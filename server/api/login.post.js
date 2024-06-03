@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
-  if (!(body.account === 'ryan' && body.password === 'iThome2023')) {
+  if (!(body.account === 'ryan' && body.password === '123')) {
     throw createError({
       statusCode: 400,
       statusMessage: '登入失敗'
