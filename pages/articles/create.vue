@@ -5,19 +5,19 @@
         <div class="space-y-8 divide-y divide-gray-200">
           <div>
             <div class="mt-6">
-              <h3 class="text-xl font-medium leading-6 text-gray-900">新增文章</h3>
+              <h3 class="text-xl font-medium leading-6 text-gray-900">新增優惠券</h3>
             </div>
 
             <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
               <div class="col-span-12">
                 <label for="title" class="block text-sm font-medium text-gray-700">
-                  文章標題
+                  優惠券名稱
                 </label>
                 <div class="mt-1">
                   <input
                     id="title"
                     v-model="articleData.title"
-                    placeholder="請撰輸入文章標題"
+                    placeholder="請輸入優惠券名稱"
                     name="title"
                     type="text"
                     autocomplete="title"
@@ -43,14 +43,14 @@
               </div>
 
               <div class="col-span-12">
-                <label for="about" class="block text-sm font-medium text-gray-700">文章內容</label>
+                <label for="about" class="block text-sm font-medium text-gray-700">優惠券內容</label>
                 <div class="mt-1">
                   <textarea
                     id="content"
                     v-model="articleData.content"
                     name="content"
                     rows="4"
-                    placeholder="請撰寫文章內容..."
+                    placeholder="請撰寫優惠券內容..."
                     class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>

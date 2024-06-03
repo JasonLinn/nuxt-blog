@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full flex-col items-center">
     <div class="item-center mt-8 flex w-full max-w-4xl flex-col px-6 md:items-start lg:px-0">
-      <h1 class="text-3xl font-semibold text-gray-800">最新文章</h1>
+      <h1 class="text-3xl font-semibold text-gray-800">最新優惠</h1>
     </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
       <div v-if="pending">
@@ -60,7 +60,7 @@
         v-if="articlesResponse"
         class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
       >
-        <div class="flex flex-1 justify-center sm:justify-end">
+        <div class="flex flex-1 justify-center sm:justify">
           <NuxtLink
             v-if="currentPage > 1"
             class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
