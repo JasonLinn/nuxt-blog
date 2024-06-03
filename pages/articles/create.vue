@@ -27,6 +27,14 @@
               </div>
               <div class="col-span-12">
                 <label for="cover" class="block text-sm font-medium text-gray-700">
+                  分類
+                </label>
+                <select class="mt-1">
+                  <option v-for="cate in category" :value="cate.id">{{ cate.name }}</option>
+                </select>
+              </div>
+              <div class="col-span-12">
+                <label for="cover" class="block text-sm font-medium text-gray-700">
                   代表性圖片連結
                 </label>
                 <div class="mt-1">
@@ -110,4 +118,18 @@ const handleSubmit = async () => {
 definePageMeta({
   middleware: 'auth'
 })
+
+const category = [{
+  id: 'play',
+  name: '玩',
+},{
+  id: 'buy',
+  name: '買',
+},{
+  id: 'live',
+  name: '住',
+},{
+  id: 'traffic',
+  name: '行',
+}]
 </script>
