@@ -11,7 +11,7 @@
             <div class="mr-3">
               <Icon class="h-12 w-12" name="logos:nuxt-icon" />
             </div>
-            <div class="hidden h-6 text-2xl font-semibold text-gray-700 sm:block">Nuxt 3 Blog</div>
+            <div class="hidden h-6 text-2xl font-semibold text-gray-700 sm:block">電子化票券</div>
           </div>
         </NuxtLink>
       </div>
