@@ -29,7 +29,7 @@
                 <label for="cover" class="block text-sm font-medium text-gray-700">
                   分類
                 </label>
-                <select class="mt-1">
+                <select class="mt-1" v-model="articleData.category">
                   <option v-for="cate in category" :value="cate.id">{{ cate.name }}</option>
                 </select>
               </div>
@@ -91,6 +91,7 @@
 <script setup>
 const articleData = reactive({
   title: '',
+  category: '',
   content: '',
   cover: ''
 })
@@ -100,6 +101,7 @@ const handleSubmit = async () => {
     method: 'POST',
     body: {
       title: articleData.title,
+      category: articleData.category,
       content: articleData.content,
       cover: articleData.cover
     }

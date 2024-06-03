@@ -94,6 +94,7 @@ const handleSubmit = async () => {
     method: 'PATCH',
     body: {
       title: articleData.value.title,
+      category: articleData.value.category,
       content: articleData.value.content,
       cover: articleData.value.cover
     }

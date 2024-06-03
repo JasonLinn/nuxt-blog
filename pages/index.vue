@@ -34,6 +34,10 @@
                 <h2 class="text-base font-semibold tracking-tight text-gray-700">
                   <span class="">{{ article.title }}</span>
                 </h2>
+                <p>分類:{{ article.category }}</p>
+                <div class="max-w-8">
+                  <img :src="article.cover"/>
+                </div>
                 <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                   {{ date2LocaleString(article.updated_at) }}
                 </time>

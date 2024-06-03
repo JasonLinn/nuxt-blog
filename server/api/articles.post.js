@@ -10,8 +10,9 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   const articleRecord = await pool
-    .query('INSERT INTO "article" ("title", "content", "cover") VALUES ($1, $2, $3) RETURNING *;', [
+    .query('INSERT INTO "article" ("title", "category", "content", "cover") VALUES ($1, $2, $3, $4) RETURNING *;', [
       body.title,
+      body.category,
       body.content,
       body.cover
     ])
