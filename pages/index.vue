@@ -126,19 +126,5 @@ const date2LocaleString = (date) => {
   return new Date(date).toLocaleString('zh-TW')
 }
 
-const changeCategory = (e) => {
-  if (articlesResponse && articlesResponse._rawValue) {
-    console.log(articlesResponse._rawValue.items, e, 'ffffff',nowCate)
-    articlesResponse._rawValue.items.map((item) => {
-      if (item.category = 'buy') {
-      } else {
-        return null;
-      }
-    })
-  }
-}
-
-console.log(currentPage, 'cccccc')
-
 import { category } from '~/utils/category';
 </script>
