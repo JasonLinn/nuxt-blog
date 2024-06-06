@@ -4,8 +4,15 @@
       <h1 class="text-3xl font-semibold text-gray-800">最新優惠</h1>
     </div>
     <ul class="flex w-full max-w-4xl">
-      <a v-for="cate in category"
-        :href="'/?cate=' + cate.id">{{ cate.name }}</a>
+      <li v-for="cate in category">
+        <NuxtLink
+          :to="{
+            query: {
+              cate: cate.id
+            }
+          }"
+        >{{ cate.name }}</NuxtLink>
+      </li>
     </ul>
     <div class="my-8 flex w-full max-w-4xl flex-col">
       <div v-if="pending">
@@ -102,7 +109,7 @@
 <script setup>
 const route = useRoute()
 const currentPage = computed(() => parseInt(route?.query?.page) || 1)
-const currentCate = route?.query?.cate
+const currentCate = computed(() => route?.query?.cate)
 const {
   pending,
   data: articlesResponse,
