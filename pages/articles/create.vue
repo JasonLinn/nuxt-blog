@@ -121,17 +121,5 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const category = [{
-  id: 'play',
-  name: '玩',
-},{
-  id: 'buy',
-  name: '買',
-},{
-  id: 'live',
-  name: '住',
-},{
-  id: 'traffic',
-  name: '行',
-}]
+import { category } from '~/utils/category';
 </script>

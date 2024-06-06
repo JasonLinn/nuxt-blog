@@ -3,6 +3,10 @@
     <div class="item-center mt-8 flex w-full max-w-4xl flex-col px-6 md:items-start lg:px-0">
       <h1 class="text-3xl font-semibold text-gray-800">最新優惠</h1>
     </div>
+    <ul class="flex w-full max-w-4xl">
+      <a v-for="cate in category"
+        :href="'/?cate=' + cate.id">{{ cate.name }}</a>
+    </ul>
     <div class="my-8 flex w-full max-w-4xl flex-col">
       <div v-if="pending">
         <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
@@ -98,12 +102,14 @@
 <script setup>
 const route = useRoute()
 const currentPage = computed(() => parseInt(route?.query?.page) || 1)
+const currentCate = route?.query?.cate
 const {
   pending,
   data: articlesResponse,
   error
 } = await useFetch('/api/articles', {
   query: {
+    category: currentCate,
     page: currentPage,
     pageSize: 10
   }
@@ -112,4 +118,20 @@ const {
 const date2LocaleString = (date) => {
   return new Date(date).toLocaleString('zh-TW')
 }
+
+const changeCategory = (e) => {
+  if (articlesResponse && articlesResponse._rawValue) {
+    console.log(articlesResponse._rawValue.items, e, 'ffffff',nowCate)
+    articlesResponse._rawValue.items.map((item) => {
+      if (item.category = 'buy') {
+      } else {
+        return null;
+      }
+    })
+  }
+}
+
+console.log(currentPage, 'cccccc')
+
+import { category } from '~/utils/category';
 </script>

@@ -5,12 +5,18 @@ export default defineEventHandler(async (event) => {
 
   const page = Math.max(parseInt(query.page) || 1, 1)
   const pageSize = Math.min(Math.max(parseInt(query.pageSize) || 10, 1), 100)
-
+  const category = query.category
+  const where = category ? `SELECT * FROM "article" WHERE category = $3` : `SELECT * FROM "article"`
+  const param = category ? [
+    (page - 1) * pageSize,
+    pageSize,
+    category
+  ] : [
+    (page - 1) * pageSize,
+    pageSize
+  ]
   const articleRecords = await pool
-    .query('SELECT * FROM "article" ORDER BY "updated_at" DESC OFFSET $1 LIMIT $2;', [
-      (page - 1) * pageSize,
-      pageSize
-    ])
+    .query(`${where} ORDER BY "updated_at" DESC OFFSET $1 LIMIT $2;`, param)
     .then((result) => result.rows)
     .catch((error) => {
       console.error(error)
