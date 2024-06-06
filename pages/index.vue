@@ -33,39 +33,41 @@
               :key="article.id"
               class="md:grid md:grid-cols-4 md:items-baseline"
             >
-              <NuxtLink
-                class="group mx-4 flex cursor-pointer flex-col items-start px-4 py-6 transition hover:bg-gray-50 sm:rounded-2xl md:col-span-3 md:mx-0"
-                :to="{
-                  name: 'articles-id',
-                  params: {
-                    id: article.id
-                  }
-                }"
-              >
-                <h2 class="text-base font-semibold tracking-tight text-gray-700">
-                  <span class="">{{ article.title }}</span>
-                </h2>
-                <p>分類:{{ article.category }}</p>
-                <div class="max-w-8">
-                  <img :src="article.cover"/>
-                </div>
-                <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
-                  {{ date2LocaleString(article.updated_at) }}
-                </time>
-                <p class="mt-2 text-sm text-gray-500">
-                  {{ article.content.replace(/\n/g, ' ').substring(0, 300) }}
-                </p>
-                <span
-                  aria-hidden="true"
-                  class="mt-4 flex items-center text-sm font-medium text-emerald-500"
+              <div >
+                <NuxtLink
+                  class="group mx-4 flex cursor-pointer flex-col items-start px-4 py-6 transition hover:bg-gray-50 sm:rounded-2xl md:col-span-3 md:mx-0"
+                  :to="{
+                    name: 'articles-id',
+                    params: {
+                      id: article.id
+                    }
+                  }"
                 >
-                  繼續閱讀
-                  <Icon name="ri:arrow-right-s-line" />
-                </span>
-              </NuxtLink>
-              <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
+                  <h2 class="text-base font-semibold tracking-tight text-gray-700">
+                    <span class="">{{ article.title }}</span>
+                  </h2>
+                  <p>分類:{{ article.category }}</p>
+                  <div class="max-w-8">
+                    <img :src="article.cover"/>
+                  </div>
+                  <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
+                    {{ date2LocaleString(article.updated_at) }}
+                  </time>
+                  <p class="mt-2 text-sm text-gray-500">
+                    {{ article.content.replace(/\n/g, ' ').substring(0, 300) }}
+                  </p>
+                  <span
+                    aria-hidden="true"
+                    class="mt-4 flex items-center text-sm font-medium text-emerald-500"
+                  >
+                    繼續閱讀
+                    <Icon name="ri:arrow-right-s-line" />
+                  </span>
+                </NuxtLink>
+              </div>
+              <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
                 {{ date2LocaleString(article.updated_at) }}
-              </time>
+              </time> -->
             </article>
           </div>
         </div>
