@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full flex-col items-center">
-    <div class="item-center mt-8 flex w-full max-w-4xl flex-col px-6 md:items-start lg:px-0">
-      <h1 class="text-3xl font-semibold text-gray-800">最新優惠</h1>
+    <div>
+      <h1 >最新優惠</h1>
     </div>
     <ul class="flex w-full max-w-4xl">
       <li v-for="cate in category">
@@ -107,6 +107,12 @@
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+h1, h2 {
+  color: red;
+}
+</style>
 
 <script setup>
 const route = useRoute()
