@@ -1,17 +1,17 @@
 <template>
   <div class="container w-full justify-center px-6 lg:px-0">
-    <div class="mb-8 flex w-full max-w-3xl justify-center">
-      <form class="w-full space-y-8 divide-y divide-gray-200" @submit.prevent="handleSubmit">
+    <div class="create mb-8 flex w-full max-w-3xl justify-center">
+      <form class="create-form w-100 divide-y divide-gray-200" @submit.prevent="handleSubmit">
         <div class="space-y-8 divide-y divide-gray-200">
           <div>
             <div class="mt-6">
-              <h3 class="text-xl font-medium leading-6 text-gray-900">新增優惠券</h3>
+              <h3 class="create-title text-xl font-medium leading-6 text-gray-900">新增優惠券</h3>
             </div>
 
             <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
-              <div class="col-span-12">
-                <label for="title" class="block text-sm font-medium text-gray-700">
-                  優惠券名稱
+              <section class="col-md-12 create-part">
+                <label for="title" class="create-name block text-sm font-medium text-gray-700">
+                  優惠券名稱：
                 </label>
                 <div class="mt-1">
                   <input
@@ -21,21 +21,21 @@
                     name="title"
                     type="text"
                     autocomplete="title"
-                    class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>
-              </div>
-              <div class="col-span-12">
-                <label for="cover" class="block text-sm font-medium text-gray-700">
-                  分類
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="cover" class="create-name block text-sm font-medium text-gray-700">
+                  分類：
                 </label>
-                <select class="mt-1" v-model="articleData.category">
+                <select class="create-category boder shadow-sm w-100 py-2 px-3 mt-1" v-model="articleData.category" value="play">
                   <option v-for="cate in category" :value="cate.id">{{ cate.name }}</option>
                 </select>
-              </div>
-              <div class="col-span-12">
-                <label for="cover" class="block text-sm font-medium text-gray-700">
-                  代表性圖片連結
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="cover" class="create-name block text-sm font-medium text-gray-700">
+                  代表性圖片連結：
                 </label>
                 <div class="mt-1">
                   <input
@@ -45,13 +45,15 @@
                     name="cover"
                     type="text"
                     autocomplete="cover"
-                    class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>
-              </div>
+              </section>
 
-              <div class="col-span-12">
-                <label for="about" class="block text-sm font-medium text-gray-700">優惠券內容</label>
+              <section class="col-md-12 create-part">
+                <label for="about" class="create-name block text-sm font-medium text-gray-700">
+                  優惠券內容：
+                </label>
                 <div class="mt-1">
                   <textarea
                     id="content"
@@ -59,25 +61,25 @@
                     name="content"
                     rows="4"
                     placeholder="請撰寫優惠券內容..."
-                    class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>
-              </div>
+              </section>
             </div>
           </div>
         </div>
 
-        <div class="pt-5">
-          <div class="flex justify-end">
+        <div class="pt-2">
+          <div class="create-button">
             <NuxtLink
-              class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              class="btn btn-light shadow-sm"
               to="/"
             >
               取消
             </NuxtLink>
             <button
               type="submit"
-              class="ml-3 inline-flex justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              class="ml-3 btn btn-info text-white shadow-sm"
             >
               發布
             </button>
@@ -87,6 +89,38 @@
     </div>
   </div>
 </template>
+<style>
+.create {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+.create-title {
+  font-size: 34px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+.create-form {
+  padding: 20px;
+  background-color: #fff;
+}
+.create-name {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+.create-category {
+  display: block;
+  height: 36px;
+  border-color: #dee2e6;
+}
+.create-part {
+  margin-bottom: 30px;
+}
+.create-button {
+  display: flex;
+  justify-content: space-around;
+}
+</style>
 
 <script setup>
 const articleData = reactive({

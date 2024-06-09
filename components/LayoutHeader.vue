@@ -1,7 +1,7 @@
 <template>
   <header class="flex w-full justify-center container">
     <nav class="index-nav flex w-full max-w-7xl items-center justify-between px-6 py-2">
-      <div class="row">
+      <div class="">
         <NuxtLink
           :to="{
             name: 'index'
@@ -64,7 +64,7 @@
         </div>
         <NuxtLink
           v-else
-          class="px-3 py-2 text-gray-700 transition hover:text-emerald-500"
+          class="login px-3 py-2"
           to="/login"
         >
           登入
@@ -75,12 +75,11 @@
 </template>
 
 <style lang="scss" scoped>
-header {
-  // position: fixed;
-  // display: flex;
-  // justify-content: center;
-  // width: 100%;
-  // margin-bottom: 20px;
+.login {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 .user-img {
   width: 40px;
