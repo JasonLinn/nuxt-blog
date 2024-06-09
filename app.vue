@@ -8,7 +8,7 @@
 
 <script setup>
 useHead({
-  titleTemplate: (title) => (title ? `${title} - Nuxt 3 Blog` : 'Nuxt 3 Blog'),
+  titleTemplate: (title) => (title ? `${title} - 宜蘭通行證-電子化票券` : '宜蘭通行證-電子化票券'),
   htmlAttrs: {
     lang: 'zh-TW'
   },
@@ -24,8 +24,8 @@ const { origin } = useRequestURL()
 const { baseURL } = useRuntimeConfig().app
 
 const seoMeta = {
-  title: 'Nuxt 3 Blog',
-  description: '歡迎來到使用 Nuxt 3 開發的部落格網站',
+  title: '宜蘭通行證-電子化票券',
+  description: '歡迎使用，內含各式優惠',
   image: 'https://i.imgur.com/AVNujNC.png',
   url: `${origin}${baseURL}`
 }
