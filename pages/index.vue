@@ -30,44 +30,48 @@
           <span class="text-gray-500">目前尚無最新文章</span>
         </div>
         <div v-else class="md:border-l md:border-gray-100">
-          <div class="cupon row">
+          <div class="row">
             <article
               v-for="article in articlesResponse.items"
               :key="article.id"
-              class="col-md-4"
+              class="cupon col-md-3"
             >
-              <div >
-                <NuxtLink
-                  class="group mx-4 flex cursor-pointer flex-col items-start px-4 py-6 transition hover:bg-gray-50 sm:rounded-2xl md:col-span-3 md:mx-0"
-                  :to="{
-                    name: 'articles-id',
-                    params: {
-                      id: article.id
-                    }
-                  }"
-                >
-                  <h2 class="text-base font-semibold tracking-tight text-gray-700">
+            <div class="cupon-wrapper">
+              <NuxtLink
+                class=""
+                :to="{
+                  name: 'articles-id',
+                  params: {
+                    id: article.id
+                  }
+                }"
+              >
+                <div class="cupon-img-wrapper">
+                  <img :src="article.cover" class="cupon-img"/>
+                </div>
+                <div class="cupon-info">
+                  <h2 class="cupon-title">
                     <span class="">{{ article.title }}</span>
                   </h2>
-                  <p>分類:{{ hadleCategory(article.category) }}</p>
-                  <div class="max-w-8">
-                    <img :src="article.cover"/>
-                  </div>
+                  <span class="cupon-category">
+                    {{ hadleCategory(article.category) }}
+                  </span>
                   <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                     {{ date2LocaleString(article.updated_at) }}
                   </time> -->
-                  <p class="mt-2 text-sm text-gray-500">
+                  <p class="cupon-text">
                     {{ article.content.replace(/\n/g, ' ').substring(0, 300) }}
                   </p>
-                  <span
-                    aria-hidden="true"
-                    class="mt-4 flex items-center text-sm font-medium text-emerald-500"
-                  >
-                    看更多
-                    <Icon name="ri:arrow-right-s-line" />
-                  </span>
-                </NuxtLink>
-              </div>
+                </div>
+                <!-- <span
+                  aria-hidden="true"
+                  class="mt-4 flex items-center text-sm font-medium text-emerald-500"
+                >
+                  看更多
+                  <Icon name="ri:arrow-right-s-line" />
+                </span> -->
+              </NuxtLink>
+            </div>
               <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
                 {{ date2LocaleString(article.updated_at) }}
               </time> -->
@@ -115,8 +119,10 @@
 .category {
   display: flex;
   flex-direction: row;
-  font-size: 60px;
-  margin-top: 30px;
+  font-size: 30px;
+  margin: 30px 0 30px 0;
+  background-color: #fff;
+  padding: 10px 0 10px 0;
 }
 .category-item {
   margin-right: 30px;
@@ -125,6 +131,49 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.cupon {
+  margin-bottom: 20px;
+}
+.cupon-wrapper {
+  border-radius: 10px;
+  overflow: hidden;
+}
+.cupon-wrapper:hover {
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+.cupon-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.cupon-info {
+  padding: 5px 8px 15px 8px;
+  background-color: #fff;
+}
+.cupon-info:hover {
+  box-shadow: #000;
+}
+.cupon-img-wrapper {
+  height: 200px;
+  overflow: hidden;
+}
+.cupon-img {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cupon-category {
+  display: inline-block;
+  font-size: 14px;
+  padding: 3px;
+  color: rgb(117, 117, 117);
+  background-color: rgb(245, 245, 245);
+  margin-bottom: 10px;
+}
+.cupon-text {
+  color: #272727;
 }
 </style>
 
