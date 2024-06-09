@@ -8,9 +8,6 @@
           }"
         >
           <div class="flex items-center justify-between">
-            <div class="mr-3">
-              <Icon class="h-12 w-12" name="logos:nuxt-icon" />
-            </div>
             <h1 class="index-title">電子化票券</h1>
           </div>
         </NuxtLink>
