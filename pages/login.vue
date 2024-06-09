@@ -5,14 +5,14 @@
         <NuxtLink to="/">
           <Icon name="logos:nuxt-icon" size="80" />
         </NuxtLink>
-        <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-700">登入帳號</h2>
+        <h2 class="login-title mt-6 py-3 text-center text-3xl font-bold tracking-tight text-gray-700">登入帳號</h2>
       </div>
 
       <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
           <form class="space-y-6" @submit.prevent="handleLogin">
-            <div>
-              <label for="account" class="block text-sm font-medium text-gray-700">帳號</label>
+            <div class="p-2">
+              <label for="account" class="login-title block text-sm font-medium text-gray-700">帳號：</label>
               <div class="mt-1">
                 <input
                   id="account"
@@ -26,8 +26,8 @@
               </div>
             </div>
 
-            <div>
-              <label for="password" class="block text-sm font-medium text-gray-700">密碼</label>
+            <div class="p-2">
+              <label for="password" class="login-title block text-sm font-medium text-gray-700">密碼：</label>
               <div class="mt-1">
                 <input
                   id="password"
@@ -41,7 +41,7 @@
               </div>
             </div>
 
-            <div>
+            <div class="p-2">
               <button
                 type="submit"
                 class="flex w-full justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
@@ -55,6 +55,11 @@
     </div>
   </div>
 </template>
+<style>
+.login-title {
+  font-weight: bold;
+}
+</style>
 
 <script setup>
 definePageMeta({
