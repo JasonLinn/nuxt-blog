@@ -96,7 +96,8 @@
 .index-title {
   text-decoration: none;
   color: #000;
-  font-size: 50px;
+  font-size: 25px;
+  font-weight: bold;
 }
 .user-info {
   position: absolute;

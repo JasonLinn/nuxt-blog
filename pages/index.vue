@@ -126,6 +126,7 @@
   font-size: 30px;
   margin: 30px 0 30px 0;
   background-color: #fff;
+  width: fit-content;
 }
 .category-item {
   padding: 10px;
