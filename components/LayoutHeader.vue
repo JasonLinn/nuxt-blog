@@ -43,7 +43,7 @@
                       class="mr-2 h-5 w-5"
                       name="ri:pencil-line"
                     />
-                    撰寫文章
+                    新增優惠券
                   </NuxtLink>
                 </div>
                 <div class="py-1">
