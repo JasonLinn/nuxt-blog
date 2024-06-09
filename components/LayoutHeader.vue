@@ -12,7 +12,7 @@
           </div>
         </NuxtLink>
         <div v-if="userInfo" class="user-info group relative">
-          <div for="avatar" class="cursor-pointer" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit">
+          <div for="avatar" class="cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
             <img
               class="user-img inline-block h-10 w-10 rounded-full bg-white/90 object-cover object-center p-0.5 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
               :src="userInfo.avatar"
@@ -20,9 +20,9 @@
             />
             <div v-show="showEdit" class="user-info-list absolute right-0 hidden w-60 pt-1 text-gray-700 group-hover:block">
               <div
-                class="mt-1 divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                class="mt-1 px-4 py-3 divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
               >
-                <div class="flex items-center px-4 py-3">
+                <div class="flex items-center">
                   <img
                     :src="userInfo.avatar"
                     class="user-img inline-block h-9 w-9 rounded-full bg-white/90 object-cover object-center p-0.5 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur"
@@ -34,25 +34,25 @@
                     </p>
                   </div>
                 </div>
-                <div class="group/menu-item px-1 py-1">
+                <div class="group/menu-item py-2">
                   <NuxtLink
-                    class="flex w-full items-center rounded-md px-2 py-2 text-sm group-hover/menu-item:bg-emerald-500 group-hover/menu-item:text-white"
+                    class=""
                     to="/articles/create"
                   >
                     <Icon
-                      class="mr-2 h-5 w-5 text-emerald-400 group-hover/menu-item:text-white"
+                      class="mr-2 h-5 w-5"
                       name="ri:pencil-line"
                     />
                     撰寫文章
                   </NuxtLink>
                 </div>
-                <div class="group/menu-item px-1 py-1">
+                <div class="py-1">
                   <button
-                    class="flex w-full items-center rounded-md px-2 py-2 text-sm group-hover/menu-item:bg-emerald-500 group-hover/menu-item:text-white"
+                    class="logout-btn btn btn-info text-white"
                     @click="handleLogout"
                   >
                     <Icon
-                      class="mr-2 h-5 w-5 text-emerald-400 group-hover/menu-item:text-white"
+                      class="mr-2 h-5 w-5"
                       name="ri:logout-box-line"
                     />
                     登出
@@ -84,6 +84,8 @@
 .user-img {
   width: 40px;
   height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
 }
 .index-nav {
   position: relative;
@@ -106,6 +108,15 @@
   position: absolute;
   right: 0;
   top: 40px;
+}
+.logout-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70px;
+  height: 30px;
+  font-size: 14px;
+  padding: 0;
 }
 </style>
 
