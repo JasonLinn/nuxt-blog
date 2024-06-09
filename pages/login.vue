@@ -5,7 +5,7 @@
         <NuxtLink to="/">
           <Icon name="logos:nuxt-icon" size="80" />
         </NuxtLink>
-        <h2 class="login-title mt-6 py-3 text-center text-3xl font-bold tracking-tight text-gray-700">登入帳號</h2>
+        <h2 class="login-title mt-6 py-3 text-center text-3xl font-bold tracking-tight text-gray-700">管理員登入</h2>
       </div>
 
       <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
