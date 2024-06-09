@@ -1,13 +1,14 @@
 <template>
   <div class="flex container">
     <ul class="category flex w-full max-w-4xl">
-      <li class="category-item">
+      <li class="category-item" :class="[!currentCate ? 'active' : '']">
         <NuxtLink
         :to="{
           name: 'index'
         }">全</NuxtLink>
       </li>
-      <li v-for="cate in category" class="category-item">
+      <li v-for="cate in category" class="category-item"
+      :class="[currentCate == cate.id ? 'active' : '']">
         <NuxtLink
           :to="{
             query: {
@@ -116,16 +117,18 @@
 </template>
 
 <style lang="scss" scoped>
+.active {
+  background-color: #ffdfa3;
+}
 .category {
   display: flex;
   flex-direction: row;
   font-size: 30px;
   margin: 30px 0 30px 0;
   background-color: #fff;
-  padding: 10px 0 10px 0;
 }
 .category-item {
-  margin-right: 30px;
+  padding: 10px;
 }
 .next-page {
   display: flex;
