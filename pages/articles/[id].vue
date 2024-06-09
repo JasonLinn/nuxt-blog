@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full justify-center px-6 lg:px-0">
+  <div class="container flex w-full justify-center px-6 lg:px-0">
     <div v-if="pending">
       <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
     </div>
@@ -39,13 +39,18 @@
           </div>
         </div>
         <h1 class="break-words text-4xl font-semibold text-gray-700">{{ article.title }}</h1>
-        <div class="mt-6 break-words">
+        <div class="cupon-text">
           {{ article.content }}
         </div>
       </div>
     </template>
   </div>
 </template>
+<style>
+.cupon-text {
+  overflow-wrap: break-word;
+}
+</style>
 
 <script setup>
 const route = useRoute()

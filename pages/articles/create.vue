@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full justify-center px-6 lg:px-0">
+  <div class="container w-full justify-center px-6 lg:px-0">
     <div class="mb-8 flex w-full max-w-3xl justify-center">
       <form class="w-full space-y-8 divide-y divide-gray-200" @submit.prevent="handleSubmit">
         <div class="space-y-8 divide-y divide-gray-200">
