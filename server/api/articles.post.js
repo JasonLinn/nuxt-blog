@@ -10,11 +10,14 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   const articleRecord = await pool
-    .query('INSERT INTO "article" ("title", "category", "content", "cover") VALUES ($1, $2, $3, $4) RETURNING *;', [
+    .query('INSERT INTO "article" ("title", "category", "content", "cover", "amount", "used_times", "hash") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;', [
       body.title,
       body.category,
       body.content,
-      body.cover
+      body.cover,
+      body.amount,
+      body.usedTimes,
+      body.hash
     ])
     .then((result) => {
       if (result.rowCount === 1) {

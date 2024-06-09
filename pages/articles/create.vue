@@ -35,6 +35,21 @@
               </section>
               <section class="col-md-12 create-part">
                 <label for="cover" class="create-name block text-sm font-medium text-gray-700">
+                  發放數量：
+                </label>
+                <div class="mt-1">
+                  <input
+                    id="amount"
+                    v-model="articleData.amount"
+                    placeholder="輸入發放數量"
+                    name="amount"
+                    type="number"
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="cover" class="create-name block text-sm font-medium text-gray-700">
                   代表性圖片連結：
                 </label>
                 <div class="mt-1">
@@ -49,7 +64,6 @@
                   />
                 </div>
               </section>
-
               <section class="col-md-12 create-part">
                 <label for="about" class="create-name block text-sm font-medium text-gray-700">
                   優惠券內容：
@@ -127,7 +141,10 @@ const articleData = reactive({
   title: '',
   category: '',
   content: '',
-  cover: ''
+  cover: '',
+  amount: 0,
+  usedTimes: 0,
+  hash: [],
 })
 
 const handleSubmit = async () => {
@@ -137,7 +154,10 @@ const handleSubmit = async () => {
       title: articleData.title,
       category: articleData.category,
       content: articleData.content,
-      cover: articleData.cover
+      cover: articleData.cover,
+      amount: articleData.amount,
+      usedTimes: articleData.usedTimes,
+      hash: articleData.hash
     }
   })
     .then((response) => {
