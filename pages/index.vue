@@ -1,10 +1,13 @@
 <template>
-  <div class="flex w-full flex-col items-center">
-    <div>
-      <h1 >最新優惠</h1>
-    </div>
-    <ul class="flex w-full max-w-4xl">
-      <li v-for="cate in category">
+  <div class="flex container">
+    <ul class="category flex w-full max-w-4xl">
+      <li class="category-item">
+        <NuxtLink
+        :to="{
+          name: 'index'
+        }">全</NuxtLink>
+      </li>
+      <li v-for="cate in category" class="category-item">
         <NuxtLink
           :to="{
             query: {
@@ -27,11 +30,11 @@
           <span class="text-gray-500">目前尚無最新文章</span>
         </div>
         <div v-else class="md:border-l md:border-gray-100">
-          <div class="flex flex-col space-y-4 md:pl-6">
+          <div class="cupon row">
             <article
               v-for="article in articlesResponse.items"
               :key="article.id"
-              class="md:grid md:grid-cols-4 md:items-baseline"
+              class="col-md-4"
             >
               <div >
                 <NuxtLink
@@ -46,13 +49,13 @@
                   <h2 class="text-base font-semibold tracking-tight text-gray-700">
                     <span class="">{{ article.title }}</span>
                   </h2>
-                  <p>分類:{{ article.category }}</p>
+                  <p>分類:{{ hadleCategory(article.category) }}</p>
                   <div class="max-w-8">
                     <img :src="article.cover"/>
                   </div>
-                  <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
+                  <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                     {{ date2LocaleString(article.updated_at) }}
-                  </time>
+                  </time> -->
                   <p class="mt-2 text-sm text-gray-500">
                     {{ article.content.replace(/\n/g, ' ').substring(0, 300) }}
                   </p>
@@ -60,7 +63,7 @@
                     aria-hidden="true"
                     class="mt-4 flex items-center text-sm font-medium text-emerald-500"
                   >
-                    繼續閱讀
+                    看更多
                     <Icon name="ri:arrow-right-s-line" />
                   </span>
                 </NuxtLink>
@@ -77,7 +80,7 @@
         v-if="articlesResponse"
         class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
       >
-        <div class="flex flex-1 justify-center sm:justify">
+        <div class="next-page flex flex-1 justify-center sm:justify">
           <NuxtLink
             v-if="currentPage > 1"
             class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
@@ -109,12 +112,25 @@
 </template>
 
 <style lang="scss" scoped>
-h1, h2 {
-  color: red;
+.category {
+  display: flex;
+  flex-direction: row;
+  font-size: 60px;
+  margin-top: 30px;
+}
+.category-item {
+  margin-right: 30px;
+}
+.next-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
 
 <script setup>
+import { category } from '~/utils/category';
+
 const route = useRoute()
 const currentPage = computed(() => parseInt(route?.query?.page) || 1)
 const currentCate = computed(() => route?.query?.cate)
@@ -134,5 +150,9 @@ const date2LocaleString = (date) => {
   return new Date(date).toLocaleString('zh-TW')
 }
 
-import { category } from '~/utils/category';
+const hadleCategory = (cate) => {
+  const oringal = category.find((item) => item.id == cate)
+
+  return oringal ? oringal.name : '未分類'
+}
 </script>
