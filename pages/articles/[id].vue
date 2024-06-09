@@ -12,7 +12,7 @@
         <div class="mt-4 flex justify-center">
           <img :src="article.cover" class="cupon-img" />
         </div>
-        <div class="my-2 flex flex-col justify-between sm:my-0 sm:flex-row sm:items-center">
+        <div class="cupon-time my-2 flex flex-col justify-between sm:my-0 sm:flex-row sm:items-center">
           <time class="my-2 text-sm text-gray-400">
             {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
           </time>
@@ -38,7 +38,9 @@
             </button>
           </div>
         </div>
-        <h1 class="break-words text-4xl font-semibold text-gray-700">{{ article.title }}</h1>
+        <h1 class="cupon-title break-words text-4xl font-semibold text-gray-700">
+          {{ article.title }}
+        </h1>
         <div class="cupon-text">
           {{ article.content }}
         </div>
@@ -51,7 +53,16 @@
   overflow-wrap: break-word;
 }
 .cupon-img {
-  width: 100%;
+  max-width: 100%;
+}
+.cupon-time {
+  display: flex;
+  justify-content: space-between;
+}
+.cupon-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 </style>
 
