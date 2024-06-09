@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
-  if (!(body.account === 'ryan' && body.password === '123')) {
+  if (!(body.account === 'admin' && body.password === '123')) {
     throw createError({
       statusCode: 400,
       statusMessage: '登入失敗'
@@ -12,8 +12,8 @@ export default defineEventHandler(async (event) => {
 
   const jwtTokenPayload = {
     id: 1,
-    nickname: 'Ryan',
-    email: 'ryanchien8125@gmail.com',
+    nickname: 'admin',
+    email: 'admin@gmail.com',
     avatar: 'https://images.unsplash.com/photo-1577023311546-cdc07a8454d9?fit=crop&w=128&h=128'
   }
 
