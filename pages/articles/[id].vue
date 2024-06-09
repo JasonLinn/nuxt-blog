@@ -1,5 +1,5 @@
 <template>
-  <div class="container flex w-full justify-center px-6 lg:px-0">
+  <div class="container col-12">
     <div v-if="pending">
       <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
     </div>
@@ -10,7 +10,7 @@
       </div>
       <div v-else-if="article" class="mb-8 flex w-full flex-col justify-center md:max-w-3xl">
         <div class="mt-4 flex justify-center">
-          <img :src="article.cover" />
+          <img :src="article.cover" class="cupon-img" />
         </div>
         <div class="my-2 flex flex-col justify-between sm:my-0 sm:flex-row sm:items-center">
           <time class="my-2 text-sm text-gray-400">
@@ -49,6 +49,9 @@
 <style>
 .cupon-text {
   overflow-wrap: break-word;
+}
+.cupon-img {
+  width: 100%;
 }
 </style>
 
