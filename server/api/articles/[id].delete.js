@@ -15,18 +15,18 @@ export default defineEventHandler(async (event) => {
       console.error(error)
       throw createError({
         statusCode: 500,
-        message: '無法刪除文章，請稍候再試'
+        message: '無法刪除優惠券，請稍候再試'
       })
     })
 
   if (result.rowCount !== 1) {
     throw createError({
       statusCode: 400,
-      message: '刪除文章失敗，請稍候再試'
+      message: '刪除優惠券失敗，請稍候再試'
     })
   }
 
   return {
-    message: '刪除文章成功'
+    message: '刪除優惠券成功'
   }
 })

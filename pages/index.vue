@@ -27,7 +27,7 @@
           <p class="my-2 text-rose-500">{{ error }}</p>
         </div>
         <div v-else-if="!articlesResponse || articlesResponse.items.length === 0">
-          <span class="text-gray-500">目前尚無最新文章</span>
+          <span class="text-gray-500">目前尚無最新優惠券</span>
         </div>
         <div v-else class="md:border-l md:border-gray-100">
           <div class="row">

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
       console.error(error)
       throw createError({
         statusCode: 500,
-        message: '無法取得文章列表，請稍候再試'
+        message: '無法取得優惠券列表，請稍候再試'
       })
     })
 

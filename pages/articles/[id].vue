@@ -79,7 +79,7 @@ if (error.value) {
 const userInfo = useState('userInfo')
 
 const handleDeleteArticle = () => {
-  const answer = confirm('你確定要刪除文章嗎？')
+  const answer = confirm('你確定要刪除優惠券嗎？')
 
   if (answer) {
     $fetch(`/api/articles/${route.params.id}`, {
