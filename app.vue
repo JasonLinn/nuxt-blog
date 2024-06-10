@@ -26,7 +26,7 @@ const { baseURL } = useRuntimeConfig().app
 const seoMeta = {
   title: '宜蘭通行證-電子化票券',
   description: '歡迎使用，內含各式優惠',
-  image: 'https://i.imgur.com/AVNujNC.png',
+  image: 'https://www.shutterstock.com/zh-Hant/blog/wp-content/uploads/sites/11/2023/02/0123-cover.png',
   url: `${origin}${baseURL}`
 }
 
