@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
       }
     })
     .catch((error) => {
-      console.error(error, 'rrrrr')
+      console.error(error)
       throw createError({
         statusCode: 500,
         message: '無法更新優惠券，請稍候再試'
