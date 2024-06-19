@@ -44,6 +44,12 @@
         <div class="cupon-text">
           {{ article.content }}
         </div>
+        <div class="cupon-amount">
+          剩餘數量: {{ article.amount }}
+        </div>
+        <div class="cupon-get btn btn-info" @click="handleRecive">
+          確定領取
+        </div>
       </div>
     </template>
   </div>
@@ -51,6 +57,7 @@
 <style>
 .cupon-text {
   overflow-wrap: break-word;
+  margin-bottom: 10px;
 }
 .cupon-img {
   max-width: 100%;
@@ -93,6 +100,20 @@ const handleDeleteArticle = () => {
         alert(error)
       })
   }
+}
+
+const handleRecive = async () => {
+  await $fetch(`/api/cupon`, {
+    method: 'PATCH',
+    body: {
+      id: route.params.id,
+      amount: article.value.amount -1
+    }
+  })
+    .then((response) => {
+      article.value.amount = response.amount
+    })
+    .catch((error) => alert(error))
 }
 
 useHead({
