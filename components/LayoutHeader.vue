@@ -79,6 +79,7 @@
         <div class="btn btn-info" @click="sendMessegeToSelf">
           點我發送訊息
         </div>
+        <button @click="sendTargetPicker">Send Sample</button>
       </div>
     </nav>
   </header>
@@ -178,6 +179,44 @@ const sendMessegeToSelf = () => {
   ])
   .then(res => window.alert(res.status))
   .catch(error => window.alert(error));
+}
+
+function sendTargetPicker() {
+  if (!liff.isLoggedIn()) {
+    liff.login({ redirectUri: window.location.href });
+  }
+  if (liff.isApiAvailable("shareTargetPicker")) {
+    liff
+      .shareTargetPicker([
+        {
+          type: "text",
+          text: "Hello, World!",
+        },
+      ])
+      .then(function (res) {
+        if (res) {
+          // succeeded in sending a message through TargetPicker
+          console.log(`[${res.status}] Message sent!`);
+        } else {
+          const [majorVer, minorVer] = (liff.getLineVersion() || "").split(".");
+          if (parseInt(majorVer) == 10 && parseInt(minorVer) < 11) {
+            // LINE 10.3.0 - 10.10.0
+            // Old LINE will access here regardless of user's action
+            console.log(
+              "TargetPicker was opened at least. Whether succeeded to send message is unclear"
+            );
+          } else {
+            // LINE 10.11.0 -
+            // sending message canceled
+            console.log("TargetPicker was closed!");
+          }
+        }
+      })
+      .catch(function (error) {
+        // something went wrong before sending a message
+        console.log("something wrong happen");
+      });
+  }
 }
 
 const handleLogout = () => {
