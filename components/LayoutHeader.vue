@@ -75,7 +75,7 @@
         <div id="displayName">
           ????
         </div>
-        <div id="pictureUrl" :src="imgUrl"></div>
+        <img :src="imgUrl"/>
         <div class="btn btn-info" @click="sendMessegeToSelf">
           點我發送訊息
         </div>
@@ -135,12 +135,14 @@
 <script setup>
 import { ref } from 'vue'
 import liff from "@line/liff";
+import { cupon }  from '~/utils/cupon'
 
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
-let displayName = ref('nobody')
+let displayName = 'nobody'
 let imgUrl = ''
+
 
 onMounted(async () => {
     try {
@@ -172,10 +174,11 @@ const sendMessegeToSelf = () => {
   // 傳送訊息給自己
   // type 的可用值說明：https://developers.line.biz/en/reference/liff/#send-messages
   liff.sendMessages([
-    {
-      type: 'text',
-      text: 'Hello'
-    }
+  {
+    "type": "flex",
+    "altText": "this is a flex message",
+    "contents": cupon
+  }
   ])
   .then(res => window.alert(res.status))
   .catch(error => window.alert(error));
