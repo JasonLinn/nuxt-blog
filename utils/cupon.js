@@ -2,7 +2,7 @@ export const cupon = {
     "type": "bubble",
     "hero": {
       "type": "image",
-      "url": "https://developers-resource.landpress.line.me/fx/img/01_1_cafe.png",
+      "url": "https://www.easycard.com.tw/_upload/images/2012011216370.jpg",
       "size": "full",
       "aspectRatio": "20:13",
       "aspectMode": "cover",
@@ -17,7 +17,7 @@ export const cupon = {
       "contents": [
         {
           "type": "text",
-          "text": "Brown Cafe",
+          "text": "悠遊台中，優惠隨行",
           "weight": "bold",
           "size": "xl"
         },
