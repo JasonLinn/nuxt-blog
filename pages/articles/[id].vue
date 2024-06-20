@@ -47,10 +47,28 @@
         <div class="cupon-amount">
           剩餘數量: {{ article.amount }}
         </div>
-        <div class="cupon-get btn btn-info" @click="handleRecive">
-          確定領取
+      </div>
+      <div>
+      <!-- modal -->
+      <div class="modal fade" tabindex="-1" ref="modalRef">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              輸入兌換序號
+            </div>
+            <div class="modal-body">
+              <input type="text" v-model="hash">
+            </div>
+            <div class="modal-footer">
+              <button type="button" @click="handleRecive">確定</button>
+            </div>
+          </div>
         </div>
       </div>
+      <button type="button" class="btn btn-success" @click="showModal">
+        領取限量優惠券
+      </button>
+    </div>
     </template>
   </div>
 </template>
@@ -74,6 +92,23 @@
 </style>
 
 <script setup>
+const { $bootstrap } = useNuxtApp();
+const modalRef = ref(null);
+let modal;
+let hash = []
+const showModal = () => {
+  modal.show();
+};
+
+onMounted(() => {
+  modal = $bootstrap.modal(modalRef.value);
+});
+
+onBeforeUnmount(() => {
+  // 加上 dispose，避免切換頁面時或是 HMR 看到殘留畫面
+  modal.dispose();
+});
+
 const route = useRoute()
 
 const { pending, data: article, error } = await useFetch(`/api/articles/${route.params.id}`)
@@ -103,17 +138,27 @@ const handleDeleteArticle = () => {
 }
 
 const handleRecive = async () => {
-  await $fetch(`/api/cupon`, {
-    method: 'PATCH',
-    body: {
-      id: route.params.id,
-      amount: article.value.amount -1
+  console.log(article.value.hash, 'SSS', hash)
+  let articleHash = article.value.hash
+  let index = articleHash.findIndex((i) =>hash == i)
+
+  if (index >= 0) {
+    alert('領取成功')
+    modal.hide()
+    // await $fetch(`/api/cupon`, {
+    //   method: 'PATCH',
+    //   body: {
+    //     id: route.params.id,
+    //     amount: article.value.amount -1
+    //   }
+    // })
+    //   .then((response) => {
+    //     article.value.amount = response.amount
+    //   })
+    //   .catch((error) => alert(error))
+    } else {
+      alert('序號錯誤')
     }
-  })
-    .then((response) => {
-      article.value.amount = response.amount
-    })
-    .catch((error) => alert(error))
 }
 
 useHead({
