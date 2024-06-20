@@ -134,7 +134,7 @@ import liff from "@line/liff";
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
-let displayName = 'nobody'
+const displayName = ref('nobody')
 
 onMounted(async () => {
     try {
@@ -144,11 +144,10 @@ onMounted(async () => {
         // document.getElementById('userId').innerHTML = profile.userId
         displayName = profile.displayName
         document.getElementById('displayName').innerHTML = profile.displayName
-        document.getElementById('pictureUrl').innerHTML = profile.pictureUrl
+        // document.getElementById('pictureUrl').innerHTML = profile.pictureUrl
         // document.getElementById('statusMessage').innerHTML = profile.statusMessage
       })
   }  catch (err) {
-      console.log(liff, liff.isLoggedIn())
       console.log(`liff.state init error ${err}`);
   }
 })
@@ -160,8 +159,7 @@ watch(
   },
   {
     immediate: true
-  },
-  displayName
+  }
 )
 
 const handleLogout = () => {
