@@ -72,6 +72,9 @@
         <div>
           {{ displayName }}
         </div>
+        <div id="displayName">
+          ????
+        </div>
       </div>
     </nav>
   </header>
@@ -140,10 +143,12 @@ onMounted(async () => {
         // 拿取profile
         // document.getElementById('userId').innerHTML = profile.userId
         displayName = profile.displayName
-        // document.getElementById('pictureUrl').innerHTML = profile.pictureUrl
+        document.getElementById('displayName').innerHTML = profile.displayName
+        document.getElementById('pictureUrl').innerHTML = profile.pictureUrl
         // document.getElementById('statusMessage').innerHTML = profile.statusMessage
       })
   }  catch (err) {
+      console.log(liff, liff.isLoggedIn())
       console.log(`liff.state init error ${err}`);
   }
 })
