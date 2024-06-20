@@ -75,6 +75,9 @@
         <div id="displayName">
           ????
         </div>
+        <div id="pictureUrl">
+
+        </div>
       </div>
     </nav>
   </header>
@@ -144,7 +147,7 @@ onMounted(async () => {
         // document.getElementById('userId').innerHTML = profile.userId
         displayName = profile.displayName
         document.getElementById('displayName').innerHTML = profile.displayName
-        // document.getElementById('pictureUrl').innerHTML = profile.pictureUrl
+        document.getElementById('pictureUrl').innerHTML = profile.pictureUrl
         // document.getElementById('statusMessage').innerHTML = profile.statusMessage
       })
   }  catch (err) {
