@@ -65,7 +65,7 @@
           </div>
         </div>
       </div>
-      <button type="button" class="btn btn-success" @click="sendCupon">
+      <button type="button" class="btn btn-success" @click="sendCupon(article)">
         領取限量優惠券
       </button>
     </div>
@@ -162,12 +162,13 @@ const handleRecive = async () => {
     }
 }
 
-const sendCupon = () => {
+const sendCupon = (article) => {
+  console.log(article, 'aaaa')
   let cupon = {
         "type": "bubble",
         "hero": {
           "type": "image",
-          "url": article.value.cover,
+          "url": article.cover,
           "size": "full",
           "aspectRatio": "20:13",
           "aspectMode": "cover",
@@ -182,7 +183,7 @@ const sendCupon = () => {
           "contents": [
             {
               "type": "text",
-              "text": article.value.title,
+              "text": article.title,
               "weight": "bold",
               "size": "xl"
             },
@@ -238,7 +239,7 @@ const sendCupon = () => {
                     },
                     {
                       "type": "text",
-                      "text": article.value.text,
+                      "text": article.content,
                       "wrap": true,
                       "color": "#666666",
                       "size": "sm",
