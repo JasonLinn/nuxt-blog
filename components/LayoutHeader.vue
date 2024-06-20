@@ -137,7 +137,7 @@ import liff from "@line/liff";
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
-const displayName = ref('nobody')
+let displayName = ref('nobody')
 
 onMounted(async () => {
     try {
