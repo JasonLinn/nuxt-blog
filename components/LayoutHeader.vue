@@ -69,6 +69,9 @@
         >
           登入
         </NuxtLink>
+        <div>
+          {{ displayName }}
+        </div>
       </div>
     </nav>
   </header>
@@ -123,10 +126,27 @@
 
 <script setup>
 import { ref } from 'vue'
+import liff from "@line/liff";
 
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
+let displayName = 'nobody'
+
+onMounted(async () => {
+    try {
+      await liff.init({ liffId: "2005661804-zld9QenV" }); // Use own liffId
+      await liff.getProfile().then(profile => {
+        // 拿取profile
+        // document.getElementById('userId').innerHTML = profile.userId
+        displayName = profile.displayName
+        // document.getElementById('pictureUrl').innerHTML = profile.pictureUrl
+        // document.getElementById('statusMessage').innerHTML = profile.statusMessage
+      })
+  }  catch (err) {
+      console.log(`liff.state init error ${err}`);
+  }
+})
 
 watch(
   data,
@@ -135,7 +155,8 @@ watch(
   },
   {
     immediate: true
-  }
+  },
+  displayName
 )
 
 const handleLogout = () => {
