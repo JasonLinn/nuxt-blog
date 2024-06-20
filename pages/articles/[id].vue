@@ -65,7 +65,7 @@
           </div>
         </div>
       </div>
-      <button type="button" class="btn btn-success" @click="showModal">
+      <button type="button" class="btn btn-success" @click="sendCupon">
         領取限量優惠券
       </button>
     </div>
@@ -92,6 +92,7 @@
 </style>
 
 <script setup>
+import liff from "@line/liff";
 const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
 let modal;
@@ -159,6 +160,133 @@ const handleRecive = async () => {
     } else {
       alert('序號錯誤')
     }
+}
+
+const sendCupon = () => {
+  let cupon = {
+        "type": "bubble",
+        "hero": {
+          "type": "image",
+          "url": article.value.cover,
+          "size": "full",
+          "aspectRatio": "20:13",
+          "aspectMode": "cover",
+          "action": {
+            "type": "uri",
+            "uri": "https://line.me/"
+          }
+        },
+        "body": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "text",
+              "text": article.value.title,
+              "weight": "bold",
+              "size": "xl"
+            },
+            {
+              "type": "box",
+              "layout": "baseline",
+              "margin": "md",
+              "contents": [
+                {
+                  "type": "icon",
+                  "size": "sm",
+                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
+                },
+                {
+                  "type": "icon",
+                  "size": "sm",
+                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
+                },
+                {
+                  "type": "icon",
+                  "size": "sm",
+                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
+                },
+                {
+                  "type": "icon",
+                  "size": "sm",
+                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
+                },
+                {
+                  "type": "icon",
+                  "size": "sm",
+                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gray_star_28.png"
+                }
+              ]
+            },
+            {
+              "type": "box",
+              "layout": "vertical",
+              "margin": "lg",
+              "spacing": "sm",
+              "contents": [
+                {
+                  "type": "box",
+                  "layout": "baseline",
+                  "spacing": "sm",
+                  "contents": [
+                    {
+                      "type": "text",
+                      "text": "說明",
+                      "color": "#aaaaaa",
+                      "size": "sm",
+                      "flex": 1
+                    },
+                    {
+                      "type": "text",
+                      "text": article.value.text,
+                      "wrap": true,
+                      "color": "#666666",
+                      "size": "sm",
+                      "flex": 5
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "footer": {
+          "type": "box",
+          "layout": "vertical",
+          "spacing": "sm",
+          "contents": [
+            {
+              "type": "button",
+              "style": "link",
+              "height": "sm",
+              "action": {
+                "type": "uri",
+                "label": "WEBSITE",
+                "uri": "https://line.me/"
+              }
+            },
+            {
+              "type": "box",
+              "layout": "vertical",
+              "contents": [],
+              "margin": "sm"
+            }
+          ],
+          "flex": 0
+        }
+      }
+
+      liff.sendMessages([
+      {
+        "type": "flex",
+        "altText": "this is a flex message",
+        "contents": cupon
+      }
+      ])
+      .then(res => {
+        // window.alert(res.status)
+      })
+      .catch(error => window.alert(error));
 }
 
 useHead({
