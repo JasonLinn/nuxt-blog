@@ -224,7 +224,28 @@ const sendCupon = (article) => {
               "layout": "vertical",
               "margin": "lg",
               "spacing": "sm",
-              "contents": [
+              "contents": [{
+                  "type": "box",
+                  "layout": "baseline",
+                  "spacing": "sm",
+                  "contents": [
+                    {
+                      "type": "text",
+                      "text": "序號",
+                      "color": "#aaaaaa",
+                      "size": "sm",
+                      "flex": 1
+                    },
+                    {
+                      "type": "text",
+                      "text": article.hash[0],
+                      "wrap": true,
+                      "color": "#666666",
+                      "size": "sm",
+                      "flex": 5
+                    }
+                  ]
+                },
                 {
                   "type": "box",
                   "layout": "baseline",
