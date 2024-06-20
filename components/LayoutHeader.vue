@@ -180,7 +180,9 @@ const sendMessegeToSelf = () => {
     "contents": cupon
   }
   ])
-  .then(res => window.alert(res.status))
+  .then(res => {
+    // window.alert(res.status)
+  })
   .catch(error => window.alert(error));
 }
 
