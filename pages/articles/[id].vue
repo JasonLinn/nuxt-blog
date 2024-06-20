@@ -285,7 +285,7 @@ const sendCupon = (article) => {
       }
       ])
       .then(res => {
-        // window.alert(res.status)
+        window.alert('成功領取優惠券!')
       })
       .catch(error => window.alert(error));
 }
