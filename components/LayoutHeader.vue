@@ -79,7 +79,6 @@
 <script setup>
 import { ref } from 'vue'
 import liff from "@line/liff";
-import { cupon }  from '~/utils/cupon'
 
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
