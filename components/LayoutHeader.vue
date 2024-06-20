@@ -69,13 +69,11 @@
         >
           登入
         </NuxtLink>
-        <div>
-          {{ displayName }}
-        </div>
+        <div>{{ displayName }}</div>
         <div id="displayName">
           ????
         </div>
-        <img :src="imgUrl"/>
+        <img :src="imgUrl" />
         <div class="btn btn-info" @click="sendMessegeToSelf">
           點我發送訊息
         </div>
@@ -85,53 +83,6 @@
   </header>
 </template>
 
-<style lang="scss" scoped>
-.login {
-  display: block;
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-.user-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-.index-nav {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: center;
-}
-.index-title {
-  text-decoration: none;
-  color: #000;
-  font-size: 25px;
-  font-weight: bold;
-}
-.user-info {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: auto;
-}
-.user-info-list {
-  position: absolute;
-  right: 0;
-  top: 40px;
-}
-.logout-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 70px;
-  height: 30px;
-  font-size: 14px;
-  padding: 0;
-}
-</style>
-
 <script setup>
 import { ref } from 'vue'
 import liff from "@line/liff";
@@ -140,9 +91,8 @@ import { cupon }  from '~/utils/cupon'
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
-let displayName = 'nobody'
-let imgUrl = ''
-
+const displayName = ref('nobody')
+const imgUrl = ref('')
 
 onMounted(async () => {
     try {
@@ -150,7 +100,7 @@ onMounted(async () => {
       await liff.getProfile().then(profile => {
         // 拿取profile
         // document.getElementById('userId').innerHTML = profile.userId
-        displayName = profile.displayName
+        displayName.value = profile.displayName
         document.getElementById('displayName').innerHTML = profile.displayName
         imgUrl = profile.pictureUrl
         // document.getElementById('statusMessage').innerHTML = profile.statusMessage
@@ -167,7 +117,9 @@ watch(
   },
   {
     immediate: true
-  }
+  },
+  displayName,
+  imgUrl
 )
 
 const sendMessegeToSelf = () => {
@@ -237,3 +189,50 @@ const toggleEdit = () => {
   showEdit.value = !showEdit.value;
 }
 </script>
+
+<style lang="scss" scoped>
+.login {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.user-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.index-nav {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+.index-title {
+  text-decoration: none;
+  color: #000;
+  font-size: 25px;
+  font-weight: bold;
+}
+.user-info {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+.user-info-list {
+  position: absolute;
+  right: 0;
+  top: 40px;
+}
+.logout-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70px;
+  height: 30px;
+  font-size: 14px;
+  padding: 0;
+}
+</style>
