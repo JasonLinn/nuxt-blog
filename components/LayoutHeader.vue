@@ -75,8 +75,9 @@
         <div id="displayName">
           ????
         </div>
-        <div id="pictureUrl">
-
+        <div id="pictureUrl" :src="imgUrl"></div>
+        <div class="btn btn-info" @click="sendMessegeToSelf">
+          點我發送訊息
         </div>
       </div>
     </nav>
@@ -138,6 +139,7 @@ const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
 let displayName = ref('nobody')
+let imgUrl = ''
 
 onMounted(async () => {
     try {
@@ -147,7 +149,7 @@ onMounted(async () => {
         // document.getElementById('userId').innerHTML = profile.userId
         displayName = profile.displayName
         document.getElementById('displayName').innerHTML = profile.displayName
-        document.getElementById('pictureUrl').innerHTML = profile.pictureUrl
+        imgUrl = profile.pictureUrl
         // document.getElementById('statusMessage').innerHTML = profile.statusMessage
       })
   }  catch (err) {
@@ -164,6 +166,19 @@ watch(
     immediate: true
   }
 )
+
+const sendMessegeToSelf = () => {
+  // 傳送訊息給自己
+  // type 的可用值說明：https://developers.line.biz/en/reference/liff/#send-messages
+  liff.sendMessages([
+    {
+      type: 'text',
+      text: 'Hello'
+    }
+  ])
+  .then(res => window.alert(res.status))
+  .catch(error => window.alert(error));
+}
 
 const handleLogout = () => {
   $fetch('/api/session', {
