@@ -167,7 +167,7 @@ const handleRecive = () => {
   console.log(article,'cccc', articleHash, index)
   if (index >= 0) {
     sendCupon()
-    alert('領取成功')
+    alert('序號正確')
     modal.hide()
     } else {
       alert('序號錯誤')
