@@ -24,6 +24,7 @@
     "prettier-plugin-tailwindcss": "^0.5.4"
   },
   "dependencies": {
+    "@line/bot-sdk": "^9.2.2",
     "@line/liff": "^2.23.2",
     "bootstrap": "^5.3.3",
     "sass": "^1.77.4"
