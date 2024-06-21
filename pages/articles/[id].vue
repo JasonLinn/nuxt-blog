@@ -316,7 +316,7 @@ const sendCupon = () => {
       liff.sendMessages([
       {
         "type": "flex",
-        "altText": '宜蘭旅遊通行證-優惠券-'+article.value.title,
+        "altText": '優惠券-'+article.value.title,
         "contents": cupon
       }
       ])
