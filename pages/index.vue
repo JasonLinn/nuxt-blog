@@ -1,7 +1,7 @@
 <template>
   <div class="flex container">
     <ul class="category flex w-full max-w-4xl">
-      <li class="category-item" :class="[!currentCate ? 'active' : '']">
+      <li class="category-item">
         <NuxtLink
         :to="{
           name: 'index'
