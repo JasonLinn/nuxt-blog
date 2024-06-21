@@ -159,7 +159,7 @@ const articleData = reactive({
   cover: '',
   amount: 0,
   usedTimes: 0,
-  hash: [],
+  hash: '',
 })
 
 const handleSubmit = async () => {
