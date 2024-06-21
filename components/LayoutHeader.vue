@@ -90,6 +90,9 @@ onMounted(async () => {
     try {
       await liff.init({ liffId: "2005661804-zld9QenV" }); // Use own liffId
       await liff.getProfile().then(profile => {
+        if (!liff.isLoggedIn()) {
+          return;
+        }
         // 拿取profile
         // document.getElementById('userId').innerHTML = profile.userId
         displayName.value = profile.displayName

@@ -66,7 +66,7 @@
         </div>
       </div>
       <button type="button" class="btn btn-success" @click="sendCupon(article)">
-        領取限量優惠券
+        領取優惠券
       </button>
     </div>
     </template>
@@ -163,6 +163,9 @@ const handleRecive = async () => {
 }
 
 const sendCupon = (article) => {
+  if (!liff.isLoggedIn()) {
+    return;
+  }
   console.log(article, 'aaaa')
   let cupon = {
         "type": "bubble",
