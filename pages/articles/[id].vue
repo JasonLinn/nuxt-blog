@@ -161,7 +161,7 @@ const handleRecive = () => {
 
   console.log(article,'cccc', articleHash, index)
   if (index >= 0) {
-    sendPatch()
+    sendCupon()
     alert('領取成功')
     modal.hide()
     } else {
