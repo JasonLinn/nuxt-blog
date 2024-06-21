@@ -78,7 +78,7 @@
 <style>
 .cupon-text {
   overflow-wrap: break-word;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
 }
 .cupon-img {
   max-width: 100%;
@@ -91,6 +91,11 @@
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 20px;
+}
+.cupon-amount {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
 }
 </style>
 
