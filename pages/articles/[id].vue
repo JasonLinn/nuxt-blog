@@ -293,8 +293,8 @@ const sendCupon = () => {
               "height": "sm",
               "action": {
                 "type": "uri",
-                "label": "WEBSITE",
-                "uri": "https://line.me/"
+                "label": "優惠券說明頁",
+                "uri": window.location.href
               }
             },
             {
