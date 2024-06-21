@@ -190,7 +190,7 @@ const sendCupon = () => {
           "aspectMode": "cover",
           "action": {
             "type": "uri",
-            "uri": liffUrl + 'article/' +article.value.id
+            "uri": liffUrl + 'articles/' +article.value.id
           }
         },
         "body": {
@@ -300,7 +300,7 @@ const sendCupon = () => {
               "action": {
                 "type": "uri",
                 "label": "優惠券說明頁",
-                "uri": liffUrl + 'article/' +article.value.id
+                "uri": liffUrl + 'articles/' +article.value.id
               }
             },
             {
