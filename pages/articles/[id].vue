@@ -65,7 +65,10 @@
           </div>
         </div>
       </div>
-      <button type="button" class="btn btn-success" @click="sendCupon(article)">
+      <button v-show="article.amount && article.hash[0]" type="button" class="btn btn-success" @click="showModal">
+        領取限量優惠券
+      </button>
+      <button v-show="article.amount && !article.hash[0]" type="button" class="btn btn-success" @click="sendCupon">
         領取優惠券
       </button>
     </div>
@@ -138,40 +141,44 @@ const handleDeleteArticle = () => {
   }
 }
 
-const handleRecive = async () => {
-  console.log(article.value.hash, 'SSS', hash)
+const sendPatch = async () => {
+  await $fetch(`/api/cupon`, {
+      method: 'PATCH',
+        body: {
+          id: route.params.id,
+          amount: article.value.amount -1
+        }
+    })
+    .then((response) => {
+      article.value.amount = response.amount
+    })
+    .catch((error) => alert(error))
+}
+
+const handleRecive = () => {
   let articleHash = article.value.hash
   let index = articleHash.findIndex((i) =>hash == i)
 
+  console.log(article,'cccc', articleHash, index)
   if (index >= 0) {
+    sendPatch()
     alert('領取成功')
     modal.hide()
-    // await $fetch(`/api/cupon`, {
-    //   method: 'PATCH',
-    //   body: {
-    //     id: route.params.id,
-    //     amount: article.value.amount -1
-    //   }
-    // })
-    //   .then((response) => {
-    //     article.value.amount = response.amount
-    //   })
-    //   .catch((error) => alert(error))
     } else {
       alert('序號錯誤')
     }
 }
 
-const sendCupon = (article) => {
-  if (!liff.isLoggedIn()) {
-    return;
-  }
+const sendCupon = () => {
+  // if (!liff.isLoggedIn()) {
+  //   return;
+  // }
   console.log(article, 'aaaa')
   let cupon = {
         "type": "bubble",
         "hero": {
           "type": "image",
-          "url": article.cover,
+          "url": article.value.cover,
           "size": "full",
           "aspectRatio": "20:13",
           "aspectMode": "cover",
@@ -186,7 +193,7 @@ const sendCupon = (article) => {
           "contents": [
             {
               "type": "text",
-              "text": article.title,
+              "text": article.value.title,
               "weight": "bold",
               "size": "xl"
             },
@@ -241,7 +248,7 @@ const sendCupon = (article) => {
                     },
                     {
                       "type": "text",
-                      "text": article.hash[0],
+                      "text": article.value.hash[0] || '無序號' ,
                       "wrap": true,
                       "color": "#666666",
                       "size": "sm",
@@ -263,7 +270,7 @@ const sendCupon = (article) => {
                     },
                     {
                       "type": "text",
-                      "text": article.content,
+                      "text": article.value.content,
                       "wrap": true,
                       "color": "#666666",
                       "size": "sm",
@@ -310,8 +317,9 @@ const sendCupon = (article) => {
       ])
       .then(res => {
         window.alert('成功領取優惠券!')
+        sendPatch()
       })
-      .catch(error => window.alert(error));
+      .catch(error => window.alert('未登入LINE帳號'+ error));
 }
 
 useHead({
