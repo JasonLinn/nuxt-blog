@@ -105,6 +105,7 @@ const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
 let modal;
 let hash = []
+const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
 const showModal = () => {
   modal.show();
 };
@@ -189,7 +190,7 @@ const sendCupon = () => {
           "aspectMode": "cover",
           "action": {
             "type": "uri",
-            "uri": "https://line.me/"
+            "uri": liffUrl + 'article/' +article.value.id
           }
         },
         "body": {
@@ -299,7 +300,7 @@ const sendCupon = () => {
               "action": {
                 "type": "uri",
                 "label": "優惠券說明頁",
-                "uri": window.location.href
+                "uri": liffUrl + 'article/' +article.value.id
               }
             },
             {
