@@ -40,7 +40,6 @@ export default defineEventHandler(async (event) => {
               }
             event.reply(msg)
           })
-          return bot.parser()
       } catch (e) {
         throw createError({
           statusCode: 401,
