@@ -1,50 +1,54 @@
+import * as line from '@line/bot-sdk'
 import linebot from 'linebot'
 
 // create LINE SDK config from env variables
 const config = {
-    channelSecret: process.env.CHANNEL_SECRET,
+  channelSecret: process.env.CHANNEL_SECRET,
 };
+
 // create LINE SDK client
-const bot = linebot({
-    channelId: process.env.CHANNEL_ID,
-    channelSecret: process.env.CHANNEL_SECRET,
-    channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
+const client = new line.messagingApi.MessagingApiClient({
+  channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
 });
+
+function handleEvent(event) {
+  if (event.type !== 'message' || event.message.type !== 'text') {
+    // ignore non-text-message event
+    return Promise.resolve(null);
+  }
+
+  let eventMsg = event.message.text;
+  let text = eventMsg;
+  if (eventMsg == '你好') {
+    text = '不好'
+  }
+  // create an echoing text message
+  const echo = { type: 'text', text };
+
+  // use reply API
+  return client.replyMessage({
+    replyToken: event.replyToken,
+    messages: [echo],
+  });
+}
 
 export default defineEventHandler(async (event) => {
     try {
-        const body = await readBody(event)
-        console.log(event,'tttt', body)
-
-        // use reply API
-        bot.on('message', async event => {
-            let msg = {
-                "type": "flex",
-                "altText": "this is a flex message",
-                "contents": {
-                  "type": "bubble",
-                  "body": {
-                    "type": "box",
-                    "layout": "vertical",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "hello"
-                      },
-                      {
-                        "type": "text",
-                        "text": "world"
-                      }
-                    ]
-                  }
-                }
-              }
-            event.reply(msg)
-          })
+      const body = await readBody(event)
+      Promise
+      .all(body.events.map(handleEvent))
+      .then((result) => {
+        console.log(result)
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).end();
+      });
       } catch (e) {
-        throw createError({
-          statusCode: 401,
-          statusMessage: 'Unauthorized'
-        })
+        console.log(e, 'EEEEEEEEERRRR')
+        // throw createError({
+        //   statusCode: 401,
+        //   statusMessage: 'Unauthorized'
+        // })
       }
 })

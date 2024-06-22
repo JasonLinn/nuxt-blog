@@ -6,7 +6,7 @@
 
 export default defineNuxtConfig({
   css: ['~/assets/scss/main.scss'],
-  modules: ['nuxt-icon'],
+  modules: ['nuxt-icon', '@nuxtjs/ngrok'],
   vite: {
     css: {
       preprocessorOptions: {
@@ -20,4 +20,8 @@ export default defineNuxtConfig({
     }
   },
   devtools: { enabled: true },
+  ngrok: {
+    // module options
+    authtoken: process.env.NGROK_AUTHTOKEN
+  }
 });
