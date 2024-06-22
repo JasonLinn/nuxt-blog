@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
       })
       .catch((err) => {
         console.error(err);
-        res.status(500).end();
+        // res.status(500).end();
       });
       } catch (e) {
         console.log(e, 'EEEEEEEEERRRR')
