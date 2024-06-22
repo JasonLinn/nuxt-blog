@@ -29,7 +29,7 @@ function handleEvent(event) {
 export default defineEventHandler(async (event) => {
     try {
       const body = await readBody(event)
-      Promise
+      await Promise
       .all(body.events.map(handleEvent))
       .then((result) => {
         console.log(result)
