@@ -1,6 +1,7 @@
 import * as line from '@line/bot-sdk'
 import { pool } from '@/server/utils/db'
 
+const liffUrl = "https://liff.line.me/2005661804-zld9QenV/";
 // create LINE SDK client
 const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
@@ -30,6 +31,151 @@ async function handleEvent (event) {
       }
     }
   }
+  let carousel = {
+    type: "carousel",
+    contents: [
+      {
+        type: "bubble",
+        size: "micro",
+        hero: {
+          type: "image",
+          url: "https://developers-resource.landpress.line.me/fx/clip/clip10.jpg",
+          size: "full",
+          aspectMode: "cover",
+          aspectRatio: "320:213"
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: "Brown Cafe",
+              weight: "bold",
+              size: "sm",
+              wrap: true
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "sm",
+                  contents: [
+                    {
+                      type: "text",
+                      text: "東京旅行",
+                      wrap: true,
+                      color: "#8c8c8c",
+                      size: "xs",
+                      flex: 5
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          spacing: "sm",
+          paddingAll: "13px"
+        }
+      },
+      {
+        type: "bubble",
+        size: "micro",
+        hero: {
+          type: "image",
+          url: "https://developers-resource.landpress.line.me/fx/clip/clip11.jpg",
+          size: "full",
+          aspectMode: "cover",
+          aspectRatio: "320:213"
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: "Brown&Cony's Restaurant",
+              weight: "bold",
+              size: "sm",
+              wrap: true
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "sm",
+                  contents: [
+                    {
+                      type: "text",
+                      text: "東京旅行",
+                      wrap: true,
+                      color: "#8c8c8c",
+                      size: "xs",
+                      flex: 5
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          spacing: "sm",
+          paddingAll: "13px"
+        }
+      },
+      {
+        type: "bubble",
+        size: "micro",
+        hero: {
+          type: "image",
+          url: "https://developers-resource.landpress.line.me/fx/clip/clip12.jpg",
+          size: "full",
+          aspectMode: "cover",
+          aspectRatio: "320:213"
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: "Tata",
+              weight: "bold",
+              size: "sm"
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "sm",
+                  contents: [
+                    {
+                      type: "text",
+                      text: "東京旅行",
+                      wrap: true,
+                      color: "#8c8c8c",
+                      size: "xs",
+                      flex: 5
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          spacing: "sm",
+          paddingAll: "13px"
+        }
+      }
+    ]
+  }
   if (eventMsg == '你好') {
     flex.contents.body.contents = [{
       type: 'text',
@@ -44,6 +190,67 @@ async function handleEvent (event) {
         text: index+1 + '.' + item.title
       }
     })
+  }
+  if(eventMsg == '優惠券列表') {
+    let cupon = await getCupon()
+    carousel.contents = cupon.map((item) => {
+      console.log(item, 'iiiiii')
+      return {
+        type: "bubble",
+        size: "micro",
+        hero: {
+          type: "image",
+          url: item.cover,
+          size: "full",
+          aspectMode: "cover",
+          aspectRatio: "320:213"
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: item.title,
+              weight: "bold",
+              size: "sm",
+              wrap: true
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "sm",
+                  contents: [
+                    {
+                      type: "text",
+                      text: item.content,
+                      wrap: true,
+                      color: "#8c8c8c",
+                      size: "xs",
+                      flex: 5
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          spacing: "sm",
+          paddingAll: "13px",
+          action: {
+            type: "uri",
+            label: "action",
+            uri: liffUrl +'articles/'+item.id
+          }
+        }
+      }
+    })
+    // console.log(carousel, 'uuuuuuuuuuuuuu')
+
+    flex.contents = carousel
   }
 
   // use reply API

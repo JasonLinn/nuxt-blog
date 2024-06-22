@@ -55,7 +55,7 @@
                 <div class="mt-1">
                   <textarea
                     id="hash"
-                    v-model="hash"
+                    v-model="articleData.hash"
                     name="hash"
                     rows="4"
                     placeholder="請撰寫優惠券序號..."
@@ -158,10 +158,7 @@ if (error.value) {
   throw createError({ statusCode: 400, message: '您要更新的優惠券不存在或已經被刪除' })
 }
 
-let hash = 'abc001,abc002';
-
 const handleSubmit = async () => {
-  hash = hash.split(',');
   await $fetch(`/api/articles/${route.query.id}`, {
     method: 'PATCH',
     body: {
@@ -170,7 +167,7 @@ const handleSubmit = async () => {
       content: articleData.value.content,
       cover: articleData.value.cover,
       amount: articleData.value.amount,
-      hash: hash
+      hash: articleData.value.hash.split(',')
     }
   })
     .then((response) => {
