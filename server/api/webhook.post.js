@@ -36,7 +36,7 @@ async function handleEvent (event) {
       text: '很高興為您服務'
     }]
   }
-  if(eventMsg == '優惠券' || '優惠券列表') {
+  if(eventMsg == '優惠券') {
     let cupon = await getCupon()
     flex.contents.body.contents = cupon.map((item, index)=> {
       return {
