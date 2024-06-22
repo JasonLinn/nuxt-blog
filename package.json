@@ -28,7 +28,6 @@
     "@line/liff": "^2.23.2",
     "@nuxtjs/ngrok": "^3.0.1",
     "bootstrap": "^5.3.3",
-    "linebot": "^1.6.1",
     "sass": "^1.77.4"
   }
 }

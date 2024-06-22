@@ -1,10 +1,4 @@
 import * as line from '@line/bot-sdk'
-import linebot from 'linebot'
-
-// create LINE SDK config from env variables
-const config = {
-  channelSecret: process.env.CHANNEL_SECRET,
-};
 
 // create LINE SDK client
 const client = new line.messagingApi.MessagingApiClient({
