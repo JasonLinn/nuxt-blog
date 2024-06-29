@@ -11,7 +11,8 @@
 <script setup>
     import { ref } from 'vue'
     import liff from "@line/liff";
-
+    let id = '5555555';
+    let text = ''
     onMounted(async () => {
     try {
       await liff.init({ liffId: "2005661804-pZRYaLm6" }); // Use own liffId
@@ -21,6 +22,7 @@
         }
         // 拿取profile
         document.getElementById('userId').innerHTML = profile.userId
+        id = profile.userId;
         // displayName.value = profile.displayName
         imgUrl = profile.pictureUrl
         // document.getElementById('statusMessage').innerHTML = profile.statusMessage
@@ -46,11 +48,11 @@
             "method": 'POST',
             "message": '你好阿',
             "body": {
-                "message": '你好阿22212313' + id.toString(),
-                "imageThumbnail": "https//" + id
+                "message": '你好阿22212313' + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a',
+                "imageThumbnail": "https//" + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'
             },
             "query": {
-                'message':  text + JSON.stringify('https://7bc7-49-158-194-181.ngrok-free.app/user?id=' + id),
+                'message':  text + JSON.stringify('https://7bc7-49-158-194-181.ngrok-free.app/user?id=' + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'),
                 // "imageThumbnail": "https//" + id,
                 'stickerPackageId': '2',
                 'stickerId': '523'
