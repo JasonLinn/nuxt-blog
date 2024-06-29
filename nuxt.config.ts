@@ -36,8 +36,8 @@ export default defineNuxtConfig({
     '/api/notify' : {
         proxy : { to : "https://notify-api.line.me/api/notify" , },
     },
-    '/api/sendMsg' : {
-        proxy : { to : "https://api.line.me/v2/bot/message/push" , },
-    },
+    // '/api/sendMsg' : {
+    //     proxy : { to : "https://api.line.me/v2/bot/message/push" , },
+    // },
   }
 });
