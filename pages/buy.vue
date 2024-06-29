@@ -30,10 +30,9 @@
         }
         })
 
-    const text = ref('')
     const sentNotify = () => {
         alert(123)
-        useFetch('/api/notify', {
+        useFetch('https://notify-api.line.me/api/notify/', {
             "headers": {
                 "Access-Control-Allow-Origin": "no-cors",
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -47,10 +46,12 @@
             "method": 'POST',
             "message": '你好阿',
             "body": {
-                "message": '你好阿22212313'
+                "message": '你好阿22212313' + id.toString(),
+                "imageThumbnail": "https//" + id
             },
             "query": {
-                'message': text,
+                'message':  text + JSON.stringify('https://7bc7-49-158-194-181.ngrok-free.app/user?id=' + id),
+                // "imageThumbnail": "https//" + id,
                 'stickerPackageId': '2',
                 'stickerId': '523'
             }
