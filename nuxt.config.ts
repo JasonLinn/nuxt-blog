@@ -17,7 +17,15 @@ export default defineNuxtConfig({
           `
         }
       }
-    }
+    },
+    server: {
+      proxy: {
+        '/api/notify': { // API 路由
+          target: 'https://notify-api.line.me/', // 主要 Domain
+          changeOrigin: true,
+        },
+      },
+    },
   },
   devtools: { enabled: true },
   ngrok: {

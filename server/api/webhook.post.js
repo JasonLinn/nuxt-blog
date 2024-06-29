@@ -14,23 +14,6 @@ async function handleEvent (event) {
   }
 
   let eventMsg = event.message.text;
-  let flex = {
-    type: "flex",
-    altText: "優惠券列表",
-    contents: {
-      type: "bubble",
-      body: {
-        type: "box",
-        layout: "vertical",
-        contents: [
-          {
-            type: "text",
-            text: eventMsg
-          }
-        ]
-      }
-    }
-  }
   let carousel = {
     type: "carousel",
     contents: [
