@@ -34,7 +34,7 @@
 
     const sentNotify = () => {
         alert(123)
-        useFetch('https://notify-api.line.me/api/notify/', {
+        useFetch('/api/notify', {
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/x-www-form-urlencoded",
