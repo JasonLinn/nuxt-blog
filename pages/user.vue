@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-let text = 'test'
+let text = '推薦您好客民宿\n'+'編號: 001'
 const route = useRoute()
 let id = route?.query?.id
 const sendMSG = async () => {
