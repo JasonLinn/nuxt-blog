@@ -18,18 +18,26 @@ export default defineNuxtConfig({
         }
       }
     },
-    server: {
-      proxy: {
-        '/api/sendMsg': { // API 路由
-          target: 'https://api.line.me/', // 主要 Domain
-          changeOrigin: true,
-        },
-      },
-    },
+    // server: {
+    //   proxy: {
+    //     '/api/sendMsg': { // API 路由
+    //       target: 'https://api.line.me/', // 主要 Domain
+    //       changeOrigin: true,
+    //     },
+    //   },
+    // },
   },
   devtools: { enabled: true },
   ngrok: {
     // module options
     authtoken: process.env.NGROK_AUTHTOKEN
+  },
+  routeRules : {
+    '/api/notify' : {
+        proxy : { to : "https://notify-api.line.me/api/notify" , },
+    },
+    '/api/sendMsg' : {
+        proxy : { to : "https://api.line.me/v2/bot/message/push" , },
+    },
   }
 });

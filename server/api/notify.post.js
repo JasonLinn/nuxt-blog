@@ -1,12 +1,13 @@
 import axios from "axios"
 
 export default defineEventHandler(async (event) => {
-    console.log(event, 'eeeee')
+    console.log(event, 'eeeee', axios,'aaaaa')
     axios.post('https://notify-api.line.me/api/notify', {
-        headers: {
+        "headers": {
             "Authorization": 'Bearer ' + process.env.CHANNEL_ACCESS_TOKEN,
         },
-        body: {
+        "method": 'POST',
+        "body": {
             "message": 123
         }
 

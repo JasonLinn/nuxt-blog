@@ -52,7 +52,7 @@
                 "imageThumbnail": "https//" + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'
             },
             "query": {
-                'message':  text + JSON.stringify('https://7bc7-49-158-194-181.ngrok-free.app/user?id=' + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'),
+                'message':  text + JSON.stringify('https://6c4f-49-158-194-181.ngrok-free.app/user?id=' + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'),
                 // "imageThumbnail": "https//" + id,
                 'stickerPackageId': '2',
                 'stickerId': '523'
