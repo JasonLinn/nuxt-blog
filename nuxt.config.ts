@@ -24,6 +24,10 @@ export default defineNuxtConfig({
           target: 'https://notify-api.line.me/', // 主要 Domain
           changeOrigin: true,
         },
+        '/api/sendMsg': { // API 路由
+          target: 'https://api.line.me/', // 主要 Domain
+          changeOrigin: true,
+        },
       },
     },
   },
