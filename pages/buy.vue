@@ -36,12 +36,12 @@
         alert(123)
         useFetch('https://notify-api.line.me/api/notify/', {
             "headers": {
-                "Access-Control-Allow-Origin": "no-cors",
+                "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/x-www-form-urlencoded",
                 // 'Sec-Fetch-Mode:': 'cors',
                 'Authorization': 'Bearer '+ '2aj6Y6IY0aiMAPL6LmCOlqHpsOCh7ieT7yNZ3j849kS',
-                // "Access-Control-Allow-Methods": "*",
-                // 'Access-Control-Allow-Headers': '*',
+                "Access-Control-Allow-Methods": "*",
+                'Access-Control-Allow-Headers': '*',
                 // 'Accept': '*/*',
                 // 'Sec-Fetch-Site': 'same-origin',
             },
