@@ -16,10 +16,10 @@
 let text = 'test'
 const route = useRoute()
 let id = route?.query?.id
-const sendMSG = () => {
+const sendMSG = async () => {
     alert(456)
     try {
-        useFetch("/api/sendMsg", {
+        await useFetch("/api/sendMsg", {
         "headers": {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "*",
