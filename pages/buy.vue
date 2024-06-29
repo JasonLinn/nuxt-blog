@@ -9,10 +9,19 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue'
     import liff from "@line/liff";
     let id = '5555555';
-    let text = ''
+    let text =
+            '\n【~~訂單來囉~~】\n' +
+            '聯絡人：林小明\n' +
+            'LINE:abc123\n' +
+            // '電話：\n' +
+            // 'ＬＩＮＥ：\n' +
+            '預計入住日期：7/1\n' +
+            '預計入住人數：16\n' +
+            '預計需求房數：3+1\n' +
+            '希望民宿設備：麻將\n' +
+            '住宿預算：50000'
     onMounted(async () => {
     try {
       await liff.init({ liffId: "2005661804-pZRYaLm6" }); // Use own liffId
@@ -52,10 +61,10 @@
                 "imageThumbnail": "https//" + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'
             },
             "query": {
-                'message':  text + JSON.stringify('https://6c4f-49-158-194-181.ngrok-free.app/user?id=' + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'),
+                'message':  text + "\n\n點連結以回覆訂單: " + JSON.stringify('https://nuxt-blog-swart.vercel.app/user?id=' + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'),
                 // "imageThumbnail": "https//" + id,
-                'stickerPackageId': '2',
-                'stickerId': '523'
+                'stickerId': '52002736',
+                'stickerPackageId': '11537',
             }
         });
     }
