@@ -158,6 +158,9 @@ if (error.value) {
   throw createError({ statusCode: 400, message: '您要更新的優惠券不存在或已經被刪除' })
 }
 
+// 先轉字串
+articleData.value.hash = await articleData.value.hash.toString()
+
 const handleSubmit = async () => {
   await $fetch(`/api/articles/${route.query.id}`, {
     method: 'PATCH',
@@ -167,6 +170,7 @@ const handleSubmit = async () => {
       content: articleData.value.content,
       cover: articleData.value.cover,
       amount: articleData.value.amount,
+      // 轉陣列
       hash: articleData.value.hash.split(',')
     }
   })
