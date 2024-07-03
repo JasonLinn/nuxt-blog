@@ -1,12 +1,12 @@
 <template>
   <div class="flex container">
     <ul class="category flex w-full max-w-4xl">
-      <li class="category-item" :class="[!currentCate ? 'active' : '']">
+      <!-- <li class="category-item" :class="[!currentCate ? 'active' : '']">
         <NuxtLink
         :to="{
           name: 'index'
         }">全</NuxtLink>
-      </li>
+      </li> -->
       <li v-for="cate in category" class="category-item"
       :class="[currentCate == cate.id ? 'active' : '']">
         <NuxtLink
