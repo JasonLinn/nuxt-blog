@@ -18,6 +18,9 @@
         >{{ cate.name }}</NuxtLink>
       </li>
     </ul>
+    <div class="col-12">
+      <input type="text" class="searchInput" placeholder="請輸入優惠券名稱" v-model="searchText">
+    </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
       <div v-if="pending">
         <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
@@ -37,7 +40,7 @@
               :key="article.id"
               class="cupon col-md-3"
             >
-            <div class="cupon-wrapper">
+            <div class="cupon-wrapper" v-if="!searchText || article.title.includes(searchText) || article.content.includes(searchText)">
               <NuxtLink
                 class=""
                 :to="{
@@ -124,7 +127,7 @@
   display: flex;
   flex-direction: row;
   font-size: 30px;
-  margin: 30px 0 30px 0;
+  margin: 20px 0 20px 0;
   background-color: #fff;
   width: fit-content;
 }
@@ -137,11 +140,11 @@
   align-items: center;
 }
 .cupon {
-  margin-bottom: 20px;
 }
 .cupon-wrapper {
   border-radius: 10px;
   overflow: hidden;
+  margin-bottom: 20px;
 }
 .cupon-wrapper:hover {
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
@@ -179,6 +182,10 @@
 .cupon-text {
   color: #272727;
 }
+.searchInput {
+  height: 30px;
+  margin-bottom: 20px;
+}
 </style>
 
 <script setup>
@@ -187,6 +194,7 @@ import { category } from '~/utils/category';
 const route = useRoute()
 const currentPage = computed(() => parseInt(route?.query?.page) || 1)
 const currentCate = computed(() => route?.query?.cate)
+const searchText = ref('')
 const {
   pending,
   data: articlesResponse,
