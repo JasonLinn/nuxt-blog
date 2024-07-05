@@ -45,7 +45,7 @@
                 "imageThumbnail": "https//" + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'
             },
             "query": {
-                'message':  '\n【民宿介紹】\n' + text + "\n\n點連結以回覆訂單: " + JSON.stringify('https://nuxt-blog-swart.vercel.app/user?token=' + token),
+                'message':  '\n【民宿介紹】\n' + text + "\n\n點連結以回覆訂單: " + JSON.stringify('https://nuxt-blog-swart.vercel.app/notify?token=' + token),
                 // "imageThumbnail": "https//" + id,
                 'stickerId': '52002736',
                 'stickerPackageId': '11537',
