@@ -25,7 +25,7 @@ async function handleEvent (event) {
         contents: [
           {
             type: "text",
-            text: "hello"
+            text: eventMsg
           }
         ]
       }
