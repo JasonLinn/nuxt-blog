@@ -14,6 +14,23 @@ async function handleEvent (event) {
   }
 
   let eventMsg = event.message.text;
+  let flex = {
+    type: "flex",
+    altText: "this is a flex message",
+    contents: {
+      type: "bubble",
+      body: {
+        type: "box",
+        layout: "vertical",
+        contents: [
+          {
+            type: "text",
+            text: "hello"
+          }
+        ]
+      }
+    }
+  }
   let carousel = {
     type: "carousel",
     contents: [
