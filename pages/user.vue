@@ -2,7 +2,7 @@
     <div class="container">
         <p>回覆資訊:</p>
         <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea>
-        <div class="btn btn-info" @click="sendMSG">
+        <div class="btn btn-info" @click.once="sendMSG">
             送出
         </div>
     </div>
@@ -38,6 +38,8 @@ const sendMSG = async () => {
                 "token": token,
                 "text": text,
             },
+        }).then(res=>{
+            alert('發送成功!')
         })
     }
 
@@ -69,6 +71,8 @@ const sendMSG = async () => {
             //         }
             //     ]
             //     }
+        }).then(res=>{
+            alert('發送成功!')
         })
     }
 }
