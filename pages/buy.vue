@@ -42,12 +42,14 @@
 
     const sentNotify = () => {
         alert(123)
+        //群組權杖
+        const groupToken = 'b6d9ktVwcCUxOAs0df5WsC5t0wi8LRYDsnQtqk3G7rU'
         useFetch('/api/notify', {
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/x-www-form-urlencoded",
                 // 'Sec-Fetch-Mode:': 'cors',
-                'Authorization': 'Bearer '+ '2aj6Y6IY0aiMAPL6LmCOlqHpsOCh7ieT7yNZ3j849kS',
+                'Authorization': 'Bearer '+ groupToken,
                 "Access-Control-Allow-Methods": "*",
                 'Access-Control-Allow-Headers': '*',
                 // 'Accept': '*/*',
