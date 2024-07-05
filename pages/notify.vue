@@ -14,7 +14,7 @@
     const route = useRoute()
     let token = route?.query?.token
     let text =
-            '聯絡人：林小明\n' +
+            '民宿: 衿日林\n' +
             'LINE:abc123\n' +
             // '電話：\n' +
             // 'ＬＩＮＥ：\n' +
@@ -31,6 +31,7 @@
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/x-www-form-urlencoded",
                 // 'Sec-Fetch-Mode:': 'cors',
+                // 這邊的Token是到特定群組
                 'Authorization': 'Bearer '+ "2aj6Y6IY0aiMAPL6LmCOlqHpsOCh7ieT7yNZ3j849kS",
                 "Access-Control-Allow-Methods": "*",
                 'Access-Control-Allow-Headers': '*',
@@ -44,7 +45,7 @@
                 "imageThumbnail": "https//" + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'
             },
             "query": {
-                'message':  '\n【~~訂單來囉~~】\n' + text + "\n\n點連結以回覆訂單: " + JSON.stringify('https://nuxt-blog-swart.vercel.app/user?token=' + token),
+                'message':  '\n【民宿介紹】\n' + text + "\n\n點連結以回覆訂單: " + JSON.stringify('https://nuxt-blog-swart.vercel.app/user?token=' + token),
                 // "imageThumbnail": "https//" + id,
                 'stickerId': '52002736',
                 'stickerPackageId': '11537',
