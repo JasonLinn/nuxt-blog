@@ -16,7 +16,7 @@ async function handleEvent (event) {
   let eventMsg = event.message.text;
   let flex = {
     type: "flex",
-    altText: "this is a flex message",
+    altText: "宜蘭旅遊通-優惠券",
     contents: {
       type: "bubble",
       body: {
