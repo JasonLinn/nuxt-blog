@@ -120,12 +120,12 @@ onMounted(async () => {
         }
         insertUser(profile)
         // 拿取profile
-        document.getElementById('userId').innerHTML = profile.userId
-        id = profile.userId;
+        // document.getElementById('userId').innerHTML = profile.userId
+        // id = profile.userId;
         // displayName.value = profile.displayName
-        imgUrl = profile.pictureUrl
+        // imgUrl = profile.pictureUrl
         // document.getElementById('statusMessage').innerHTML = profile.statusMessage
-            })
+      })
         }  catch (err) {
             console.log(`liff.state init error ${err}`);
         }
