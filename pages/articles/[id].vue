@@ -111,24 +111,26 @@ const showModal = () => {
 };
 
 onMounted(async () => {
+  console.log('hihihihi')
   modal = $bootstrap.modal(modalRef.value);
-  try {
-      await liff.init({ liffId: "2005661804-pZRYaLm6" }); // Use own liffId
-      await liff.getProfile().then(profile => {
-        if (!liff.isLoggedIn()) {
-          return;
-        }
-        insertUser(profile)
-        // 拿取profile
-        // document.getElementById('userId').innerHTML = profile.userId
-        // id = profile.userId;
-        // displayName.value = profile.displayName
-        // imgUrl = profile.pictureUrl
-        // document.getElementById('statusMessage').innerHTML = profile.statusMessage
-      })
-        }  catch (err) {
-            console.log(`liff.state init error ${err}`);
-        }
+  // try {
+  //     await liff.init({ liffId: "2005661804-pZRYaLm6" }); // Use own liffId
+  //     await liff.getProfile().then(profile => {
+  //       console.log(profile, 'llll')
+  //       if (!liff.isLoggedIn()) {
+  //         return;
+  //       }
+  //       insertUser(profile)
+  //       // 拿取profile
+  //       // document.getElementById('userId').innerHTML = profile.userId
+  //       // id = profile.userId;
+  //       // displayName.value = profile.displayName
+  //       // imgUrl = profile.pictureUrl
+  //       // document.getElementById('statusMessage').innerHTML = profile.statusMessage
+  //     })
+  //       }  catch (err) {
+  //           console.log(`liff.state init error ${err}`);
+  //       }
 });
 
 onBeforeUnmount(() => {

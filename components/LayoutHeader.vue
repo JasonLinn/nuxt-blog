@@ -93,6 +93,7 @@ onMounted(async () => {
         if (!liff.isLoggedIn()) {
           return;
         }
+        insertUser(profile)
         // 拿取profile
         // document.getElementById('userId').innerHTML = profile.userId
         displayName.value = profile.displayName
@@ -115,6 +116,25 @@ watch(
   displayName,
   imgUrl
 )
+
+const insertUser = async (profile) => {
+  console.log(profile, 'iiiiiiii')
+  await $fetch(`/api/user/user`, {
+      method: 'POST',
+        body: {
+          name: profile.displayName,
+          cover: profile.pictureUrl,
+          token: profile.userId,
+          coupons: [],
+          msg_times: 0,
+        }
+    })
+    .then((response) => {
+      console.log(response, 'ppppp')
+      // article.value.amount = response.amount
+    })
+    .catch((error) => alert(error))
+}
 
 const handleLogout = () => {
   $fetch('/api/session', {
