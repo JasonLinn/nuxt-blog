@@ -124,7 +124,7 @@ const insertUser = async (profile) => {
         body: {
           name: profile.displayName,
           cover: profile.pictureUrl,
-          token: profile.userId,
+          user_id: profile.userId,
           coupons: [],
           msg_times: 0,
         }
