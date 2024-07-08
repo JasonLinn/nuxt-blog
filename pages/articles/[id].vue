@@ -60,7 +60,7 @@
               <input type="text" v-model="hash">
             </div>
             <div class="modal-footer">
-              <button type="button" @click="handleRecive">確定</button>
+              <button type="button" @click="handleHashRecive">確定</button>
             </div>
           </div>
         </div>
@@ -110,8 +110,25 @@ const showModal = () => {
   modal.show();
 };
 
-onMounted(() => {
+onMounted(async () => {
   modal = $bootstrap.modal(modalRef.value);
+  try {
+      await liff.init({ liffId: "2005661804-pZRYaLm6" }); // Use own liffId
+      await liff.getProfile().then(profile => {
+        if (!liff.isLoggedIn()) {
+          return;
+        }
+        insertUser(profile)
+        // 拿取profile
+        document.getElementById('userId').innerHTML = profile.userId
+        id = profile.userId;
+        // displayName.value = profile.displayName
+        imgUrl = profile.pictureUrl
+        // document.getElementById('statusMessage').innerHTML = profile.statusMessage
+            })
+        }  catch (err) {
+            console.log(`liff.state init error ${err}`);
+        }
 });
 
 onBeforeUnmount(() => {
@@ -161,7 +178,23 @@ const sendPatch = async () => {
     .catch((error) => alert(error))
 }
 
-const handleRecive = () => {
+const insertUser = async (profile) => {
+  console.log(profile, 'iiiiiiii')
+  await $fetch(`/api/user/user`, {
+      method: 'POST',
+        body: {
+          name: profile.displayName,
+          cover: profile.pictureUrl,
+          token: profile.userId,
+        }
+    })
+    .then((response) => {
+      article.value.amount = response.amount
+    })
+    .catch((error) => alert(error))
+}
+
+const handleHashRecive = () => {
   let articleHash = article.value.hash
   let index = articleHash.findIndex((i) =>hash == i)
 
