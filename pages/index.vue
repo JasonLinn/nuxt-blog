@@ -63,7 +63,7 @@
                   <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                     {{ date2LocaleString(article.updated_at) }}
                   </time> -->
-                  <p class="cupon-text">
+                  <p class="index-cupon-text">
                     {{ article.content.replace(/\n/g, ' ').substring(0, 300) }}
                   </p>
                 </div>
@@ -179,7 +179,7 @@
   background-color: rgb(245, 245, 245);
   margin-bottom: 10px;
 }
-.cupon-text {
+.index-cupon-text {
   color: #272727;
 }
 .searchInput {
