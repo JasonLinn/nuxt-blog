@@ -9,4 +9,10 @@
 </template>
 
 <script setup>
+const { pending, data: user, error } = await useFetch(`/api/user/${route.params.id}`)
+
+if (error.value) {
+  console.log(error.value)
+  throw createError({ statusCode: 404 })
+}
 </script>
