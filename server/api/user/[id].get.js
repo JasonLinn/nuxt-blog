@@ -10,14 +10,14 @@ export default defineEventHandler(async (event) => {
       console.error(error)
       throw createError({
         statusCode: 500,
-        message: '無法取得優惠券，請稍候再試'
+        message: '無法取得LINE ID，請稍候再試'
       })
     })
 
   if (!userRecord) {
     throw createError({
       statusCode: 400,
-      message: '取得優惠券失敗，請稍候再試'
+      message: '取得LINE ID失敗，請稍候再試'
     })
   }
   console.log(userRecord, 'ooooooo')
