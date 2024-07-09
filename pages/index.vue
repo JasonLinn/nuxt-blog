@@ -84,7 +84,7 @@
         </div>
       </template>
 
-      <nav
+      <!-- <nav
         v-if="articlesResponse"
         class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
       >
@@ -114,7 +114,7 @@
             <Icon name="ri:arrow-right-s-line" />
           </NuxtLink>
         </div>
-      </nav>
+      </nav> -->
     </div>
   </div>
 </template>
