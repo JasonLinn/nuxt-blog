@@ -66,6 +66,8 @@
                 'stickerId': '52002736',
                 'stickerPackageId': '11537',
             }
-        });
+        }).then(res =>{
+            alert('發送成功!')
+        }).catch((error) => alert('發送失敗!請洽工程人員，錯誤代碼:'+ error));
     }
 </script>
