@@ -10,7 +10,7 @@
 
 <script setup>
     import liff from "@line/liff";
-    let id = '5555555';
+    let userId = ref('xxxxxx');
     let text =
             '聯絡人：林小明\n' +
             'LINE:abc123\n' +
@@ -22,23 +22,23 @@
             '希望民宿設備：麻將\n' +
             '住宿預算：50000'
     onMounted(async () => {
-    try {
-      await liff.init({ liffId: "2005661804-pZRYaLm6" }); // Use own liffId
-      await liff.getProfile().then(profile => {
-        if (!liff.isLoggedIn()) {
-          return;
-        }
-        // 拿取profile
-        document.getElementById('userId').innerHTML = profile.userId
-        id = profile.userId;
-        // displayName.value = profile.displayName
-        imgUrl = profile.pictureUrl
-        // document.getElementById('statusMessage').innerHTML = profile.statusMessage
-            })
-        }  catch (err) {
-            console.log(`liff.state init error ${err}`);
-        }
-        })
+        try {
+        await liff.init({ liffId: "2005661804-pZRYaLm6" }); // Use own liffId
+        await liff.getProfile().then(profile => {
+            if (!liff.isLoggedIn()) {
+            return;
+            }
+            // 拿取profile
+            document.getElementById('userId').innerHTML = profile.userId
+            userId = profile.userId;
+            // displayName.value = profile.displayName
+            imgUrl = profile.pictureUrl
+            // document.getElementById('statusMessage').innerHTML = profile.statusMessage
+                })
+            }  catch (err) {
+                console.log(`liff.state init error ${err}`);
+            }
+    })
 
     const sentNotify = () => {
         alert(123)
@@ -62,7 +62,7 @@
                 "imageThumbnail": "https//" + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'
             },
             "query": {
-                'message':  '\n【~~訂單來囉~~】\n' + text + "\n\n點連結以回覆訂單: " + JSON.stringify('https://nuxt-blog-swart.vercel.app/reply?id=' + 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a'),
+                'message':  '\n【~~訂單來囉~~】\n' + text + "\n\n點連結以回覆訂單: " + JSON.stringify('https://nuxt-blog-swart.vercel.app/reply?id=' + userId),
                 // "imageThumbnail": "https//" + id,
                 'stickerId': '52002736',
                 'stickerPackageId': '11537',
