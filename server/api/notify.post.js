@@ -12,6 +12,8 @@ export default defineEventHandler(async (event) => {
             "message": 123
         }
 
-    })
+    }).then(res =>{
+        alert('發送成功!')
+    }).catch((error) => console.log(error, 'rrreeeeee'))
     // useFetch('https://notify-api.line.me/api/notify', {});
 })

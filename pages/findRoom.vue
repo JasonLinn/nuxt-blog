@@ -41,7 +41,6 @@
     })
 
     const sentNotify = () => {
-        alert(123)
         //群組權杖
         const groupToken = 'b6d9ktVwcCUxOAs0df5WsC5t0wi8LRYDsnQtqk3G7rU'
         useFetch('/api/notify', {
