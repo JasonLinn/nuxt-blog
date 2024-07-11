@@ -1,5 +1,3 @@
-
-import liff from "@line/liff";
 import { defineStore } from "pinia";
 import fetchUser from "../server/utils/fetchUser";
 

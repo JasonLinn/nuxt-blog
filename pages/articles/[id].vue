@@ -335,7 +335,6 @@ const getCupon = () => {
       }
       ])
       .then(res => {
-        alert(res, 'ssssss')
         window.alert('成功領取優惠券!')
         liff.getProfile().then(profile => {
           if (!liff.isLoggedIn()) {

@@ -7,8 +7,10 @@
           name: 'index'
         }">全</NuxtLink>
       </li> -->
-      <li v-for="cate in category" class="category-item"
-      :class="[currentCate == cate.id ? 'active' : '']">
+      <li
+      v-for="cate in category" class="category-item"
+      :class="[currentCate == cate.id ? 'active' : '']"
+      >
         <NuxtLink
           :to="{
             query: {
@@ -22,21 +24,21 @@
       <input type="text" class="searchInput" placeholder="請輸入優惠券名稱" v-model="searchText">
     </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
-      <div v-if="pending">
+      <div v-if="couponObject.pending">
         <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
       </div>
       <template v-else>
-        <div v-if="error">
+        <div v-if="couponObject.error">
           <span class="text-gray-500">發生了一點錯誤，請稍後再嘗試</span>
-          <p class="my-2 text-rose-500">{{ error }}</p>
+          <p class="my-2 text-rose-500">{{ couponObject.error }}</p>
         </div>
-        <div v-else-if="!articlesResponse || articlesResponse.items.length === 0">
+        <div v-else-if="!couponObject.data || couponObject?.data?.items.length === 0">
           <span class="text-gray-500">目前尚無最新優惠券</span>
         </div>
         <div v-else class="md:border-l md:border-gray-100">
           <div class="row">
             <article
-              v-for="article in articlesResponse.items"
+              v-for="article in couponObject.data.items"
               :key="article.id"
               class="cupon col-md-3"
             >
@@ -191,23 +193,33 @@
 
 <script setup>
 import { category } from '~/utils/category';
+import useCouponStore from "~~/store/coupon";
 // const handleLogout = store.resetUser;
 
 const route = useRoute()
 const currentPage = computed(() => parseInt(route?.query?.page) || 1)
 const currentCate = computed(() => route?.query?.cate)
 const searchText = ref('')
-const {
-  pending,
-  data: articlesResponse,
-  error
-} = await useFetch('/api/articles', {
-  query: {
-    category: currentCate,
-    page: currentPage,
-    pageSize: 10
-  }
-})
+const store = useCouponStore();
+store.fetchAndSetCoupon()
+// const {
+//   pending,
+//   data,
+//   error
+// } = computed(() => JSON.parse(JSON.stringify(store.getCouponData)));
+
+let couponObject = computed(() =>store.getCouponData)
+// const {
+//   pending,
+//   data: articlesResponse,
+//   error
+// } = await useFetch('/api/articles', {
+//   query: {
+//     category: currentCate,
+//     page: currentPage,
+//     pageSize: 10
+//   }
+// })
 
 const date2LocaleString = (date) => {
   return new Date(date).toLocaleString('zh-TW')
