@@ -191,6 +191,7 @@
 
 <script setup>
 import { category } from '~/utils/category';
+// const handleLogout = store.resetUser;
 
 const route = useRoute()
 const currentPage = computed(() => parseInt(route?.query?.page) || 1)

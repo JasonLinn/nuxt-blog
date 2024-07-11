@@ -79,31 +79,37 @@
 <script setup>
 import { ref } from 'vue'
 import liff from "@line/liff";
+import useStore from "~~/store";
 
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
-const displayName = ref('nobody')
 const imgUrl = ref('')
 
-onMounted(async () => {
-    try {
-      await liff.init({ liffId: "2005661804-zld9QenV" }); // Use own liffId
-      await liff.getProfile().then(profile => {
-        if (!liff.isLoggedIn()) {
-          return;
-        }
-        insertUser(profile)
-        // 拿取profile
-        // document.getElementById('userId').innerHTML = profile.userId
-        displayName.value = profile.displayName
-        imgUrl = profile.pictureUrl
-        // document.getElementById('statusMessage').innerHTML = profile.statusMessage
-      })
-  }  catch (err) {
-      console.log(`liff.state init error ${err}`);
-  }
+const store = useStore();
+const displayName = computed(() => store.getUserDisplayName);
+
+onMounted(() => {
+  store.fetchAndSetUser()
 })
+// onMounted(async () => {
+//     try {
+//       await liff.init({ liffId: "2005661804-zld9QenV" }); // Use own liffId
+//       await liff.getProfile().then(profile => {
+//         if (!liff.isLoggedIn()) {
+//           return;
+//         }
+//         insertUser(profile)
+//         // 拿取profile
+//         // document.getElementById('userId').innerHTML = profile.userId
+//         displayName.value = profile.displayName
+//         imgUrl = profile.pictureUrl
+//         // document.getElementById('statusMessage').innerHTML = profile.statusMessage
+//       })
+//   }  catch (err) {
+//       console.log(`liff.state init error ${err}`);
+//   }
+// })
 
 watch(
   data,
@@ -112,29 +118,8 @@ watch(
   },
   {
     immediate: true
-  },
-  displayName,
-  imgUrl
+  }
 )
-
-const insertUser = async (profile) => {
-  console.log(profile, 'iiiiiiii')
-  await $fetch(`/api/user/user`, {
-      method: 'POST',
-        body: {
-          name: profile.displayName,
-          cover: profile.pictureUrl,
-          user_id: profile.userId,
-          coupons: [],
-          msg_times: 0,
-        }
-    })
-    .then((response) => {
-      console.log(response, 'ppppp')
-      // article.value.amount = response.amount
-    })
-    .catch((error) => alert(error))
-}
 
 const handleLogout = () => {
   $fetch('/api/session', {

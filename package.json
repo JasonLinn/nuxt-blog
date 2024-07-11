@@ -27,8 +27,13 @@
     "@line/bot-sdk": "^9.2.2",
     "@line/liff": "^2.23.2",
     "@nuxtjs/ngrok": "^3.0.1",
+    "@pinia/nuxt": "^0.5.1",
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
+    "pinia": "^2.1.7",
     "sass": "^1.77.4"
+  },
+  "overrides": {
+    "vue": "latest"
   }
 }
