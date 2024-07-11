@@ -69,7 +69,7 @@
         >
           登入
         </NuxtLink>
-        <div>Hi, {{ displayName }}, 歡迎登入</div>
+        <div>{{displayName ? `Hi, ${displayName}, 歡迎登入` : '未登入'}}</div>
         <img :src="imgUrl" />
       </div>
     </nav>
