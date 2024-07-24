@@ -165,7 +165,7 @@ const patchUser = async (profile) => {
   await $fetch(`/api/user/coupon`, {
       method: 'PATCH',
         body: {
-          coupon: article.value,
+          coupon: JSON.stringify(article.value),
           user: profile,
         }
     })
