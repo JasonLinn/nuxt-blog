@@ -30,7 +30,7 @@
                             <span class="">{{ JSON.parse(coupon).title }}</span>
                         </h2>
                         <span class="cupon-category">
-                            {{ hadleCategory(JSON.parse(coupon).category) }}
+                            <!-- {{ hadleCategory(JSON.parse(coupon).category) }} -->
                         </span>
                         <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                             {{ date2LocaleString(JSON.parse(coupon).updated_at) }}
