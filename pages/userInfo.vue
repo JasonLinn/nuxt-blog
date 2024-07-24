@@ -9,7 +9,7 @@
                     {{ JSON.parse(coupon).id }}
                 </div>
                 <article
-                    v-for="article in user.coupons"
+                    v-for="coupon in user.coupons"
                     :key="JSON.parse(coupon).id"
                     class="cupon col-md-3"
                     >
