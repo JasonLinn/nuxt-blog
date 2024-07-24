@@ -7,6 +7,7 @@
             <div v-for="coupon in coupons">
                 {{ JSON.parse(coupon).id }}
             </div>
+            {{userId}}
         </div>
     </div>
 </template>
