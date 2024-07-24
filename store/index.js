@@ -24,6 +24,7 @@ const useStore = defineStore("useStore", {
     getUserData: (state) => state.userData,
     getUserDisplayName: (state) => state.userData?.displayName,
     getUserId: (state) => state.userData?.userId,
+    getUserCoupons: (state) => state.userData?.coupons,
     getUserCover: (state) => state.userData?.pictureUrl,
     getUserStatus: (state) => state.userData?.statusMessage,
   },
