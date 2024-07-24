@@ -8,8 +8,49 @@
                 <div v-for="coupon in user.coupons">
                     {{ JSON.parse(coupon).id }}
                 </div>
-                {{userId}}
-                {{ user.coupons }}
+                <article
+                    v-for="article in user.coupons"
+                    :key="JSON.parse(coupon).id"
+                    class="cupon col-md-3"
+                    >
+                    <NuxtLink
+                        class=""
+                        :to="{
+                        name: 'articles-id',
+                        params: {
+                            id: JSON.parse(coupon).id
+                        }
+                        }"
+                    >
+                        <div class="cupon-img-wrapper">
+                        <img :src="JSON.parse(coupon).cover" class="cupon-img"/>
+                        </div>
+                        <div class="cupon-info">
+                        <h2 class="cupon-title">
+                            <span class="">{{ JSON.parse(coupon).title }}</span>
+                        </h2>
+                        <span class="cupon-category">
+                            {{ hadleCategory(JSON.parse(coupon).category) }}
+                        </span>
+                        <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
+                            {{ date2LocaleString(JSON.parse(coupon).updated_at) }}
+                        </time> -->
+                        <p class="index-cupon-text">
+                            {{ JSON.parse(coupon).content.replace(/\n/g, ' ').substring(0, 300) }}
+                        </p>
+                        </div>
+                        <!-- <span
+                        aria-hidden="true"
+                        class="mt-4 flex items-center text-sm font-medium text-emerald-500"
+                        >
+                        看更多
+                        <Icon name="ri:arrow-right-s-line" />
+                        </span> -->
+                    </NuxtLink>
+                    <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
+                        {{ date2LocaleString(article.updated_at) }}
+                    </time> -->
+                    </article>
             </div>
         </div>
     </div>
