@@ -15,5 +15,13 @@
 import useStore from "~~/store";
 const store = useStore();
 const userName = computed(() => store.getUserName);
-const coupons = computed(() => store.getUserCoupons);
+const userId = computed(() => store.getUserId)
+const { pending, data: coupons, error } = await useFetch(`/api/user/${userId}`)
+const items = [
+  "{\"id\":35,\"title\":\"農場\",\"category\":\"buy\",\"content\":\"GOOD\",\"cover\":\"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg\",\"amount\":9952,\"used_times\":0,\"hash\":[\"\"],\"updated_at\":\"2024-07-24T06:05:16.617Z\"}",
+  "{\"id\":35,\"title\":\"農場\",\"category\":\"buy\",\"content\":\"GOOD\",\"cover\":\"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg\",\"amount\":9951,\"used_times\":0,\"hash\":[\"\"],\"updated_at\":\"2024-07-24T06:21:04.378Z\"}"
+]
+items.map((item)=> {
+    console.log(JSON.parse(item).title, 'eeeeeeeeeeee')
+})
 </script>
