@@ -5,7 +5,7 @@
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
             <div class="btn btn-info" @click="sentNotify">送出</div>
             <div v-for="coupon in coupons">
-                {{ coupon }}
+                {{ JSON.parse(coupon) }}
             </div>
         </div>
     </div>
