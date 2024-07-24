@@ -4,11 +4,13 @@
             <div id="userId">{{userName}}</div>
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
             <div class="btn btn-info" @click="sentNotify">送出</div>
-            <div v-for="coupon in coupons">
-                {{ JSON.parse(coupon).id }}
+            <div v-if="coupons">
+                <div v-for="coupon in coupons">
+                    {{ JSON.parse(coupon).id }}
+                </div>
+                {{userId}}
+                {{ coupons }}
             </div>
-            {{userId}}
-            {{ coupons }}
         </div>
     </div>
 </template>
