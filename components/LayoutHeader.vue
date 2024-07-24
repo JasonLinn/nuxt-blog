@@ -11,6 +11,15 @@
             <h1 class="index-title">電子化票券</h1>
           </div>
         </NuxtLink>
+        <NuxtLink
+          :to="{
+            name: 'userInfo'
+          }"
+        >
+          <div class="flex items-center justify-between">
+            <p class="">會員專區</p>
+          </div>
+        </NuxtLink>
         <div v-if="userInfo" class="user-info group relative">
           <div for="avatar" class="cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
             <img
