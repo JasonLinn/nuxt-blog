@@ -5,7 +5,7 @@
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
             <h2>已領優惠券</h2>
             <div v-if="user">
-                <div v-if="!user.coupons.length">尚未領取優惠券</div>
+                <div v-if="!user.coupons?.length">尚未領取優惠券</div>
                 <article
                     v-for="coupon in user.coupons"
                     :key="JSON.parse(coupon).id"
@@ -68,3 +68,44 @@ items.map((item)=> {
     console.log(JSON.parse(item).title, 'eeeeeeeeeeee')
 })
 </script>
+
+<style lang="scss" scoped>
+.cupon-wrapper {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.cupon-wrapper:hover {
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+.cupon-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.cupon-info {
+  padding: 5px 8px 15px 8px;
+  background-color: #fff;
+}
+.cupon-info:hover {
+  box-shadow: #000;
+}
+.cupon-img-wrapper {
+  height: 200px;
+  overflow: hidden;
+}
+.cupon-img {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cupon-category {
+  display: inline-block;
+  font-size: 14px;
+  padding: 3px;
+  color: rgb(117, 117, 117);
+  background-color: rgb(245, 245, 245);
+  margin-bottom: 10px;
+}
+</style>
