@@ -3,11 +3,9 @@
         <div class="row">
             <div id="userId">{{userName}}</div>
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
-            <div class="btn btn-info" @click="sentNotify">送出</div>
+            <h2>已領優惠券</h2>
             <div v-if="user">
-                <div v-for="coupon in user.coupons">
-                    {{ JSON.parse(coupon).id }}
-                </div>
+                <div v-if="!user.coupons.length">尚未領取優惠券</div>
                 <article
                     v-for="coupon in user.coupons"
                     :key="JSON.parse(coupon).id"
