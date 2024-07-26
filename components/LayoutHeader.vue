@@ -16,9 +16,9 @@
             name: 'userInfo'
           }"
         >
-          <div class="flex items-center justify-between">
+          <!-- <div class="flex items-center justify-between">
             <p class="">會員專區</p>
-          </div>
+          </div> -->
         </NuxtLink>
         <div v-if="userInfo" class="user-info group relative">
           <div for="avatar" class="cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
