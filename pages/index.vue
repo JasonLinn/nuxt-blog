@@ -217,7 +217,6 @@
   font-size: 14px;
 }
 .tag-list {
-  margin-left: -3px;
 }
 .hot-tag {
   background-color: #92DEE4;
