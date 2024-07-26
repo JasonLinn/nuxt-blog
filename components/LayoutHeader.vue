@@ -160,6 +160,8 @@ const toggleEdit = () => {
   overflow: hidden;
 }
 .index-nav {
+  width: 100%;
+  display: inline-grid;
 }
 .nav-wrapper {
   display: flex;
