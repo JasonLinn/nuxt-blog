@@ -22,9 +22,9 @@
     </ul> -->
     <div class="col-12">
       <h2 class="tag-title">
-        熱門標籤:
       </h2>
       <div class="tag-list">
+        熱門標籤:
         <span class="hot-tag" v-for="tag in hotTag" @click="clickTag">
           {{ tag }}
         </span>

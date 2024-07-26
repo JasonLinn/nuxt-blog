@@ -7,9 +7,10 @@
             name: 'index'
           }"
         >
-          <div class="flex items-center justify-between">
+        <img src="logo.png" width="140" alt="宜蘭旅遊通">
+          <!-- <div class="flex items-center justify-between">
             <h1 class="index-title">宜蘭旅遊通</h1>
-          </div>
+          </div> -->
         </NuxtLink>
         <NuxtLink
           :to="{
