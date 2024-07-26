@@ -21,14 +21,20 @@
       </li>
     </ul> -->
     <div class="col-12">
-      熱門標籤:
+      <h2 class="tag-title">
+        熱門標籤:
+      </h2>
       <div class="tag-list">
         <span class="hot-tag" v-for="tag in hotTag" @click="clickTag">
           {{ tag }}
         </span>
       </div>
-
-      <input type="text" class="searchInput" placeholder="請輸入優惠券名稱" v-model="searchText">
+      <div class="search">
+        <input type="text" class="searchInput" placeholder="請輸入優惠券名稱" v-model="searchText">
+        <svg  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search search-icon" viewBox="0 0 16 16">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+        </svg>
+      </div>
     </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
       <div v-if="couponObject.pending">
@@ -192,10 +198,23 @@
 .index-cupon-text {
   color: #272727;
 }
+.search {
+  position: relative;
+}
 .searchInput {
   margin-bottom: 20px;
   font-size: 13px;
   padding: 5px;
+  width: 100%;
+}
+.search-icon {
+  position: absolute;
+  right: 8px;
+  top: 7px;
+}
+.tag-title {
+  font-size: 14px;
+  font-weight: bold;
 }
 .tag-list {
   margin-left: -3px;
