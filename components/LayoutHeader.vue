@@ -7,7 +7,7 @@
             name: 'index'
           }"
         >
-        <img src="logo.png" width="140" alt="宜蘭旅遊通">
+        <img src="/logo.png" width="140" alt="宜蘭旅遊通">
           <!-- <div class="flex items-center justify-between">
             <h1 class="index-title">宜蘭旅遊通</h1>
           </div> -->
