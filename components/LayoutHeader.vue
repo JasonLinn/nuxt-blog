@@ -1,7 +1,7 @@
 <template>
   <header class="flex w-full justify-center container">
     <nav class="index-nav flex w-full max-w-7xl items-center justify-between px-6 py-2">
-      <div class="">
+      <div class="nav-wrapper">
         <NuxtLink
           :to="{
             name: 'index'
@@ -12,15 +12,17 @@
             <h1 class="index-title">宜蘭旅遊通</h1>
           </div> -->
         </NuxtLink>
-        <NuxtLink
+        <div class="user-status">{{displayName ? `Hi, ${displayName}` : '未登入'}}</div>
+      </div>
+        <!-- <NuxtLink
           :to="{
             name: 'userInfo'
           }"
         >
-          <!-- <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between">
             <p class="">會員專區</p>
-          </div> -->
-        </NuxtLink>
+          </div>
+        </NuxtLink> -->
         <div v-if="userInfo" class="user-info group relative">
           <div for="avatar" class="cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
             <img
@@ -80,9 +82,7 @@
         >
           登入
         </NuxtLink> -->
-        <div class="user-status">{{displayName ? `Hi, ${displayName}` : '未登入'}}</div>
         <img :src="imgUrl" />
-      </div>
     </nav>
   </header>
 </template>
@@ -160,10 +160,11 @@ const toggleEdit = () => {
   overflow: hidden;
 }
 .index-nav {
-  position: relative;
+}
+.nav-wrapper {
   display: flex;
-  width: 100%;
   align-items: center;
+  justify-content: space-between;
 }
 .index-title {
   text-decoration: none;
@@ -192,9 +193,6 @@ const toggleEdit = () => {
   padding: 0;
 }
 .user-status {
-  position: absolute;
-  right: 0;
-  top: 12px;
   font-size: 12px;
 
 }

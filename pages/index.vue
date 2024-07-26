@@ -218,6 +218,8 @@
   font-weight: bold;
 }
 .tag-list {
+  display: flex;
+  align-items: center;
 }
 .hot-tag {
   background-color: #92DEE4;
