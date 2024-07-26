@@ -215,6 +215,7 @@
 .tag-title {
   display: inline-block;
   font-size: 14px;
+  font-weight: bold;
 }
 .tag-list {
 }
