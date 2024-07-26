@@ -39,5 +39,11 @@ export default defineNuxtConfig({
     // '/api/sendMsg' : {
     //     proxy : { to : "https://api.line.me/v2/bot/message/push" , },
     // },
+  },
+  app: {
+    head: {
+      charset: 'utf-8',
+      viewport: 'width=device-width, initial-scale=1',
+    }
   }
 });
