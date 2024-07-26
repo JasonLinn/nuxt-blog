@@ -21,10 +21,10 @@
       </li>
     </ul> -->
     <div class="col-12">
-      <h2 class="tag-title">
-      </h2>
       <div class="tag-list">
-        熱門標籤:
+        <h2 class="tag-title">
+          熱門:
+        </h2>
         <span class="hot-tag" v-for="tag in hotTag" @click="clickTag">
           {{ tag }}
         </span>
@@ -213,8 +213,8 @@
   top: 7px;
 }
 .tag-title {
+  display: inline-block;
   font-size: 14px;
-  font-weight: bold;
 }
 .tag-list {
   margin-left: -3px;
