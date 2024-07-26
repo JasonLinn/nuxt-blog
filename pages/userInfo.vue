@@ -14,11 +14,10 @@
                     <NuxtLink
                         class=""
                         :to="{
-                        name: 'articles-id',
-                        params: {
-                            id: JSON.parse(coupon).id
-                        }
-                        }"
+                          name: 'articles-id',
+                          params: {
+                              id: JSON.parse(coupon).id
+                        }}"
                     >
                         <div class="cupon-img-wrapper">
                         <img :src="JSON.parse(coupon).cover" class="cupon-img"/>

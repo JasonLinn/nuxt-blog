@@ -8,7 +8,7 @@
           }"
         >
           <div class="flex items-center justify-between">
-            <h1 class="index-title">電子化票券</h1>
+            <h1 class="index-title">宜蘭旅遊通</h1>
           </div>
         </NuxtLink>
         <NuxtLink

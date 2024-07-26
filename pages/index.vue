@@ -8,8 +8,8 @@
         }">全</NuxtLink>
       </li> -->
       <li
-      v-for="cate in category" class="category-item"
-      :class="[currentCate == cate.id ? 'active' : '']"
+        v-for="cate in category" class="category-item"
+        :class="[currentCate == cate.id ? 'active' : '']"
       >
         <NuxtLink
           :to="{
@@ -21,6 +21,13 @@
       </li>
     </ul>
     <div class="col-12">
+      熱門標籤:
+      <div class="tag-list">
+        <span class="hot-tag" v-for="tag in hotTag" @click="clickTag">
+          {{ tag }}
+        </span>
+      </div>
+
       <input type="text" class="searchInput" placeholder="請輸入優惠券名稱" v-model="searchText">
     </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
@@ -129,7 +136,7 @@
 .category {
   display: flex;
   flex-direction: row;
-  font-size: 30px;
+  font-size: 22px;
   margin: 20px 0 20px 0;
   background-color: #fff;
   width: fit-content;
@@ -186,8 +193,20 @@
   color: #272727;
 }
 .searchInput {
-  height: 30px;
   margin-bottom: 20px;
+  font-size: 13px;
+  padding: 5px;
+}
+.tag-list {
+  margin-left: -3px;
+}
+.hot-tag {
+  background-color: #a7d9ff;
+  border-radius: 6px;
+  padding: 5px;
+  margin: 10px 3px;
+  font-size: 12px;
+  display: inline-block;
 }
 </style>
 
@@ -202,6 +221,11 @@ const currentCate = computed(() => route?.query?.cate)
 const searchText = ref('')
 const store = useCouponStore();
 store.fetchAndSetCoupon()
+const hotTag = [
+  '農場',
+  '觀光工廠',
+  '美食'
+]
 // const {
 //   pending,
 //   data,
@@ -229,5 +253,9 @@ const hadleCategory = (cate) => {
   const oringal = category.find((item) => item.id == cate)
 
   return oringal ? oringal.name : '未分類'
+}
+
+const clickTag = (e) => {
+  searchText.value = e.target.textContent
 }
 </script>
