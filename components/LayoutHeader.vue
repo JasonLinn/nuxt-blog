@@ -71,14 +71,15 @@
             </div>
           </div>
         </div>
-        <NuxtLink
+        <!-- 管理員登入入口 -->
+        <!-- <NuxtLink
           v-else
           class="login px-3 py-2"
           to="/login"
         >
           登入
-        </NuxtLink>
-        <div>{{displayName ? `Hi, ${displayName}, 歡迎登入` : '未登入'}}</div>
+        </NuxtLink> -->
+        <div class="user-status">{{displayName ? `Hi, ${displayName}` : '未登入'}}</div>
         <img :src="imgUrl" />
       </div>
     </nav>
@@ -188,5 +189,12 @@ const toggleEdit = () => {
   height: 30px;
   font-size: 14px;
   padding: 0;
+}
+.user-status {
+  position: absolute;
+  right: 0;
+  top: 12px;
+  font-size: 12px;
+
 }
 </style>

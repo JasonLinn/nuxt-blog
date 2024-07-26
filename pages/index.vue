@@ -201,12 +201,13 @@
   margin-left: -3px;
 }
 .hot-tag {
-  background-color: #a7d9ff;
+  background-color: #92DEE4;
   border-radius: 6px;
   padding: 5px;
   margin: 10px 3px;
   font-size: 12px;
   display: inline-block;
+  color: #222222;
 }
 </style>
 
