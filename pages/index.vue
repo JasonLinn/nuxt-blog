@@ -1,12 +1,12 @@
 <template>
   <div class="flex container">
-    <ul class="category flex w-full max-w-4xl">
-      <!-- <li class="category-item" :class="[!currentCate ? 'active' : '']">
+    <!-- <ul class="category flex w-full max-w-4xl">
+      <li class="category-item" :class="[!currentCate ? 'active' : '']">
         <NuxtLink
         :to="{
           name: 'index'
         }">全</NuxtLink>
-      </li> -->
+      </li>
       <li
         v-for="cate in category" class="category-item"
         :class="[currentCate == cate.id ? 'active' : '']"
@@ -19,7 +19,7 @@
           }"
         >{{ cate.name }}</NuxtLink>
       </li>
-    </ul>
+    </ul> -->
     <div class="col-12">
       熱門標籤:
       <div class="tag-list">
