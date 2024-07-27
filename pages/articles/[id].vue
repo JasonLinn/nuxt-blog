@@ -75,7 +75,7 @@
     </template>
   </div>
 </template>
-<style>
+<style scoped>
 .cupon-text {
   overflow-wrap: break-word;
   margin-bottom: 30px;

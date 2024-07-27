@@ -70,7 +70,7 @@ items.map((item)=> {
 
 <style lang="scss" scoped>
 .cupon-wrapper {
-  border-radius: 10px;
+  // border-radius: 10px;
   overflow: hidden;
   margin-bottom: 20px;
 }
@@ -98,6 +98,7 @@ items.map((item)=> {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 10px;
 }
 .cupon-category {
   display: inline-block;

@@ -73,7 +73,8 @@
                     <span class="">{{ article.title }}</span>
                   </h2>
                   <span class="cupon-category">
-                    {{ hadleCategory(article.category) }}
+                    <!-- {{ hadleCategory(article.category) }} -->
+                      {{ article.hash[0] ? '序號' : '免費' }}
                   </span>
                   <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                     {{ date2LocaleString(article.updated_at) }}
@@ -158,20 +159,18 @@
 .cupon {
 }
 .cupon-wrapper {
-  border-radius: 10px;
   overflow: hidden;
   margin-bottom: 20px;
 }
 .cupon-wrapper:hover {
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  // box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 .cupon-title {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 16px;
   margin-bottom: 5px;
 }
 .cupon-info {
-  padding: 5px 8px 15px 8px;
+  padding: 13px 8px 15px 8px;
   background-color: #fff;
 }
 .cupon-info:hover {
@@ -186,17 +185,21 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 10px;
 }
 .cupon-category {
   display: inline-block;
   font-size: 14px;
   padding: 3px;
-  color: rgb(117, 117, 117);
-  background-color: rgb(245, 245, 245);
+  // color: rgb(117, 117, 117);
+  color: #36a1fa;
+  background-color: rgba(100,179,244,.1);
   margin-bottom: 10px;
+  margin-left: -2px;
 }
 .index-cupon-text {
   color: #272727;
+  font-size: 14px;
 }
 .search {
   position: relative;
