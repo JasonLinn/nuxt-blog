@@ -207,6 +207,7 @@ const getCupon = () => {
   console.log(article, 'aaaa')
   let cupon = {
         "type": "bubble",
+        "size": "giga",
         "hero": {
           "type": "image",
           "url": article.value.cover,
