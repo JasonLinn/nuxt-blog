@@ -13,9 +13,10 @@
           <img :src="article.cover" class="cupon-img" />
         </div>
         <div class="cupon-time my-2 flex flex-col justify-between sm:my-0 sm:flex-row sm:items-center">
-          <time class="my-2 text-sm text-gray-400">
+          <!-- <time class="my-2 text-sm text-gray-400">
             {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
-          </time>
+          </time> -->
+          <div>推薦店家:{{ referralStore?.name || '無' }}</div>
           <div v-if="userInfo?.id === 1" class="flex-rowx flex gap-3">
             <NuxtLink
               class="flex items-center text-sm text-gray-400 hover:font-semibold hover:text-emerald-500"
@@ -101,6 +102,8 @@
 
 <script setup>
 import liff from "@line/liff";
+import useReferralStore from "~/store/referral";
+import { referral } from "~/utils/referral"
 const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
 let modal;
@@ -109,6 +112,15 @@ const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
 const showModal = () => {
   modal.show();
 };
+const store = useReferralStore()
+const referralStore = referral.find((ref) => {
+  if (!store.getReferral?.referral) {
+    return null
+  }
+  console.log(ref, store.getReferral.referral)
+  return ref.code == store.getReferral.referral
+})
+
 
 onMounted(async () => {
   modal = $bootstrap.modal(modalRef.value);
@@ -122,7 +134,7 @@ onBeforeUnmount(() => {
 const route = useRoute()
 
 const { pending, data: article, error } = await useFetch(`/api/articles/${route.params.id}`)
-
+article.value.referral = referralStore
 if (error.value) {
   console.log(error.value)
   throw createError({ statusCode: 404 })

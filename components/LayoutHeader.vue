@@ -91,18 +91,23 @@
 import { ref } from 'vue'
 import liff from "@line/liff";
 import useStore from "~~/store";
+import useReferralStore from '~~/store/referral';
 
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
 const imgUrl = ref('')
+const route = useRoute()
 
 const store = useStore();
 const displayName = computed(() => store.getUserDisplayName);
+const referral = useReferralStore();
 
 onMounted(() => {
+  referral.setReferral(route.query)
   store.fetchAndSetUser()
 })
+await console.log(referral.getReferral.referral, 'ccccc')
 // onMounted(async () => {
 //     try {
 //       await liff.init({ liffId: "2005661804-zld9QenV" }); // Use own liffId

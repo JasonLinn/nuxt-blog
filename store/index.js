@@ -14,6 +14,7 @@ const useStore = defineStore("useStore", {
     },
     resetUser() {
       this.userData = initState.userData;
+      // return this.userData
     },
     async fetchAndSetUser() {
       const user = await fetchUser();

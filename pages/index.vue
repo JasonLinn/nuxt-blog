@@ -167,7 +167,6 @@
 }
 .cupon-title {
   font-size: 16px;
-  margin-bottom: 5px;
 }
 .cupon-info {
   padding: 13px 8px 15px 8px;
@@ -194,7 +193,7 @@
   // color: rgb(117, 117, 117);
   color: #36a1fa;
   background-color: rgba(100,179,244,.1);
-  margin-bottom: 10px;
+  margin: 10px 0;
   margin-left: -2px;
 }
 .index-cupon-text {
