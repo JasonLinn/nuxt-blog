@@ -104,10 +104,9 @@ const displayName = computed(() => store.getUserDisplayName);
 const referral = useReferralStore();
 
 onMounted(() => {
-  referral.setReferral(route.query)
   store.fetchAndSetUser()
+  referral.setReferral(route.query)
 })
-await console.log(referral.getReferral.referral, 'ccccc')
 // onMounted(async () => {
 //     try {
 //       await liff.init({ liffId: "2005661804-zld9QenV" }); // Use own liffId
