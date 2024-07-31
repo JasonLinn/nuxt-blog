@@ -45,6 +45,10 @@
         <div class="cupon-text">
           {{ article.content }}
         </div>
+        <div v-if="article.isReferral">
+          輸入推薦代碼:
+          <input type="text" v-model="referralCode">
+        </div>
         <div class="cupon-amount">
           剩餘數量: {{ article.amount }}
         </div>
@@ -66,6 +70,7 @@
           </div>
         </div>
       </div>
+      <!-- modal end -->
       <button v-show="article.amount && article.hash[0]" type="button" class="btn btn-success" @click="showModal">
         領取限量優惠券
       </button>
@@ -106,6 +111,7 @@ import useReferralStore from "~/store/referral";
 import { referral } from "~/utils/referral"
 const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
+const referralCode = ref('');
 let modal;
 let hash = []
 const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
@@ -134,7 +140,7 @@ onBeforeUnmount(() => {
 const route = useRoute()
 
 const { pending, data: article, error } = await useFetch(`/api/articles/${route.params.id}`)
-article.value.referral = referralStore
+// article.value.referral = referralStore
 if (error.value) {
   console.log(error.value)
   throw createError({ statusCode: 404 })

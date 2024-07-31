@@ -10,13 +10,14 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   const articleRecord = await pool
-    .query('INSERT INTO "article" ("title", "category", "content", "cover", "amount", "used_times", "hash") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;', [
+    .query('INSERT INTO "article" ("title", "category", "content", "cover", "amount", "used_times", "isReferral", "hash") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;', [
       body.title,
       body.category,
       body.content,
       body.cover,
       body.amount,
       body.usedTimes,
+      body.isReferral,
       body.hash
     ])
     .then((result) => {

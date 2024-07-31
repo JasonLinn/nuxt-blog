@@ -50,6 +50,17 @@
               </section>
               <section class="col-md-12 edit-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
+                  是否允許推薦店家：
+                </label>
+                <div class="mt-1">
+                  <input type="radio" id="referralTrue" value="true" v-model="isReferral">
+                  <label for="referralTrue">是</label>
+                  <input type="radio" id="referralFalse" value="false" v-model="isReferral">
+                  <label for="referralFalse">否</label>
+                </div>
+              </section>
+              <section class="col-md-12 edit-part">
+                <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
                   序號：
                 </label>
                 <div class="mt-1">
@@ -161,6 +172,7 @@ const articleData = reactive({
   usedTimes: 0,
   hash: '',
 })
+const isReferral = ref(false)
 
 const handleSubmit = async () => {
   await $fetch('/api/articles', {
@@ -172,6 +184,7 @@ const handleSubmit = async () => {
       cover: articleData.cover,
       amount: articleData.amount,
       usedTimes: articleData.usedTimes,
+      isReferral: isReferral.value,
       hash: articleData.hash.split(',')
     }
   })
