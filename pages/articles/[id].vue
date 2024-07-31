@@ -47,7 +47,8 @@
         </div>
         <div v-if="article.isReferral">
           輸入推薦代碼:
-          <input type="text" v-model="referralCode">
+          <input type="text" class="fererral-input" v-model="referralCode">
+          <div class="btn fererral-comfirm" @click="checkReferral">代入</div>
         </div>
         <div class="cupon-amount">
           剩餘數量: {{ article.amount }}
@@ -103,6 +104,17 @@
   color: #666;
   margin-bottom: 10px;
 }
+.fererral-input{
+  width: 100px;
+}
+.fererral-comfirm {
+  /* height: 24px; */
+  font-size: 12px;
+  color: #fff;
+  padding: 3px;
+  margin-left: 15px;
+  background-color: #ff9742;
+}
 </style>
 
 <script setup>
@@ -119,13 +131,14 @@ const showModal = () => {
   modal.show();
 };
 const store = useReferralStore()
-const referralStore = referral.find((ref) => {
-  if (!store.getReferral?.referral) {
-    return null
-  }
-  console.log(ref, store.getReferral.referral)
-  return ref.code == store.getReferral.referral
-})
+let referralStore = ref({})
+// const referralStore = referral.find((ref) => {
+//   if (!store.getReferral?.referral) {
+//     return null
+//   }
+//   console.log(ref, store.getReferral.referral)
+//   return ref.code == store.getReferral.referral
+// })
 
 
 onMounted(async () => {
@@ -180,6 +193,8 @@ const sendPatch = async () => {
 }
 
 const patchUser = async (profile) => {
+  article.value.referral = referralStore
+
   await $fetch(`/api/user/coupon`, {
       method: 'PATCH',
         body: {
@@ -190,6 +205,17 @@ const patchUser = async (profile) => {
     .then((response) => {
     })
     .catch((error) => alert(error))
+}
+
+const checkReferral = () => {
+  referralStore = referral.find((ref) => {
+      return ref.code == referralCode.value
+  })
+  if (referralStore) {
+    alert('成功代入:' + referralStore?.name)
+  } else {
+    alert('代碼錯誤')
+  }
 }
 
 const handleHashRecive = () => {
@@ -210,7 +236,7 @@ const getCupon = () => {
   // if (!liff.isLoggedIn()) {
   //   return;
   // }
-  console.log(article, 'aaaa')
+  console.log(article, referralStore, 'aaaa')
   let cupon = {
         "type": "bubble",
         "size": "giga",
