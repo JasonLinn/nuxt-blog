@@ -308,7 +308,7 @@ const getCupon = () => {
                       "text": "推薦店家",
                       "color": "#aaaaaa",
                       "size": "sm",
-                      "flex": 1
+                      "flex": 2
                     },
                     {
                       "type": "text",
@@ -329,7 +329,7 @@ const getCupon = () => {
                       "text": "序號",
                       "color": "#aaaaaa",
                       "size": "sm",
-                      "flex": 1
+                      "flex": 2
                     },
                     {
                       "type": "text",
@@ -351,7 +351,7 @@ const getCupon = () => {
                       "text": "說明",
                       "color": "#aaaaaa",
                       "size": "sm",
-                      "flex": 1
+                      "flex": 2
                     },
                     {
                       "type": "text",
