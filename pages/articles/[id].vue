@@ -373,12 +373,15 @@ const getCupon = () => {
           "spacing": "sm",
           "contents": [
             {
+              "type": "separator"
+            },
+            {
               "type": "button",
               "style": "link",
               "height": "sm",
               "action": {
                 "type": "uri",
-                "label": "優惠券說明頁",
+                "label": "優惠券說明",
                 "uri": liffUrl + 'articles/' +article.value.id
               }
             },
