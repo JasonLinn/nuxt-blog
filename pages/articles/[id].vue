@@ -305,6 +305,27 @@ const getCupon = () => {
                   "contents": [
                     {
                       "type": "text",
+                      "text": "推薦店家",
+                      "color": "#aaaaaa",
+                      "size": "sm",
+                      "flex": 1
+                    },
+                    {
+                      "type": "text",
+                      "text": referralStore?.name || '無' ,
+                      "wrap": true,
+                      "color": "#666666",
+                      "size": "sm",
+                      "flex": 5
+                    }
+                  ]
+                },{
+                  "type": "box",
+                  "layout": "baseline",
+                  "spacing": "sm",
+                  "contents": [
+                    {
+                      "type": "text",
                       "text": "序號",
                       "color": "#aaaaaa",
                       "size": "sm",
