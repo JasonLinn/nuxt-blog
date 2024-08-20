@@ -12,17 +12,15 @@
             <h1 class="index-title">宜蘭旅遊通</h1>
           </div> -->
         </NuxtLink>
-        <div class="user-status">{{displayName ? `Hi, ${displayName}` : '未登入'}}</div>
-      </div>
-        <!-- <NuxtLink
-          :to="{
-            name: 'userInfo'
-          }"
+        <!-- <div class="user-status">{{displayName ? `Hi, ${displayName}` : '未登入'}}</div> -->
+        <NuxtLink
+          v-if="displayName"
+          class="get"
+          to="/userInfo"
         >
-          <div class="flex items-center justify-between">
-            <p class="">會員專區</p>
-          </div>
-        </NuxtLink> -->
+          <p class="">查看已領</p>
+        </NuxtLink>
+      </div>
         <div v-if="userInfo" class="user-info group relative">
           <div for="avatar" class="cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
             <img
@@ -89,7 +87,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import liff from "@line/liff";
 import useStore from "~~/store";
 import useReferralStore from '~~/store/referral';
 
@@ -156,6 +153,9 @@ const toggleEdit = () => {
   position: absolute;
   right: 0;
   top: 0;
+}
+.get {
+  font-size: 12px;
 }
 .user-img {
   width: 40px;

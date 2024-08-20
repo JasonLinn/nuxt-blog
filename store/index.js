@@ -18,6 +18,7 @@ const useStore = defineStore("useStore", {
     },
     async fetchAndSetUser() {
       const user = await fetchUser();
+      console.log(user, 'uuuuuuuu')
       this.userData = user;
     },
   },
@@ -27,6 +28,7 @@ const useStore = defineStore("useStore", {
     getUserId: (state) => state.userData?.userId,
     getUserCover: (state) => state.userData?.pictureUrl,
     getUserStatus: (state) => state.userData?.statusMessage,
+    getUserCoupons: (state) => state.userData?.coupons,
   },
 });
 

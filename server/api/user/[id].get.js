@@ -20,6 +20,6 @@ export default defineEventHandler(async (event) => {
       message: '取得LINE ID失敗，請稍候再試'
     })
   }
-  console.log(userRecord, 'ooooooo')
+  // console.log(userRecord, 'ooooooo')
   return userRecord
 })

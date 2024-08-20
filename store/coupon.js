@@ -25,7 +25,6 @@ const useCouponStore = defineStore("useCouponStore", {
     },
     async fetchAndSetCoupon() {
         const url = useRequestURL()
-        console.log(url,'lllll')
         const {
             pending,
             data,

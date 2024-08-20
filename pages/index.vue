@@ -207,7 +207,7 @@
   margin-bottom: 20px;
   font-size: 13px;
   padding: 5px;
-  width: 100%;
+  width: 50%;
 }
 .search-icon {
   position: absolute;

@@ -1,13 +1,13 @@
 <template>
     <div class="container">
         <div class="row">
-            <div id="userId">{{userName}}</div>
+            <!-- <div id="userId">{{coupons}}</div> -->
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
             <h2>已領優惠券</h2>
-            <div v-if="user">
-                <div v-if="!user.coupons?.length">尚未領取優惠券</div>
+            <div v-if="coupons">
+                <div v-if="!coupons?.length">尚未領取優惠券</div>
                 <article
-                    v-for="coupon in user.coupons"
+                    v-for="coupon in coupons"
                     :key="JSON.parse(coupon).id"
                     class="cupon col-md-3"
                     >
@@ -56,16 +56,37 @@
 <script setup>
 import useStore from "~~/store";
 const store = useStore();
-const userName = computed(() => store.getUserName);
+const userName = computed(() => store.getUserDisplayName);
 const userId = store.getUserId
-const { pending, data: user, error } = await useFetch(`/api/user/${userId}`)
+const coupons = computed(() => store.getUserCoupons)
+// const userI = store.getUserInfo
+// const data =''
+// onMounted(() => {
+//   const { pending, data: user, error } = useFetch(`/api/user/${userId}`)
+// })
+console.log(coupons, 'kkkkkkqqqq', userId)
+
 const items = [
   "{\"id\":35,\"title\":\"農場\",\"category\":\"buy\",\"content\":\"GOOD\",\"cover\":\"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg\",\"amount\":9952,\"used_times\":0,\"hash\":[\"\"],\"updated_at\":\"2024-07-24T06:05:16.617Z\"}",
   "{\"id\":35,\"title\":\"農場\",\"category\":\"buy\",\"content\":\"GOOD\",\"cover\":\"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg\",\"amount\":9951,\"used_times\":0,\"hash\":[\"\"],\"updated_at\":\"2024-07-24T06:21:04.378Z\"}"
 ]
-items.map((item)=> {
-    console.log(JSON.parse(item).title, 'eeeeeeeeeeee')
-})
+const fakeUser = {
+  id: 11,
+  name: 'Jason Lin',
+  user_id: 'U6a5aaa9d07c1d3742e19ccbdbe3b9e4a',
+  cover: 'https://profile.line-scdn.net/0hsDb-1A3zLGtPVDyaTipSFD8ELwFsJXV5ZWBlWioGdAknZmxuYjdjXn9dJQh1ZW85ZjE2DXxXJVlDR1sNUQLQX0hkcVpzYGw6YztiiA',
+  coupons: [
+    '{"id":35,"title":"農場","category":"buy","content":"GOOD","cover":"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg","amount":9952,"used_times":0,"hash":[""],"updated_at":"2024-07-24T06:05:16.617Z"}',
+    '{"id":35,"title":"農場","category":"buy","content":"GOOD","cover":"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg","amount":9951,"used_times":0,"hash":[""],"updated_at":"2024-07-24T06:21:04.378Z"}',
+    '{"id":35,"title":"農場","category":"buy","content":"GOOD","cover":"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg","amount":9950,"used_times":0,"hash":[""],"updated_at":"2024-07-24T06:28:24.715Z"}',
+    '{"id":34,"title":"好玩","category":"play","content":"好玩a1","cover":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDF4NhElQATrC2VFZyaEUenGHyU0voLS-s8A&s","amount":1999993,"used_times":0,"hash":["a1","a2"],"updated_at":"2024-07-13T04:27:39.043Z"}',
+  ],
+  msg_times: 0,
+  join_at: "2024-07-24T06:19:34.744Z"
+}
+// user.map((item)=> {
+//     console.log(JSON.parse(item).title, 'kkkkkk')
+// })
 </script>
 
 <style lang="scss" scoped>

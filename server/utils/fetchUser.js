@@ -3,13 +3,14 @@ import liff from "@line/liff";
 const fetchUser = async () => {
     try {
         await liff.init({ liffId: "2005661804-zld9QenV" }); // Use own liffId
-        const user = await liff.getProfile().then(profile => {
+        const user = await liff.getProfile().then(async (profile) => {
           if (!liff.isLoggedIn()) {
             return;
           }
           //寫入DB
-          insertUser(profile)
-
+          await insertUser(profile)
+          //獲取已領Coupon訊息
+          profile.coupons = await getUserCoupons(profile)
           return profile
         })
 
@@ -22,7 +23,6 @@ const fetchUser = async () => {
 
 
   const insertUser = async (profile) => {
-    console.log(profile, 'iiiiiiii')
     await $fetch(`/api/user/user`, {
         method: 'POST',
           body: {
@@ -38,6 +38,14 @@ const fetchUser = async () => {
         // article.value.amount = response.amount
       })
       .catch((error) => alert(error))
+  }
+
+  const getUserCoupons = async (profile) => {
+    return await $fetch(`/api/user/${profile.userId}`)
+    .then((response) => {
+      return response?.coupons
+    })
+    .catch((error) => alert(error))
   }
 
 export default fetchUser;
