@@ -6,7 +6,15 @@
 
 export default defineNuxtConfig({
   css: ['~/assets/scss/main.scss'],
-  modules: ['nuxt-icon', '@nuxtjs/ngrok', '@pinia/nuxt'],
+  modules: [
+    'nuxt-icon',
+    '@nuxtjs/ngrok',
+    '@pinia/nuxt',
+    'nuxt-swiper'
+  ],
+  // swiper: {
+  //   modules: ['navigation', 'pagination', 'effect-creative' ]
+  // },
   vite: {
     css: {
       preprocessorOptions: {
