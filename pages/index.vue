@@ -235,7 +235,7 @@
   align-items: center;
 }
 .hot-tag {
-  background-color: #92DEE4;
+  background-color: #9ef8ff;
   border-radius: 6px;
   padding: 5px;
   margin: 10px 3px;

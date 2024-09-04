@@ -48,7 +48,7 @@
                   />
                 </div>
               </section>
-              <section class="col-md-12 edit-part">
+              <section class="col-md-12 create-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
                   是否允許推薦店家：
                 </label>
@@ -59,7 +59,7 @@
                   <label for="referralFalse">否</label>
                 </div>
               </section>
-              <section class="col-md-12 edit-part">
+              <section class="col-md-12 create-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
                   序號：
                 </label>
