@@ -130,6 +130,9 @@
   </div>
 </template>
 <style>
+.user-info {
+  z-index: 1;
+}
 .create {
   display: flex;
   justify-content: center;
