@@ -261,38 +261,39 @@ const getCupon = () => {
               "weight": "bold",
               "size": "xl"
             },
-            {
-              "type": "box",
-              "layout": "baseline",
-              "margin": "md",
-              "contents": [
-                {
-                  "type": "icon",
-                  "size": "sm",
-                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
-                },
-                {
-                  "type": "icon",
-                  "size": "sm",
-                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
-                },
-                {
-                  "type": "icon",
-                  "size": "sm",
-                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
-                },
-                {
-                  "type": "icon",
-                  "size": "sm",
-                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
-                },
-                {
-                  "type": "icon",
-                  "size": "sm",
-                  "url": "https://developers-resource.landpress.line.me/fx/img/review_gray_star_28.png"
-                }
-              ]
-            },
+            //隱藏無用星星
+            // {
+            //   "type": "box",
+            //   "layout": "baseline",
+            //   "margin": "md",
+            //   "contents": [
+            //     {
+            //       "type": "icon",
+            //       "size": "sm",
+            //       "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
+            //     },
+            //     {
+            //       "type": "icon",
+            //       "size": "sm",
+            //       "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
+            //     },
+            //     {
+            //       "type": "icon",
+            //       "size": "sm",
+            //       "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
+            //     },
+            //     {
+            //       "type": "icon",
+            //       "size": "sm",
+            //       "url": "https://developers-resource.landpress.line.me/fx/img/review_gold_star_28.png"
+            //     },
+            //     {
+            //       "type": "icon",
+            //       "size": "sm",
+            //       "url": "https://developers-resource.landpress.line.me/fx/img/review_gray_star_28.png"
+            //     }
+            //   ]
+            // },
             {
               "type": "box",
               "layout": "vertical",
