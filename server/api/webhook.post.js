@@ -8,12 +8,14 @@ const client = new line.messagingApi.MessagingApiClient({
 });
 
 async function handleEvent (event) {
+  // 需要是訊息
   if (event.type !== 'message' || event.message.type !== 'text') {
     // ignore non-text-message event
     return Promise.resolve(null);
   }
 
   let eventMsg = event.message.text;
+  //echo message
   let flex = {
     type: "flex",
     altText: "宜蘭旅遊通-優惠券",
@@ -31,6 +33,7 @@ async function handleEvent (event) {
       }
     }
   }
+  // 旋轉木馬
   let carousel = {
     type: "carousel",
     contents: [
@@ -176,6 +179,7 @@ async function handleEvent (event) {
       }
     ]
   }
+  // 特定字回覆
   if (eventMsg == '你好') {
     flex.contents.body.contents = [{
       type: 'text',

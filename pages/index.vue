@@ -146,7 +146,7 @@
 
 <style lang="scss" scoped>
 .active {
-  background-color: #ffdfa3;
+  background-color: #ffefd2;
 }
 .category {
   display: flex;
@@ -238,7 +238,7 @@
   align-items: center;
 }
 .hot-tag {
-  background-color: #9ef8ff;
+  background-color: #ffe9ac69;
   border-radius: 6px;
   padding: 5px;
   margin: 10px 3px;
