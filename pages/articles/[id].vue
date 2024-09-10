@@ -348,13 +348,13 @@ const getCupon = () => {
                   "layout": "baseline",
                   "spacing": "sm",
                   "contents": [
-                    {
-                      "type": "text",
-                      "text": "說明",
-                      "color": "#aaaaaa",
-                      "size": "sm",
-                      "flex": 2
-                    },
+                    // {
+                    //   "type": "text",
+                    //   "text": "說明",
+                    //   "color": "#aaaaaa",
+                    //   "size": "sm",
+                    //   "flex": 2
+                    // },
                     {
                       "type": "text",
                       "text": article.value.content,
