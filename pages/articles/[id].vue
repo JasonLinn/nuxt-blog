@@ -245,7 +245,7 @@ const getCupon = () => {
           "type": "image",
           "url": article.value.cover,
           "size": "full",
-          "aspectRatio": "20:13",
+          "aspectRatio": "20:10",
           "aspectMode": "cover",
           "action": {
             "type": "uri",
