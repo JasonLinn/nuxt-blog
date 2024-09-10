@@ -208,6 +208,9 @@
 .index-cupon-text {
   color: #272727;
   font-size: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .search {
   position: relative;
