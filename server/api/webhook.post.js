@@ -25,10 +25,10 @@ async function handleEvent (event) {
         type: "box",
         layout: "vertical",
         contents: [
-          {
-            type: "text",
-            text: eventMsg
-          }
+          // {
+          //   type: "text",
+          //   text: eventMsg
+          // }
         ]
       }
     }
