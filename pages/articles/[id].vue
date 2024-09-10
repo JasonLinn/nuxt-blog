@@ -333,7 +333,7 @@ const getCupon = () => {
                   "type": "box",
                   "layout": "baseline",
                   "spacing": "sm",
-                  "offsetBottom": "md",
+                  "paddingBottom": "md",
                   "contents": [
                     {
                       "type": "text",
@@ -359,7 +359,7 @@ const getCupon = () => {
                   "type": "box",
                   "layout": "baseline",
                   "spacing": "sm",
-                  "offsetTop": "md",
+                  "paddingTop": "md",
                   "contents": [
                     // {
                     //   "type": "text",
