@@ -356,6 +356,9 @@ const getCupon = () => {
                     //   "flex": 2
                     // },
                     {
+                      "type": "separator"
+                    },
+                    {
                       "type": "text",
                       "text": article.value.content,
                       "wrap": true,
