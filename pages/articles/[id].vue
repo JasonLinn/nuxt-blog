@@ -344,6 +344,9 @@ const getCupon = () => {
                   ]
                 },
                 {
+                  "type": "separator"
+                },
+                {
                   "type": "box",
                   "layout": "baseline",
                   "spacing": "sm",
@@ -355,9 +358,6 @@ const getCupon = () => {
                     //   "size": "sm",
                     //   "flex": 2
                     // },
-                    {
-                      "type": "separator"
-                    },
                     {
                       "type": "text",
                       "text": article.value.content,
