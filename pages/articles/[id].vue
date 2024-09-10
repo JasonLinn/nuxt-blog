@@ -260,7 +260,11 @@ const getCupon = () => {
               "type": "text",
               "text": article.value.title,
               "weight": "bold",
-              "size": "xl"
+              "size": "xl",
+              "action": {
+                "type": "uri",
+                "uri": liffUrl + 'articles/' +article.value.id
+              }
             },
             //隱藏無用星星
             // {
@@ -300,6 +304,10 @@ const getCupon = () => {
               "layout": "vertical",
               "margin": "lg",
               "spacing": "sm",
+              "action": {
+                "type": "uri",
+                "uri": liffUrl + 'articles/' +article.value.id
+              },
               "contents": [{
                   "type": "box",
                   "layout": "baseline",
@@ -372,33 +380,33 @@ const getCupon = () => {
             }
           ]
         },
-        "footer": {
-          "type": "box",
-          "layout": "vertical",
-          "spacing": "sm",
-          "contents": [
-            {
-              "type": "separator"
-            },
-            {
-              "type": "button",
-              "style": "link",
-              "height": "sm",
-              "action": {
-                "type": "uri",
-                "label": "優惠券說明",
-                "uri": liffUrl + 'articles/' +article.value.id
-              }
-            },
-            {
-              "type": "box",
-              "layout": "vertical",
-              "contents": [],
-              "margin": "sm"
-            }
-          ],
-          "flex": 0
-        }
+        // "footer": {
+        //   "type": "box",
+        //   "layout": "vertical",
+        //   "spacing": "sm",
+        //   "contents": [
+        //     {
+        //       "type": "separator"
+        //     },
+        //     {
+        //       "type": "button",
+        //       "style": "link",
+        //       "height": "sm",
+        //       "action": {
+        //         "type": "uri",
+        //         "label": "優惠券說明",
+        //         "uri": liffUrl + 'articles/' +article.value.id
+        //       }
+        //     },
+        //     {
+        //       "type": "box",
+        //       "layout": "vertical",
+        //       "contents": [],
+        //       "margin": "sm"
+        //     }
+        //   ],
+        //   "flex": 0
+        // }
       }
 
       liff.sendMessages([
