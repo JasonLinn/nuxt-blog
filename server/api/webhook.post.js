@@ -8,15 +8,16 @@ const client = new line.messagingApi.MessagingApiClient({
 });
 
 async function handleEvent (event) {
+  const noMsg = Promise.resolve(null)
   // 需要是訊息
   if (event.type !== 'message' || event.message.type !== 'text') {
     // ignore non-text-message event
-    return Promise.resolve(null);
+    return noMsg;
   }
 
   let eventMsg = event.message.text;
   //echo message
-  let flex = {
+  let flexMsg = {
     type: "flex",
     altText: "宜蘭旅遊通-優惠券",
     contents: {
@@ -181,14 +182,14 @@ async function handleEvent (event) {
   }
   // 特定字回覆
   if (eventMsg == '你好') {
-    flex.contents.body.contents = [{
+    flexMsg.contents.body.contents = [{
       type: 'text',
       text: '很高興為您服務'
     }]
   }
   if(eventMsg == '優惠券') {
     let cupon = await getCupon()
-    flex.contents.body.contents = cupon.map((item, index)=> {
+    flexMsg.contents.body.contents = cupon.map((item, index)=> {
       return {
         type: 'text',
         text: index+1 + '.' + item.title
@@ -254,13 +255,13 @@ async function handleEvent (event) {
     })
     // console.log(carousel, 'uuuuuuuuuuuuuu')
 
-    flex.contents = carousel
+    flexMsg.contents = carousel
   }
 
   // use reply API
   return client.replyMessage({
     replyToken: event.replyToken,
-    messages: [flex],
+    messages: [flexMsg],
   });
 }
 
