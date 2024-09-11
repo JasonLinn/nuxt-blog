@@ -20,19 +20,20 @@ async function handleEvent (event) {
   let flexMsg = {
     type: "flex",
     altText: "宜蘭旅遊通-優惠券",
-    contents: {
-      type: "bubble",
-      body: {
-        type: "box",
-        layout: "vertical",
-        contents: [
-          // {
-          //   type: "text",
-          //   text: eventMsg
-          // }
-        ]
-      }
-    }
+    contents: null
+    // {
+    //   type: "bubble",
+    //   body: {
+    //     type: "box",
+    //     layout: "vertical",
+    //     contents: [
+    //       // {
+    //       //   type: "text",
+    //       //   text: eventMsg
+    //       // }
+    //     ]
+    //   }
+    // }
   }
   // 旋轉木馬
   let carousel = {
@@ -181,21 +182,21 @@ async function handleEvent (event) {
     ]
   }
   // 特定字回覆
-  if (eventMsg == '你好') {
-    flexMsg.contents.body.contents = [{
-      type: 'text',
-      text: '很高興為您服務'
-    }]
-  }
-  if(eventMsg == '優惠券') {
-    let cupon = await getCupon()
-    flexMsg.contents.body.contents = cupon.map((item, index)=> {
-      return {
-        type: 'text',
-        text: index+1 + '.' + item.title
-      }
-    })
-  }
+  // if (eventMsg == '你好') {
+  //   flexMsg.contents.body.contents = [{
+  //     type: 'text',
+  //     text: '很高興為您服務'
+  //   }]
+  // }
+  // if(eventMsg == '優惠券') {
+  //   let cupon = await getCupon()
+  //   flexMsg.contents.body.contents = cupon.map((item, index)=> {
+  //     return {
+  //       type: 'text',
+  //       text: index+1 + '.' + item.title
+  //     }
+  //   })
+  // }
   if(eventMsg == '優惠券列表') {
     let cupon = await getCupon()
     carousel.contents = cupon.map((item) => {
@@ -258,11 +259,15 @@ async function handleEvent (event) {
     flexMsg.contents = carousel
   }
 
-  // use reply API
-  return client.replyMessage({
-    replyToken: event.replyToken,
-    messages: [flexMsg],
-  });
+  if (flexMsg.contents) {
+    // use reply API
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [flexMsg],
+    });
+  } else {
+    return noMsg
+  }
 }
 
 export default defineEventHandler(async (event) => {
