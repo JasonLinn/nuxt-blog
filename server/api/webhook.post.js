@@ -246,6 +246,7 @@ async function handleEvent (event) {
           ],
           spacing: "sm",
           paddingAll: "13px",
+          "maxHeight": "100px",
           action: {
             type: "uri",
             label: "action",
