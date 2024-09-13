@@ -16,7 +16,6 @@
           <!-- <time class="my-2 text-sm text-gray-400">
             {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
           </time> -->
-          <div>推薦店家:{{ referralStore?.name || '無' }}</div>
           <div v-if="userInfo?.id === 1" class="flex-rowx flex gap-3">
             <NuxtLink
               class="flex items-center text-sm text-gray-400 hover:font-semibold hover:text-emerald-500"
@@ -45,6 +44,11 @@
         <div class="cupon-text">
           {{ article.content }}
         </div>
+        <div class="cupon-referral">推薦店家: {{ referralStore?.name || `無` }}
+          <svg v-show="referralStore?.name" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+          </svg>
+        </div>
         <div v-if="article.isReferral">
           輸入推薦代碼:
           <input type="text" class="fererral-input" v-model="referralCode">
@@ -72,10 +76,13 @@
         </div>
       </div>
       <!-- modal end -->
+      <button v-show="article.isReferral && !isCheckReferral" type="button" class="btn btn-light">
+        請輸入推薦代碼
+      </button>
       <button v-show="article.amount && article.hash[0]" type="button" class="btn btn-success" @click="showModal">
         領取限量優惠券
       </button>
-      <button v-show="article.amount && !article.hash[0]" type="button" class="btn btn-success" @click="getCupon">
+      <button v-show="article.amount && !article.hash[0] && isCheckReferral" type="button" class="btn btn-success" @click="getCupon">
         領取優惠券
       </button>
     </div>
@@ -105,6 +112,16 @@
   color: #666;
   margin-bottom: 10px;
 }
+.cupon-referral {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cupon-referral > svg {
+  color: #00b4ff;
+  margin-left: 5px;
+}
 .fererral-input{
   width: 100px;
 }
@@ -132,7 +149,8 @@ const showModal = () => {
   modal.show();
 };
 const store = useReferralStore()
-let referralStore = ref({})
+let referralStore = ref(null)
+let isCheckReferral = ref(false)
 // const referralStore = referral.find((ref) => {
 //   if (!store.getReferral?.referral) {
 //     return null
@@ -209,11 +227,13 @@ const patchUser = async (profile) => {
 }
 
 const checkReferral = () => {
-  referralStore = referral.find((ref) => {
+  referralStore.value = referral.find((ref) => {
       return ref.code == referralCode.value
   })
-  if (referralStore) {
-    alert('成功代入:' + referralStore?.name)
+  console.log(referralStore.value, 'ssss')
+  if (referralStore?.value) {
+    isCheckReferral.value = true
+    alert('成功代入:' + referralStore?.value?.name)
   } else {
     alert('代碼錯誤')
   }
