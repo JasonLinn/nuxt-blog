@@ -212,7 +212,7 @@ const sendPatch = async () => {
 }
 
 const patchUser = async (profile) => {
-  article.value.referral = referralStore
+  article.value.referral = referralStore.value
 
   await $fetch(`/api/user/coupon`, {
       method: 'PATCH',
