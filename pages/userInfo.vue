@@ -3,7 +3,8 @@
         <div class="row">
             <!-- <div id="userId">{{coupons}}</div> -->
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
-            <h2>已領優惠券</h2>
+            <h2 class="cupon-geted">已領優惠券</h2>
+            <hr>
             <div v-if="coupons">
                 <div v-if="!coupons?.length">尚未領取優惠券</div>
                 <article
@@ -90,6 +91,11 @@ const fakeUser = {
 </script>
 
 <style lang="scss" scoped>
+.cupon-geted {
+  font-weight: bold;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
 .cupon-wrapper {
   // border-radius: 10px;
   overflow: hidden;
