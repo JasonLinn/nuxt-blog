@@ -342,7 +342,7 @@ const getCupon = () => {
                     },
                     {
                       "type": "text",
-                      "text": referralStore?.name || '無' ,
+                      "text": referralStore?.value?.name || '無' ,
                       "wrap": true,
                       "color": "#666666",
                       "size": "sm",
