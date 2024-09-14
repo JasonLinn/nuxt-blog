@@ -82,7 +82,7 @@
       <button v-show="article.amount && article.hash[0]" type="button" class="btn btn-success" @click="showModal">
         領取限量優惠券
       </button>
-      <button v-show="article.amount && !article.hash[0] && isCheckReferral" type="button" class="btn btn-success" @click="getCupon">
+      <button v-show="article.amount && !article.hash[0] && !article.isReferral || isCheckReferral" type="button" class="btn btn-success" @click="getCupon">
         領取優惠券
       </button>
     </div>
