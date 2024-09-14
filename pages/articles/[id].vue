@@ -374,9 +374,8 @@ const getCupon = () => {
                       "type": "icon",
                       "size": "xxl",
                       "url": "https://nuxt-blog-swart.vercel.app/one_text.png",
-                      "position": "relative",
-                      "offsetStart": "100px",
-                      "offsetTop": "10px"
+                      "position": "absolute",
+                      "offsetEnd": "10px"
                     },
                   ]
                 },
