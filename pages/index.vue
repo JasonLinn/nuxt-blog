@@ -82,7 +82,7 @@
                     {{ hadleCategory(article.category) }}
                   </span>
                   <span class="cupon-category">
-                    {{ article.hash[0] ? '序號' : '免費' }}
+                    {{ article.isReferral ? '推薦代碼' : '免費' }}
                   </span>
                   <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                     {{ date2LocaleString(article.updated_at) }}
