@@ -184,7 +184,7 @@
   box-shadow: #000;
 }
 .cupon-img-wrapper {
-  height: 200px;
+  height: 165px;
   overflow: hidden;
 }
 .cupon-img {
