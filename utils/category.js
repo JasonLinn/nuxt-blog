@@ -11,3 +11,15 @@ export const category = [{
     id: 'traffic',
     name: '行',
   }];
+
+
+  export const categoryRelative = [{
+    id: 'show',
+    name: '表演',
+  },{
+    id: 'food',
+    name: '外燴',
+  },{
+    id: 'bbq',
+    name: '烤肉',
+  }];
