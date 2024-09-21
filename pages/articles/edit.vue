@@ -67,15 +67,19 @@
                 <label for="cover" class="block text-sm font-medium text-gray-700">
                   代表性圖片連結
                 </label>
-                <div class="mt-1">
+                <div class="mt-1"
+                  v-for="(img, index) in articleData.cover"
+                  :key="index"
+                >
+                {{ index + 1 }}
                   <input
-                    id="cover"
-                    v-model="articleData.cover"
+                    :value="img"
                     placeholder="請撰輸入網址連結"
                     name="cover"
                     type="text"
                     autocomplete="cover"
-                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                    class="articleCover"
+                    ref="covers"
                   />
                 </div>
               </section>
@@ -161,14 +165,22 @@ if (error.value) {
 // 先轉字串
 articleData.value.hash = await articleData.value.hash.toString()
 
+const covers = ref([])
+
 const handleSubmit = async () => {
+  let urls = []
+  for (let index = 0; index < covers.value.length; index++) {
+      if (covers.value[index]?.value) {
+        urls.push(covers.value[index].value);
+      }
+    }
   await $fetch(`/api/articles/${route.query.id}`, {
     method: 'PATCH',
     body: {
       title: articleData.value.title,
       category: articleData.value.category,
       content: articleData.value.content,
-      cover: articleData.value.cover,
+      cover: urls,
       amount: articleData.value.amount,
       // 轉陣列
       hash: articleData.value.hash.split(',')

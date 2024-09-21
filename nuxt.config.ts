@@ -6,7 +6,7 @@
 
 export default defineNuxtConfig({
   css: ['~/assets/scss/main.scss'],
-  modules: ['nuxt-icon', '@nuxtjs/ngrok', '@pinia/nuxt'],
+  modules: ['nuxt-icon', '@nuxtjs/ngrok', '@pinia/nuxt', 'vue3-carousel-nuxt'],
   vite: {
     css: {
       preprocessorOptions: {

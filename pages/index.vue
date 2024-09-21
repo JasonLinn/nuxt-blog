@@ -71,9 +71,17 @@
                   }
                 }"
               >
-                <div class="cupon-img-wrapper">
-                  <img :src="article.cover" class="cupon-img"/>
-                </div>
+                <Carousel>
+                  <Slide v-for="(img, index) in article.cover" :key="img">
+                    <img :src="img" class="cupon-img" />
+                  </Slide>
+
+                  <template #addons="{ slidesCount }">
+                    <Pagination v-if="slidesCount > 1" />
+                  </template>
+                </Carousel>
+                <!-- <div class="cupon-img-wrapper">
+                </div> -->
                 <div class="cupon-info">
                   <h2 class="cupon-title">
                     <span class="">{{ article.title }}</span>

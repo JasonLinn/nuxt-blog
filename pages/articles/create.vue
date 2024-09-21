@@ -81,7 +81,24 @@
                 <div class="mt-1">
                   <input
                     id="cover"
-                    v-model="articleData.cover"
+                    v-model="cover1"
+                    placeholder="請撰輸入網址連結"
+                    name="cover"
+                    type="text"
+                    autocomplete="cover"
+                  />
+                  <input
+                    id="cover"
+                    v-model="cover2"
+                    placeholder="請撰輸入網址連結"
+                    name="cover"
+                    type="text"
+                    autocomplete="cover"
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                  <input
+                    id="cover"
+                    v-model="cover3"
                     placeholder="請撰輸入網址連結"
                     name="cover"
                     type="text"
@@ -166,11 +183,15 @@
 </style>
 
 <script setup>
+const cover1 = ref('')
+const cover2 = ref('')
+const cover3 = ref('')
+
 const articleData = reactive({
   title: '',
   category: '',
   content: '',
-  cover: '',
+  cover: [],
   amount: 0,
   usedTimes: 0,
   hash: '',
@@ -178,6 +199,10 @@ const articleData = reactive({
 const isReferral = ref(false)
 
 const handleSubmit = async () => {
+  if (cover1.value) articleData.cover.push(cover1.value)
+  if (cover2.value) articleData.cover.push(cover2.value)
+  if (cover3.value) articleData.cover.push(cover3.value)
+
   await $fetch('/api/articles', {
     method: 'POST',
     body: {

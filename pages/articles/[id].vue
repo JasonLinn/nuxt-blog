@@ -9,9 +9,19 @@
         <p class="my-2 text-rose-500">{{ error }}</p>
       </div>
       <div v-else-if="article" class="mb-8 flex w-full flex-col justify-center md:max-w-3xl">
-        <div class="mt-4 flex justify-center">
+        <!-- <div class="mt-4 flex justify-center">
           <img :src="article.cover" class="cupon-img" />
-        </div>
+        </div> -->
+        <Carousel>
+          <Slide v-for="img in article.cover" :key="img">
+            <img :src="img" class="cupon-img" />
+          </Slide>
+
+          <template #addons="{ slidesCount }">
+            <Navigation v-if="slidesCount > 1" />
+            <Pagination v-if="slidesCount > 1" />
+          </template>
+        </Carousel>
         <div class="cupon-time my-2 flex flex-col justify-between sm:my-0 sm:flex-row sm:items-center">
           <!-- <time class="my-2 text-sm text-gray-400">
             {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
