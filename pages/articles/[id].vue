@@ -273,7 +273,7 @@ const getCupon = () => {
         "size": "giga",
         "hero": {
           "type": "image",
-          "url": article.value.cover,
+          "url": article.value.cover[0],
           "size": "full",
           "aspectRatio": "20:10",
           "aspectMode": "cover",
@@ -480,11 +480,11 @@ useSeoMeta({
   description,
   ogTitle: article.value.title,
   ogDescription: description,
-  ogImage: article.value.cover,
+  ogImage: article.value.cover[0],
   ogUrl: () => `${origin}${baseURL}/articles/${article.value.id}`,
   twitterTitle: article.value.title,
   twitterDescription: description,
-  twitterImage: article.value.cover,
+  twitterImage: article.value.cover[0],
   twitterUrl: () => `${origin}${baseURL}/articles/${article.value.id}`,
   twitterCard: 'summary_large_image'
 })
