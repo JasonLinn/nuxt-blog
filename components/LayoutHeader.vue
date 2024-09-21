@@ -1,5 +1,36 @@
 <template>
   <header class="flex w-full justify-center container">
+    <div id="sidemenu">
+    <button class="sidemenu__btn" v-on:click="navOpen=!navOpen" v-bind:class="{active:navOpen}">
+				<span class="top"></span>
+				<span class="mid"></span>
+				<span class="bottom"></span>
+			</button>
+    <transition name="translateX">
+      <nav v-show="navOpen">
+        <div class="sidemenu__wrapper">
+          <ul class="sidemenu__list">
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
+                v-if="displayName"
+                class="get"
+                to="/userInfo"
+              >
+                <p class="">查看已領</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
+                to="/relative"
+              >
+                <p class="">休閒服務</p>
+              </NuxtLink>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </transition>
+  </div>
     <nav class="index-nav flex w-full max-w-7xl items-center justify-between px-6 py-2">
       <div class="nav-wrapper">
         <NuxtLink
@@ -13,13 +44,6 @@
           </div> -->
         </NuxtLink>
         <!-- <div class="user-status">{{displayName ? `Hi, ${displayName}` : '未登入'}}</div> -->
-        <NuxtLink
-          v-if="displayName"
-          class="get"
-          to="/userInfo"
-        >
-          <p class="">查看已領</p>
-        </NuxtLink>
       </div>
         <div v-if="userInfo" class="user-info group relative">
           <div for="avatar" class="cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
@@ -99,7 +123,7 @@ const route = useRoute()
 const store = useStore();
 const displayName = computed(() => store.getUserDisplayName);
 const referral = useReferralStore();
-
+const navOpen = ref(false)
 onMounted(() => {
   store.fetchAndSetUser()
   referral.setReferral(route.query)
@@ -202,4 +226,121 @@ const toggleEdit = () => {
   font-size: 12px;
 
 }
+
+#sidemenu {
+	nav {
+		width: 100%;
+    height: 100%;
+		// height: calc(100% - #{$headerHeight} - #{$footerHeight});
+		background: #c9e0f6;
+		position: fixed;
+		top: 0;
+		right: 0;
+    z-index: 2;
+		// box-shadow: 2px 0 3px$grey-6;
+		// overflow-y: scroll;
+	}
+  .sidemenu__btn {
+    background-color: #f4606000;
+  }
+  .sidemenu__item {
+      height: 60px;
+    }
+	.sidemenu {
+		&__btn {
+			display: block;
+			width: 40px;
+			height: 40px;
+			// background: grey;
+			border: none;
+			position: fixed;
+      right: 0;
+      margin: 7px;
+			z-index: 100;
+			appearance: none;
+			cursor: pointer;
+			outline: none;
+      z-index: 3;
+			span {
+				display: block;
+				width: 20px;
+				height: 2px;
+				margin: auto;
+				background: black;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				transition: all .4s ease;
+
+				&.top {
+					transform: translateY(-8px);
+				}
+
+				&.bottom {
+					transform: translateY(8px);
+				}
+			}
+			&.active{
+				.top {
+					transform: rotate(-45deg);
+				}
+				.mid{
+					transform: translateX(-20px) rotate(360deg);
+					opacity: 0;
+				}
+				.bottom {
+					transform: rotate(45deg);
+				}
+			}
+
+		}
+
+		&__wrapper {
+      padding-top: 50px;
+    }
+
+		&__list {
+			padding-top: 50px;
+      list-style:none;
+      padding: 0;
+      margin: 0;
+		}
+
+		&__item {
+			a {
+        text-decoration: none;
+				line-height: 1.6em;
+				font-size: 1.6em;
+				padding: .5em;
+				display: block;
+				color: white;
+				transition: .4s ease;
+
+				&:hover {
+					background: lightgrey;
+					color: dimgrey;
+				}
+			}
+		}
+	}
+}
+
+.translateX-enter{
+	transform:translateX(200px);
+	opacity: 0;
+  transition: .3s ease;
+}
+
+.translateX-enter-active,.translateX-leave-active{
+	transform-origin: top right 0;
+	transition:.3s ease;
+}
+
+.translateX-leave-to{
+	transform: translateX(200px);
+	opacity: 0;
+}
+
 </style>
