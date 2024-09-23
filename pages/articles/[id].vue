@@ -523,34 +523,11 @@ const shareCoupon = () => {
         "contents": [
           {
             "type": "image",
-            "url": "https://developers-resource.landpress.line.me/fx/clip/clip4.jpg",
+            "url": article.value.cover[0],
             "size": "full",
             "aspectMode": "cover",
-            "aspectRatio": "150:196",
+            "aspectRatio": "2:1",
             "gravity": "center",
-            "flex": 1
-          },
-          {
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-              {
-                "type": "image",
-                "url": "https://developers-resource.landpress.line.me/fx/clip/clip5.jpg",
-                "size": "full",
-                "aspectMode": "cover",
-                "aspectRatio": "150:98",
-                "gravity": "center"
-              },
-              {
-                "type": "image",
-                "url": "https://developers-resource.landpress.line.me/fx/clip/clip6.jpg",
-                "size": "full",
-                "aspectMode": "cover",
-                "aspectRatio": "150:98",
-                "gravity": "center"
-              }
-            ],
             "flex": 1
           },
           {
@@ -600,7 +577,7 @@ const shareCoupon = () => {
                 "contents": [],
                 "size": "xl",
                 "wrap": true,
-                "text": "Cony Residence",
+                "text": article.value.title,
                 "color": "#ffffff",
                 "weight": "bold"
               },
