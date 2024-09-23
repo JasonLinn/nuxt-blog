@@ -26,6 +26,20 @@
           <!-- <time class="my-2 text-sm text-gray-400">
             {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
           </time> -->
+          <div class="cupon-share">
+            <svg @click="isOpenShare = !isOpenShare" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share-fill cupon-share-icon" viewBox="0 0 16 16">
+              <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
+            </svg>
+            <div class="cupon-share-list" v-show="isOpenShare">
+                <svg @click="shareCopy" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                </svg>
+                <svg @click="shareCoupon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right cupon-share-icon" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
+                  <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
+                </svg>
+            </div>
+          </div>
           <div v-if="userInfo?.id === 1" class="flex-rowx flex gap-3">
             <NuxtLink
               class="flex items-center text-sm text-gray-400 hover:font-semibold hover:text-emerald-500"
@@ -50,10 +64,6 @@
         </div>
         <h1 class="cupon-title break-words text-4xl font-semibold text-gray-700">
           {{ article.title }}
-          <svg @click="shareCoupon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right cupon-share" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
-            <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
-          </svg>
         </h1>
         <div class="cupon-text">
           {{ article.content }}
@@ -114,7 +124,7 @@
 }
 .cupon-time {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 .cupon-title {
   font-size: 20px;
@@ -123,8 +133,20 @@
   position: relative;
 }
 .cupon-share {
+  position: relative;
+  z-index: 1;
+}
+.cupon-share-icon {
+}
+.cupon-share-list {
+  width: 80px;
+  background-color: #c9e0f6;
   position: absolute;
   right: 0;
+  padding: 10px;
+  border-radius: 40px;
+  display: flex;
+  justify-content: space-around;
 }
 .cupon-amount {
   font-size: 12px;
@@ -158,9 +180,11 @@
 import liff from "@line/liff";
 import useReferralStore from "~/store/referral";
 import { referral } from "~/utils/referral"
+import { index_liff_url } from "/utils/static"
 const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
 const referralCode = ref('');
+const isOpenShare = ref(false)
 let modal;
 let hash = []
 const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
@@ -476,15 +500,148 @@ const getCupon = () => {
       })
       .catch(error => window.alert('未登入LINE帳號'+ error));
 }
-
+const shareCopy = () => {
+  navigator.clipboard.writeText(index_liff_url + route.path);
+  window.alert('已複製連結!')
+}
 const shareCoupon = () => {
   liff
   .shareTargetPicker(
     [
+    {
+  "type": "bubble",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
       {
-        type: "text",
-        text: "Hello, World!",
-      },
+        "type": "box",
+        "layout": "horizontal",
+        "contents": [
+          {
+            "type": "image",
+            "url": "https://developers-resource.landpress.line.me/fx/clip/clip4.jpg",
+            "size": "full",
+            "aspectMode": "cover",
+            "aspectRatio": "150:196",
+            "gravity": "center",
+            "flex": 1
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "image",
+                "url": "https://developers-resource.landpress.line.me/fx/clip/clip5.jpg",
+                "size": "full",
+                "aspectMode": "cover",
+                "aspectRatio": "150:98",
+                "gravity": "center"
+              },
+              {
+                "type": "image",
+                "url": "https://developers-resource.landpress.line.me/fx/clip/clip6.jpg",
+                "size": "full",
+                "aspectMode": "cover",
+                "aspectRatio": "150:98",
+                "gravity": "center"
+              }
+            ],
+            "flex": 1
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "NEW",
+                "size": "xs",
+                "color": "#ffffff",
+                "align": "center",
+                "gravity": "center"
+              }
+            ],
+            "backgroundColor": "#EC3D44",
+            "paddingAll": "2px",
+            "paddingStart": "4px",
+            "paddingEnd": "4px",
+            "flex": 0,
+            "position": "absolute",
+            "offsetStart": "18px",
+            "offsetTop": "18px",
+            "cornerRadius": "100px",
+            "width": "48px",
+            "height": "25px"
+          }
+        ]
+      }
+    ],
+    "paddingAll": "0px"
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "text",
+                "contents": [],
+                "size": "xl",
+                "wrap": true,
+                "text": "Cony Residence",
+                "color": "#ffffff",
+                "weight": "bold"
+              },
+              {
+                "type": "text",
+                "text": "3 Bedrooms, ¥35,000",
+                "color": "#ffffffcc",
+                "size": "sm"
+              }
+            ],
+            "spacing": "sm"
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                  {
+                    "type": "text",
+                    "contents": [],
+                    "size": "sm",
+                    "wrap": true,
+                    "margin": "lg",
+                    "color": "#ffffffde",
+                    "text": "Private Pool, Delivery box, Floor heating, Private Cinema"
+                  }
+                ]
+              }
+            ],
+            "paddingAll": "13px",
+            "backgroundColor": "#ffffff1A",
+            "cornerRadius": "2px",
+            "margin": "xl"
+          }
+        ]
+      }
+    ],
+    "paddingAll": "20px",
+    "backgroundColor": "#464F69"
+  }
+}
     ],
     {
       isMultiple: true,
