@@ -12,18 +12,18 @@
           <ul class="sidemenu__list">
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
+                to="/relative"
+              >
+                <p class="">旅遊服務</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
                 v-if="displayName"
                 class="get"
                 to="/userInfo"
               >
                 <p class="">查看已領</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/relative"
-              >
-                <p class="">休閒服務</p>
               </NuxtLink>
             </li>
           </ul>
