@@ -507,7 +507,10 @@ const shareCopy = () => {
 const shareCoupon = () => {
   liff
   .shareTargetPicker(
-    [
+    [{
+    "type": "flex",
+    "altText": "宜蘭旅遊通-優惠券",
+    "contents":
     {
   "type": "bubble",
   "header": {
@@ -642,7 +645,7 @@ const shareCoupon = () => {
     "backgroundColor": "#464F69"
   }
 }
-    ],
+}],
     {
       isMultiple: true,
     }
