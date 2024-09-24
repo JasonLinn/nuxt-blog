@@ -257,6 +257,9 @@
   display: inline-block;
   color: #222222;
 }
+.carousel__slide {
+  max-height: 180px;
+}
 </style>
 
 <script setup>
