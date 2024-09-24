@@ -258,7 +258,7 @@
   color: #222222;
 }
 .carousel__slide {
-  max-height: 180px;
+  height: 165px;
 }
 </style>
 
