@@ -304,6 +304,7 @@ const getCupon = () => {
   //   return;
   // }
   console.log(article, referralStore, 'aaaa')
+  let checkIcon = referralStore?.value?.name ? "https://nuxt-blog-swart.vercel.app/icon/check-circle-fill.svg" : "";
   let cupon = {
         "type": "bubble",
         "size": "giga",
@@ -392,12 +393,11 @@ const getCupon = () => {
                       "wrap": true,
                       "color": "#666666",
                       "size": "sm",
-                      "flex": 5
                     },
                     {
                       "type": "icon",
                       "size": "lg",
-                      "url": "https://nuxt-blog-swart.vercel.app/one_text.png",
+                      "url": checkIcon,
                     }
                   ]
                 },{
