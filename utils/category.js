@@ -22,4 +22,7 @@ export const category = [{
   },{
     id: 'bbq',
     name: '烤肉',
+  },{
+    id: 'massage',
+    name: '按摩',
   }];

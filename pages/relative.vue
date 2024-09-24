@@ -65,15 +65,22 @@
                 <NuxtLink
                   class=""
                   :to="{
-                    name: 'relative-shop-id',
+                    name: 'relative_shop-id',
                     params: {
                       id: article.id
                     }
                   }"
                 >
-                  <div class="cupon-img-wrapper">
-                    <img :src="article.cover" class="cupon-img"/>
-                  </div>
+                <Carousel>
+                    <Slide v-for="img in article.cover" :key="img">
+                      <img :src="img" class="cupon-img" />
+                    </Slide>
+
+                    <template #addons="{ slidesCount }">
+                      <Navigation v-if="slidesCount > 1" />
+                      <Pagination v-if="slidesCount > 1" />
+                    </template>
+                </Carousel>
                   <div class="cupon-info">
                     <h2 class="cupon-title">
                       <span class="">{{ article.title }}</span>

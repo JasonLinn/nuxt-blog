@@ -7,7 +7,6 @@
               <div class="mt-6">
                 <h3 class="create-title text-xl font-medium leading-6 text-gray-900">新增優惠券</h3>
               </div>
-  
               <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
                 <section class="col-md-12 create-part">
                   <label for="title" class="create-name block text-sm font-medium text-gray-700">
@@ -30,7 +29,7 @@
                     分類：
                   </label>
                   <select class="create-category boder shadow-sm w-100 py-2 px-3 mt-1" v-model="articleData.category" value="play">
-                    <option v-for="cate in category" :value="cate.id">{{ cate.name }}</option>
+                    <option v-for="cate in categoryRelative" :value="cate.id">{{ cate.name }}</option>
                   </select>
                 </section>
                 <section class="col-md-12 create-part">
@@ -49,47 +48,63 @@
                   </div>
                 </section>
                 <section class="col-md-12 create-part">
-                  <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
-                    是否允許推薦店家：
-                  </label>
-                  <div class="mt-1">
-                    <input type="radio" id="referralTrue" value="true" v-model="isReferral">
-                    <label for="referralTrue">是</label>
-                    <input type="radio" id="referralFalse" value="false" v-model="isReferral">
-                    <label for="referralFalse">否</label>
-                  </div>
-                </section>
-                <section class="col-md-12 create-part">
-                  <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
-                    序號：
-                  </label>
-                  <div class="mt-1">
-                    <textarea
-                      id="hash"
-                      v-model="articleData.hash"
-                      name="hash"
-                      rows="4"
-                      placeholder="請撰寫優惠券序號..."
-                      class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                    />
-                  </div>
-                </section>
-                <section class="col-md-12 create-part">
-                  <label for="cover" class="create-name block text-sm font-medium text-gray-700">
-                    代表性圖片連結：
-                  </label>
-                  <div class="mt-1">
-                    <input
-                      id="cover"
-                      v-model="articleData.cover"
-                      placeholder="請撰輸入網址連結"
-                      name="cover"
-                      type="text"
-                      autocomplete="cover"
-                      class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                    />
-                  </div>
-                </section>
+                <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
+                  是否允許推薦店家：
+                </label>
+                <div class="mt-1">
+                  <input type="radio" id="referralTrue" value="true" v-model="isReferral">
+                  <label for="referralTrue">是</label>
+                  <input type="radio" id="referralFalse" value="false" v-model="isReferral">
+                  <label for="referralFalse">否</label>
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
+                  序號：
+                </label>
+                <div class="mt-1">
+                  <textarea
+                    id="hash"
+                    v-model="articleData.hash"
+                    name="hash"
+                    rows="4"
+                    placeholder="請撰寫優惠券序號..."
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                </div>
+              </section>
+                <label for="cover" class="create-name block text-sm font-medium text-gray-700">
+                  代表性圖片連結：
+                </label>
+                <div class="mt-1">
+                  <input
+                    id="cover"
+                    v-model="cover1"
+                    placeholder="請撰輸入網址連結"
+                    name="cover"
+                    type="text"
+                    autocomplete="cover"
+                    class="w-full w-100"
+                  />
+                  <input
+                    id="cover"
+                    v-model="cover2"
+                    placeholder="請撰輸入網址連結"
+                    name="cover"
+                    type="text"
+                    autocomplete="cover"
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                  <input
+                    id="cover"
+                    v-model="cover3"
+                    placeholder="請撰輸入網址連結"
+                    name="cover"
+                    type="text"
+                    autocomplete="cover"
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                </div>
                 <section class="col-md-12 create-part">
                   <label for="about" class="create-name block text-sm font-medium text-gray-700">
                     優惠券內容：
@@ -166,11 +181,15 @@
   </style>
   
   <script setup>
+  const cover1 = ref('')
+  const cover2 = ref('')
+  const cover3 = ref('')
+
   const articleData = reactive({
     title: '',
     category: '',
     content: '',
-    cover: '',
+    cover: [],
     amount: 0,
     usedTimes: 0,
     hash: '',
@@ -178,7 +197,11 @@
   const isReferral = ref(false)
   
   const handleSubmit = async () => {
-    await $fetch('/api/articles', {
+    if (cover1.value) articleData.cover.push(cover1.value)
+    if (cover2.value) articleData.cover.push(cover2.value)
+    if (cover3.value) articleData.cover.push(cover3.value)
+
+    await $fetch('/api/relative', {
       method: 'POST',
       body: {
         title: articleData.title,
@@ -193,7 +216,7 @@
     })
       .then((response) => {
         navigateTo({
-          name: 'articles-id',
+          name: 'relative_shop-id',
           params: {
             id: response.id
           }
@@ -206,6 +229,6 @@
     middleware: 'auth'
   })
   
-  import { category } from '~/utils/category';
+  import { categoryRelative } from '~/utils/category';
   </script>
   

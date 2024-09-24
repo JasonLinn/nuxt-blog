@@ -30,7 +30,7 @@
                     分類：
                   </label>
                   <select class="create-category boder shadow-sm w-100 py-2 px-3 mt-1" v-model="articleData.category" value="play">
-                    <option v-for="cate in category" :value="cate.id">{{ cate.name }}</option>
+                    <option v-for="cate in categoryRelative" :value="cate.id">{{ cate.name }}</option>
                   </select>
                 </section>
                 <section class="col-md-12 edit-part">
@@ -176,7 +176,7 @@
     })
       .then((response) => {
         navigateTo({
-          name: 'relative-shop-id',
+          name: 'relative_shop-id',
           params: {
             id: response.id
           }
@@ -188,5 +188,7 @@
   definePageMeta({
     middleware: 'auth'
   })
-  </script>
+
+import { categoryRelative } from '~/utils/category';
+</script>
   
