@@ -393,6 +393,11 @@ const getCupon = () => {
                       "color": "#666666",
                       "size": "sm",
                       "flex": 5
+                    },
+                    {
+                      "type": "icon",
+                      "size": "lg",
+                      "url": "https://nuxt-blog-swart.vercel.app/one_text.png",
                     }
                   ]
                 },{
@@ -422,7 +427,7 @@ const getCupon = () => {
                       "url": "https://nuxt-blog-swart.vercel.app/one_text.png",
                       "position": "absolute",
                       "offsetEnd": "10px",
-                      "offsetBottom": "2px"
+                      "offsetBottom": "3px"
                     },
                   ]
                 },
