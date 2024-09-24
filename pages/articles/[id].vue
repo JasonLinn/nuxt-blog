@@ -393,6 +393,7 @@ const getCupon = () => {
                       "wrap": true,
                       "color": "#666666",
                       "size": "sm",
+                      "flex": 5
                     },
                     {
                       "type": "icon",
