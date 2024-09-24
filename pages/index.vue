@@ -274,9 +274,9 @@ const searchText = ref('')
 const store = useCouponStore();
 store.fetchAndSetCoupon()
 const hotTag = [
-  '農場',
-  '觀光工廠',
-  '美食'
+  '伴手禮',
+  '租車',
+  '湯屋'
 ]
 
 
