@@ -126,13 +126,13 @@
   // })
   
   
-  onMounted(async () => {
-    modal = $bootstrap.modal(modalRef.value);
-  });
+  // onMounted(async () => {
+  //   modal = $bootstrap.modal(modalRef.value);
+  // });
   
   onBeforeUnmount(() => {
     // 加上 dispose，避免切換頁面時或是 HMR 看到殘留畫面
-    // modal.dispose();
+    modal.dispose();
   });
   
   const route = useRoute()
