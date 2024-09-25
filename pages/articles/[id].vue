@@ -601,24 +601,15 @@ const shareCoupon = () => {
             "layout": "vertical",
             "contents": [
               {
-                "type": "box",
-                "layout": "vertical",
-                "contents": [
-                  {
-                    "type": "text",
-                    "contents": [],
-                    "size": "sm",
-                    "wrap": true,
-                    "margin": "lg",
-                    "color": "#ffffffde",
-                    "text": "點我看更多"
-                  }
-                ]
+                "type": "text",
+                "text": "點我看更多",
+                "color": "#Ffffff",
+                "align": "center"
               }
             ],
             "paddingAll": "13px",
             "backgroundColor": "#ffffff1A",
-            "cornerRadius": "2px",
+            "cornerRadius": "30px",
             "margin": "xl"
           }
         ]
