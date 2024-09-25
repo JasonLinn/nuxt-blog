@@ -611,7 +611,7 @@ const shareCoupon = () => {
                     "wrap": true,
                     "margin": "lg",
                     "color": "#ffffffde",
-                    "text": article.value.content
+                    "text": "點我看更多"
                   }
                 ],
                 "maxHeight": "150px"
