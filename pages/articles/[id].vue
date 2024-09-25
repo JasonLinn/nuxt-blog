@@ -613,8 +613,7 @@ const shareCoupon = () => {
                     "color": "#ffffffde",
                     "text": "點我看更多"
                   }
-                ],
-                "maxHeight": "150px"
+                ]
               }
             ],
             "paddingAll": "13px",
