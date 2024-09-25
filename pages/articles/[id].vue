@@ -614,7 +614,7 @@ const shareCoupon = () => {
                     "text": article.value.content
                   }
                 ],
-                "maxHeight": "300px"
+                "maxHeight": "150px"
               }
             ],
             "paddingAll": "13px",
