@@ -613,7 +613,8 @@ const shareCoupon = () => {
                     "color": "#ffffffde",
                     "text": article.value.content
                   }
-                ]
+                ],
+                "maxHeight": "300px"
               }
             ],
             "paddingAll": "13px",
@@ -626,6 +627,11 @@ const shareCoupon = () => {
     ],
     "paddingAll": "20px",
     "backgroundColor": "#464F69"
+  },
+  "action": {
+    "type": "uri",
+    "label": "action",
+    "uri": liffUrl + 'articles/' +article.value.id
   }
 }
 }],
