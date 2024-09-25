@@ -143,6 +143,7 @@
   background-color: #c9e0f6;
   position: absolute;
   right: 0;
+  bottom: -35px;
   padding: 10px;
   border-radius: 40px;
   display: flex;
@@ -541,7 +542,7 @@ const shareCoupon = () => {
             "contents": [
               {
                 "type": "text",
-                "text": "NEW",
+                "text": "推薦",
                 "size": "xs",
                 "color": "#ffffff",
                 "align": "center",
@@ -586,12 +587,12 @@ const shareCoupon = () => {
                 "color": "#ffffff",
                 "weight": "bold"
               },
-              {
-                "type": "text",
-                "text": "3 Bedrooms, ¥35,000",
-                "color": "#ffffffcc",
-                "size": "sm"
-              }
+              // {
+              //   "type": "text",
+              //   "text": "3 Bedrooms, ¥35,000",
+              //   "color": "#ffffffcc",
+              //   "size": "sm"
+              // }
             ],
             "spacing": "sm"
           },
@@ -610,7 +611,7 @@ const shareCoupon = () => {
                     "wrap": true,
                     "margin": "lg",
                     "color": "#ffffffde",
-                    "text": "Private Pool, Delivery box, Floor heating, Private Cinema"
+                    "text": article.value.content
                   }
                 ]
               }
