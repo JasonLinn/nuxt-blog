@@ -99,7 +99,10 @@
     margin-left: 15px;
     background-color: #ff9742;
   }
-  </style>
+  .carousel__slide {
+    max-height: 180px;
+  }
+</style>
   
   <script setup>
   import liff from "@line/liff";
