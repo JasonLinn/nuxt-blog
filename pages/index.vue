@@ -262,6 +262,14 @@
   height: 165px;
 }
 </style>
+<style>
+.carousel__pagination {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 10px;
+}
+</style>
 
 <script setup>
 import { category } from '~/utils/category';
