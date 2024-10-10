@@ -183,6 +183,7 @@
 }
 .cupon-title {
   font-size: 16px;
+  font-weight: 800;
 }
 .cupon-info {
   padding: 13px 8px 15px 8px;
@@ -199,7 +200,7 @@
   display: inline-block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 10px;
 }
 .cupon-category {

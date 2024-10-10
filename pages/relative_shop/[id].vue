@@ -52,9 +52,10 @@
             {{ article.content }}
           </div>
         </div>
+        <RelativeFooter/>
       </template>
     </div>
-  </template>
+</template>
   <style scoped>
   .cupon-text {
     overflow-wrap: break-word;
@@ -108,6 +109,7 @@
   import liff from "@line/liff";
   import useReferralStore from "~/store/referral";
   import { referral } from "~/utils/referral"
+  // import { RelativeFooter } from "@/components/RelativeFooter.vue";
   const { $bootstrap } = useNuxtApp();
   const modalRef = ref(null);
   const referralCode = ref('');
@@ -133,10 +135,10 @@
   //   modal = $bootstrap.modal(modalRef.value);
   // });
   
-  onBeforeUnmount(() => {
-    // 加上 dispose，避免切換頁面時或是 HMR 看到殘留畫面
-    modal.dispose();
-  });
+  // onBeforeUnmount(() => {
+  //   // 加上 dispose，避免切換頁面時或是 HMR 看到殘留畫面
+  //   modal.dispose();
+  // });
   
   const route = useRoute()
   

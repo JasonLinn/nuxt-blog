@@ -77,7 +77,7 @@
                     </Slide>
 
                     <template #addons="{ slidesCount }">
-                      <Navigation v-if="slidesCount > 1" />
+                      <!-- <Navigation v-if="slidesCount > 1" /> -->
                       <Pagination v-if="slidesCount > 1" />
                     </template>
                 </Carousel>
@@ -179,6 +179,7 @@
   }
   .cupon-title {
     font-size: 16px;
+    font-weight: 800;
   }
   .cupon-info {
     padding: 13px 8px 15px 8px;
@@ -195,7 +196,7 @@
     display: inline-block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 10px;
   }
   .cupon-category {
@@ -257,6 +258,14 @@
     height: 165px;
   }
   </style>
+<style>
+.carousel__pagination {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 10px;
+}
+</style>
   
   <script setup>
   import { categoryRelative } from '~/utils/category';
