@@ -23,7 +23,7 @@ const useCouponStore = defineStore("useCouponStore", {
     resetCoupon() {
       this.couponData = initState.couponData;
     },
-    async fetchAndSetCoupon() {
+    async fetchAndSetCoupon(cate) {
         const url = useRequestURL()
         const {
             pending,
@@ -31,7 +31,7 @@ const useCouponStore = defineStore("useCouponStore", {
             error
           } = await useFetch('/api/articles', {
             query: {
-                category: initState.currentCate,
+                category: cate || initState.currentCate,
                 page: initState.currentPage,
                 pageSize: 10
             }

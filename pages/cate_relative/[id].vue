@@ -28,7 +28,7 @@
           </span>
         </div>
         <div class="search">
-          <input type="text" class="searchInput" maximum-scale="1" placeholder="請輸入關鍵字" v-model="searchText">
+          <input type="text" class="searchInput" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText">
           <svg
             v-if="searchText"
             @click="cleanText"
@@ -41,21 +41,21 @@
         </div>
       </div>
       <div class="my-8 flex w-full max-w-4xl flex-col">
-        <div v-if="relativeObject?.pending">
+        <div v-if="relativeObject.pending">
           <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
         </div>
         <template v-else>
-          <div v-if="relativeObject?.error">
+          <div v-if="relativeObject.error">
             <span class="text-gray-500">發生了一點錯誤，請稍後再嘗試</span>
-            <p class="my-2 text-rose-500">{{ relativeObject?.error }}</p>
+            <p class="my-2 text-rose-500">{{ relativeObject.error }}</p>
           </div>
-          <div v-else-if="!relativeObject?.data || relativeObject?.data?.items.length === 0">
+          <div v-else-if="!relativeObject.data || relativeObject?.data?.items.length === 0">
             <span class="text-gray-500">目前尚無最新優惠券</span>
           </div>
           <div v-else class="md:border-l md:border-gray-100">
             <div class="row">
               <article
-                v-for="article in relativeObject?.data.items"
+                v-for="article in relativeObject.data.items"
                 :key="article.id"
                 class="cupon col-md-3"
               >
@@ -63,28 +63,32 @@
                 <NuxtLink
                   class=""
                   :to="{
-                    name: 'relative_shop-id',
+                    name: 'articles-id',
                     params: {
                       id: article.id
                     }
                   }"
                 >
-                <Carousel>
-                    <Slide v-for="img in article.cover" :key="img">
+                  <Carousel>
+                    <Slide v-for="(img, index) in article.cover" :key="img">
                       <img :src="img" class="cupon-img" />
                     </Slide>
-
+  
                     <template #addons="{ slidesCount }">
-                      <!-- <Navigation v-if="slidesCount > 1" /> -->
                       <Pagination v-if="slidesCount > 1" />
                     </template>
-                </Carousel>
+                  </Carousel>
+                  <!-- <div class="cupon-img-wrapper">
+                  </div> -->
                   <div class="cupon-info">
                     <h2 class="cupon-title">
                       <span class="">{{ article.title }}</span>
                     </h2>
                     <span class="cupon-category">
                       {{ hadleCategory(article.category) }}
+                    </span>
+                    <span class="cupon-category">
+                      {{ article.isReferral ? '推薦代碼' : '免費' }}
                     </span>
                     <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                       {{ date2LocaleString(article.updated_at) }}
@@ -187,7 +191,7 @@
     box-shadow: #000;
   }
   .cupon-img-wrapper {
-    height: 200px;
+    height: 165px;
     overflow: hidden;
   }
   .cupon-img {
@@ -256,6 +260,14 @@
     height: 165px;
   }
   </style>
+  <style>
+  .carousel__pagination {
+      position: absolute;
+      right: 0;
+      left: 0;
+      bottom: 10px;
+  }
+  </style>
   
   <script setup>
   import { categoryRelative } from '~/utils/category';
@@ -263,26 +275,27 @@
   // const handleLogout = store.resetUser;
   
   const route = useRoute()
-  const currentPage = computed(() => parseInt(route?.query?.page) || 1)
-  const currentCate = computed(() => route?.query?.cate)
+  const currentCate = computed(() => route?.params?.id)
   const searchText = ref('')
   const store = useRelativeStore();
-  store.fetchAndSetRelative()
+  store.fetchAndSetRelative(route.params.id)
   const hotTag = [
     '魔術',
     '派對'
   ]
   
-  
+  console.log(route.params.id, 'rrrrr')
   // const {
   //   pending,
   //   data,
   //   error
-  // } = computed(() => JSON.parse(JSON.stringify(store.getRelativeData)));
-  
+  // } = computed(() => JSON.parse(JSON.stringify(store.getCouponData)));
+
   
   const relativeObject = computed(() => store.getRelativeData)
-
+  
+  console.log(relativeObject, 'eeeeeeefffff')
+  
   
   const date2LocaleString = (date) => {
     return new Date(date).toLocaleString('zh-TW')

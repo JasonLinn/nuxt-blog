@@ -14,17 +14,14 @@ export const category = [{
 
 
   export const categoryRelative = [{
-    id: 'show',
-    name: '表演',
-  },{
     id: 'food',
     name: '外燴',
   },{
     id: 'bbq',
     name: '烤肉',
   },{
-    id: 'massage',
-    name: '按摩',
+    id: 'play',
+    name: '體驗',
   },{
     id: 'other',
     name: '其他',

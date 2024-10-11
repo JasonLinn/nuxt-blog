@@ -23,7 +23,7 @@ const useRelativeStore = defineStore("useRelativeStore", {
     resetRelative() {
       this.relativeData = initState.relativeData;
     },
-    async fetchAndSetRelative() {
+    async fetchAndSetRelative(cate) {
         const url = useRequestURL()
         const {
             pending,
@@ -31,7 +31,7 @@ const useRelativeStore = defineStore("useRelativeStore", {
             error
           } = await useFetch('/api/relative', {
             query: {
-                category: initState.currentCate,
+                category: cate || initState.currentCate,
                 page: initState.currentPage,
                 pageSize: 10
             }

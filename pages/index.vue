@@ -1,7 +1,7 @@
 <template>
   <div class="flex container">
     <ul class="category flex w-full max-w-4xl">
-      <li class="category-item" :class="[!currentCate ? 'active' : '']">
+      <li class="category-item active">
         <NuxtLink
         :to="{
           name: 'index'
@@ -9,13 +9,10 @@
       </li>
       <li
         v-for="cate in category" class="category-item"
-        :class="[currentCate == cate.id ? 'active' : '']"
       >
         <NuxtLink
           :to="{
-            query: {
-              cate: cate.id
-            }
+            name: 'cate-id', params: { id: cate.id }
           }"
         >{{ cate.name }}</NuxtLink>
       </li>
@@ -287,7 +284,22 @@ const hotTag = [
   '租車',
   '湯屋'
 ]
+// await useFetch('/api/articles', {
+//   query: {
+//     category: currentCate,
+//     page: currentPage,
+//     pageSize: 10
+//     }
+//   }).then(res => {
+//     let obj = {
+//       data: {
+//         items: []
+//       }
+//     }
 
+//     obj.data = res.data.value
+//     store.setCoupon(obj.data)
+//   })
 
 // const {
 //   pending,
@@ -299,24 +311,24 @@ const hotTag = [
 const couponObject = computed(() => store.getCouponData)
 
 console.log(couponObject, 'eeeeeeefffff')
-watch(currentCate, ()=>{
-  // 重新抓取資料
-  useFetch('/api/articles', {
-  query: {
-    category: currentCate,
-    page: currentPage,
-    pageSize: 10
-    }
-  }).then(res => {
-    let obj = {
-      data: {
-        items: []
-      }
-    }
+// watch(currentCate, ()=>{
+//   // 重新抓取資料
+//   useFetch('/api/articles', {
+//   query: {
+//     category: currentCate,
+//     page: currentPage,
+//     pageSize: 10
+//     }
+//   }).then(res => {
+//     let obj = {
+//       data: {
+//         items: []
+//       }
+//     }
 
-    obj.data = res.data.value
-    store.setCoupon(obj.data)
-  })
+//     obj.data = res.data.value
+//     store.setCoupon(obj.data)
+//   })
 
   //sort 改變資料
 //   const items = [
@@ -353,7 +365,7 @@ watch(currentCate, ()=>{
 //   console.log(sortCouponObject, 'tttttt')
 //   store.setCoupon(sortCouponObject.data)
 //   console.log(couponObject, 'eeeeeee')
-})
+// })
 
 
 const date2LocaleString = (date) => {
