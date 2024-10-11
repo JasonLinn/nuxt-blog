@@ -28,7 +28,7 @@
           </span>
         </div>
         <div class="search">
-          <input type="text" class="searchInput" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText">
+          <input type="text" class="searchInput" maximum-scale="1" placeholder="請輸入關鍵字" v-model="searchText">
           <svg
             v-if="searchText"
             @click="cleanText"
@@ -86,9 +86,6 @@
                     </h2>
                     <span class="cupon-category">
                       {{ hadleCategory(article.category) }}
-                    </span>
-                    <span class="cupon-category">
-                      {{ article.isReferral ? '推薦代碼' : '免費' }}
                     </span>
                     <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                       {{ date2LocaleString(article.updated_at) }}
