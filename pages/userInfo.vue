@@ -5,14 +5,14 @@
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
             <h2 class="cupon-geted">已領優惠券</h2>
             <hr>
-            <div v-if="coupons">
-                <div v-if="!coupons?.length">尚未領取優惠券</div>
+            <div v-if="items" class="coupon-list">
+                <div v-if="!items?.length">尚未領取優惠券</div>
                 <article
-                    v-for="coupon in coupons"
+                    v-for="coupon in items"
                     :key="JSON.parse(coupon).id"
                     class="cupon col-md-3"
                     >
-                    <NuxtLink
+                    <div
                         class="coupon-wrapper"
                         :to="{
                           name: 'articles-id',
@@ -27,63 +27,39 @@
                         <div class="barcode">
                           <img :src="JSON.parse(coupon).cover" class="cupon-img"/>
                         </div>
-                        <p class="index-cupon-text">
-                            {{ JSON.parse(coupon).content.replace(/\n/g, ' ').substring(0, 300) }}
-                        </p>
+                        <div class="cupon-line"></div>
+                        <AccordionRoot
+                          class="AccordionRoot"
+                          default-value="'item-1'"
+                          type="single"
+                          :collapsible="true"
+                        >
+                            <AccordionItem
+                              class="AccordionItem"
+                              value="item.value"
+                            >
+                              <AccordionHeader class="AccordionHeader">
+                                <AccordionTrigger class="AccordionTrigger">
+                                  <span>查看使用說明</span>
+                                  <Icon
+                                    icon="radix-icons:chevron-down"
+                                    class="AccordionChevron"
+                                    aria-label="Expand/Collapse"
+                                  />
+                                </AccordionTrigger>
+                              </AccordionHeader>
+                              <AccordionContent class="AccordionContent">
+                                <div class="AccordionContentText">
+                                  {{ JSON.parse(coupon).content.replace(/\n/g, ' ') }}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                        </AccordionRoot>
                         <div class="timer">使用期限<br>00 天 00 小時 00 分 00 秒</div>
                         <button class="button">標註為已兌換</button>
                         <div class="footer">此按鈕請交由門市人員點擊</div>
                     </div>
-                      <div class="container card-wrapper">
-                        <div class="card">
-                          <div class="main">
-                            <div class="co-img">
-                              <img
-                                :src="JSON.parse(coupon).cover" class="cupon-img"
-                              />
-                            </div>
-                            <div class="vertical"></div>
-                            <div class="content">
-                              <h2 class="cupon-title">
-                                  <span class="">{{ JSON.parse(coupon).title }}</span>
-                              </h2>
-                              <p class="index-cupon-text">
-                                  {{ JSON.parse(coupon).content.replace(/\n/g, ' ').substring(0, 300) }}
-                              </p>
-                            </div>
-                          </div>
-                          <div class="copy-button">
-                            <input id="copyvalue" type="text" readonly value="確定領取" />
-                            <button onclick="copyIt()" class="copybtn">COPY</button>
-                          </div>
-                        </div>
-                      </div>
-
-                          <div class="cupon-img-wrapper">
-                          <img :src="JSON.parse(coupon).cover" class="cupon-img"/>
-                          </div>
-                          <div class="cupon-info">
-                          <h2 class="cupon-title">
-                              <span class="">{{ JSON.parse(coupon).title }}</span>
-                          </h2>
-                          <span class="cupon-category">
-                              <!-- {{ hadleCategory(JSON.parse(coupon).category) }} -->
-                          </span>
-                          <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
-                              {{ date2LocaleString(JSON.parse(coupon).updated_at) }}
-                          </time> -->
-                          <p class="index-cupon-text">
-                              {{ JSON.parse(coupon).content.replace(/\n/g, ' ').substring(0, 300) }}
-                          </p>
-                        </div>
-                        <!-- <span
-                        aria-hidden="true"
-                        class="mt-4 flex items-center text-sm font-medium text-emerald-500"
-                        >
-                        看更多
-                        <Icon name="ri:arrow-right-s-line" />
-                        </span> -->
-                    </NuxtLink>
+                    </div>
                     <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
                         {{ date2LocaleString(article.updated_at) }}
                     </time> -->
@@ -95,19 +71,39 @@
 
 <script setup>
 import useStore from "~~/store";
+import { AccordionContent, AccordionHeader, AccordionItem, AccordionRoot, AccordionTrigger } from 'radix-vue'
+import { Icon } from '@iconify/vue'
 const store = useStore();
 const userName = computed(() => store.getUserDisplayName);
 const userId = store.getUserId
 const coupons = computed(() => store.getUserCoupons)
+
+const accordionItems = [
+  {
+    value: 'item-1',
+    title: 'Is it accessible?',
+    content: 'Yes. It adheres to the WAI-ARIA design pattern.',
+  },
+  {
+    value: 'item-2',
+    title: 'Is it unstyled?',
+    content: 'Yes. It\'s unstyled by default, giving you freedom over the look and feel.',
+  },
+  {
+    value: 'item-3',
+    title: 'Can it be animated?',
+    content: 'Yes! You can use the transition prop to configure the animation.',
+  },
+]
+
 // const userI = store.getUserInfo
 // const data =''
 // onMounted(() => {
 //   const { pending, data: user, error } = useFetch(`/api/user/${userId}`)
 // })
-console.log(coupons, 'kkkkkkqqqq', userId)
 
 const items = [
-  "{\"id\":35,\"title\":\"農場\",\"category\":\"buy\",\"content\":\"GOOD\",\"cover\":\"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg\",\"amount\":9952,\"used_times\":0,\"hash\":[\"\"],\"updated_at\":\"2024-07-24T06:05:16.617Z\"}",
+  "{\"id\":35,\"title\":\"米樂客丨人氣米蛋糕丨伴手禮\",\"category\":\"buy\",\"content\":\"【使用說明】1.米蛋糕口味限定：招牌鴨賞、金莎巧克力、起司南瓜、經典香古早味、陽光芝麻2.如遇缺貨，以現場口味現貨為主。3.此優惠活動不與其他優惠活動合併使用。4.使用折價券，顯示此圖片即可使用。5.需購買第1件原價，第2件可享299元，第3件原價，第4件$299，以此類推。6.此為店家特殊優惠活動，如遇消費疑慮糾紛等，店家保有解釋並回收權責。\",\"cover\":\"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg\",\"amount\":9952,\"used_times\":0,\"hash\":[\"\"],\"updated_at\":\"2024-07-24T06:05:16.617Z\"}",
   "{\"id\":35,\"title\":\"農場\",\"category\":\"buy\",\"content\":\"GOOD\",\"cover\":\"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg\",\"amount\":9951,\"used_times\":0,\"hash\":[\"\"],\"updated_at\":\"2024-07-24T06:21:04.378Z\"}"
 ]
 const fakeUser = {
@@ -130,10 +126,42 @@ const fakeUser = {
 </script>
 
 <style lang="scss" scoped>
+.coupon-list {
+  overflow: hidden;
+  padding-top: 20px;
+}
 .cupon-geted {
   font-weight: bold;
   margin-bottom: 20px;
   margin-top: 10px;
+}
+.cupon-line {
+  position: relative;
+  border-top: 5px dotted #7c7c7c;
+  margin-bottom: 20px;
+}
+.cupon-line::after {
+  position: absolute;
+  content: "";
+  height: 40px;
+  right: -45px;
+  border-radius: 40px;
+  z-index: 1;
+  top: -25px;
+  background-color: #fff;
+  width: 40px;
+}
+
+.cupon-line::before {
+  position: absolute;
+  content: "";
+  height: 40px;
+  left: -45px;
+  border-radius: 40px;
+  z-index: 1;
+  top: -25px;
+  background-color: #fff;
+  width: 40px;
 }
 .cupon-wrapper {
   // border-radius: 10px;
@@ -199,29 +227,7 @@ const fakeUser = {
 .card-wrapper {
   overflow: hidden;
 }
-.card::after {
-  position: absolute;
-  content: "";
-  height: 40px;
-  right: -25px;
-  border-radius: 40px;
-  z-index: 1;
-  top: 70px;
-  background-color: #fff;
-  width: 40px;
-}
 
-.card::before {
-  position: absolute;
-  content: "";
-  height: 40px;
-  left: -25px;
-  border-radius: 40px;
-  z-index: 1;
-  top: 70px;
-  background-color: #fff;
-  width: 40px;
-}
 
 .co-img img {
   width: 100px;
@@ -279,38 +285,30 @@ const fakeUser = {
   border: 1px solid transparent;
 }
 .coupon {
-    width: 300px;
     background-color: #e5f5ff;
     border-radius: 15px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     position: relative;
+    padding: 20px;
+    margin-bottom: 60px;
 }
 
-.coupon:before, .coupon:after {
-    content: '';
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background-color: #fff;
+.coupon::before {
+    content: "";
+    display: block;
+    background-color: #e5f5ff;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.coupon:before {
-    left: -15px;
-}
-
-.coupon:after {
-    right: -15px;
+    position: absolute;
+    top: -20px;
+    right: 0;
+    left: 0;
+    margin: auto;
 }
 
 .header {
-    background-color: #0099FF;
-    color: white;
-    padding: 10px;
-    border-radius: 15px 15px 0 0;
     font-size: 16px;
 }
 
@@ -337,5 +335,99 @@ const fakeUser = {
     margin: 20px;
     color: #999;
     font-size: 12px;
+}
+.AccordionRoot {
+  border-radius: 6px;
+  background-color: var(--mauve-6);
+  box-shadow: 0 2px 10px var(--black-a4);
+}
+
+.AccordionItem {
+  overflow: hidden;
+  margin-top: 1px;
+}
+
+.AccordionItem:first-child {
+  margin-top: 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.AccordionItem:last-child {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.AccordionItem:focus-within {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 2px var(--mauve-12);
+}
+
+.AccordionHeader {
+  display: flex;
+}
+
+.AccordionTrigger {
+  font-family: inherit;
+  background-color: transparent;
+  padding: 0 20px;
+  height: 45px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--grass-11);
+  box-shadow: 0 1px 0 var(--mauve-6);
+  background-color: white;
+}
+
+.AccordionTrigger:hover {
+  background-color: var(--mauve-2);
+}
+
+.AccordionContent {
+  overflow: hidden;
+  font-size: 15px;
+  color: var(--mauve-11);
+  background-color: var(--mauve-2);
+}
+.AccordionContent[data-state='open'] {
+  animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+.AccordionContent[data-state='closed'] {
+  animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.AccordionContentText {
+  padding: 15px 20px;
+}
+
+.AccordionChevron {
+  color: var(--grass-10);
+  transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+.AccordionTrigger[data-state='open'] > .AccordionChevron {
+  transform: rotate(180deg);
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
 }
 </style>
