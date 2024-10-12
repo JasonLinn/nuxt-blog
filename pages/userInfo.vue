@@ -5,10 +5,10 @@
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
             <h2 class="cupon-geted">已領優惠券</h2>
             <hr>
-            <div v-if="items" class="coupon-list">
-                <div v-if="!items?.length">尚未領取優惠券</div>
+            <div v-if="coupons" class="coupon-list">
+                <div v-if="!coupons?.length">尚未領取優惠券</div>
                 <article
-                    v-for="coupon in items"
+                    v-for="coupon in coupons"
                     :key="JSON.parse(coupon).id"
                     class="cupon col-md-3"
                     >
