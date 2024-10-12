@@ -25,7 +25,7 @@
                           <span class="">{{ JSON.parse(coupon).title }}</span>
                         </div>
                         <div class="barcode">
-                          <img :src="JSON.parse(coupon).cover" class="cupon-img"/>
+                          <img :src="JSON.parse(coupon).cover[0]" class="cupon-img"/>
                         </div>
                         <div class="cupon-line"></div>
                         <AccordionRoot
@@ -103,8 +103,9 @@ const accordionItems = [
 // })
 
 const items = [
-  "{\"id\":35,\"title\":\"米樂客丨人氣米蛋糕丨伴手禮\",\"category\":\"buy\",\"content\":\"【使用說明】1.米蛋糕口味限定：招牌鴨賞、金莎巧克力、起司南瓜、經典香古早味、陽光芝麻2.如遇缺貨，以現場口味現貨為主。3.此優惠活動不與其他優惠活動合併使用。4.使用折價券，顯示此圖片即可使用。5.需購買第1件原價，第2件可享299元，第3件原價，第4件$299，以此類推。6.此為店家特殊優惠活動，如遇消費疑慮糾紛等，店家保有解釋並回收權責。\",\"cover\":\"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg\",\"amount\":9952,\"used_times\":0,\"hash\":[\"\"],\"updated_at\":\"2024-07-24T06:05:16.617Z\"}",
-  "{\"id\":35,\"title\":\"農場\",\"category\":\"buy\",\"content\":\"GOOD\",\"cover\":\"https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg\",\"amount\":9951,\"used_times\":0,\"hash\":[\"\"],\"updated_at\":\"2024-07-24T06:21:04.378Z\"}"
+  "{\"id\":48,\"title\":\"蘇澳冷泉丨VIP、頂級湯屋\",\"category\":\"play\",\"content\":\"蘇澳冷泉二樓VIP湯屋及頂級湯屋，限定2人一間作折扣，\\n需現場排隊不可預約 ，折價150元\",\"cover\":[\"https://nuxt-blog-swart.vercel.app/shop/play/cold1.jpg\",\"https://nuxt-blog-swart.vercel.app/shop/play/cold2.jpg\",\"https://nuxt-blog-swart.vercel.app/shop/play/cold3.JPG\"],\"amount\":9993,\"used_times\":0,\"isReferral\":false,\"hash\":[\"\"],\"updated_at\":\"2024-10-11T06:02:36.140Z\",\"referral\":null}",
+  "{\"id\":47,\"title\":\"陳家庄農園丨米果丨米餅丨伴手禮\",\"category\":\"buy\",\"content\":\"優惠內容：\\n1.陳家庄米果袋裝3包$250優惠，原價$108/包\\n2.陳家庄米餅罐裝3罐$500優惠，原價$200/罐\\n3.宜蘭嚴選居仁米一箱$1000+免運費（居仁米3.5公斤✖️5包）原價$1250\\n\\n\\n\\n了解更多農園近況歡迎臉書&IG追蹤我們\\n臉書：陳家庄農園\\nIG：228sandy\\nLINE：@riceshop\\n聯繫電話： TEL:0971005171\\n陳家庄官網： https://www.rice-shop.com.tw/about.html \",\"cover\":[\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm1.jpeg\",\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm.jpeg\",\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm2.jpeg\"],\"amount\":9988,\"used_times\":0,\"isReferral\":false,\"hash\":[\"\"],\"updated_at\":\"2024-09-26T00:56:48.254Z\",\"referral\":null}",
+  "{\"id\":47,\"title\":\"陳家庄農園丨米果丨米餅丨伴手禮\",\"category\":\"buy\",\"content\":\"優惠內容：\\n1.陳家庄米果袋裝3包$250優惠，原價$108/包\\n2.陳家庄米餅罐裝3罐$500優惠，原價$200/罐\\n3.宜蘭嚴選居仁米一箱$1000+免運費（居仁米3.5公斤✖️5包）原價$1250\\n\\n\\n\\n了解更多農園近況歡迎臉書&IG追蹤我們\\n臉書：陳家庄農園\\nIG：228sandy\\nLINE：@riceshop\\n聯繫電話： TEL:0971005171\\n陳家庄官網： https://www.rice-shop.com.tw/about.html \",\"cover\":[\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm1.jpeg\",\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm.jpeg\",\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm2.jpeg\"],\"amount\":9987,\"used_times\":0,\"isReferral\":false,\"hash\":[\"\"],\"updated_at\":\"2024-09-26T00:56:48.254Z\",\"referral\":null}"
 ]
 const fakeUser = {
   id: 11,
