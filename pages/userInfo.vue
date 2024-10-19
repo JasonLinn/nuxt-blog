@@ -422,7 +422,6 @@ const fakeUser = {
   white-space: pre-wrap;
   text-align: left;
   border: 1px dashed;
-  border-top: none;
 }
 
 .AccordionChevron {
