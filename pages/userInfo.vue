@@ -56,16 +56,16 @@
                             </AccordionItem>
                         </AccordionRoot>
                         <table class="coupon-info-table">
-                          <tr>
-                            <td>推薦店家：</td>
-                            <td>{{ JSON.parse(coupon).referral || '無' }}</td>
+                          <tr class="coupon-info-tr">
+                            <td class="coupon-info-title">推薦店家：</td>
+                            <td>{{ JSON.parse(coupon).referral?.name || '無' }}</td>
                           </tr>
-                          <tr>
-                            <td>兌換序號：</td>
+                          <tr class="coupon-info-tr">
+                            <td class="coupon-info-title">兌換序號：</td>
                             <td>{{ JSON.parse(coupon).hash[0] || '無' }}</td>
                           </tr>
-                          <tr>
-                            <td>使用期限：</td>
+                          <tr class="coupon-info-tr">
+                            <td class="coupon-info-title">使用期限：</td>
                             <td>2024/12/31</td>
                           </tr>
                         </table>
@@ -305,6 +305,10 @@ const fakeUser = {
   margin-top: 15px;
   text-align: left;
 }
+.coupon-info-title {
+  width: 90px;
+  padding: 3px 0;
+}
 // .coupon::before {
 //     content: "";
 //     display: block;
@@ -417,6 +421,8 @@ const fakeUser = {
   padding: 15px 10px;
   white-space: pre-wrap;
   text-align: left;
+  border: 1px dashed;
+  border-top: none;
 }
 
 .AccordionChevron {
