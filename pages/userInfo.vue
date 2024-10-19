@@ -50,7 +50,7 @@
                               </AccordionHeader>
                               <AccordionContent class="AccordionContent">
                                 <div class="AccordionContentText">
-                                  {{ JSON.parse(coupon).content.replace(/\n/g, '<br> ') }}
+                                  {{ JSON.parse(coupon).content }}
                                 </div>
                               </AccordionContent>
                             </AccordionItem>
@@ -414,7 +414,9 @@ const fakeUser = {
 }
 
 .AccordionContentText {
-  padding: 15px 20px;
+  padding: 15px 10px;
+  white-space: pre-wrap;
+  text-align: left;
 }
 
 .AccordionChevron {
