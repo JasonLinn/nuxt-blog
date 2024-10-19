@@ -50,14 +50,27 @@
                               </AccordionHeader>
                               <AccordionContent class="AccordionContent">
                                 <div class="AccordionContentText">
-                                  {{ JSON.parse(coupon).content.replace(/\n/g, ' ') }}
+                                  {{ JSON.parse(coupon).content.replace(/\n/g, '<br> ') }}
                                 </div>
                               </AccordionContent>
                             </AccordionItem>
                         </AccordionRoot>
-                        <div class="timer">使用期限<br>00 天 00 小時 00 分 00 秒</div>
-                        <button class="button">標註為已兌換</button>
-                        <div class="footer">此按鈕請交由門市人員點擊</div>
+                        <table class="coupon-info-table">
+                          <tr>
+                            <td>推薦店家：</td>
+                            <td>{{ JSON.parse(coupon).referral || '無' }}</td>
+                          </tr>
+                          <tr>
+                            <td>兌換序號：</td>
+                            <td>{{ JSON.parse(coupon).hash[0] || '無' }}</td>
+                          </tr>
+                          <tr>
+                            <td>使用期限：</td>
+                            <td>2024/12/31</td>
+                          </tr>
+                        </table>
+                        <button class="coupon-button">標註為已兌換</button>
+                        <div class="coupon-footer">此按鈕請交由門市人員點擊</div>
                     </div>
                     </div>
                     <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
@@ -129,7 +142,6 @@ const fakeUser = {
 <style lang="scss" scoped>
 .coupon-list {
   overflow: hidden;
-  padding-top: 20px;
 }
 .cupon-geted {
   font-weight: bold;
@@ -202,11 +214,6 @@ const fakeUser = {
   color: rgb(117, 117, 117);
   background-color: rgb(245, 245, 245);
   margin-bottom: 10px;
-}
-.coupon-wrapper {
-  display: flex;
-  align-items: center;
-  flex-flow: column;
 }
 .card {
   width: 100%;
@@ -294,20 +301,23 @@ const fakeUser = {
     padding: 20px;
     margin-bottom: 60px;
 }
-
-.coupon::before {
-    content: "";
-    display: block;
-    background-color: #e5f5ff;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    position: absolute;
-    top: -20px;
-    right: 0;
-    left: 0;
-    margin: auto;
+.coupon-info-table {
+  margin-top: 15px;
+  text-align: left;
 }
+// .coupon::before {
+//     content: "";
+//     display: block;
+//     background-color: #e5f5ff;
+//     width: 40px;
+//     height: 40px;
+//     border-radius: 50%;
+//     position: absolute;
+//     top: -20px;
+//     right: 0;
+//     left: 0;
+//     margin: auto;
+// }
 
 .header {
     font-size: 16px;
@@ -323,17 +333,18 @@ const fakeUser = {
     margin: 20px 0;
 }
 
-.button {
+.coupon-button {
     background-color: #00cc99;
     color: white;
     padding: 10px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin-top: 15px;
 }
 
-.footer {
-    margin: 20px;
+.coupon-footer {
+    margin: 10px 0;
     color: #999;
     font-size: 12px;
 }
