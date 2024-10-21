@@ -64,10 +64,12 @@
                             </tr>
                           </tbody>
                         </table>
+                        <button claas="btn btn-gray" v-if="JSON.parse(coupon).received">已兌換</button>
                         <button
                           class="coupon-button"
                           @click="received"
                           :id="JSON.parse(coupon).id"
+                          v-if="!JSON.parse(coupon).received"
                         >標註為已兌換</button>
                         <div class="coupon-footer">此按鈕請交由門市人員點擊</div>
                     </div>
@@ -86,7 +88,7 @@ import useStore from "~~/store";
 import { AccordionContent, AccordionHeader, AccordionItem, AccordionRoot, AccordionTrigger } from 'radix-vue'
 import { Icon } from '@iconify/vue'
 const store = useStore();
-const userName = computed(() => store.getUserDisplayName);
+const userName = store.getUserDisplayName
 const userId = store.getUserId
 const coupons = computed(() => store.getUserCoupons)
 
@@ -139,19 +141,28 @@ const fakeUser = {
 
 const received = (e) => {
   const getted = confirm("是否確認兌換?");
+  let couponGetted = {}
 
   if (getted) {
-    const couponGetted = items.find((coupon)=>{
-      return JSON.parse(coupon).id == Number(e.target.id)
+    let newCoupons = items.map((coupon)=> {
+      let jsonCoupon = JSON.parse(coupon)
+
+      if (jsonCoupon.id == Number(e.target.id)) {
+        jsonCoupon.received = true
+        couponGetted = jsonCoupon
+
+        return couponGetted
+      }
+
+      return jsonCoupon
     })
-    const couponRecived = JSON.parse(couponGetted)
 
     $fetch('/api/received', {
       method: 'POST',
       body: {
-        coupon_title: couponRecived.title,
-        coupon_id: couponRecived.id,
-        coupon_content: couponRecived.content,
+        coupon_title: couponGetted.title,
+        coupon_id: couponGetted.id,
+        coupon_content: couponGetted.content,
         user_id: userId || 0,
         user_name: userName || 'undefined',
         remark: ''
@@ -161,6 +172,19 @@ const received = (e) => {
         console.log(response, 'rrrrr')
       })
       .catch((error) => alert(error))
+
+
+    $fetch(`/api/user/updateCoupon`, {
+      method: 'PATCH',
+        body: {
+          coupons: newCoupons,
+          user: userId,
+        }
+    })
+    .then((response) => {
+      console.log(response)
+    })
+    .catch((error) => alert(error))
   }
 }
 </script>
