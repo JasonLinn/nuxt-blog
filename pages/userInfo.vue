@@ -178,7 +178,7 @@ const received = (e) => {
       method: 'PATCH',
         body: {
           coupons: newCoupons,
-          user: userId,
+          userId: userId,
         }
     })
     .then((response) => {
