@@ -144,7 +144,7 @@ const received = (e) => {
   let couponGetted = {}
 
   if (getted) {
-    let newCoupons = items.map((coupon)=> {
+    let newCoupons = coupons.map((coupon)=> {
       let jsonCoupon = JSON.parse(coupon)
 
       if (jsonCoupon.id == Number(e.target.id)) {
