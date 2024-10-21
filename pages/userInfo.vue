@@ -182,7 +182,7 @@ const received = (e) => {
         }
     })
     .then((response) => {
-      store.getUserCoupons
+      // store.getUserCoupons
       console.log(response)
     })
     .catch((error) => alert(error))
