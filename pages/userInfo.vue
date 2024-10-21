@@ -64,7 +64,7 @@
                             </tr>
                           </tbody>
                         </table>
-                        <button claas="btn btn-gray" v-if="JSON.parse(coupon).received">已兌換</button>
+                        <button claas="btn btn-gray coupon-button-received" v-if="JSON.parse(coupon).received">已兌換</button>
                         <button
                           class="coupon-button"
                           @click="received"
@@ -182,6 +182,7 @@ const received = (e) => {
         }
     })
     .then((response) => {
+      store.getUserCoupons
       console.log(response)
     })
     .catch((error) => alert(error))
@@ -401,6 +402,9 @@ const received = (e) => {
     border-radius: 5px;
     cursor: pointer;
     margin-top: 15px;
+}
+.coupon-button-received {
+  margin-top: 15px;
 }
 
 .coupon-footer {

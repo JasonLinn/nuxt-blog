@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const couponRecord = await pool
     .query(
       'UPDATE "user" SET "coupons" =  $1 WHERE "user_id" = $2 RETURNING *;',
-      [body.coupons, body.user.userId]
+      [body.coupons, body.userId]
     )
     .then((result) => {
       if (result.rowCount === 1) {
