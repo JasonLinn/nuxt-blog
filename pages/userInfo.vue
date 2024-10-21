@@ -153,7 +153,7 @@ const received = (e) => {
         coupon_id: couponRecived.id,
         coupon_content: couponRecived.content,
         user_id: userId || 0,
-        user_name: couponRecived.userName || 'undefined',
+        user_name: userName || 'undefined',
         remark: ''
       }
     })
