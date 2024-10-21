@@ -12,17 +12,10 @@
                     :key="JSON.parse(coupon).id"
                     class="cupon col-md-3"
                     >
-                    <div
-                        class="coupon-wrapper"
-                        :to="{
-                          name: 'articles-id',
-                          params: {
-                              id: JSON.parse(coupon).id
-                        }}"
-                    >
+                    <div class="coupon-wrapper">
                     <div class="coupon">
                         <div class="header">
-                          <span class="">{{ JSON.parse(coupon).title }}</span>
+                          <span class="coupon-title">{{ JSON.parse(coupon).title }}</span>
                         </div>
                         <div class="barcode">
                           <img :src="JSON.parse(coupon).cover[0]" class="cupon-img"/>
@@ -56,20 +49,26 @@
                             </AccordionItem>
                         </AccordionRoot>
                         <table class="coupon-info-table">
-                          <tr class="coupon-info-tr">
-                            <td class="coupon-info-title">推薦店家：</td>
-                            <td>{{ JSON.parse(coupon).referral?.name || '無' }}</td>
-                          </tr>
-                          <tr class="coupon-info-tr">
-                            <td class="coupon-info-title">兌換序號：</td>
-                            <td>{{ JSON.parse(coupon).hash[0] || '無' }}</td>
-                          </tr>
-                          <tr class="coupon-info-tr">
-                            <td class="coupon-info-title">使用期限：</td>
-                            <td>2024/12/31</td>
-                          </tr>
+                          <tbody>
+                            <tr class="coupon-info-tr">
+                              <td class="coupon-info-title">推薦店家：</td>
+                              <td>{{ JSON.parse(coupon).referral?.name || '無' }}</td>
+                            </tr>
+                            <tr class="coupon-info-tr">
+                              <td class="coupon-info-title">兌換序號：</td>
+                              <td>{{ JSON.parse(coupon).hash[0] || '無' }}</td>
+                            </tr>
+                            <tr class="coupon-info-tr">
+                              <td class="coupon-info-title">使用期限：</td>
+                              <td>2024/12/31</td>
+                            </tr>
+                          </tbody>
                         </table>
-                        <button class="coupon-button">標註為已兌換</button>
+                        <button
+                          class="coupon-button"
+                          @click="received"
+                          :id="JSON.parse(coupon).id"
+                        >標註為已兌換</button>
                         <div class="coupon-footer">此按鈕請交由門市人員點擊</div>
                     </div>
                     </div>
@@ -137,6 +136,33 @@ const fakeUser = {
 // user.map((item)=> {
 //     console.log(JSON.parse(item).title, 'kkkkkk')
 // })
+
+const received = (e) => {
+  const getted = confirm("是否確認兌換?");
+
+  if (getted) {
+    const couponGetted = items.find((coupon)=>{
+      return JSON.parse(coupon).id == Number(e.target.id)
+    })
+    const couponRecived = JSON.parse(couponGetted)
+
+    $fetch('/api/received', {
+      method: 'POST',
+      body: {
+        coupon_title: couponRecived.title,
+        coupon_id: couponRecived.id,
+        coupon_content: couponRecived.content,
+        user_id: userId || 0,
+        user_name: couponRecived.userName || 'undefined',
+        remark: ''
+      }
+    })
+      .then((response) => {
+        console.log(response, 'rrrrr')
+      })
+      .catch((error) => alert(error))
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -147,6 +173,8 @@ const fakeUser = {
   font-weight: bold;
   margin-bottom: 20px;
   margin-top: 10px;
+  font-size: 20px;
+  text-align: center;
 }
 .cupon-line {
   position: relative;
@@ -325,6 +353,10 @@ const fakeUser = {
 
 .header {
     font-size: 16px;
+}
+.coupon-title {
+  font-weight: bold;
+  font-size: 20px;
 }
 
 .timer {
