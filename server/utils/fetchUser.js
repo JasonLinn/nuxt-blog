@@ -3,7 +3,7 @@ import { LIFF_ID } from "./liffID";
 
 const fetchUser = async () => {
     try {
-        await liff.init({ liffId: LIFF_ID[useRoute().fullPath] }); // Use own liffId
+        await liff.init({ liffId: LIFF_ID[useRoute().name] }); // Use own liffId
         const user = await liff.getProfile().then(async (profile) => {
           if (!liff.isLoggedIn()) {
             return;
