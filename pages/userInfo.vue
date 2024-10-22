@@ -8,8 +8,8 @@
             <div v-if="coupons" class="coupon-list">
                 <div v-if="!coupons?.length">尚未領取優惠券</div>
                 <article
-                    v-for="coupon in coupons"
-                    :key="JSON.parse(coupon).id"
+                    v-for="(coupon, index) in coupons"
+                    :key="JSON.parse(coupon).id + index"
                     class="cupon col-md-3"
                     >
                     <div class="coupon-wrapper">
@@ -182,8 +182,9 @@ const received = (e) => {
           userId: userId,
         }
     })
-    .then((response) => {
-      console.log(response)
+    .then(async () => {
+      alert('已標註兌換!')
+      await navigateTo('/relative')
     })
     .catch((error) => alert(error))
   }
