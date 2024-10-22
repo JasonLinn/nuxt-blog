@@ -71,7 +71,7 @@
                           :id="JSON.parse(coupon).id"
                           v-if="!JSON.parse(coupon).received"
                         >標註為已兌換</button>
-                        <div class="coupon-footer">此按鈕請交由門市人員點擊</div>
+                        <div class="coupon-footer" v-if="JSON.parse(coupon).received">此按鈕請交由門市人員點擊</div>
                     </div>
                     </div>
                     <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
