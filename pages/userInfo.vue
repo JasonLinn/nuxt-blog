@@ -90,7 +90,8 @@ import { Icon } from '@iconify/vue'
 const store = useStore();
 const userName = store.getUserDisplayName
 const userId = store.getUserId
-const coupons = computed(() => store.getUserCoupons)
+const data = store.getCoupons(userId)
+const coupons = computed(() => store.getUserCoupons?.reverse())
 
 const accordionItems = [
   {
@@ -144,7 +145,7 @@ const received = (e) => {
   let couponGetted = {}
 
   if (getted) {
-    let newCoupons = coupons.map((coupon)=> {
+    let newCoupons = coupons.value.map((coupon)=> {
       let jsonCoupon = JSON.parse(coupon)
 
       if (jsonCoupon.id == Number(e.target.id)) {
@@ -169,7 +170,7 @@ const received = (e) => {
       }
     })
       .then((response) => {
-        console.log(response, 'rrrrr')
+        console.log(response)
       })
       .catch((error) => alert(error))
 
@@ -182,7 +183,6 @@ const received = (e) => {
         }
     })
     .then((response) => {
-      // store.getUserCoupons
       console.log(response)
     })
     .catch((error) => alert(error))
@@ -357,6 +357,7 @@ const received = (e) => {
 .coupon-info-table {
   margin-top: 15px;
   text-align: left;
+  margin-bottom: 15px;
 }
 .coupon-info-title {
   width: 90px;
@@ -401,10 +402,6 @@ const received = (e) => {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 15px;
-}
-.coupon-button-received {
-  margin-top: 15px;
 }
 
 .coupon-footer {
