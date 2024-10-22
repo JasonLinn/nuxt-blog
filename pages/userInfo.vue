@@ -184,7 +184,7 @@ const received = (e) => {
     })
     .then(async () => {
       alert('已標註兌換!')
-      await navigateTo('https://liff.line.me/2005661804-RoPMzgkN')
+      await navigateTo('/userInfo')
     })
     .catch((error) => alert(error))
   }
