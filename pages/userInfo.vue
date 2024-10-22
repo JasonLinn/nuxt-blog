@@ -184,7 +184,7 @@ const received = (e) => {
     })
     .then(async () => {
       alert('已標註兌換!')
-      await navigateTo('/userInfo')
+      await navigateTo('/')
     })
     .catch((error) => alert(error))
   }
