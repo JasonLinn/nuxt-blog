@@ -300,11 +300,22 @@ const handleHashRecive = () => {
     }
 }
 
-const getCupon = () => {
+const getCupon = async () => {
   // if (!liff.isLoggedIn()) {
   //   return;
   // }
-  console.log(article, referralStore, 'aaaa')
+  await liff.getProfile().then(profile => {
+    if (!liff.isLoggedIn()) {
+      return;
+    }
+    patchUser(profile)
+  })
+  await sendPatch()
+
+  alert('領取成功!')
+  await navigateTo('/userInfo')
+
+  return
   // let checkIcon = referralStore?.value?.name ? "https://nuxt-blog-swart.vercel.app/icon/check-circle-fill.svg" : "";
   let cupon = {
         "type": "bubble",
