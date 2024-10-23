@@ -2,6 +2,9 @@ export const referral = [
   {
     code: 'jinbnb',
     name: '衿日林民宿',
+  },{
+    code: 'yesbnb',
+    name: 'YES民宿',
   },
   { code: 'BNB335', name: '根本町咖啡民宿' },
   { code: 'BNB37L', name: '小Ｋ咖啡b&b民宿' },
