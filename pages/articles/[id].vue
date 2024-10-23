@@ -313,7 +313,9 @@ const getCupon = async () => {
   await sendPatch()
 
   alert('領取成功!')
-  await navigateTo('/userInfo')
+  setTimeout(async () => {
+    await navigateTo('/userInfo')
+  }, 3000);
 
   return
   // let checkIcon = referralStore?.value?.name ? "https://nuxt-blog-swart.vercel.app/icon/check-circle-fill.svg" : "";
