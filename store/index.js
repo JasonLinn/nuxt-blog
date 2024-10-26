@@ -17,6 +17,9 @@ const useStore = defineStore("useStore", {
       this.userData = initState.userData;
       // return this.userData
     },
+    setCoupons(coupons) {
+      this.couponData = coupons
+    },
     async getCoupons(id) {
       const userCoupons = await $fetch(`/api/user/${id}`)
         .then((response) => {

@@ -68,7 +68,7 @@
                         <button
                           class="coupon-button"
                           @click="received"
-                          :id="coupon.id"
+                          :id="coupon.updated_at"
                           v-if="!coupon.received"
                         >標註為已兌換</button>
                         <div class="coupon-footer" v-if="!coupon.received">此按鈕請交由門市人員點擊</div>
@@ -146,7 +146,7 @@ const received = (e) => {
 
   if (getted) {
     let newCoupons = coupons.value.map((objectCoupon)=> {
-      if (objectCoupon.id == Number(e.target.id)) {
+      if (objectCoupon.updated_at == e.target.id) {
         objectCoupon.received = true
         couponGetted = objectCoupon
 
@@ -182,7 +182,7 @@ const received = (e) => {
     })
     .then(async () => {
       alert('已標註兌換!')
-      await navigateTo('/')
+      store.setCoupons(newCoupons)
     })
     .catch((error) => alert(error))
   }
