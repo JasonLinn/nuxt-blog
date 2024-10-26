@@ -108,6 +108,7 @@
       </button>
       <button v-show="article.amount && !article.hash[0] && !article.isReferral || isCheckReferral" type="button" class="btn btn-success" @click="getCupon">
         領取優惠券
+        <Icon v-if="loading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
       </button>
     </div>
     </template>
@@ -189,6 +190,7 @@ const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
 const referralCode = ref('');
 const isOpenShare = ref(false)
+let loading = ref(false)
 let modal;
 let hash = []
 const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
@@ -304,6 +306,7 @@ const handleHashRecive = () => {
 }
 
 const getCupon = async () => {
+  loading = true
   // if (!liff.isLoggedIn()) {
   //   return;
   // }
