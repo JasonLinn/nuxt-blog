@@ -4,13 +4,14 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   const receivedRecord = await pool
-    .query('INSERT INTO "received" ("coupon_title", "coupon_id", "coupon_content", "user_id", "user_name", "remark") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;', [
+    .query('INSERT INTO "received" ("coupon_title", "coupon_id", "coupon_content", "user_id", "user_name", "remark", "received_time") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;', [
       body.coupon_title,
       body.coupon_id,
       body.coupon_content,
       body.user_id,
       body.user_name,
-      body.remark
+      body.remark,
+      body.received_time
     ])
     .then((result) => {
       if (result.rowCount === 1) {

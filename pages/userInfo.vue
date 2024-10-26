@@ -148,6 +148,7 @@ const received = (e) => {
     let newCoupons = coupons.value.map((objectCoupon)=> {
       if (objectCoupon.gotTime == e.target.id) {
         objectCoupon.received = true
+        objectCoupon.receivedTime = new Date()
         couponGetted = objectCoupon
 
         return couponGetted
@@ -164,7 +165,8 @@ const received = (e) => {
         coupon_content: couponGetted.content,
         user_id: userId || 0,
         user_name: userName || 'undefined',
-        remark: ''
+        remark: '',
+        received_time: couponGetted.receivedTime
       }
     })
       .then((response) => {
