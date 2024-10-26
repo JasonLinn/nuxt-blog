@@ -20,9 +20,9 @@ const useStore = defineStore("useStore", {
     async getCoupons(id) {
       const couponData = await $fetch(`/api/user/${id}`)
         .then((response) => {
-          return response?.coupons
+          return response?.coupons.map((item)=> JSON.parse(item)).sort((a, b)=> new Date(b.updated_at) - new Date(a.updated_at))
         })
-        .catch((error) => alert(error))
+        .catch((error) => console.log(error))
 
         this.couponData = couponData
     },

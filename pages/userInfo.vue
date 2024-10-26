@@ -9,16 +9,16 @@
                 <div v-if="!coupons?.length">尚未領取優惠券</div>
                 <article
                     v-for="(coupon, index) in coupons"
-                    :key="JSON.parse(coupon).id + index"
+                    :key="coupon.id + index"
                     class="cupon col-md-3"
                     >
                     <div class="coupon-wrapper">
                     <div class="coupon">
                         <div class="header">
-                          <span class="coupon-title">{{ JSON.parse(coupon).title }}</span>
+                          <span class="coupon-title">{{ coupon.title }}</span>
                         </div>
                         <div class="barcode">
-                          <img :src="JSON.parse(coupon).cover[0]" class="cupon-img"/>
+                          <img :src="coupon.cover[0]" class="cupon-img"/>
                         </div>
                         <div class="cupon-line"></div>
                         <AccordionRoot
@@ -43,7 +43,7 @@
                               </AccordionHeader>
                               <AccordionContent class="AccordionContent">
                                 <div class="AccordionContentText">
-                                  {{ JSON.parse(coupon).content }}
+                                  {{ coupon.content }}
                                 </div>
                               </AccordionContent>
                             </AccordionItem>
@@ -52,11 +52,11 @@
                           <tbody>
                             <tr class="coupon-info-tr">
                               <td class="coupon-info-title">推薦店家：</td>
-                              <td>{{ JSON.parse(coupon).referral?.name || '無' }}</td>
+                              <td>{{ coupon.referral?.name || '無' }}</td>
                             </tr>
                             <tr class="coupon-info-tr">
                               <td class="coupon-info-title">兌換序號：</td>
-                              <td>{{ JSON.parse(coupon).hash[0] || '無' }}</td>
+                              <td>{{ coupon.hash[0] || '無' }}</td>
                             </tr>
                             <tr class="coupon-info-tr">
                               <td class="coupon-info-title">使用期限：</td>
@@ -64,14 +64,14 @@
                             </tr>
                           </tbody>
                         </table>
-                        <button claas="btn btn-gray coupon-button-received" v-if="JSON.parse(coupon).received">已兌換</button>
+                        <button claas="btn btn-gray coupon-button-received" v-if="coupon.received">已兌換</button>
                         <button
                           class="coupon-button"
                           @click="received"
-                          :id="JSON.parse(coupon).id"
-                          v-if="!JSON.parse(coupon).received"
+                          :id="coupon.id"
+                          v-if="!coupon.received"
                         >標註為已兌換</button>
-                        <div class="coupon-footer" v-if="!JSON.parse(coupon).received">此按鈕請交由門市人員點擊</div>
+                        <div class="coupon-footer" v-if="!coupon.received">此按鈕請交由門市人員點擊</div>
                     </div>
                     </div>
                     <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
@@ -90,8 +90,8 @@ import { Icon } from '@iconify/vue'
 const store = useStore();
 const userName = store.getUserDisplayName
 const userId = store.getUserId
-const data = store.getCoupons(userId)
-const coupons = computed(() => store.getUserCoupons?.reverse())
+store.getCoupons(userId)
+const coupons = computed(() => store.getUserCoupons)
 
 const accordionItems = [
   {
@@ -121,7 +121,7 @@ const items = [
   "{\"id\":48,\"title\":\"蘇澳冷泉丨VIP、頂級湯屋\",\"category\":\"play\",\"content\":\"蘇澳冷泉二樓VIP湯屋及頂級湯屋，限定2人一間作折扣，\\n需現場排隊不可預約 ，折價150元\",\"cover\":[\"https://nuxt-blog-swart.vercel.app/shop/play/cold1.jpg\",\"https://nuxt-blog-swart.vercel.app/shop/play/cold2.jpg\",\"https://nuxt-blog-swart.vercel.app/shop/play/cold3.JPG\"],\"amount\":9993,\"used_times\":0,\"isReferral\":false,\"hash\":[\"\"],\"updated_at\":\"2024-10-11T06:02:36.140Z\",\"referral\":null}",
   "{\"id\":47,\"title\":\"陳家庄農園丨米果丨米餅丨伴手禮\",\"category\":\"buy\",\"content\":\"優惠內容：\\n1.陳家庄米果袋裝3包$250優惠，原價$108/包\\n2.陳家庄米餅罐裝3罐$500優惠，原價$200/罐\\n3.宜蘭嚴選居仁米一箱$1000+免運費（居仁米3.5公斤✖️5包）原價$1250\\n\\n\\n\\n了解更多農園近況歡迎臉書&IG追蹤我們\\n臉書：陳家庄農園\\nIG：228sandy\\nLINE：@riceshop\\n聯繫電話： TEL:0971005171\\n陳家庄官網： https://www.rice-shop.com.tw/about.html \",\"cover\":[\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm1.jpeg\",\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm.jpeg\",\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm2.jpeg\"],\"amount\":9988,\"used_times\":0,\"isReferral\":false,\"hash\":[\"\"],\"updated_at\":\"2024-09-26T00:56:48.254Z\",\"referral\":null}",
   "{\"id\":47,\"title\":\"陳家庄農園丨米果丨米餅丨伴手禮\",\"category\":\"buy\",\"content\":\"優惠內容：\\n1.陳家庄米果袋裝3包$250優惠，原價$108/包\\n2.陳家庄米餅罐裝3罐$500優惠，原價$200/罐\\n3.宜蘭嚴選居仁米一箱$1000+免運費（居仁米3.5公斤✖️5包）原價$1250\\n\\n\\n\\n了解更多農園近況歡迎臉書&IG追蹤我們\\n臉書：陳家庄農園\\nIG：228sandy\\nLINE：@riceshop\\n聯繫電話： TEL:0971005171\\n陳家庄官網： https://www.rice-shop.com.tw/about.html \",\"cover\":[\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm1.jpeg\",\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm.jpeg\",\"https://nuxt-blog-swart.vercel.app/shop/buy/chen_farm2.jpeg\"],\"amount\":9987,\"used_times\":0,\"isReferral\":false,\"hash\":[\"\"],\"updated_at\":\"2024-09-26T00:56:48.254Z\",\"referral\":null}"
-]
+].map((item)=> JSON.parse(item)).sort((a, b)=> new Date(a.updated_at) - new Date(b.updated_at))
 const fakeUser = {
   id: 11,
   name: 'Jason Lin',
@@ -145,17 +145,15 @@ const received = (e) => {
   let couponGetted = {}
 
   if (getted) {
-    let newCoupons = coupons.value.map((coupon)=> {
-      let jsonCoupon = JSON.parse(coupon)
-
-      if (jsonCoupon.id == Number(e.target.id)) {
-        jsonCoupon.received = true
-        couponGetted = jsonCoupon
+    let newCoupons = coupons.value.map((objectCoupon)=> {
+      if (objectCoupon.id == Number(e.target.id)) {
+        objectCoupon.received = true
+        couponGetted = objectCoupon
 
         return couponGetted
       }
 
-      return jsonCoupon
+      return objectCoupon
     })
 
     $fetch('/api/received', {
