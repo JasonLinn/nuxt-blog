@@ -270,6 +270,8 @@ const patchUser = async (profile) => {
         }
     })
     .then((response) => {
+      alert('領取成功!')
+      navigateTo('/userInfo')
     })
     .catch((error) => alert(error))
 }
@@ -312,11 +314,6 @@ const getCupon = async () => {
     patchUser(profile)
   })
   await sendPatch()
-
-  alert('領取成功!')
-  setTimeout(async () => {
-    await navigateTo('/userInfo')
-  }, 2000);
 
   return
   // let checkIcon = referralStore?.value?.name ? "https://nuxt-blog-swart.vercel.app/icon/check-circle-fill.svg" : "";
