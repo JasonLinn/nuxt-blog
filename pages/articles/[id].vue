@@ -108,7 +108,7 @@
       </button>
       <button v-show="article.amount && !article.hash[0] && !article.isReferral || isCheckReferral" type="button" class="btn btn-success" @click="getCupon">
         領取優惠券
-        <Icon v-show="!loading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
+        <Icon v-show="loading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
       </button>
     </div>
     </template>
