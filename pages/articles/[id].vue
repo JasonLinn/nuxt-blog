@@ -260,6 +260,7 @@ const sendPatch = async () => {
 
 const patchUser = async (profile) => {
   article.value.referral = referralStore.value
+  article.value.gotTime = new Date()
 
   await $fetch(`/api/user/appendCoupon`, {
       method: 'PATCH',
