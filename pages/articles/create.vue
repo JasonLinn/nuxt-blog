@@ -189,7 +189,8 @@ const handleSubmit = async () => {
   const response = await $fetch('/api/files', {
 		method: 'POST',
 		body: {
-			files: files.value
+			files: files.value,
+      url: 'shop/'
 		}
 	})
 
