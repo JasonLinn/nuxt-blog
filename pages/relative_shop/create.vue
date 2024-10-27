@@ -175,7 +175,7 @@ const handleSubmit = async () => {
     return
   }
   files.value.map((file)=> {
-    articleData.cover.push(index_url + 'shop/' + file.name)
+    articleData.cover.push(index_url + 'relative/' + file.name)
   })
 
   const response = await $fetch('/api/files', {
