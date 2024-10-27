@@ -6,7 +6,7 @@ export default defineEventHandler(async event => {
 		// the file object
 		file, // you can add a name for the file or length of Unique ID that will be automatically generated!
 		file.name.match(/.*(?=\.)/g)[0], // the folder the file will be stored in
-		// "shop/"
+		"shop/"
 	  )
   
 	  // {OR}

@@ -79,6 +79,9 @@
                   ※請上傳代表性圖片：
                 </label>
                 <input type="file" @input="handleFileInput" multiple />
+                <div class="create-img">
+                  <img v-for="file in files" :key="file.name" :src="file.content" alt="file.name" />
+                </div>
               </section>
               <section class="col-md-12 create-part">
                 <label for="about" class="create-name block text-sm font-medium text-gray-700">
@@ -145,6 +148,9 @@
   display: block;
   height: 36px;
   border-color: #dee2e6;
+}
+.create-img > img {
+  width: 100px;
 }
 .create-part {
   margin-bottom: 30px;
