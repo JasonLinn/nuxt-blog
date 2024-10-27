@@ -11,7 +11,8 @@ export default defineNuxtConfig({
     '@nuxtjs/ngrok',
     '@pinia/nuxt',
     'vue3-carousel-nuxt',
-    'radix-vue/nuxt'
+    'radix-vue/nuxt',
+    'nuxt-file-storage'
   ],
   vite: {
     css: {
@@ -57,5 +58,13 @@ export default defineNuxtConfig({
       path: '~/components',
       pathPrefix: false
     }
-  ]
+  ],
+  fileStorage: {
+    // enter the absolute path to the location of your storage
+    mount: '',
+
+    // {OR} use environment variables (recommended)
+    // mount: process.env.mount
+    // you need to set the mount in your .env file at the root of your project
+},
 });

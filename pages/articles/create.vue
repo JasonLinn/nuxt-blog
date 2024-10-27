@@ -76,36 +76,9 @@
               </section>
               <section class="col-md-12 create-part">
                 <label for="cover" class="create-name block text-sm font-medium text-gray-700">
-                  代表性圖片連結：
+                  ※請上傳代表性圖片：
                 </label>
-                <div class="mt-1">
-                  <input
-                    id="cover"
-                    v-model="cover1"
-                    placeholder="請撰輸入網址連結"
-                    name="cover"
-                    type="text"
-                    autocomplete="cover"
-                  />
-                  <input
-                    id="cover"
-                    v-model="cover2"
-                    placeholder="請撰輸入網址連結"
-                    name="cover"
-                    type="text"
-                    autocomplete="cover"
-                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                  />
-                  <input
-                    id="cover"
-                    v-model="cover3"
-                    placeholder="請撰輸入網址連結"
-                    name="cover"
-                    type="text"
-                    autocomplete="cover"
-                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                  />
-                </div>
+                <input type="file" @input="handleFileInput" multiple />
               </section>
               <section class="col-md-12 create-part">
                 <label for="about" class="create-name block text-sm font-medium text-gray-700">
@@ -183,9 +156,7 @@
 </style>
 
 <script setup>
-const cover1 = ref('')
-const cover2 = ref('')
-const cover3 = ref('')
+import { index_url } from '~/utils/static'
 
 const articleData = reactive({
   title: '',
@@ -198,10 +169,23 @@ const articleData = reactive({
 })
 const isReferral = ref(false)
 
+const { handleFileInput, files } = useFileStorage()
+
 const handleSubmit = async () => {
-  if (cover1.value) articleData.cover.push(cover1.value)
-  if (cover2.value) articleData.cover.push(cover2.value)
-  if (cover3.value) articleData.cover.push(cover3.value)
+  if (!files.value[0]) {
+    alert('請上傳至少一個圖檔')
+    return
+  }
+  files.value.map((file)=> {
+    articleData.cover.push(index_url + 'shop/' + file.name)
+  })
+
+  const response = await $fetch('/api/files', {
+		method: 'POST',
+		body: {
+			files: files.value
+		}
+	})
 
   await $fetch('/api/articles', {
     method: 'POST',
