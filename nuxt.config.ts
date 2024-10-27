@@ -61,7 +61,7 @@ export default defineNuxtConfig({
   ],
   fileStorage: {
     // enter the absolute path to the location of your storage
-    mount: resolve(__dirname, 'public'),
+    mount: resolve(__dirname),
 
     // {OR} use environment variables (recommended)
     // mount: process.env.mount
