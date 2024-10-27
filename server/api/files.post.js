@@ -1,6 +1,6 @@
 export default defineEventHandler(async event => {
 	const { files, url } = await readBody(event)
-	console.log(url, 'lllll')
+
 	for (const file of files) {
 	  await storeFileLocally(
 		// the file object
