@@ -3,7 +3,7 @@
 //   modules: ['@nuxtjs/tailwindcss', 'nuxt-icon'],
 //   devtools: { enabled: true }
 // })
-
+import { resolve } from 'path'
 export default defineNuxtConfig({
   css: ['~/assets/scss/main.scss'],
   modules: [
@@ -61,7 +61,7 @@ export default defineNuxtConfig({
   ],
   fileStorage: {
     // enter the absolute path to the location of your storage
-    mount: '',
+    mount: resolve(__dirname, 'public'),
 
     // {OR} use environment variables (recommended)
     // mount: process.env.mount
