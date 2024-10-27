@@ -186,7 +186,7 @@ import liff from "@line/liff";
 import useReferralStore from "~/store/referral";
 import { referral } from "~/utils/referral"
 import { index_liff_url } from "/utils/static"
-const { $bootstrap } = useNuxtApp();
+// const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
 const referralCode = ref('');
 const isOpenShare = ref(false)
@@ -194,9 +194,9 @@ let loading = ref(false)
 let modal;
 let hash = []
 const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
-const showModal = () => {
-  modal.show();
-};
+// const showModal = () => {
+//   modal.show();
+// };
 const store = useReferralStore()
 let referralStore = ref(null)
 let isCheckReferral = ref(false)
@@ -209,14 +209,14 @@ let isCheckReferral = ref(false)
 // })
 
 
-onMounted(async () => {
-  modal = $bootstrap.modal(modalRef.value);
-});
+// onMounted(async () => {
+//   modal = $bootstrap.modal(modalRef.value);
+// });
 
-onBeforeUnmount(() => {
-  // 加上 dispose，避免切換頁面時或是 HMR 看到殘留畫面
-  modal.dispose();
-});
+// onBeforeUnmount(() => {
+//   // 加上 dispose，避免切換頁面時或是 HMR 看到殘留畫面
+//   modal.dispose();
+// });
 
 const route = useRoute()
 
