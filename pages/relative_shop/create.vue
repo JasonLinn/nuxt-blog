@@ -146,6 +146,9 @@
     height: 36px;
     border-color: #dee2e6;
   }
+  .create-img > img {
+    width: 100px;
+  }
   .create-part {
     margin-bottom: 30px;
   }
