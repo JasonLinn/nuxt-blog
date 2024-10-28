@@ -239,7 +239,7 @@
 .cancel-icon {
   position: absolute;
   right: 3px;
-  top: 4px;
+  top: 6px;
 }
 .search-icon {
   position: absolute;
