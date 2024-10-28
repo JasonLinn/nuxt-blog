@@ -1,4 +1,8 @@
-export const category = [{
+export const category = [
+  {
+    id: 'index',
+    name: '全',
+  },{
     id: 'play',
     name: '玩',
   },{
@@ -27,7 +31,7 @@ export const category = [{
     name: '其他',
   }];
 
-export const YilanCity = [[
+export const township = [
   {
     "zipcode": "260",
     "name": "宜蘭市",
@@ -112,4 +116,4 @@ export const YilanCity = [[
     "state_name": null,
     "city_name": "宜蘭縣"
   }
-]];
+];
