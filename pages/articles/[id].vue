@@ -319,7 +319,7 @@ const getCupon = async () => {
   await sendPatch()
 
   return
-  // let checkIcon = referralStore?.value?.name ? "https://nuxt-blog-swart.vercel.app/icon/check-circle-fill.svg" : "";
+  // let checkIcon = referralStore?.value?.name ? "https://yilanpass.com/icon/check-circle-fill.svg" : "";
   let cupon = {
         "type": "bubble",
         "size": "giga",
@@ -435,7 +435,7 @@ const getCupon = async () => {
                     {
                       "type": "icon",
                       "size": "xl",
-                      "url": "https://nuxt-blog-swart.vercel.app/one_text.png",
+                      "url": "https://yilanpass.com/one_text.png",
                       "position": "absolute",
                       "offsetEnd": "10px",
                       "offsetBottom": "3px"
