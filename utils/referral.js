@@ -30,7 +30,7 @@ export const referral = [
   { code: 'BNB53D', name: '遇見山嵐' },
   { code: 'BNB564', name: '蔥境雅閣民宿' },
   { code: 'BNB593', name: '幸福蝸牛' },
-  { code: 'BNB5D7', name: '喜相逢鄉村民宿' },
+  { code: 'BNB5D7', name: '蜜雪蓮城堡民宿' },
   { code: 'BNB5GA', name: '樂山水休閒農園' },
   { code: 'BNB5HN', name: '星果園休閒民宿' },
   { code: 'BNB5ML', name: '貝兒花園民宿' },
