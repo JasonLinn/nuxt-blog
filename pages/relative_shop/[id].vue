@@ -61,6 +61,7 @@
     overflow-wrap: break-word;
     margin-bottom: 30px;
     white-space: pre-line;
+    line-height: 1.3;
   }
   .cupon-img {
     max-width: 100%;
