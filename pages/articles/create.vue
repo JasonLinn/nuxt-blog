@@ -178,10 +178,10 @@ const isReferral = ref(false)
 const { handleFileInput, files } = useFileStorage()
 
 const handleSubmit = async () => {
-  if (!files.value[0]) {
-    alert('請上傳至少一個圖檔')
-    return
-  }
+  // if (!files.value[0]) {
+  //   alert('請上傳至少一個圖檔')
+  //   return
+  // }
   files.value.map((file)=> {
     articleData.cover.push(index_url + 'shop/' + file.name)
   })
