@@ -220,7 +220,7 @@
 }
 .coupon-township {
   background-color: #ffdcdc8a;
-  color: #ff7c21;
+  color: #ff9246;
 }
 .index-cupon-text {
   color: #272727;

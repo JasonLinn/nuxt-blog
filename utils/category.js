@@ -3,11 +3,11 @@ export const category = [
     id: 'index',
     name: '全',
   },{
-    id: 'play',
-    name: '玩',
+    id: 'eat',
+    name: '食',
   },{
-    id: 'buy',
-    name: '買',
+    id: 'play',
+    name: '樂',
   },{
     id: 'live',
     name: '住',
