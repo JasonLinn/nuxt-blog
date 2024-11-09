@@ -10,9 +10,11 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   const articleRecord = await pool
-    .query('INSERT INTO "article" ("title", "category", "content", "cover", "amount", "used_times", "isReferral", "hash") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;', [
+    .query('INSERT INTO "article" ("title", "category", "adress", "township", "content", "cover", "amount", "used_times", "isReferral", "hash") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;', [
       body.title,
       body.category,
+      body.adress,
+      body.township,
       body.content,
       body.cover,
       body.amount,
@@ -29,14 +31,14 @@ export default defineEventHandler(async (event) => {
       console.error(error)
       throw createError({
         statusCode: 500,
-        message: '無法建立文章，請稍候再試'
+        message: '無法建立優惠券，請稍候再試'
       })
     })
 
   if (!articleRecord) {
     throw createError({
       statusCode: 400,
-      message: '建立文章失敗，請稍候再試'
+      message: '建立優惠券失敗，請稍候再試'
     })
   }
 

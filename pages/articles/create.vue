@@ -34,6 +34,28 @@
                 </select>
               </section>
               <section class="col-md-12 create-part">
+                <label for="adress" class="create-name block text-sm font-medium text-gray-700">
+                  地址：
+                </label>
+                <input
+                  id="adress"
+                  v-model="articleData.adress"
+                  placeholder="請輸入優惠券名稱"
+                  name="adress"
+                  type="text"
+                  autocomplete="adress"
+                  class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                />
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="township" class="create-name block text-sm font-medium text-gray-700">
+                  鄉鎮：
+                </label>
+                <select class="create-category boder shadow-sm w-100 py-2 px-3 mt-1" v-model="articleData.township" value="play">
+                  <option v-for="town in township" :value="town.name">{{ town.name }}</option>
+                </select>
+              </section>
+              <section class="col-md-12 create-part">
                 <label for="cover" class="create-name block text-sm font-medium text-gray-700">
                   發放數量：
                 </label>
@@ -167,6 +189,8 @@ import { index_url } from '~/utils/static'
 const articleData = reactive({
   title: '',
   category: '',
+  adress: [],
+  township: [],
   content: '',
   cover: [],
   amount: 0,
@@ -199,6 +223,8 @@ const handleSubmit = async () => {
     body: {
       title: articleData.title,
       category: articleData.category,
+      adress: [articleData.adress],
+      township: [articleData.township],
       content: articleData.content,
       cover: articleData.cover,
       amount: articleData.amount,
@@ -222,5 +248,5 @@ definePageMeta({
   middleware: 'auth'
 })
 
-import { category } from '~/utils/category';
+import { category, township } from '~/utils/category';
 </script>
