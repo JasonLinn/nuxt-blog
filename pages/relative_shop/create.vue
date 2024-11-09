@@ -5,7 +5,7 @@
           <div class="space-y-8 divide-y divide-gray-200">
             <div>
               <div class="mt-6">
-                <h3 class="create-title text-xl font-medium leading-6 text-gray-900">新增優惠券</h3>
+                <h3 class="create-title text-xl font-medium leading-6 text-gray-900">新增旅遊服務</h3>
               </div>
               <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
                 <section class="col-md-12 create-part">
