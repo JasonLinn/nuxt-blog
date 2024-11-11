@@ -71,7 +71,7 @@
                 >
                 <Carousel>
                     <Slide v-for="img in article.cover" :key="img">
-                      <img :src="img" class="cupon-img" />
+                      <img :src="img" class="cupon-img" height="165" />
                     </Slide>
 
                     <template #addons="{ slidesCount }">
@@ -187,13 +187,11 @@
     box-shadow: #000;
   }
   .cupon-img-wrapper {
-    height: 200px;
     overflow: hidden;
   }
   .cupon-img {
     display: inline-block;
     width: 100%;
-    height: 100%;
     object-fit: cover;
     border-radius: 10px;
   }

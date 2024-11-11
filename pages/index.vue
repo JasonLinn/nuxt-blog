@@ -14,7 +14,7 @@
         </option>
       </select>
       <select class="form-select col-4 category" name="township" id="township"  v-model="selectedTown">
-        <option :value = 0>選擇地區</option>
+        <option :value = null>選擇地區</option>
         <option v-for="town in township" :value="town.name">{{town.name}}</option>
       </select>
     </div>
@@ -59,7 +59,7 @@
               :key="article.id"
               class="cupon col-md-3"
             >
-            <div class="cupon-wrapper" v-if="(article.township == selectedTown || !selectedTown) && (!searchText || article.title.includes(searchText) || article.content.includes(searchText))">
+            <div class="cupon-wrapper" v-if="(!searchText || article.title.includes(searchText) || article.content.includes(searchText))">
               <NuxtLink
                 class=""
                 :to="{
@@ -71,7 +71,7 @@
               >
                 <Carousel>
                   <Slide v-for="(img, index) in article.cover" :key="img">
-                    <img :src="img" class="cupon-img" />
+                    <img :src="img" class="cupon-img" height="165"/>
                   </Slide>
 
                   <template #addons="{ slidesCount }">
@@ -118,8 +118,8 @@
       </template>
 
       <!-- @@@@@分頁功能在此@@@@ -->
-      <!-- <nav
-        v-if="articlesResponse"
+      <nav
+        v-if="couponObject?.data?.items.length"
         class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
       >
         <div class="next-page flex flex-1 justify-center sm:justify">
@@ -135,7 +135,7 @@
           >
             <Icon name="ri:arrow-left-s-line" />
           </NuxtLink>
-          <label class="mx-2 text-sm text-gray-600">第 {{ articlesResponse.page }} 頁</label>
+          <label class="mx-2 text-sm text-gray-600">第 {{ couponObject.data?.page }} 頁</label>
           <NuxtLink
             class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
             :to="{
@@ -148,7 +148,7 @@
             <Icon name="ri:arrow-right-s-line" />
           </NuxtLink>
         </div>
-      </nav> -->
+      </nav>
     </div>
   </div>
 </template>
@@ -197,13 +197,11 @@
   box-shadow: #000;
 }
 .cupon-img-wrapper {
-  height: 165px;
   overflow: hidden;
 }
 .cupon-img {
   display: inline-block;
   width: 100%;
-  height: 100%;
   object-fit: cover;
   border-radius: 10px;
 }
@@ -286,11 +284,11 @@ const route = useRoute()
 const currentPage = computed(() => parseInt(route?.query?.page) || 1)
 const currentCate = computed(() => route?.params?.id)
 const searchText = ref('')
-const selectedTown = ref(0)
+const selectedTown = ref(null)
 let selectedCate = ref('index')
-console.log(currentCate, 'ccccccc')
+console.log(currentCate, selectedTown, 'ccccccc')
 const store = useCouponStore();
-store.fetchAndSetCoupon()
+store.fetchAndSetCoupon({currentPage, selectedTown})
 const hotTag = [
   '伴手禮',
   '租車',

@@ -2,19 +2,32 @@ import { pool } from '@/server/utils/db'
 
 export default defineEventHandler(async (event) => {
   const query = await getQuery(event)
-
   const page = Math.max(parseInt(query.page) || 1, 1)
   const pageSize = Math.min(Math.max(parseInt(query.pageSize) || 10, 1), 100)
   const category = query.category
-  const where = category ? `SELECT * FROM "article" WHERE category = $3` : `SELECT * FROM "article"`
-  const param = category ? [
-    (page - 1) * pageSize,
-    pageSize,
-    category
-  ] : [
+  const township = query.township
+  let where = `SELECT * FROM "article"`
+  let param = [
     (page - 1) * pageSize,
     pageSize
   ]
+  if (category) {
+    where = `SELECT * FROM "article" WHERE category = $3`
+    param = [(page - 1) * pageSize,
+    pageSize, category]
+  }
+  if (township) {
+    where = `SELECT * FROM "article" WHERE $3 = ANY(township)`
+    param = [(page - 1) * pageSize,
+    pageSize, township]
+  }
+  if (category && township) {
+    where = `SELECT * FROM "article" WHERE category = $3 and $4 = ANY(township)`
+    param = [(page - 1) * pageSize,
+    pageSize, category, township]
+  }
+
+  console.log(where, param, 'pppppppccccc')
   const articleRecords = await pool
     .query(`${where} ORDER BY "updated_at" DESC OFFSET $1 LIMIT $2;`, param)
     .then((result) => result.rows)

@@ -18,12 +18,14 @@ const useCouponStore = defineStore("useCouponStore", {
   state: () => initState,
   actions: {
     setCoupon(couponData) {
+      console.log(couponData, 'aaaaaaaeeee')
       this.couponData.data = couponData;
     },
     resetCoupon() {
       this.couponData = initState.couponData;
     },
-    async fetchAndSetCoupon(cate) {
+    async fetchAndSetCoupon(initData) {
+      console.log(initData, 'iiiiiiiiii')
         const url = useRequestURL()
         const {
             pending,
@@ -31,12 +33,13 @@ const useCouponStore = defineStore("useCouponStore", {
             error
           } = await useFetch('/api/articles', {
             query: {
-                category: cate || initState.currentCate,
-                page: initState.currentPage,
+                category: initData.cate || initState.currentCate,
+                township: initData.selectedTown || initState.currentCate,
+                page: initData.currentPage || initState.currentPage,
                 pageSize: 10
             }
         })
-
+      console.log(data, 'ddddddd')
       this.couponData =  {
         pending,
         data,
