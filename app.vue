@@ -2,9 +2,7 @@
   <div>
     <NuxtLayout>
       <NuxtLoadingIndicator :throttle="0" />
-      <div>
-        <NuxtPage />
-      </div>
+      <NuxtPage />
     </NuxtLayout>
   </div>
 </template>
