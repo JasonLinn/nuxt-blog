@@ -12,7 +12,8 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     'vue3-carousel-nuxt',
     'radix-vue/nuxt',
-    'nuxt-file-storage'
+    'nuxt-file-storage',
+    '@nuxt/image'
   ],
   vite: {
     css: {
