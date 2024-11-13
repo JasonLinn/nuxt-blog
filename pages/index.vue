@@ -119,7 +119,7 @@
 
       <!-- @@@@@分頁功能在此@@@@ -->
       <nav
-        v-if="couponObject?.data?.items.length"
+        v-if="couponObject.data"
         class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
       >
         <div class="next-page flex flex-1 justify-center sm:justify">
@@ -135,7 +135,7 @@
           >
             <Icon name="ri:arrow-left-s-line" />
           </NuxtLink>
-          <label class="mx-2 text-sm text-gray-600">第 {{ couponObject.data?.page }} 頁</label>
+          <label class="mx-2 text-sm text-gray-600">第 {{ currentPage }} 頁</label>
           <NuxtLink
             class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
             :to="{
