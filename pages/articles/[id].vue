@@ -14,7 +14,7 @@
         </div> -->
         <Carousel>
           <Slide v-for="img in article.cover" :key="img">
-            <img :src="img" class="cupon-img" />
+            <NuxtImg :src="img" class="cupon-img" />
           </Slide>
 
           <template #addons="{ slidesCount }">
