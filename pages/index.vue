@@ -118,39 +118,36 @@
       </template>
 
       <!-- @@@@@分頁功能在此@@@@ -->
-       <div>
-         <nav
-           v-if="couponObject?.data"
-           class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
-         >
-           <div class="next-page flex flex-1 justify-center sm:justify">
-             <NuxtLink
-               v-if="currentPage > 1"
-               class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-               :to="{
-                 name: 'index',
-                 query: {
-                   page: currentPage - 1
-                 }
-               }"
-             >
-               <Icon name="ri:arrow-left-s-line" />
-             </NuxtLink>
-             <label class="mx-2 text-sm text-gray-600">第 {{ currentPage }} 頁</label>
-             <NuxtLink
-               class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-               :to="{
-                 name: 'index',
-                 query: {
-                   page: currentPage + 1
-                 }
-               }"
-             >
-               <Icon name="ri:arrow-right-s-line" />
-             </NuxtLink>
-           </div>
-         </nav>
-       </div>
+      <nav
+        class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
+      >
+        <div class="next-page flex flex-1 justify-center sm:justify">
+          <NuxtLink
+            v-if="currentPage > 1"
+            class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+            :to="{
+              name: 'index',
+              query: {
+                page: currentPage - 1
+              }
+            }"
+          >
+            <Icon name="ri:arrow-left-s-line" />
+          </NuxtLink>
+          <label class="mx-2 text-sm text-gray-600">第 {{ currentPage }} 頁</label>
+          <NuxtLink
+            class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+            :to="{
+              name: 'index',
+              query: {
+                page: currentPage + 1
+              }
+            }"
+          >
+            <Icon name="ri:arrow-right-s-line" />
+          </NuxtLink>
+        </div>
+      </nav>
     </div>
   </div>
 </template>
