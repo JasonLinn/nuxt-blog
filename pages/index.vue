@@ -285,7 +285,6 @@ const currentCate = computed(() => route?.params?.id)
 const searchText = ref('')
 const selectedTown = ref(null)
 let selectedCate = ref('index')
-console.log(currentCate, selectedTown, 'ccccccc')
 const store = useCouponStore();
 store.fetchAndSetCoupon({currentPage, selectedTown})
 const hotTag = [
@@ -319,7 +318,7 @@ const hotTag = [
 
 const couponObject = computed(() => store.getCouponData)
 
-console.log(couponObject, 'eeeeeeefffff')
+console.log(couponObject, 'eeeeeeefffff', couponObject?.data?.items.length)
 // watch(currentCate, ()=>{
 //   // 重新抓取資料
 //   useFetch('/api/articles', {
