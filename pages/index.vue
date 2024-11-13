@@ -318,7 +318,7 @@ const hotTag = [
 
 const couponObject = computed(() => store.getCouponData)
 
-console.log(couponObject, 'eeeeeeefffff', couponObject?.data?.items.length)
+console.log(couponObject, 'eeeeeeefffff')
 // watch(currentCate, ()=>{
 //   // 重新抓取資料
 //   useFetch('/api/articles', {
