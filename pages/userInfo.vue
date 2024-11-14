@@ -185,7 +185,7 @@ const received = (e) => {
     })
     .then(async () => {
       alert('已標註兌換!')
-      store.setCoupons(newCoupons)
+      await store.setCoupons(newCoupons)
     })
     .catch((error) => alert(error))
   }
