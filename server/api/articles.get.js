@@ -6,30 +6,41 @@ export default defineEventHandler(async (event) => {
   const pageSize = Math.min(Math.max(parseInt(query.pageSize) || 10, 1), 100)
   const category = query.category
   const township = query.township
+  const searchText = query.searchText
   let where = `SELECT * FROM "article"`
-  let param = [
-    (page - 1) * pageSize,
-    pageSize
-  ]
+  let param = []
   if (category) {
     where = `SELECT * FROM "article" WHERE category = $3`
-    param = [(page - 1) * pageSize,
-    pageSize, category]
+    param = [category]
   }
   if (township) {
     where = `SELECT * FROM "article" WHERE $3 = ANY(township)`
-    param = [(page - 1) * pageSize,
-    pageSize, township]
+    param = [township]
+  }
+  if (searchText) {
+    where = `SELECT * FROM "article" WHERE content LIKE $3 OR title LIKE $3`
+    param = [`%${searchText}%`]
   }
   if (category && township) {
     where = `SELECT * FROM "article" WHERE category = $3 and $4 = ANY(township)`
-    param = [(page - 1) * pageSize,
-    pageSize, category, township]
+    param = [category, township]
+  }
+  if (category && searchText) {
+    where = `SELECT * FROM "article" WHERE category = $3 and (content LIKE $4 OR title LIKE $4)`
+    param = [category, `%${searchText}%`]
+  }
+  if (township && searchText) {
+    where = `SELECT * FROM "article" WHERE $3 = ANY(township) and (content LIKE $4 OR title LIKE $4)`
+    param = [township, `%${searchText}%`]
+  }
+  if (category && township && searchText) {
+    where = `SELECT * FROM "article" WHERE category = $3 and $4 = ANY(township) and (content LIKE $5 OR title LIKE $5)`
+    param = [category, township, `%${searchText}%`]
   }
 
-  console.log(where, param, 'pppppppccccc')
+  console.log(where, param, 'pppppppccccc', query)
   const articleRecords = await pool
-    .query(`${where} ORDER BY "updated_at" DESC OFFSET $1 LIMIT $2;`, param)
+    .query(`${where} ORDER BY "updated_at" DESC OFFSET $1 LIMIT $2;`, [(page - 1) * pageSize, pageSize, ...param])
     .then((result) => result.rows)
     .catch((error) => {
       console.error(error)

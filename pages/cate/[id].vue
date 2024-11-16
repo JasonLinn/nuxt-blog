@@ -59,7 +59,7 @@
               :key="article.id"
               class="cupon col-md-3"
             >
-            <div class="cupon-wrapper" v-if="(article.township == selectedTown || !selectedTown) && (!searchText || article.title.includes(searchText) || article.content.includes(searchText))">
+            <div class="cupon-wrapper">
               <NuxtLink
                 class=""
                 :to="{
@@ -321,6 +321,9 @@ const hotTag = [
 const couponObject = computed(() => store.getCouponData)
 
 console.log(couponObject, 'eeeeeeefffff')
+watch(searchText, ()=>{
+  store.fetchAndSetCoupon({currentPage, selectedTown, searchText: searchText.value})
+})
 // watch(currentCate, ()=>{
 //   // 重新抓取資料
 //   useFetch('/api/articles', {

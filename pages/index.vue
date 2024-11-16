@@ -19,7 +19,7 @@
       </select>
     </div>
     <div class="search">
-        <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText">
+        <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText" @change="inputText">
         <svg
           v-if="searchText"
           @click="cleanText"
@@ -59,7 +59,7 @@
               :key="article.id"
               class="cupon col-md-3"
             >
-            <div class="cupon-wrapper" v-if="(!searchText || article.title.includes(searchText) || article.content.includes(searchText))">
+            <div class="cupon-wrapper">
               <NuxtLink
                 class=""
                 :to="{
@@ -318,6 +318,9 @@ const hotTag = [
 const couponObject = computed(() => store.getCouponData)
 
 console.log(couponObject, 'eeeeeeefffff')
+watch(searchText, ()=>{
+  store.fetchAndSetCoupon({currentPage, selectedTown, searchText: searchText.value})
+})
 // watch(currentCate, ()=>{
 //   // 重新抓取資料
 //   useFetch('/api/articles', {

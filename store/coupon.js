@@ -7,6 +7,7 @@ const initState = {
     error: null
   },
   currentCate: '',
+  searchText: null,
   currentPage: 0,
   peding: null,
     data: null,
@@ -35,6 +36,7 @@ const useCouponStore = defineStore("useCouponStore", {
             query: {
                 category: initData.cate || initState.currentCate,
                 township: initData.selectedTown || initState.currentCate,
+                searchText: initData.searchText || initState.searchText,
                 page: initData.currentPage || initState.currentPage,
                 pageSize: 10
             }
