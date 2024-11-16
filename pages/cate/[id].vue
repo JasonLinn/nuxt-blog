@@ -288,7 +288,7 @@ const selectedTown = ref(null)
 let selectedCate = ref(route?.params?.id)
 console.log(currentCate, selectedTown, 'ccccccc')
 const store = useCouponStore();
-store.fetchAndSetCoupon({cate: route?.params?.id, selectedTown})
+store.fetchAndSetCoupon({cate: route?.params?.id,currentPage, selectedTown})
 const hotTag = [
   '伴手禮',
   '租車',
