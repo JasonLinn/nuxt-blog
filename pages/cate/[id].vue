@@ -286,7 +286,7 @@ const currentCate = computed(() => route?.params?.id)
 const searchText = ref('')
 const selectedTown = ref(null)
 let selectedCate = ref(route?.params?.id)
-console.log(currentCate, selectedTown, 'ccccccc')
+
 const store = useCouponStore();
 store.fetchAndSetCoupon({cate: route?.params?.id,currentPage, selectedTown})
 const hotTag = [

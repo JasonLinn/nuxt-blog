@@ -29,9 +29,9 @@ const useStore = defineStore("useStore", {
 
         this.couponData = userCoupons
     },
-    async fetchAndSetUser() {
-      const user = await fetchUser();
-      console.log(user, 'uuuuuuuu')
+    async fetchAndSetUser(data) {
+      const user = await fetchUser(data);
+      console.log(user, 'tttttt')
       this.userData = user;
     },
   },

@@ -108,7 +108,7 @@
       </button>
       <button v-show="article.amount && !article.hash[0] && !article.isReferral || isCheckReferral" type="button" class="btn btn-success" @click="getCupon">
         領取優惠券
-        <Icon v-show="loading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
+        <Icon v-show="iconLoading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
       </button>
     </div>
     </template>
@@ -185,20 +185,27 @@
 <script setup>
 import liff from "@line/liff";
 import useReferralStore from "~/store/referral";
+import useStore from "~/store";
 import { referral } from "~/utils/referral"
 import { index_liff_url } from "/utils/static"
+const route = useRoute()
+const store = useStore()
+const userData = computed(()=> store.getUserData)
+const userId = computed(()=> store.getUserId)
+// 避免liffId not defined
+liff.init({liffId: '2005661804-zld9QenV'})
+
 // const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
 const referralCode = ref('');
 const isOpenShare = ref(false)
-let loading = ref(false)
+let iconLoading = ref(false)
 let modal;
 let hash = []
 const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
 // const showModal = () => {
 //   modal.show();
 // };
-const store = useReferralStore()
 let referralStore = ref(null)
 let isCheckReferral = ref(false)
 // const referralStore = referral.find((ref) => {
@@ -219,7 +226,6 @@ let isCheckReferral = ref(false)
 //   modal.dispose();
 // });
 
-const route = useRoute()
 
 const { pending, data: article, error } = await useFetch(`/api/articles/${route.params.id}`)
 // article.value.referral = referralStore
@@ -283,7 +289,7 @@ const checkReferral = () => {
   referralStore.value = referral.find((ref) => {
       return ref.code == referralCode.value
   })
-  console.log(referralStore.value, 'ssss')
+
   if (referralStore?.value) {
     isCheckReferral.value = true
     alert('成功代入:' + referralStore?.value?.name)
@@ -296,7 +302,6 @@ const handleHashRecive = () => {
   let articleHash = article.value.hash
   let index = articleHash.findIndex((i) =>hash == i)
 
-  console.log(article,'cccc', articleHash, index)
   if (index >= 0) {
     getCupon()
     alert('序號正確')
@@ -307,17 +312,27 @@ const handleHashRecive = () => {
 }
 
 const getCupon = async () => {
-  loading = true
-  // if (!liff.isLoggedIn()) {
-  //   return;
-  // }
-  await liff.getProfile().then(profile => {
-    if (!liff.isLoggedIn()) {
-      return;
-    }
-    patchUser(profile)
-  })
-  await sendPatch()
+  iconLoading = true
+
+  // liff登入和user(web)登入兩種
+  if (!liff.isLoggedIn() && !userId.value) {
+    alert("請先登入")
+    navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
+    return
+  }
+
+  if (userId.value) {
+    await patchUser(userData.value)
+    await sendPatch()
+  } else {
+    await liff.getProfile().then(profile => {
+      if (!liff.isLoggedIn()) {
+        return;
+      }
+      patchUser(profile)
+    })
+    await sendPatch()
+  }
 
   return
   // let checkIcon = referralStore?.value?.name ? "https://yilanpass.com/icon/check-circle-fill.svg" : "";

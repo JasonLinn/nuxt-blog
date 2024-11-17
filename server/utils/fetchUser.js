@@ -1,7 +1,20 @@
 import liff from "@line/liff";
 import { LIFF_ID } from "./liffID";
 
-const fetchUser = async () => {
+const fetchUser = async (data) => {
+  console.log(useRoute(), 'eeeeeeeee', data)
+    // web登入
+    if (data) {
+      const webProfile = {
+        'userId': data.sub,
+        'pictureUrl': data.picture,
+        'displayName': data.name,
+      }
+      await insertUser(webProfile)
+      webProfile.coupons = await getUserCoupons(webProfile)
+
+      return webProfile
+    }
     try {
         await liff.init({ liffId: LIFF_ID[useRoute().name] }); // Use own liffId
         const user = await liff.getProfile().then(async (profile) => {

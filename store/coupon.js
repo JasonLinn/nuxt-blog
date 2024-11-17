@@ -7,6 +7,7 @@ const initState = {
     error: null
   },
   currentCate: '',
+  township: [],
   searchText: null,
   currentPage: 0,
   peding: null,
@@ -19,15 +20,12 @@ const useCouponStore = defineStore("useCouponStore", {
   state: () => initState,
   actions: {
     setCoupon(couponData) {
-      console.log(couponData, 'aaaaaaaeeee')
       this.couponData.data = couponData;
     },
     resetCoupon() {
       this.couponData = initState.couponData;
     },
     async fetchAndSetCoupon(initData) {
-      console.log(initData, 'iiiiiiiiii')
-        const url = useRequestURL()
         const {
             pending,
             data,
@@ -35,13 +33,12 @@ const useCouponStore = defineStore("useCouponStore", {
           } = await useFetch('/api/articles', {
             query: {
                 category: initData.cate || initState.currentCate,
-                township: initData.selectedTown || initState.currentCate,
+                township: initData.selectedTown || initState.township,
                 searchText: initData.searchText || initState.searchText,
                 page: initData.currentPage || initState.currentPage,
                 pageSize: 10
             }
         })
-      console.log(data, 'ddddddd')
       this.couponData =  {
         pending,
         data,

@@ -4,7 +4,7 @@ import axios from "axios"
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     // console.log('New request: ' + getRequestURL(event), 'nnnnnnnnnnnnnnnnnnnnn')
-    await axios.post(`https://notify-bot.line.me/oauth/token?grant_type=authorization_code&code=${body.code}&redirect_uri=https://yilanpass.com/api/callback/&client_id=8jilqbG1VMeizXW9U36bH1&client_secret=a3G7L0gzZJ6vR9ALXRvLu21yMcqPZYb2cnTJbx9IhTn`, {
+    await axios.post(`https://notify-bot.line.me/oauth/token?grant_type=authorization_code&code=${body.code}&redirect_uri=https://yilanpass.com/api/linelogin&client_id=8jilqbG1VMeizXW9U36bH1&client_secret=a3G7L0gzZJ6vR9ALXRvLu21yMcqPZYb2cnTJbx9IhTn`, {
         // "headers": {
         //     // "grant_type": "authorization_code",
         //     // "code": body.code,

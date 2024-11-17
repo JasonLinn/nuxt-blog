@@ -240,7 +240,7 @@ const received = (e) => {
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 .cupon-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   margin-bottom: 5px;
 }
@@ -353,8 +353,8 @@ const received = (e) => {
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     position: relative;
-    padding: 20px;
-    margin-bottom: 60px;
+    padding: 10px;
+    margin-bottom: 40px;
 }
 .coupon-info-table {
   margin-top: 15px;
@@ -394,7 +394,7 @@ const received = (e) => {
 }
 
 .barcode {
-    margin: 20px 0;
+    margin: 10px 0;
 }
 
 .coupon-button {
