@@ -3,7 +3,7 @@
         <div class="row">
             <!-- <div id="userId">{{coupons}}</div> -->
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
-            <h2 class="cupon-geted">已領優惠券</h2>
+            <h2 class="cupon-geted">{{userName}} 您好，以下是已領優惠券：</h2>
             <hr>
             <div v-if="coupons" class="coupon-list">
                 <div v-if="!coupons?.length">尚未領取優惠券</div>
@@ -198,10 +198,10 @@ const received = (e) => {
 }
 .cupon-geted {
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   margin-top: 10px;
-  font-size: 20px;
-  text-align: center;
+  font-size: 16px;
+  text-align: left;
 }
 .cupon-line {
   position: relative;
@@ -258,7 +258,7 @@ const received = (e) => {
 .cupon-img {
   display: inline-block;
   width: 100%;
-  height: 100%;
+  max-height: 165px;
   object-fit: cover;
   border-radius: 10px;
 }
