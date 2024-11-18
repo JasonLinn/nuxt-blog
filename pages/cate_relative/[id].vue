@@ -265,12 +265,12 @@
       bottom: 10px;
   }
   </style>
-  
+
   <script setup>
   import { categoryRelative } from '~/utils/category';
   import useRelativeStore from "~~/store/relative";
   // const handleLogout = store.resetUser;
-  
+
   const route = useRoute()
   const currentCate = computed(() => route?.params?.id)
   const searchText = ref('')
@@ -280,7 +280,7 @@
     '魔術',
     '派對'
   ]
-  
+
   console.log(route.params.id, 'rrrrr')
   // const {
   //   pending,
