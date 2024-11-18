@@ -317,7 +317,7 @@ const getCupon = async () => {
   // liff登入和user(web)登入兩種
   if (!liff.isLoggedIn() && !userId.value) {
     alert("請先登入")
-    navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
+    navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
     return
   }
 
@@ -538,7 +538,7 @@ const getCupon = async () => {
 }
 const shareCopy = () => {
   navigator.clipboard.writeText(index_liff_url + route.path);
-  window.alert('已複製連結!')
+  window?.alert('已複製連結!')
 }
 const shareCoupon = () => {
   liff
