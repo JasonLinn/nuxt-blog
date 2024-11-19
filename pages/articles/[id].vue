@@ -102,7 +102,7 @@
           <div class="cupon-amount">
             剩餘數量: {{ article.amount }}
           </div>
-         <button v-show="article.isReferral && !isCheckReferral" type="button" class="btn btn-light">
+         <button v-show="article.isReferral && !isCheckReferral && !checkRecieved()" type="button" class="btn btn-light">
            請輸入推薦代碼
          </button>
          <button v-show="checkRecieved()" type="button" class="btn btn-light">
