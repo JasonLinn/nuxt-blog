@@ -268,12 +268,6 @@ const getCupon = async () => {
     navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
     return
   }
-  // liff登入和user(web)登入兩種
-  if (!liff.isLoggedIn() && !userId.value) {
-    alert("請先登入")
-    navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
-    return
-  }
 
   if (userId.value) {
     await patchUser(userData.value)
