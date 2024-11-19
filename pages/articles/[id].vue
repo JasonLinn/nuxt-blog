@@ -217,10 +217,6 @@ let isCheckReferral = ref(false)
 //   return ref.code == store.getReferral.referral
 // })
 
-onMounted(()=>{
-// 避免liffId not defined
-liff.init({liffId: '2005661804-zld9QenV'})
-})
 // onMounted(async () => {
 //   modal = $bootstrap.modal(modalRef.value);
 // });
@@ -331,6 +327,11 @@ const handleHashRecive = () => {
 const getCupon = async () => {
   iconLoading = true
 
+  if (!liff?.id) {
+    alert("請先登入")
+    navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
+    return
+  }
   // liff登入和user(web)登入兩種
   if (!liff.isLoggedIn() && !userId.value) {
     alert("請先登入")
