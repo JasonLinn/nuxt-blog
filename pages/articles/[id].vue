@@ -73,6 +73,9 @@
             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
           </svg>
         </div>
+        <div class="cupon-map">
+          查看Google地圖： <a target="_blank" :href="`https://www.google.com/maps/?q=${article.township[0]} ${article.title}`">{{article.township[0]}} {{article.title}}</a>
+        </div>
         <div v-if="article.isReferral">
           輸入推薦代碼:
           <input type="text" class="fererral-input" v-model="referralCode">
@@ -263,7 +266,7 @@ const handleHashRecive = () => {
 const getCupon = async () => {
   iconLoading = true
 
-  if (!liff?.id && !userId.value) {
+  if (!liff?.isLoggedIn() && !userId.value) {
     alert("請先登入")
     navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
     return
@@ -700,6 +703,9 @@ useSeoMeta({
 .cupon-referral > svg {
   color: #00b4ff;
   margin-left: 5px;
+}
+.cupon-map {
+  margin-bottom: 15px;
 }
 .fererral-input{
   width: 100px;
