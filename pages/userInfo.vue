@@ -19,7 +19,16 @@
                           <span class="coupon-title">{{ coupon.title }}</span>
                         </div>
                         <div class="barcode">
-                          <img :src="coupon.cover[0]" class="cupon-img"/>
+                          <Carousel>
+                          <Slide v-for="img in coupon.cover" :key="img">
+                            <NuxtImg :src="img" class="cupon-img" />
+                          </Slide>
+
+                          <template #addons="{ slidesCount }">
+                            <Navigation v-if="slidesCount > 1" />
+                            <Pagination v-if="slidesCount > 1" />
+                          </template>
+                        </Carousel>
                         </div>
                         <div class="cupon-line"></div>
                         <AccordionRoot
@@ -65,7 +74,7 @@
                             </tr>
                           </tbody>
                         </table>
-                        <button claas="btn btn-gray coupon-button-received" v-if="coupon.received">已兌換</button>
+                        <button class="btn coupon-button-received" v-if="coupon.received">已兌換</button>
                         <button
                           class="coupon-button"
                           @click="received"
@@ -406,9 +415,15 @@ const received = (e) => {
     cursor: pointer;
 }
 
+.coupon-button-received {
+  height: 36px;
+  background-color: #ccc;
+  color: #fff;
+}
+
 .coupon-footer {
     margin: 10px 0;
-    color: #999;
+    color: #ff5858;
     font-size: 12px;
 }
 .AccordionRoot {
