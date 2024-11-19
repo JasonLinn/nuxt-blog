@@ -192,8 +192,7 @@ const route = useRoute()
 const store = useStore()
 const userData = computed(()=> store.getUserData)
 const userId = computed(()=> store.getUserId)
-// 避免liffId not defined
-// liff.init({liffId: '2005661804-zld9QenV'})
+
 
 // const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
@@ -216,7 +215,10 @@ let isCheckReferral = ref(false)
 //   return ref.code == store.getReferral.referral
 // })
 
-
+onMounted(()=>{
+// 避免liffId not defined
+liff.init({liffId: '2005661804-zld9QenV'})
+})
 // onMounted(async () => {
 //   modal = $bootstrap.modal(modalRef.value);
 // });
