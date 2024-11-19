@@ -78,9 +78,6 @@
           <input type="text" class="fererral-input" v-model="referralCode">
           <div class="btn fererral-comfirm" @click="checkReferral">代入</div>
         </div>
-        <div class="cupon-amount">
-          剩餘數量: {{ article.amount }}
-        </div>
       </div>
       <div>
       <!-- modal -->
@@ -100,90 +97,29 @@
         </div>
       </div>
       <!-- modal end -->
-      <button v-show="article.isReferral && !isCheckReferral" type="button" class="btn btn-light">
-        請輸入推薦代碼
-      </button>
-      <button v-show="checkRecieved()" type="button" class="btn btn-light">
-        每個帳號限領一次
-      </button>
-      <button v-show="article.amount && article.hash[0] && !checkRecieved()" type="button" class="btn btn-success" @click="showModal">
-        領取限量優惠券
-      </button>
-      <button v-show="article.amount && !article.hash[0] && (!article.isReferral || isCheckReferral) && !checkRecieved()" type="button" class="btn btn-success" @click="getCupon">
-        領取優惠券
-        <Icon v-show="iconLoading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
-      </button>
+       <div class="coupon-pass" v-show="!article.isonce">出示即可使用</div>
+       <div v-show="article.isonce">
+          <div class="cupon-amount">
+            剩餘數量: {{ article.amount }}
+          </div>
+         <button v-show="article.isReferral && !isCheckReferral" type="button" class="btn btn-light">
+           請輸入推薦代碼
+         </button>
+         <button v-show="checkRecieved()" type="button" class="btn btn-light">
+           每個帳號限領一次
+         </button>
+         <button v-show="article.amount && article.hash[0] && !checkRecieved()" type="button" class="btn btn-success" @click="showModal">
+           領取限量優惠券
+         </button>
+         <button v-show="article.amount && !article.hash[0] && (!article.isReferral || isCheckReferral) && !checkRecieved()" type="button" class="btn btn-success" @click="getCupon">
+           領取優惠券
+           <Icon v-show="iconLoading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
+         </button>
+       </div>
     </div>
     </template>
   </div>
 </template>
-<style scoped>
-.cupon-text {
-  overflow-wrap: break-word;
-  margin-bottom: 30px;
-  white-space: pre-line;
-  line-height: 1.3;
-}
-.cupon-img {
-  max-width: 100%;
-}
-.cupon-time {
-  display: flex;
-  justify-content: flex-end;
-}
-.cupon-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  position: relative;
-}
-.cupon-share {
-  position: relative;
-  z-index: 1;
-}
-.cupon-share-icon {
-}
-.cupon-share-list {
-  width: 80px;
-  background-color: #c9e0f6;
-  position: absolute;
-  right: 0;
-  bottom: -40px;
-  padding: 10px;
-  border-radius: 40px;
-  display: flex;
-  justify-content: space-around;
-}
-.cupon-amount {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 10px;
-}
-.cupon-referral {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.cupon-referral > svg {
-  color: #00b4ff;
-  margin-left: 5px;
-}
-.fererral-input{
-  width: 100px;
-}
-.fererral-comfirm {
-  /* height: 24px; */
-  font-size: 12px;
-  color: #fff;
-  padding: 3px;
-  margin-left: 15px;
-  background-color: #ff9742;
-}
-.carousel__slide {
-  max-height: 180px;
-}
-</style>
 
 <script setup>
 import liff from "@line/liff";
@@ -713,3 +649,76 @@ useSeoMeta({
   twitterCard: 'summary_large_image'
 })
 </script>
+<style scoped>
+.cupon-text {
+  overflow-wrap: break-word;
+  margin-bottom: 30px;
+  white-space: pre-line;
+  line-height: 1.3;
+}
+.cupon-img {
+  max-width: 100%;
+}
+.cupon-time {
+  display: flex;
+  justify-content: flex-end;
+}
+.cupon-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  position: relative;
+}
+.cupon-share {
+  position: relative;
+  z-index: 1;
+}
+.cupon-share-icon {
+}
+.cupon-share-list {
+  width: 80px;
+  background-color: #c9e0f6;
+  position: absolute;
+  right: 0;
+  bottom: -40px;
+  padding: 10px;
+  border-radius: 40px;
+  display: flex;
+  justify-content: space-around;
+}
+.coupon-pass {
+  width: fit-content;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #a7ffc4;
+}
+.cupon-amount {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+.cupon-referral {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cupon-referral > svg {
+  color: #00b4ff;
+  margin-left: 5px;
+}
+.fererral-input{
+  width: 100px;
+}
+.fererral-comfirm {
+  /* height: 24px; */
+  font-size: 12px;
+  color: #fff;
+  padding: 3px;
+  margin-left: 15px;
+  background-color: #ff9742;
+}
+.carousel__slide {
+  max-height: 180px;
+}
+</style>

@@ -88,7 +88,7 @@
                     {{ hadleCategory(article.category) }}
                   </span>
                   <span class="cupon-category">
-                    {{ article.isReferral ? '推薦代碼' : '免費' }}
+                    {{ article.isonce ? '限量' : '免費' }}
                   </span>
                   <span class="cupon-category coupon-township">
                     {{ article.township[0] }}
