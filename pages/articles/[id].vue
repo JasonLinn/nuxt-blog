@@ -103,10 +103,13 @@
       <button v-show="article.isReferral && !isCheckReferral" type="button" class="btn btn-light">
         請輸入推薦代碼
       </button>
-      <button v-show="article.amount && article.hash[0]" type="button" class="btn btn-success" @click="showModal">
+      <button v-show="checkRecieved()" type="button" class="btn btn-light">
+        每個帳號限領一次
+      </button>
+      <button v-show="article.amount && article.hash[0] && !checkRecieved()" type="button" class="btn btn-success" @click="showModal">
         領取限量優惠券
       </button>
-      <button v-show="article.amount && !article.hash[0] && !article.isReferral || isCheckReferral" type="button" class="btn btn-success" @click="getCupon">
+      <button v-show="article.amount && !article.hash[0] && (!article.isReferral || isCheckReferral) && !checkRecieved()" type="button" class="btn btn-success" @click="getCupon">
         領取優惠券
         <Icon v-show="iconLoading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
       </button>
@@ -193,7 +196,6 @@ const store = useStore()
 const userData = computed(()=> store.getUserData)
 const userId = computed(()=> store.getUserId)
 
-
 // const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
 const referralCode = ref('');
@@ -238,6 +240,14 @@ if (error.value) {
 
 const userInfo = useState('userInfo')
 
+const checkRecieved = () => {
+  const whiteList = []
+  const got = userData?.value?.coupons.some((cup)=> {
+    return JSON.parse(cup).id == article.value.id
+  })
+  return got
+}
+
 const handleDeleteArticle = () => {
   const answer = confirm('你確定要刪除優惠券嗎？')
 
@@ -270,9 +280,14 @@ const sendPatch = async () => {
 }
 
 const patchUser = async (profile) => {
+  // 設定推薦店家
   article.value.referral = referralStore.value
+  //增加領取時間
   article.value.gotTime = new Date()
-
+  //暫時填進已領優惠券
+  userData?.value?.coupons.push(JSON.stringify(article.value))
+  store.setUser(userData)
+  //打API更新資料庫
   await $fetch(`/api/user/appendCoupon`, {
       method: 'PATCH',
         body: {
