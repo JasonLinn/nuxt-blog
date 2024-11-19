@@ -26,11 +26,11 @@
           <!-- <time class="my-2 text-sm text-gray-400">
             {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
           </time> -->
-          <div class="cupon-share">
-            <svg @click="isOpenShare = !isOpenShare" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share-fill cupon-share-icon" viewBox="0 0 16 16">
+          <div class="cupon-share" tabindex="0" @click="isOpenShare = !isOpenShare" @blur="isOpenShare = false">
+            <svg  xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-share-fill cupon-share-icon" viewBox="0 0 16 16">
               <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
             </svg>
-            <div class="cupon-share-list" v-show="isOpenShare">
+            <div class="cupon-share-list" v-show="isOpenShare" >
                 <svg @click="shareCopy" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
                   <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
                 </svg>
@@ -145,7 +145,7 @@
   background-color: #c9e0f6;
   position: absolute;
   right: 0;
-  bottom: -35px;
+  bottom: -40px;
   padding: 10px;
   border-radius: 40px;
   display: flex;
