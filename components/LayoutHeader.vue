@@ -26,7 +26,7 @@
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
-                v-if="displayName"
+                v-if="userData?.userId"
                 class="get"
                 to="/userInfo"
               >
@@ -51,6 +51,9 @@
           </div> -->
         </NuxtLink>
         <!-- <div class="user-status">{{displayName ? `Hi, ${displayName}` : '未登入'}}</div> -->
+      </div>
+      <div class="user-info group relative p-2" v-show="userData" v-on:click="navOpen=!navOpen">
+        <img class="user-img" :src="userData?.pictureUrl" :alt="userData?.displayName">
       </div>
         <div v-if="userInfo" class="user-info group relative">
           <div for="avatar" class="cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
@@ -128,7 +131,7 @@ const imgUrl = ref('')
 const route = useRoute()
 
 const store = useStore();
-const displayName = computed(() => store.getUserDisplayName);
+const userData = computed(() => store.getUserData);
 const referral = useReferralStore();
 const navOpen = ref(false)
 onMounted(() => {
@@ -188,9 +191,16 @@ const toggleEdit = () => {
 .get {
   font-size: 12px;
 }
+.user-info {
+  position: fixed;
+  right: 35px;
+  top: 5px;
+  width: auto;
+  z-index: 2;
+}
 .user-img {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   overflow: hidden;
 }
@@ -209,12 +219,7 @@ const toggleEdit = () => {
   font-size: 25px;
   font-weight: bold;
 }
-.user-info {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: auto;
-}
+
 .user-info-list {
   position: absolute;
   right: 0;
