@@ -69,7 +69,7 @@
           {{ article.content }}
         </div>
         <div class="cupon-map">
-          查看Google地圖： <a target="_blank" :href="`https://www.google.com/maps/?q=${article.township[0]} ${article.title}`">{{article.township[0]}} {{article.title}}</a>
+          查看Google地圖： <a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
         </div>
         <div class="cupon-referral" v-if="article.isReferral">推薦店家: {{ referralStore?.name || `無` }}
           <svg v-show="referralStore?.name" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
