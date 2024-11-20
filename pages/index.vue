@@ -88,10 +88,10 @@
                     {{ hadleCategory(article.category) }}
                   </span>
                   <span class="cupon-category">
-                    {{ article.isonce ? '限量' : '免費' }}
-                  </span>
-                  <span class="cupon-category coupon-township">
                     {{ article.township[0] }}
+                  </span>
+                  <span class="cupon-category" :class="{'cupon-once': article.isonce}">
+                    {{ article.isonce ? '限量' : '免費' }}
                   </span>
                   <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                     {{ date2LocaleString(article.updated_at) }}
@@ -187,6 +187,7 @@
 .cupon-title {
   font-size: 16px;
   font-weight: 800;
+  color: #613030;
 }
 .cupon-info {
   padding: 13px 8px 15px 8px;
@@ -208,13 +209,13 @@
   font-size: 14px;
   padding: 3px;
   // color: rgb(117, 117, 117);
-  color: #36a1fa;
+  color: #5db0be;
   background-color: rgba(100,179,244,.1);
   margin: 10px 0;
   margin-left: -2px;
   margin-right: 10px;
 }
-.coupon-township {
+.cupon-once {
   background-color: #ffdcdc8a;
   color: #ff9246;
 }

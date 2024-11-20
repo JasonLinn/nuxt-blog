@@ -684,7 +684,8 @@ useSeoMeta({
   width: fit-content;
   padding: 10px;
   border-radius: 5px;
-  background-color: #a7ffc4;
+  background-color: #40a2ab;
+  color: #fff;
 }
 .cupon-amount {
   font-size: 12px;
