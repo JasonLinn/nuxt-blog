@@ -96,7 +96,7 @@
               </section>
               <section class="edit-part col-span-12">
                 <label for="cover" class="block text-sm font-medium text-gray-700">
-                  <TipIcon/>代表性圖片連結：
+                  <TipIcon/>圖片連結(用逗點分隔)：
                 </label>
                 <div class="mt-1 w-full">
                   <textarea
