@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   const articleRecord = await pool
-    .query('INSERT INTO "article" ("title", "category", "adress", "township", "content", "cover", "amount", "used_times", "isReferral", "hash") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;', [
+    .query('INSERT INTO "article" ("title", "category", "adress", "township", "content", "cover", "amount", "used_times", "isReferral", "hash", "isonce") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *;', [
       body.title,
       body.category,
       body.adress,
@@ -20,7 +20,8 @@ export default defineEventHandler(async (event) => {
       body.amount,
       body.usedTimes,
       body.isReferral,
-      body.hash
+      body.hash,
+      body.isonce
     ])
     .then((result) => {
       if (result.rowCount === 1) {

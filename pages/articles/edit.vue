@@ -11,7 +11,7 @@
             <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
               <section class="edit-part col-span-12">
                 <label for="title" class="edit-name block text-sm font-medium text-gray-700">
-                  優惠券標題
+                  <TipIcon/>優惠券標題：
                 </label>
                 <div class="mt-1">
                   <input
@@ -27,15 +27,39 @@
               </section>
               <section class="col-md-12 edit-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
-                  分類：
+                  <TipIcon/>分類：
                 </label>
                 <select class="create-category boder shadow-sm w-100 py-2 px-3 mt-1" v-model="articleData.category" value="play">
                   <option v-for="cate in category" :value="cate.id">{{ cate.name }}</option>
                 </select>
               </section>
+              <section class="col-md-12 create-part">
+                <label for="adress" class="create-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>地址(用逗點分隔)：
+                </label>
+                <textarea
+                  id="adress"
+                  v-model="articleData.adress"
+                  placeholder="請輸入地址"
+                  name="adress"
+                  class="w-100"
+                />
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="township" class="create-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>鄉鎮(用逗點分隔)：
+                </label>
+                <textarea
+                  id="township"
+                  v-model="articleData.township"
+                  placeholder="請輸入鄉鎮"
+                  name="township"
+                  class="w-100"
+                />
+              </section>
               <section class="col-md-12 edit-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
-                  發放數量：
+                  <TipIcon/>發放數量：
                 </label>
                 <div class="mt-1">
                   <input
@@ -44,6 +68,57 @@
                     placeholder="輸入發放數量"
                     name="amount"
                     type="number"
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>是否允許推薦店家：
+                </label>
+                <div class="mt-1">
+                  <input type="radio" id="referralTrue" value="true" v-model="articleData.isReferral">
+                  <label for="referralTrue">是</label>
+                  <input type="radio" id="referralFalse" value="false" v-model="articleData.isReferral">
+                  <label for="referralFalse">否</label>
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="once" class="edit-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>一個帳號只能領一次：
+                </label>
+                <div class="mt-1">
+                  <input type="radio" id="isonceTrue" value="true" v-model="articleData.isonce">
+                  <label for="isonceTrue">是</label>
+                  <input type="radio" id="isonceFalse" value="false" v-model="articleData.isonce">
+                  <label for="isonceFalse">否</label>
+                </div>
+              </section>
+              <section class="edit-part col-span-12">
+                <label for="cover" class="block text-sm font-medium text-gray-700">
+                  <TipIcon/>代表性圖片連結：
+                </label>
+                <div class="mt-1 w-full">
+                  <textarea
+                    v-model="articleData.cover"
+                    placeholder="請撰輸入圖片網址"
+                    name="cover"
+                    class="articleCover w-100"
+                  />
+                </div>
+              </section>
+
+              <section class="edit-part col-span-12">
+                <label for="about" class="edit-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>優惠券內容：
+                </label>
+                <div class="mt-1">
+                  <textarea
+                    id="content"
+                    v-model="articleData.content"
+                    name="content"
+                    rows="4"
+                    placeholder="請撰寫優惠券內容..."
                     class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>
@@ -59,40 +134,6 @@
                     name="hash"
                     rows="4"
                     placeholder="請撰寫優惠券序號..."
-                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                  />
-                </div>
-              </section>
-              <section class="edit-part col-span-12">
-                <label for="cover" class="block text-sm font-medium text-gray-700">
-                  代表性圖片連結
-                </label>
-                <div class="mt-1"
-                  v-for="(img, index) in articleData.cover"
-                  :key="index"
-                >
-                {{ index + 1 }}
-                  <input
-                    :value="img"
-                    placeholder="請撰輸入網址連結"
-                    name="cover"
-                    type="text"
-                    autocomplete="cover"
-                    class="articleCover"
-                    ref="covers"
-                  />
-                </div>
-              </section>
-
-              <section class="edit-part col-span-12">
-                <label for="about" class="edit-name block text-sm font-medium text-gray-700">優惠券內容</label>
-                <div class="mt-1">
-                  <textarea
-                    id="content"
-                    v-model="articleData.content"
-                    name="content"
-                    rows="4"
-                    placeholder="請撰寫優惠券內容..."
                     class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>
@@ -154,6 +195,7 @@
 }
 </style>
 <script setup>
+import { township } from '~/utils/category';
 const route = useRoute()
 
 const { data: articleData, error } = await useFetch(`/api/articles/${route.query.id}`)
@@ -163,25 +205,25 @@ if (error.value) {
 }
 
 // 先轉字串
+articleData.value.adress = await articleData.value.adress.toString()
+articleData.value.township = await articleData.value.township.toString()
 articleData.value.hash = await articleData.value.hash.toString()
-
-const covers = ref([])
+articleData.value.cover = await articleData.value.cover.toString()
 
 const handleSubmit = async () => {
-  let urls = []
-  for (let index = 0; index < covers.value.length; index++) {
-      if (covers.value[index]?.value) {
-        urls.push(covers.value[index].value);
-      }
-    }
+  console.log(articleData, 'ddddd')
   await $fetch(`/api/articles/${route.query.id}`, {
     method: 'PATCH',
     body: {
       title: articleData.value.title,
       category: articleData.value.category,
       content: articleData.value.content,
-      cover: urls,
+      adress: articleData.value.adress.split(','),
+      township: articleData.value.township.split(','),
+      cover: articleData.value.cover.split(','),
       amount: articleData.value.amount,
+      isReferral: articleData.value.isReferral,
+      isonce: articleData.value.isonce,
       // 轉陣列
       hash: articleData.value.hash.split(',')
     }

@@ -11,7 +11,7 @@
             <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
               <section class="col-md-12 create-part">
                 <label for="title" class="create-name block text-sm font-medium text-gray-700">
-                  優惠券名稱：
+                  <TipIcon/>優惠券名稱：
                 </label>
                 <div class="mt-1">
                   <input
@@ -26,8 +26,8 @@
                 </div>
               </section>
               <section class="col-md-12 create-part">
-                <label for="cover" class="create-name block text-sm font-medium text-gray-700">
-                  分類：
+                <label for="category" class="create-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>分類：
                 </label>
                 <select class="create-category boder shadow-sm w-100 py-2 px-3 mt-1" v-model="articleData.category" value="play">
                   <option v-for="cate in category" :value="cate.id">{{ cate.name }}</option>
@@ -35,29 +35,31 @@
               </section>
               <section class="col-md-12 create-part">
                 <label for="adress" class="create-name block text-sm font-medium text-gray-700">
-                  地址：
+                  <TipIcon/>地址(用逗點分隔)：
                 </label>
-                <input
+                <textarea
                   id="adress"
                   v-model="articleData.adress"
                   placeholder="請輸入優惠券名稱"
                   name="adress"
-                  type="text"
-                  autocomplete="adress"
-                  class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  class="w-100"
                 />
               </section>
               <section class="col-md-12 create-part">
-                <label for="township" class="create-name block text-sm font-medium text-gray-700">
-                  鄉鎮：
+                <label for="township" class="create-name">
+                  <TipIcon/>鄉鎮(用逗點分隔)：
                 </label>
-                <select class="create-category boder shadow-sm w-100 py-2 px-3 mt-1" v-model="articleData.township" value="play">
-                  <option v-for="town in township" :value="town.name">{{ town.name }}</option>
-                </select>
+                <textarea
+                  id="township"
+                  v-model="articleData.township"
+                  placeholder="請輸入鄉鎮"
+                  name="township"
+                  class="w-100"
+                />
               </section>
               <section class="col-md-12 create-part">
-                <label for="cover" class="create-name block text-sm font-medium text-gray-700">
-                  發放數量：
+                <label for="amount" class="create-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>發放數量：
                 </label>
                 <div class="mt-1">
                   <input
@@ -72,18 +74,59 @@
               </section>
               <section class="col-md-12 create-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
-                  是否允許推薦店家：
+                  <TipIcon/>是否允許推薦店家：
                 </label>
                 <div class="mt-1">
-                  <input type="radio" id="referralTrue" value="true" v-model="isReferral">
+                  <input type="radio" id="referralTrue" value="true" v-model="articleData.isReferral">
                   <label for="referralTrue">是</label>
-                  <input type="radio" id="referralFalse" value="false" v-model="isReferral">
+                  <input type="radio" id="referralFalse" value="false" v-model="articleData.isReferral">
                   <label for="referralFalse">否</label>
                 </div>
               </section>
               <section class="col-md-12 create-part">
+                <label for="once" class="edit-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>一個帳號只能領一次：
+                </label>
+                <div class="mt-1">
+                  <input type="radio" id="isonceTrue" value="true" v-model="articleData.isonce">
+                  <label for="articleData.True">是</label>
+                  <input type="radio" id="isonceFalse" value="false" v-model="articleData.isonce">
+                  <label for="isonceFalse">否</label>
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
-                  序號：
+                  <TipIcon/>圖片(用逗點分隔)：
+                </label>
+                <div class="mt-1">
+                  <textarea
+                    id="hash"
+                    v-model="articleData.cover"
+                    name="hash"
+                    rows="4"
+                    placeholder="請輸入圖片網址..."
+                    class="w-100 w-full "
+                  />
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="about" class="create-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>優惠券內容：
+                </label>
+                <div class="mt-1">
+                  <textarea
+                    id="content"
+                    v-model="articleData.content"
+                    name="content"
+                    rows="4"
+                    placeholder="請撰寫優惠券內容..."
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="hash" class="edit-name block text-sm font-medium text-gray-700">
+                  序號(用逗點分隔)：
                 </label>
                 <div class="mt-1">
                   <textarea
@@ -98,26 +141,11 @@
               </section>
               <section class="col-md-12 create-part">
                 <label for="cover" class="create-name block text-sm font-medium text-gray-700">
-                  ※請上傳代表性圖片：
+                  請上傳代表性圖片(工程師用)：
                 </label>
                 <input type="file" @input="handleFileInput" multiple />
                 <div class="create-img">
                   <img v-for="file in files" :key="file.name" :src="file.content" alt="file.name" />
-                </div>
-              </section>
-              <section class="col-md-12 create-part">
-                <label for="about" class="create-name block text-sm font-medium text-gray-700">
-                  優惠券內容：
-                </label>
-                <div class="mt-1">
-                  <textarea
-                    id="content"
-                    v-model="articleData.content"
-                    name="content"
-                    rows="4"
-                    placeholder="請撰寫優惠券內容..."
-                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                  />
                 </div>
               </section>
             </div>
@@ -192,12 +220,13 @@ const articleData = reactive({
   adress: [],
   township: [],
   content: '',
-  cover: [],
-  amount: 0,
+  cover: '',
+  isReferral: false,
+  isonce: false,
+  amount: 10000,
   usedTimes: 0,
   hash: '',
 })
-const isReferral = ref(false)
 
 const { handleFileInput, files } = useFileStorage()
 
@@ -206,6 +235,8 @@ const handleSubmit = async () => {
   //   alert('請上傳至少一個圖檔')
   //   return
   // }
+//files 有上傳才執行
+if (files.value[0]) {
   files.value.map((file)=> {
     articleData.cover.push(index_url + 'shop/' + file.name)
   })
@@ -217,6 +248,7 @@ const handleSubmit = async () => {
       url: 'shop/'
 		}
 	})
+}
 
   await $fetch('/api/articles', {
     method: 'POST',
@@ -226,10 +258,11 @@ const handleSubmit = async () => {
       adress: [articleData.adress],
       township: [articleData.township],
       content: articleData.content,
-      cover: articleData.cover,
+      cover: articleData.cover.split(','),
       amount: articleData.amount,
       usedTimes: articleData.usedTimes,
-      isReferral: isReferral.value,
+      isReferral: articleData.isReferral,
+      isonce: articleData.isonce,
       hash: articleData.hash.split(',')
     }
   })
