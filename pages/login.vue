@@ -3,7 +3,8 @@
     <div class="w-full max-w-md">
       <div class="flex flex-col items-center">
         <NuxtLink to="/">
-          <Icon name="logos:nuxt-icon" size="80" />
+          <!-- <Icon name="logos:nuxt-icon" size="80" /> -->
+          <img src="/one_text.png" width="100" alt="logo">
         </NuxtLink>
         <h2 class="login-title mt-6 py-3 text-center text-3xl font-bold tracking-tight text-gray-700">管理員登入</h2>
       </div>
