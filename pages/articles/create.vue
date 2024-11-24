@@ -40,7 +40,7 @@
                 <textarea
                   id="adress"
                   v-model="articleData.adress"
-                  placeholder="請輸入優惠券名稱"
+                  placeholder="請輸入地址"
                   name="adress"
                   class="w-100"
                 />
