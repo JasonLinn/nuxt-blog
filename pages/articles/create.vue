@@ -179,7 +179,6 @@
 .create {
   display: flex;
   justify-content: center;
-  padding: 20px;
 }
 .create-title {
   font-size: 34px;
@@ -187,7 +186,6 @@
   font-weight: bold;
 }
 .create-form {
-  padding: 20px;
   background-color: #fff;
 }
 .create-name {

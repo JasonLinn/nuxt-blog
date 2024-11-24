@@ -166,7 +166,6 @@
 .edit {
   display: flex;
   justify-content: center;
-  padding: 20px;
 }
 .edit-title {
   font-size: 34px;
@@ -174,7 +173,6 @@
   font-weight: bold;
 }
 .edit-form {
-  padding: 20px;
   background-color: #fff;
 }
 .edit-name {
