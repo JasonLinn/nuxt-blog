@@ -74,7 +74,7 @@
               </section>
               <section class="col-md-12 create-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
-                  <TipIcon/>是否允許推薦店家：
+                  <TipIcon/>是否顯示推薦店家：
                 </label>
                 <div class="mt-1">
                   <input type="radio" id="referralTrue" value="true" v-model="articleData.isReferral">

@@ -56,7 +56,7 @@
         <img class="user-img" :src="userData?.pictureUrl" :alt="userData?.displayName">
       </div>
         <div v-if="userInfo" class="user-info group relative">
-          <div for="avatar" class="cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
+          <div for="avatar" class="avatar cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
             <img
               class="user-img inline-block h-10 w-10 rounded-full bg-white/90 object-cover object-center p-0.5 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
               :src="userInfo.avatar"
@@ -354,5 +354,7 @@ const toggleEdit = () => {
 	transform: translateX(200px);
 	opacity: 0;
 }
-
+.avatar {
+  padding-right: 10px;
+}
 </style>
