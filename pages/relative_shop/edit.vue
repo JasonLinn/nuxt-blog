@@ -5,19 +5,19 @@
           <div class="space-y-8 divide-y divide-gray-200">
             <div>
               <div class="mt-6">
-                <h3 class="edit-title text-xl font-medium leading-6 text-gray-900">更新優惠券</h3>
+                <h3 class="edit-title text-xl font-medium leading-6 text-gray-900">更新旅遊服務</h3>
               </div>
   
               <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
                 <section class="edit-part col-span-12">
                   <label for="title" class="edit-name block text-sm font-medium text-gray-700">
-                    優惠券標題
+                    旅遊服務標題
                   </label>
                   <div class="mt-1">
                     <input
                       id="title"
                       v-model="articleData.title"
-                      placeholder="請撰輸入優惠券標題"
+                      placeholder="請撰輸入旅遊服務標題"
                       name="title"
                       type="text"
                       autocomplete="title"
@@ -58,7 +58,7 @@
                       v-model="articleData.hash"
                       name="hash"
                       rows="4"
-                      placeholder="請撰寫優惠券序號..."
+                      placeholder="請撰寫旅遊服務序號..."
                       class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                     />
                   </div>
@@ -81,14 +81,14 @@
                 </section>
   
                 <section class="edit-part col-span-12">
-                  <label for="about" class="edit-name block text-sm font-medium text-gray-700">優惠券內容</label>
+                  <label for="about" class="edit-name block text-sm font-medium text-gray-700">旅遊服務內容</label>
                   <div class="mt-1">
                     <textarea
                       id="content"
                       v-model="articleData.content"
                       name="content"
                       rows="4"
-                      placeholder="請撰寫優惠券內容..."
+                      placeholder="請撰寫旅遊服務內容..."
                       class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                     />
                   </div>
@@ -121,7 +121,6 @@
   .edit {
     display: flex;
     justify-content: center;
-    padding: 20px;
   }
   .edit-title {
     font-size: 34px;
@@ -129,7 +128,6 @@
     font-weight: bold;
   }
   .edit-form {
-    padding: 20px;
     background-color: #fff;
   }
   .edit-name {
@@ -155,7 +153,7 @@
   const { data: articleData, error } = await useFetch(`/api/relative/${route.query.id}`)
   
   if (error.value) {
-    throw createError({ statusCode: 400, message: '您要更新的優惠券不存在或已經被刪除' })
+    throw createError({ statusCode: 400, message: '您要更新的旅遊服務不存在或已經被刪除' })
   }
   
   // 先轉字串

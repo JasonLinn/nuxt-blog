@@ -68,7 +68,7 @@
                     v-model="articleData.hash"
                     name="hash"
                     rows="4"
-                    placeholder="請撰寫優惠券序號..."
+                    placeholder="請撰寫旅遊服務序號..."
                     class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>
@@ -82,7 +82,7 @@
                 </div>
                 <section class="col-md-12 create-part">
                   <label for="about" class="create-name block text-sm font-medium text-gray-700">
-                    優惠券內容：
+                    旅遊服務內容：
                   </label>
                   <div class="mt-1">
                     <textarea
@@ -90,7 +90,7 @@
                       v-model="articleData.content"
                       name="content"
                       rows="4"
-                      placeholder="請撰寫優惠券內容..."
+                      placeholder="請撰寫旅遊服務內容..."
                       class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                     />
                   </div>
@@ -126,7 +126,6 @@
   .create {
     display: flex;
     justify-content: center;
-    padding: 20px;
   }
   .create-title {
     font-size: 34px;
@@ -134,7 +133,6 @@
     font-weight: bold;
   }
   .create-form {
-    padding: 20px;
     background-color: #fff;
   }
   .create-name {
