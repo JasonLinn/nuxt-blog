@@ -63,7 +63,7 @@
                 <NuxtLink
                   class=""
                   :to="{
-                    name: 'articles-id',
+                    name: 'relative_shop-id',
                     params: {
                       id: article.id
                     }
