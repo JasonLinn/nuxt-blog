@@ -55,6 +55,7 @@
                                 <div class="AccordionContentText">
                                   {{ coupon.content }}
                                 </div>
+                                <TipText></TipText>
                               </AccordionContent>
                             </AccordionItem>
                         </AccordionRoot>

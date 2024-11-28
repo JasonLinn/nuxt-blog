@@ -68,6 +68,7 @@
         <div class="cupon-text">
           {{ article.content }}
         </div>
+        <TipText></TipText>
         <div class="cupon-map">
           查看Google地圖： <a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
         </div>
