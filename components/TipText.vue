@@ -13,6 +13,8 @@
 </template>
 <style>
 .tip-text-wrapper {
+    text-align: left;
+    margin-top: 5px;
     margin-bottom: 15px;
 }
 .tip-text-title {

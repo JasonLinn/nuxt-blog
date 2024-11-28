@@ -73,7 +73,6 @@
                     <Slide v-for="(img, index) in article.cover" :key="img">
                       <img :src="img" class="cupon-img" />
                     </Slide>
-  
                     <template #addons="{ slidesCount }">
                       <Pagination v-if="slidesCount > 1" />
                     </template>
