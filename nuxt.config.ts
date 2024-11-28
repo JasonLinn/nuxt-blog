@@ -13,8 +13,13 @@ export default defineNuxtConfig({
     'vue3-carousel-nuxt',
     'radix-vue/nuxt',
     'nuxt-file-storage',
-    '@nuxt/image'
+    '@nuxt/image',
   ],
+  runtimeConfig: {
+    public: {
+      mapApiKey: "AIzaSyD7HWVfZa4Tq-IGp0SsaCOanE4wtux-T74",
+    },
+  },
   vite: {
     css: {
       preprocessorOptions: {
@@ -25,6 +30,9 @@ export default defineNuxtConfig({
           `
         }
       }
+    },
+    optimizeDeps: {
+      include: ["@fawmi/vue-google-maps", "fast-deep-equal"],
     },
     // server: {
     //   proxy: {
