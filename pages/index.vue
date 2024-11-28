@@ -114,40 +114,42 @@
               </time> -->
             </article>
           </div>
+          <!-- @@@@@分頁功能在此@@@@ -->
+          <nav
+            class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
+          >
+            <div class="next-page flex flex-1 justify-center sm:justify">
+              <NuxtLink
+                v-if="currentPage > 1"
+                class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+                :to="{
+                  name: 'index',
+                  query: {
+                    page: currentPage - 1
+                  }
+                }"
+              >
+                <Icon name="ri:arrow-left-s-line" />
+                {{ currentPage -1 }}
+              </NuxtLink>
+              <label class="now-page">{{ currentPage }}</label>
+              <NuxtLink
+                v-if="couponObject?.data?.items.length == 10"
+                class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+                :to="{
+                  name: 'index',
+                  query: {
+                    page: currentPage + 1
+                  }
+                }"
+              >
+              {{ currentPage +1 }}
+                <Icon name="ri:arrow-right-s-line" />
+              </NuxtLink>
+            </div>
+          </nav>
         </div>
       </template>
-
-      <!-- @@@@@分頁功能在此@@@@ -->
-      <nav
-        class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
-      >
-        <div class="next-page flex flex-1 justify-center sm:justify">
-          <NuxtLink
-            v-if="currentPage > 1"
-            class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-            :to="{
-              name: 'index',
-              query: {
-                page: currentPage - 1
-              }
-            }"
-          >
-            <Icon name="ri:arrow-left-s-line" />
-          </NuxtLink>
-          <label class="mx-2 text-sm text-gray-600">第 {{ currentPage }} 頁</label>
-          <NuxtLink
-            class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-            :to="{
-              name: 'index',
-              query: {
-                page: currentPage + 1
-              }
-            }"
-          >
-            <Icon name="ri:arrow-right-s-line" />
-          </NuxtLink>
-        </div>
-      </nav>
     </div>
   </div>
 </template>
@@ -174,6 +176,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size: 16px;
+}
+.now-page {
+  padding: 5px;
+  margin: 0 10px;
+  background-color: #f1f1f1;
+  border-radius: 50%;
 }
 .cupon {
 }
