@@ -176,88 +176,9 @@ const hotTag = [
   '租車',
   '湯屋'
 ]
-// await useFetch('/api/articles', {
-//   query: {
-//     category: currentCate,
-//     page: currentPage,
-//     pageSize: 10
-//     }
-//   }).then(res => {
-//     let obj = {
-//       data: {
-//         items: []
-//       }
-//     }
-
-//     obj.data = res.data.value
-//     store.setCoupon(obj.data)
-//   })
-
-// const {
-//   pending,
-//   data,
-//   error
-// } = computed(() => JSON.parse(JSON.stringify(store.getCouponData)));
-
 
 const couponObject = computed(() => store.getCouponData)
 
-
-// watch(currentCate, ()=>{
-//   // 重新抓取資料
-//   useFetch('/api/articles', {
-//   query: {
-//     category: currentCate,
-//     page: currentPage,
-//     pageSize: 10
-//     }
-//   }).then(res => {
-//     let obj = {
-//       data: {
-//         items: []
-//       }
-//     }
-
-//     obj.data = res.data.value
-//     store.setCoupon(obj.data)
-//   })
-
-  //sort 改變資料
-//   const items = [
-//     {
-//         "id": 35,
-//         "title": "農場",
-//         "category": "buy",
-//         "content": "GOOD",
-//         "cover": "https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg",
-//         "amount": 9952,
-//         "used_times": 0,
-//         "hash": [""],
-//         "updated_at": "2024-07-24T06:05:16.617Z"
-//     },
-//     {
-//         "id": 35,
-//         "title": "農場",
-//         "category": "buy",
-//         "content": "GOOD",
-//         "cover": "https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg",
-//         "amount": 9951,
-//         "used_times": 0,
-//         "hash": [""],
-//         "updated_at": "2024-07-24T06:21:04.378Z"
-//     }
-// ]
-// const sortCouponObject = JSON.parse(JSON.stringify(couponObject))
-// console.log(sortCouponObject, 'sssssssss')
-//   sortCouponObject.data.items = sortCouponObject.data.items.filter((item)=> {
-//     console.log(item.category, currentCate.value, 'ooooooooooooo')
-//     return item.category == currentCate.value
-//   })
-
-//   console.log(sortCouponObject, 'tttttt')
-//   store.setCoupon(sortCouponObject.data)
-//   console.log(couponObject, 'eeeeeee')
-// })
 
 const date2LocaleString = (date) => {
   return new Date(date).toLocaleString('zh-TW')
