@@ -52,7 +52,7 @@
             {{ article.content }}
           </div>
         </div>
-        <RelativeFooter/>
+        <RelativeFooter></RelativeFooter>
       </template>
     </div>
 </template>
