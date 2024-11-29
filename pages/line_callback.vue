@@ -3,7 +3,7 @@
         <h1 class="loading-title">
             LINE登入中 ···
         </h1>
-        <CustomerLoading :isLoading="true"></CustomerLoading>
+        <CustomerLoading :isLoading="true"/>
     </div>
 	<!-- <a href="https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://bff1faf23607.ngrok.app/line_callback&state=openid%20email%20profile&bot_prompt=normal&scope=openid%20email%20profile">
 		<img src="/icon/line_login.png" alt="line-login">

@@ -101,21 +101,22 @@
         </div>
       </div>
       <!-- modal end -->
-       <div class="coupon-pass" v-show="!article.isonce">出示即可使用</div>
-       <div v-show="article.isonce">
-          <div class="cupon-amount">
+       <div class="coupon-pass" v-show="!article.isonce && !article.isReferral">出示即可使用</div>
+       <div>
+          <div class="cupon-amount" v-show="article.isReferral">
             剩餘數量: {{ article.amount }}
           </div>
-         <button v-show="article.isReferral && !isCheckReferral && !checkRecieved()" type="button" class="btn btn-light">
+         <button v-show="article.isReferral && !isCheckReferral" type="button" class="btn btn-light">
            請輸入推薦代碼
          </button>
-         <button v-show="checkRecieved()" type="button" class="btn btn-light">
+         <!-- 領券按鈕 -->
+         <button v-show="checkIsOnce() && article.isonce && isCheckReferral" type="button" class="btn btn-light">
            每個帳號限領一次
          </button>
-         <button v-show="article.amount && article.hash[0] && !checkRecieved()" type="button" class="btn btn-success" @click="showModal">
+         <button v-show="article.amount && article.hash[0]" type="button" class="btn btn-success" @click="showModal">
            領取限量優惠券
          </button>
-         <button v-show="article.amount && !article.hash[0] && (!article.isReferral || isCheckReferral) && !checkRecieved()" type="button" class="btn btn-success" @click="getCupon">
+         <button v-show="article.amount && !article.hash[0] && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="getCupon">
            領取優惠券
            <Icon v-show="iconLoading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
          </button>
@@ -176,12 +177,14 @@ if (error.value) {
 
 const userInfo = useState('userInfo')
 
-const checkRecieved = () => {
+const checkIsOnce = () => {
+  let wasGet = false
   const whiteList = []
-  const got = userData?.value?.coupons.some((cup)=> {
+  // 查詢該帳號是否領過
+  wasGet = userData?.value?.coupons.some((cup)=> {
     return JSON.parse(cup).id == article.value.id
   })
-  return got
+  return wasGet && article.value.isonce
 }
 
 const handleDeleteArticle = () => {

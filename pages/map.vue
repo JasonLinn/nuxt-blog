@@ -18,7 +18,7 @@
       }'
 >
 <GMapInfoWindow>
-        <div>I am in info window <RelativeFooter/>
+        <div>I am in info window
         </div>
       </GMapInfoWindow>
 </GMapMarker>
