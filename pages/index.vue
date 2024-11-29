@@ -170,7 +170,7 @@ const currentPage = ref(1)
 const selectedTown = ref(null)
 const selectedCate = ref('')
 const store = useCouponStore();
-store.fetchAndSetCoupon({cate: selectedCate, selectedTown, currentPage, searchText})
+store.fetchAndSetCoupon({selectedCate, selectedTown, currentPage, searchText})
 const hotTag = [
   '伴手禮',
   '租車',
@@ -258,7 +258,6 @@ const couponObject = computed(() => store.getCouponData)
 //   store.setCoupon(sortCouponObject.data)
 //   console.log(couponObject, 'eeeeeee')
 // })
-
 
 const date2LocaleString = (date) => {
   return new Date(date).toLocaleString('zh-TW')

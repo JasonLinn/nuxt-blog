@@ -32,7 +32,7 @@ const useCouponStore = defineStore("useCouponStore", {
             error
           } = await useFetch('/api/articles', {
             query: {
-                category: initData.cate || initState.currentCate,
+                category: initData.selectedCate || initState.currentCate,
                 township: initData.selectedTown || initState.township,
                 searchText: initData.searchText || initState.searchText,
                 page: initData.currentPage || initState.currentPage,
