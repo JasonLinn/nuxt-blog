@@ -21,6 +21,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "jsonwebtoken": "^9.0.2",
     "nuxt": "^3.7.4",
+    "nuxt-easy-lightbox": "^1.0.2",
     "nuxt-file-storage": "^0.2.8",
     "nuxt-icon": "^0.5.0",
     "prettier-plugin-tailwindcss": "^0.5.4",

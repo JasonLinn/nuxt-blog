@@ -122,7 +122,7 @@
               <NuxtLink
                 v-if="currentPage > 1"
                 class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-                @click="nowPage = nowPage - 1"
+                @click="currentPage = currentPage - 1"
                 :to="{
                   name: 'index',
                   query: {
@@ -138,7 +138,7 @@
               <NuxtLink
                 v-if="couponObject?.data?.items.length == 10"
                 class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-                @click="nowPage = nowPage + 1"
+                @click="currentPage = currentPage + 1"
                 :to="{
                   name: 'index',
                   query: {

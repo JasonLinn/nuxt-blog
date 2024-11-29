@@ -13,8 +13,16 @@
           <img :src="article.cover" class="cupon-img" />
         </div> -->
         <Carousel>
-          <Slide v-for="img in article.cover" :key="img">
-            <NuxtImg :src="img" class="cupon-img" />
+          <Slide v-for="(img, index) in article.cover" :key="img">
+            <NuxtImg
+              preload
+              format="webp"
+              fit="cover"
+              :src="img.replace('https://yilanpass.com', '.')"
+              class="cupon-img"
+              @click="showImg(index)"
+              quality="50"
+            />
           </Slide>
 
           <template #addons="{ slidesCount }">
@@ -22,6 +30,12 @@
             <Pagination v-if="slidesCount > 1" />
           </template>
         </Carousel>
+        <VueEasyLightbox
+          :visible="visibleRef"
+          :imgs="article.cover"
+          :index="indexRef"
+          @hide="onHide"
+        />
         <div class="cupon-time my-2 flex flex-col justify-between sm:my-0 sm:flex-row sm:items-center">
           <!-- <time class="my-2 text-sm text-gray-400">
             {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
@@ -148,8 +162,25 @@ const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
 // const showModal = () => {
 //   modal.show();
 // };
+/*  lightbox  */
 let referralStore = ref(null)
 let isCheckReferral = ref(false)
+const visibleRef = ref(false);
+const indexRef = ref(0);
+
+const imgs = [
+  "https://via.placeholder.com/450.png/",
+  "https://via.placeholder.com/300.png/",
+  "https://via.placeholder.com/150.png/",
+  { src: "https://via.placeholder.com/450.png/", title: "this is title" },
+];
+
+const showImg = (index) => {
+  indexRef.value = index;
+  visibleRef.value = true;
+};
+const onHide = () => (visibleRef.value = false);
+/* lightbox end */
 // const referralStore = referral.find((ref) => {
 //   if (!store.getReferral?.referral) {
 //     return null

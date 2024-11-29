@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     'radix-vue/nuxt',
     'nuxt-file-storage',
     '@nuxt/image',
+    "nuxt-easy-lightbox"
   ],
   runtimeConfig: {
     public: {
