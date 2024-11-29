@@ -3,6 +3,9 @@
     :center="{lat: 24.69295, lng: 121.7195}"
     :zoom="12"
 >
+<GMapAutocomplete
+        placeholder="This is a placeholder"
+    />
 <GMapMarker
     :key="index"
     v-for="(m, index) in markers"
