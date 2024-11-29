@@ -1,6 +1,6 @@
 export const category = [
   {
-    id: 'index',
+    id: '',
     name: '全',
   },{
     id: 'eat',
