@@ -71,7 +71,15 @@
               >
                 <Carousel>
                   <Slide v-for="(img, index) in article.cover" :key="img">
-                    <NuxtImg :src="img" class="cupon-img" :alt="article.title" height="165" width="366" />
+                    <NuxtImg
+                      :alt="article.title"
+                      height="165"
+                      width="366"
+                      loading="lazy"
+                      format="webp"
+                      :src="img.replace('https://yilanpass.com', '.')"
+                      class="cupon-img"
+                    />
                   </Slide>
 
                   <template #addons="{ slidesCount }">

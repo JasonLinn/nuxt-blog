@@ -15,9 +15,8 @@
         <Carousel>
           <Slide v-for="(img, index) in article.cover" :key="img">
             <NuxtImg
-              preload
+              loading="lazy"
               format="webp"
-              fit="cover"
               :src="img.replace('https://yilanpass.com', '.')"
               class="cupon-img"
               @click="showImg(index)"
@@ -755,6 +754,6 @@ useSeoMeta({
   background-color: #ff9742;
 }
 .carousel__slide {
-  max-height: 180px;
+  height: 180px;
 }
 </style>
