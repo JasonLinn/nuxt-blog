@@ -122,10 +122,11 @@
               <NuxtLink
                 v-if="currentPage > 1"
                 class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+                @click="nowPage = nowPage - 1"
                 :to="{
                   name: 'index',
                   query: {
-                    cate: currentCate,
+                    cate: selectedCate,
                     page: currentPage - 1
                   }
                 }"
@@ -137,10 +138,11 @@
               <NuxtLink
                 v-if="couponObject?.data?.items.length == 10"
                 class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+                @click="nowPage = nowPage + 1"
                 :to="{
                   name: 'index',
                   query: {
-                    cate: currentCate,
+                    cate: selectedCate,
                     page: currentPage + 1
                   }
                 }"
@@ -162,13 +164,13 @@ import useCouponStore from "~~/store/coupon";
 // const handleLogout = store.resetUser;
 
 const route = useRoute()
-const currentPage = computed(() => parseInt(route?.query?.page) || 1)
 const currentCate = computed(() => route?.query?.cate)
 const searchText = ref('')
+const currentPage = ref(1)
 const selectedTown = ref(null)
-let selectedCate = ref(route?.query?.cate || '')
+const selectedCate = ref('')
 const store = useCouponStore();
-store.fetchAndSetCoupon({cate: currentCate, currentPage, selectedTown})
+store.fetchAndSetCoupon({cate: selectedCate, selectedTown, currentPage, searchText})
 const hotTag = [
   '伴手禮',
   '租車',
@@ -200,10 +202,7 @@ const hotTag = [
 
 const couponObject = computed(() => store.getCouponData)
 
-console.log(couponObject, 'eeeeeeefffff', route, currentCate, route?.query?.cate)
-watch(searchText, ()=>{
-  store.fetchAndSetCoupon({cate: currentCate, currentPage, selectedTown, searchText: searchText.value})
-})
+
 // watch(currentCate, ()=>{
 //   // 重新抓取資料
 //   useFetch('/api/articles', {
