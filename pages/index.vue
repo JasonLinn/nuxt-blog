@@ -174,7 +174,7 @@ import useCouponStore from "~~/store/coupon";
 const route = useRoute()
 const currentCate = computed(() => route?.query?.cate)
 const searchText = ref('')
-const currentPage = ref(1)
+let currentPage = ref(1)
 const selectedTown = ref(null)
 const selectedCate = ref('')
 const store = useCouponStore();
@@ -208,6 +208,7 @@ const cleanText = () => {
 
 const clickCate = (e) => {
   console.log(e.target, selectedCate, 'eeeee', currentCate)
+  currentPage.value = 1
   // if (selectedCate.value == 'index') {
   //   return
   // }
