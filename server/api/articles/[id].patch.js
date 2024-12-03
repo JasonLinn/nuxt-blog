@@ -12,8 +12,8 @@ export default defineEventHandler(async (event) => {
 
   const articleRecord = await pool
     .query(
-      'UPDATE "article" SET "title" = $1, "category" = $2, "content" = $3, "cover" = $4, "amount" = $5, "hash" = $6, "adress" = $8, "township" = $9, "isReferral" = $10, "isonce" = $11, "updated_at" = NOW() WHERE "id" = $7 RETURNING *;',
-      [body.title, body.category, body.content, body.cover, body.amount, body.hash, articleId, body.adress, body.township, body.isReferral, body.isonce]
+      'UPDATE "article" SET "title" = $1, "category" = $2, "content" = $3, "cover" = $4, "amount" = $5, "hash" = $6, "adress" = $8, "township" = $9, "isReferral" = $10, "isonce" = $11, "position" = $12, "tags" = $13, "updated_at" = NOW() WHERE "id" = $7 RETURNING *;',
+      [body.title, body.category, body.content, body.cover, body.amount, body.hash, articleId, body.adress, body.township, body.isReferral, body.isonce, body.position, body.tags]
     )
     .then((result) => {
       if (result.rowCount === 1) {

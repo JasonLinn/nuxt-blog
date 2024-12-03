@@ -46,6 +46,21 @@
                 />
               </section>
               <section class="col-md-12 create-part">
+                <label for="position" class="create-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>經緯度:
+                </label>
+                <div class="mt-1">
+                  <input
+                    id="position"
+                    v-model="articleData.position"
+                    placeholder="請輸入經緯度"
+                    name="position"
+                    type="text"
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
                 <label for="township" class="create-name">
                   <TipIcon/>鄉鎮(用逗點分隔)：
                 </label>
@@ -120,6 +135,21 @@
                     name="content"
                     rows="4"
                     placeholder="請撰寫優惠券內容..."
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="tags" class="create-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>標籤：
+                </label>
+                <div class="mt-1">
+                  <textarea
+                    id="tags"
+                    v-model="articleData.tags"
+                    name="tags"
+                    rows="2"
+                    placeholder="請用#撰寫標籤..."
                     class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>
@@ -247,7 +277,7 @@ if (files.value[0]) {
 		}
 	})
 }
-
+  let position = articleData.position.match(/\d+\.\d+/g)
   await $fetch('/api/articles', {
     method: 'POST',
     body: {
@@ -261,7 +291,12 @@ if (files.value[0]) {
       usedTimes: articleData.usedTimes,
       isReferral: articleData.isReferral,
       isonce: articleData.isonce,
-      hash: articleData.hash.split(',')
+      hash: articleData.hash.split(','),
+      position: {
+        lng: Number(position[0]),
+        lat: Number(position[1])
+      },
+      tags: articleData.tags
     }
   })
     .then((response) => {
