@@ -75,7 +75,6 @@
                       :alt="article.title"
                       height="165"
                       width="366"
-                      loading="lazy"
                       format="webp"
                       :src="img.replace('https://yilanpass.com', '.')"
                       class="cupon-img"
