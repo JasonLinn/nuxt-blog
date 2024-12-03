@@ -36,7 +36,7 @@ const useCouponStore = defineStore("useCouponStore", {
                 township: initData.selectedTown || initState.township,
                 searchText: initData.searchText || initState.searchText,
                 page: initData.currentPage || initState.currentPage,
-                pageSize: 10
+                pageSize: initData.pageSize || 10
             }
         })
       this.couponData =  {
