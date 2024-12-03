@@ -166,6 +166,7 @@ console.log(nowId, couponObject, 'nnnnn', couponData, selectedCate, 'eee')
 store.fetchAndSetCoupon({pageSize: 30})
 const mapRef = ref({})
 let map;
+let infoWindow;
 let markers = [];
 onMounted(()=>{
     console.log(mapRef, 'fffffffff')
@@ -217,10 +218,62 @@ onMounted(()=>{
                 }, 1400);
 
             }
+
+            infoWindow = new google.maps.InfoWindow();
+
+            const locationButton = document.createElement("button");
+
+            locationButton.textContent = "Pan to Current Location";
+            locationButton.classList.add("custom-map-control-button");
+            map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(locationButton);
+            locationButton.addEventListener("click", () => {
+                // Try HTML5 geolocation.
+                if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                    const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+
+                        const markerLoc = new google.maps.Marker({
+                            position: pos,
+                            map: map,
+                            icon: {
+                                url: './icon/location-point.svg',
+                                scaledSize: {width: 30, height: 30}
+                            }
+                        });
+                        markers.push(markerLoc)
+
+                        infoWindow.setPosition(pos);
+                        infoWindow.setContent("Location found.");
+                        // infoWindow.open(map);
+                        map.setCenter(pos);
+                    },
+                    () => {
+                    handleLocationError(true, infoWindow, map.getCenter());
+                    },
+                );
+                } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infoWindow, map.getCenter());
+                }
+            });
         })
       }
 })
 
+
+function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+  infoWindow.setPosition(pos);
+  infoWindow.setContent(
+    browserHasGeolocation
+      ? "Error: The Geolocation service failed."
+      : "Error: Your browser doesn't support geolocation.",
+  );
+  infoWindow.open(map);
+}
 function addMyButton(map) {
   const controlUI = document.createElement("button");
   controlUI.title = "Click to zoom the map";
