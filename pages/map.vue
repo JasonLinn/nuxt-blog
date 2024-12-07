@@ -161,7 +161,7 @@ const store = useCouponStore();
 let nowId = ref(1)
 let nowCoupon = reactive({})
 const couponObject = computed(() => store.getCouponData)
-const couponData = computed(() =>selectedCate ? couponObject.value.data.items : couponObject.value.data.items.filter((i) => i.category == selectedCate))
+const couponData = computed(() =>selectedCate ? couponObject?.value?.data?.items : couponObject?.value?.data?.items.filter((i) => i.category == selectedCate))
 console.log(nowId, couponObject, 'nnnnn', couponData, selectedCate, 'eee')
 store.fetchAndSetCoupon({pageSize: 30})
 const mapRef = ref({})
@@ -341,7 +341,7 @@ function setMapOnAll(map, category) {
 //   hideMarkers();
 //   markers = [];
 // }
-console.log(couponObject.value.data.items.filter((i) => i.position?.lat), 'tttttttccsddddd')
+console.log(couponObject?.value?.data?.items.filter((i) => i.position?.lat), 'tttttttccsddddd')
 // const markers = reactive([
 // {
 //     position: {lat: 24.669843988805, lng: 121.748609031434},
