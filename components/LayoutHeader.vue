@@ -26,6 +26,20 @@
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
+                to="/about"
+              >
+                <p class="">關於我們</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
+                to="/rule"
+              >
+                <p class="">使用規範</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
                 v-if="userData?.userId"
                 class="get"
                 to="/userInfo"
