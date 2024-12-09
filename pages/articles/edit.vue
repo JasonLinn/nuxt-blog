@@ -47,7 +47,7 @@
               </section>
               <section class="col-md-12 create-part">
                 <label for="position" class="create-name block text-sm font-medium text-gray-700">
-                  <TipIcon/>經緯度:
+                  <TipIcon/>經緯度(經度：121.614046 緯度：24.6379):
                 </label>
                 <div class="mt-1">
                   <input
