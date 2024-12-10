@@ -47,7 +47,7 @@
               </section>
               <section class="col-md-12 create-part">
                 <label for="position" class="create-name block text-sm font-medium text-gray-700">
-                  <TipIcon/>經緯度:
+                  <TipIcon/>經緯度(經度：121.614046 緯度：24.6379):
                 </label>
                 <div class="mt-1">
                   <input
@@ -237,6 +237,7 @@ articleData.value.adress = await articleData.value.adress.toString()
 articleData.value.township = await articleData.value.township.toString()
 articleData.value.hash = await articleData.value.hash.toString()
 articleData.value.cover = await articleData.value.cover.toString()
+articleData.value.position = await '經度：' + articleData.value.position?.lng + ' 緯度：' + articleData.value.position?.lat
 
 const handleSubmit = async () => {
   console.log(articleData, 'ddddd')
