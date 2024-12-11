@@ -1,12 +1,4 @@
 <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-            color: #333;
-        }
         .about-header {
             background-color: #2a90b6a6;
             color: #fff;
@@ -22,6 +14,7 @@
             font-size: 1.2rem;
         }
         .about-main {
+            line-height: 1.6;
             padding: 20px 10%;
         }
         .about-section {
