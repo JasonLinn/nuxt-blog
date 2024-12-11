@@ -21,11 +21,6 @@
     </section>
 
     <section class="rule-section">
-        <h2>使用者責任</h2>
-        <p>使用推薦代碼的用戶須遵守本規範，並對自身行為負全部責任。</p>
-    </section>
-
-    <section class="rule-section">
         <h2>違規處理</h2>
         <p>若平台發現用戶違反上述規範，有權立即暫停或取消該推薦代碼的有效性，並保留追究相關法律責任的權利。</p>
     </section>
@@ -46,7 +41,7 @@
         color: #333;
     }
     .rule-header {
-        background-color: #4CAF50;
+        background-color: #2a90b6a6;
         color: #fff;
         padding: 20px 10%;
         text-align: center;
