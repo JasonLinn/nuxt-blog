@@ -63,7 +63,7 @@
     .rule-section h2 {
         font-size: 1.8rem;
         margin-bottom: 10px;
-        color: #4CAF50;
+        color: #000;
     }
     .rule-section p, 
     .rule-section li {

@@ -30,7 +30,7 @@
         .about-section h2 {
             font-size: 1.8rem;
             margin-bottom: 10px;
-            color: #0078d7;
+            color: #000;
         }
         .about-section p {
             margin-bottom: 10px;
