@@ -27,7 +27,7 @@
 </main>
 
 <footer class="rule-footer">
-    <p>&copy; 2024 宜蘭觀光民宿行銷協會. 保留所有權利。</p>
+    <p>&copy; 2024 宜蘭旅遊通. 保留所有權利。</p>
 </footer>
 </template>
 
