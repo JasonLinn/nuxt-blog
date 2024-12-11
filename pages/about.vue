@@ -1,53 +1,3 @@
-<style>
-        .about-header {
-            background-color: #2a90b6a6;
-            color: #fff;
-            padding: 20px 10%;
-            text-align: center;
-        }
-        .about-header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-        .about-header p {
-            margin: 10px 0 0;
-            font-size: 1.2rem;
-        }
-        .about-main {
-            line-height: 1.6;
-            padding: 20px 10%;
-        }
-        .about-section {
-            margin-bottom: 20px;
-        }
-        .about-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            color: #000;
-        }
-        .about-section p {
-            margin-bottom: 10px;
-        }
-        .about-section ul {
-            padding-left: 20px;
-            list-style: disc;
-        }
-        .about-section ul li {
-            margin-bottom: 8px;
-        }
-        .about-footer {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            margin-top: 20px;
-        }
-        .about-footer p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-    </style>
-
 <template>
 <header class="about-header">
     <h1>宜蘭旅遊通</h1>
@@ -89,3 +39,52 @@
     <p>&copy; 2024 宜蘭旅遊通. 保留所有權利。</p>
 </footer>
 </template>
+<style>
+    .about-header {
+        background-color: #2a90b6a6;
+        color: #fff;
+        padding: 20px 10%;
+        text-align: center;
+    }
+    .about-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+    }
+    .about-header p {
+        margin: 10px 0 0;
+        font-size: 1.2rem;
+    }
+    .about-main {
+        line-height: 1.6;
+        padding: 20px 10%;
+    }
+    .about-section {
+        margin-bottom: 20px;
+    }
+    .about-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        color: #000;
+    }
+    .about-section p {
+        margin-bottom: 10px;
+    }
+    .about-section ul {
+        padding-left: 20px;
+        list-style: disc;
+    }
+    .about-section ul li {
+        margin-bottom: 8px;
+    }
+    .about-footer {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 10px 0;
+        margin-top: 20px;
+    }
+    .about-footer p {
+        margin: 0;
+        font-size: 0.9rem;
+    }
+</style>
