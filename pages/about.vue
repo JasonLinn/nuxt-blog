@@ -8,7 +8,7 @@
             color: #333;
         }
         .about-header {
-            background-color: #0078d7;
+            background-color: #2a90b6a6;
             color: #fff;
             padding: 20px 10%;
             text-align: center;
