@@ -254,6 +254,8 @@ const articleData = reactive({
   amount: 10000,
   usedTimes: 0,
   hash: '',
+  position: '',
+  hashTag: '',
 })
 
 const { handleFileInput, files } = useFileStorage()

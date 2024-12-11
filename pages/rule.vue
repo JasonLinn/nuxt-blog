@@ -1,57 +1,3 @@
-<style scoped>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        .rule-header {
-            background-color: #4CAF50;
-            color: #fff;
-            padding: 20px 10%;
-            text-align: center;
-        }
-        .rule-header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-        .rule-header p {
-            margin: 10px 0 0;
-            font-size: 1.2rem;
-        }
-        .rule-main {
-            padding: 20px 10%;
-        }
-        .rule-section {
-            margin-bottom: 20px;
-        }
-        .rule-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            color: #4CAF50;
-        }
-        .rule-section p, 
-        .rule-section li {
-            margin-bottom: 10px;
-        }
-        .rule-section ul {
-            padding-left: 20px;
-            list-style: disc;
-        }
-        .rule-footer {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            margin-top: 20px;
-        }
-        .rule-footer p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-    </style>
 <template>
 
 
@@ -89,3 +35,58 @@
     <p>&copy; 2024 宜蘭觀光民宿行銷協會. 保留所有權利。</p>
 </footer>
 </template>
+
+<style scoped>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+    .rule-header {
+        background-color: #4CAF50;
+        color: #fff;
+        padding: 20px 10%;
+        text-align: center;
+    }
+    .rule-header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+    .rule-header p {
+        margin: 10px 0 0;
+        font-size: 1.2rem;
+    }
+    .rule-main {
+        padding: 20px 10%;
+    }
+    .rule-section {
+        margin-bottom: 20px;
+    }
+    .rule-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        color: #4CAF50;
+    }
+    .rule-section p, 
+    .rule-section li {
+        margin-bottom: 10px;
+    }
+    .rule-section ul {
+        padding-left: 20px;
+        list-style: disc;
+    }
+    .rule-footer {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 10px 0;
+        margin-top: 20px;
+    }
+    .rule-footer p {
+        margin: 0;
+        font-size: 0.9rem;
+    }
+</style>
