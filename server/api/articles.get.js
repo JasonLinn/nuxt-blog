@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     param = [township]
   }
   if (searchText) {
-    where = `SELECT * FROM "article" WHERE content LIKE $3 OR title LIKE $3`
+    where = `SELECT * FROM "article" WHERE content LIKE $3 OR title LIKE $3 OR tags LIKE $3`
     param = [`%${searchText}%`]
   }
   if (category && township) {
@@ -26,15 +26,15 @@ export default defineEventHandler(async (event) => {
     param = [category, township]
   }
   if (category && searchText) {
-    where = `SELECT * FROM "article" WHERE category = $3 and (content LIKE $4 OR title LIKE $4)`
+    where = `SELECT * FROM "article" WHERE category = $3 and (content LIKE $4 OR title LIKE $4 OR tags LIKE $4)`
     param = [category, `%${searchText}%`]
   }
   if (township && searchText) {
-    where = `SELECT * FROM "article" WHERE $3 = ANY(township) and (content LIKE $4 OR title LIKE $4)`
+    where = `SELECT * FROM "article" WHERE $3 = ANY(township) and (content LIKE $4 OR title LIKE $4 OR tags LIKE $4)`
     param = [township, `%${searchText}%`]
   }
   if (category && township && searchText) {
-    where = `SELECT * FROM "article" WHERE category = $3 and $4 = ANY(township) and (content LIKE $5 OR title LIKE $5)`
+    where = `SELECT * FROM "article" WHERE category = $3 and $4 = ANY(township) and (content LIKE $5 OR title LIKE $5 OR tags LIKE $5)`
     param = [category, township, `%${searchText}%`]
   }
 

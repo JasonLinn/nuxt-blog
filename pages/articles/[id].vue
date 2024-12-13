@@ -80,6 +80,9 @@
         <div class="cupon-text">
           {{ article.content }}
         </div>
+        <div class="cupon-tags">
+          {{ article.tags }}
+        </div>
         <TipText></TipText>
         <div class="cupon-map">
           查看Google地圖： <a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
@@ -679,9 +682,12 @@ useSeoMeta({
 <style scoped>
 .cupon-text {
   overflow-wrap: break-word;
-  margin-bottom: 30px;
+  margin-bottom: 5px;
   white-space: pre-line;
   line-height: 1.3;
+}
+.cupon-tags {
+  margin-bottom: 25px;
 }
 .cupon-img {
   max-width: 100%;
