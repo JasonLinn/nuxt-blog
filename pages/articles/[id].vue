@@ -14,7 +14,7 @@
         </div> -->
         <Carousel>
           <Slide v-for="(img, index) in article.cover" :key="img">
-            <NuxtImg
+            <img
               format="webp"
               :src="img.replace('https://yilanpass.com', '.')"
               class="cupon-img"

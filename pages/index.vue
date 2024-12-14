@@ -71,13 +71,14 @@
               >
                 <Carousel>
                   <Slide v-for="(img, index) in article.cover" :key="img">
-                    <NuxtImg
+                    <img
                       :alt="article.title"
                       height="165"
                       width="366"
                       format="webp"
                       :src="img.replace('https://yilanpass.com', '.')"
                       class="cupon-img"
+                      placeholder-class="card"
                     />
                   </Slide>
 

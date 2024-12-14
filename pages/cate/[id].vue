@@ -71,7 +71,7 @@
               >
                 <Carousel>
                   <Slide v-for="(img, index) in article.cover" :key="img">
-                    <NuxtImg :src="img" :alt="article.title" class="cupon-img" height="165"/>
+                    <img :src="img" :alt="article.title" class="cupon-img" height="165"/>
                   </Slide>
 
                   <template #addons="{ slidesCount }">

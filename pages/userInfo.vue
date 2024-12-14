@@ -21,7 +21,7 @@
                         <div class="barcode">
                           <Carousel>
                           <Slide v-for="img in coupon.cover" :key="img">
-                            <NuxtImg :src="img" class="cupon-img" />
+                            <img :src="img" class="cupon-img" />
                           </Slide>
 
                           <template #addons="{ slidesCount }">
