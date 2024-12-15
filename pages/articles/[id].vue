@@ -15,8 +15,7 @@
         <Carousel>
           <Slide v-for="(img, index) in article.cover" :key="img">
             <img
-              format="webp"
-              :src="img.replace('https://yilanpass.com', '.')"
+              :src="img"
               class="cupon-img"
               @click="showImg(index)"
               quality="50"
