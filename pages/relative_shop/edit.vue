@@ -68,12 +68,13 @@
                     代表性圖片連結
                   </label>
                   <div class="mt-1">
-                    <input
+                    <textarea
                       id="cover"
                       v-model="articleData.cover"
                       placeholder="請撰輸入網址連結"
                       name="cover"
                       type="text"
+                      rows="4"
                       autocomplete="cover"
                       class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                     />
@@ -87,7 +88,7 @@
                       id="content"
                       v-model="articleData.content"
                       name="content"
-                      rows="4"
+                      rows="12"
                       placeholder="請撰寫旅遊服務內容..."
                       class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                     />
