@@ -32,7 +32,7 @@
                     <option v-for="cate in categoryRelative" :value="cate.id">{{ cate.name }}</option>
                   </select>
                 </section>
-                <section class="col-md-12 create-part">
+                <!-- <section class="col-md-12 create-part">
                   <label for="cover" class="create-name block text-sm font-medium text-gray-700">
                     發放數量：
                   </label>
@@ -57,8 +57,23 @@
                   <input type="radio" id="referralFalse" value="false" v-model="isReferral">
                   <label for="referralFalse">否</label>
                 </div>
-              </section>
+              </section> -->
               <section class="col-md-12 create-part">
+                <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>圖片(用逗點分隔)：
+                </label>
+                <div class="mt-1">
+                  <textarea
+                    id="hash"
+                    v-model="articleData.cover"
+                    name="hash"
+                    rows="4"
+                    placeholder="請輸入圖片網址..."
+                    class="w-100 w-full "
+                  />
+                </div>
+              </section>
+              <!-- <section class="col-md-12 create-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
                   序號：
                 </label>
@@ -72,14 +87,14 @@
                     class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>
-              </section>
-              <label for="cover" class="create-name block text-sm font-medium text-gray-700">
-                  ※請上傳代表性圖片：
-                </label>
-                <input type="file" @input="handleFileInput" multiple />
-                <div class="create-img">
-                  <img v-for="file in files" :key="file.name" :src="file.content" alt="file.name" />
-                </div>
+              </section> -->
+              <!-- <label for="cover" class="create-name block text-sm font-medium text-gray-700">
+                ※請上傳代表性圖片：
+              </label>
+              <input type="file" @input="handleFileInput" multiple />
+              <div class="create-img">
+                <img v-for="file in files" :key="file.name" :src="file.content" alt="file.name" />
+              </div> -->
                 <section class="col-md-12 create-part">
                   <label for="about" class="create-name block text-sm font-medium text-gray-700">
                     旅遊服務內容：
@@ -161,7 +176,7 @@ const articleData = reactive({
     title: '',
     category: '',
     content: '',
-    cover: [],
+    cover: '',
     amount: 0,
     usedTimes: 0,
     hash: '',
@@ -175,17 +190,17 @@ const handleSubmit = async () => {
   //   alert('請上傳至少一個圖檔')
   //   return
   // }
-  files.value.map((file)=> {
-    articleData.cover.push(index_url + 'relative/' + file.name)
-  })
+  // files.value.map((file)=> {
+  //   articleData.cover.push(index_url + 'relative/' + file.name)
+  // })
 
-  const response = await $fetch('/api/files', {
-		method: 'POST',
-		body: {
-			files: files.value,
-      url: 'relative/'
-		}
-	})
+  // const response = await $fetch('/api/files', {
+	// 	method: 'POST',
+	// 	body: {
+	// 		files: files.value,
+  //     url: 'relative/'
+	// 	}
+	// })
 
     await $fetch('/api/relative', {
       method: 'POST',
@@ -193,7 +208,7 @@ const handleSubmit = async () => {
         title: articleData.title,
         category: articleData.category,
         content: articleData.content,
-        cover: articleData.cover,
+        cover: articleData.cover.split(','),
         amount: articleData.amount,
         usedTimes: articleData.usedTimes,
         isReferral: isReferral.value,

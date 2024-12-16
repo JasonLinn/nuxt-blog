@@ -153,7 +153,7 @@
   const userInfo = useState('userInfo')
   
   const handleDeleteArticle = () => {
-    const answer = confirm('你確定要刪除優惠券嗎？')
+    const answer = confirm('你確定要刪除旅遊服務嗎？')
   
     if (answer) {
       $fetch(`/api/relative/${route.params.id}`, {
