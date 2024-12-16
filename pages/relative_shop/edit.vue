@@ -48,7 +48,7 @@
                     />
                   </div>
                 </section>
-                <section class="col-md-12 edit-part">
+                <!-- <section class="col-md-12 edit-part">
                   <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
                     序號：
                   </label>
@@ -62,7 +62,7 @@
                       class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                     />
                   </div>
-                </section>
+                </section> -->
                 <section class="edit-part col-span-12">
                   <label for="cover" class="block text-sm font-medium text-gray-700">
                     代表性圖片連結
