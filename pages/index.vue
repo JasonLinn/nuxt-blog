@@ -19,7 +19,7 @@
       </select>
     </div>
     <div class="search">
-        <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText" @change="inputText">
+        <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText" @input="inputText">
         <svg
           v-if="searchText"
           @click="cleanText"
@@ -202,6 +202,10 @@ const clickTag = (e) => {
   searchText.value = e.target.textContent
 }
 
+const inputText = () => {
+  currentPage.value = 1
+}
+
 const cleanText = () => {
   searchText.value = ''
 }
@@ -222,6 +226,8 @@ const clickCate = (e) => {
 }
 
 const clickTown = (e) => {
+  currentPage.value = 1
+
   navigateTo({
     name: 'index',
     query: { cate: selectedCate.value }
