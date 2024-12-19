@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
   console.log(where, param, 'pppppppccccc', query)
   const articleRecords = await pool
     // 不 BY RANDOM()
-    .query(`${where} ORDER BY amount OFFSET $1 LIMIT $2;`, [(page - 1) * pageSize, pageSize, ...param])
+    .query(`${where} ORDER BY "updated_at" DESC OFFSET $1 LIMIT $2;`, [(page - 1) * pageSize, pageSize, ...param])
     .then((result) => result.rows)
     .catch((error) => {
       console.error(error)
