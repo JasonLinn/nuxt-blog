@@ -538,4 +538,7 @@ const coupons = [
 .cateActive {
   background-color: #ccc;
 }
+.gm-style-pbc{
+    display: none !important
+}
 </style>
