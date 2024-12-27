@@ -32,7 +32,7 @@
             :center="{lat: 24.69295, lng: 121.7195}"
             :zoom="11"
             :disableDefaultUI="true"
-            :gestureHandling="greedy"
+            :gestureHandling="none"
             @click="isOpen = false"
             :options="{
                 // zoomControl: true,
@@ -40,7 +40,7 @@
                 // scaleControl: false,
                 // streetViewControl: false,
                 // rotateControl: false,
-                gestureHandling: greedy,
+                gestureHandling: none,
                 fullscreenControl: false,
                 styles: [
   {
