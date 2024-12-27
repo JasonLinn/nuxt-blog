@@ -32,7 +32,7 @@
             :center="{lat: 24.69295, lng: 121.7195}"
             :zoom="11"
             :disableDefaultUI="true"
-            :gestureHandling="false"
+            :gestureHandling="greedy"
             @click="isOpen = false"
             :options="{
                 // zoomControl: true,
