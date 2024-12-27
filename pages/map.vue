@@ -170,7 +170,6 @@ let map;
 let infoWindow;
 let markers = [];
 onMounted(()=>{
-    console.log(mapRef, 'fffffffff')
     if (mapRef) {
         mapRef.value?.$mapPromise?.then(map=> {
             console.log(map, 'ppppp', google.maps)
@@ -189,7 +188,6 @@ onMounted(()=>{
               let markerWidth = (zoom/12)*25
               let markerHeight = (zoom/12)*25
 
-              console.log(zoom, 'zzzzzzzzz', google.maps.Icon)
 
               //set the icon with the new size to the marker
               markers = markers.map((marker) => {
@@ -207,7 +205,7 @@ onMounted(()=>{
                 }
                 return marker
               })
-              console.log(markers, 'sssss')
+
               setMapOnAll(map)
               if (selectedCate.value) {
                 hideMarkers()
