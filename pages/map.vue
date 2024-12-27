@@ -40,6 +40,7 @@
                 // scaleControl: false,
                 // streetViewControl: false,
                 // rotateControl: false,
+                gestureHandling: "greedy",
                 fullscreenControl: false,
                 styles: [
   {
