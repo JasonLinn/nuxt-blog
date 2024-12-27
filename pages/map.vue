@@ -19,12 +19,12 @@
         </div>
     </div>
     <div>
-        <div class="map-options">
+        <div class="map-options" id="mapCate">
             <div
-                class="map-oitem"
-                v-for="cate in category"
-                @click="selectedCate = cate.id"
-                :id="'mapCate'+cate.id"
+              v-for="cate in category"
+              @click="selectedCate = cate.id"
+              :class="{ 'cateActive': selectedCate  == cate.id}"
+              class="map-oitem"
             >{{ cate.name }}</div>
         </div>
         <GMapMap
@@ -156,14 +156,14 @@ const currentCate = computed(() => route?.query?.cate)
 const searchText = ref('')
 let currentPage = ref(1)
 const selectedTown = ref(null)
-const selectedCate = ref('')
+const selectedCate = ref(null)
 const isOpen = ref(false)
 const store = useCouponStore();
 let nowId = ref(1)
 let nowCoupon = reactive({})
 const couponObject = computed(() => store.getCouponData)
 const couponData = computed(() =>selectedCate ? couponObject?.value?.data?.items : couponObject?.value?.data?.items.filter((i) => i.category == selectedCate))
-console.log(nowId, couponObject, 'nnnnn', couponData, selectedCate, 'eee')
+// console.log(nowId, couponObject, 'nnnnn', couponData, selectedCate, 'eee')
 store.fetchAndSetCoupon({pageSize: 30})
 const mapRef = ref({})
 let map;
@@ -179,19 +179,6 @@ onMounted(()=>{
           couponData.value.filter((i) => i.position?.lat).map((c) =>{
             addMarker(c, map)
           })
-            console.log(markers, 'kkkkkk')
-          document
-            .getElementById("mapCateeat")
-            .addEventListener("click", hideMarkers);
-          document
-            .getElementById("mapCateplay")
-            .addEventListener("click", hideMarkers);
-          document
-            .getElementById("mapCatelive")
-            .addEventListener("click", hideMarkers);
-          document
-            .getElementById("mapCatetraffic")
-            .addEventListener("click", hideMarkers);
           document
             .getElementById("mapCate")
             .addEventListener("click", showMarkers);
@@ -231,6 +218,10 @@ onMounted(()=>{
 
             // Shows any markers currently in the array.
             function showMarkers() {
+                if (selectedCate.value) {
+                  hideMarkers()
+                  return
+                }
                 markers.map((m) => bounce(m))
                 setMapOnAll(map);
             }
@@ -540,5 +531,12 @@ const coupons = [
 .map-oitem {
     flex: 1;
     text-align: center;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cateActive {
+  background-color: #ccc;
 }
 </style>
