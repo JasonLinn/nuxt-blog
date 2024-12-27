@@ -30,8 +30,9 @@
         <GMapMap
             ref="mapRef"
             :center="{lat: 24.69295, lng: 121.7195}"
-            :zoom="12"
+            :zoom="11"
             :disableDefaultUI="true"
+            :gestureHandling= "none"
             @click="isOpen = false"
             :options="{
                 // zoomControl: true,
@@ -173,8 +174,11 @@ onMounted(()=>{
     if (mapRef) {
         mapRef.value?.$mapPromise?.then(map=> {
             console.log(map, 'ppppp', google.maps)
-          addMyButton(map);
+          // addMyButton(map);
 
+          couponData.value.filter((i) => i.position?.lat).map((c) =>{
+            addMarker(c, map)
+          })
             console.log(markers, 'kkkkkk')
           document
             .getElementById("mapCateeat")
@@ -192,6 +196,37 @@ onMounted(()=>{
             .getElementById("mapCate")
             .addEventListener("click", showMarkers);
 
+            // 設定 icon scaled
+            google.maps.event.addListener(map, 'zoom_changed', function() {
+              var zoom = map.getZoom();
+              let markerWidth = (zoom/12)*25
+              let markerHeight = (zoom/12)*25
+
+              console.log(zoom, 'zzzzzzzzz', google.maps.Icon)
+
+              //set the icon with the new size to the marker
+              markers = markers.map((marker) => {
+                marker.setMap(null)
+                console.log(marker, marker?.icon.size.width, 'mmmmmm')
+                marker.icon.size.height = markerHeight
+                marker.icon.size.width = markerWidth
+
+                if (marker.label) {
+                  if (zoom > 12){
+                    marker.label.fontSize = `${zoom}px`
+                  } else {
+                    marker.label.fontSize = 0
+                  }
+                }
+                return marker
+              })
+              console.log(markers, 'sssss')
+              setMapOnAll(map)
+              if (selectedCate.value) {
+                hideMarkers()
+              }
+            });
+            // scaled end
 
 
             // Shows any markers currently in the array.
@@ -221,11 +256,12 @@ onMounted(()=>{
 
             infoWindow = new google.maps.InfoWindow();
 
-            const locationButton = document.createElement("button");
+            const locationButton = document.createElement("img");
 
-            locationButton.textContent = "Pan to Current Location";
+            // locationButton.textContent = "Current Location";
+            locationButton.src = "./icon/location.png";
             locationButton.classList.add("custom-map-control-button");
-            map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(locationButton);
+            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
             locationButton.addEventListener("click", () => {
                 // Try HTML5 geolocation.
                 if (navigator.geolocation) {
@@ -280,7 +316,7 @@ function addMyButton(map) {
   const controlText = document.createElement("div");
   controlText.innerHTML = `Center`;
   controlUI.appendChild(controlText);
-  
+
   controlUI.addEventListener("click", () => {
     map.setZoom(map.getZoom() + 1);
   });
@@ -292,9 +328,6 @@ function addMyButton(map) {
 //     addMarker(event.latLng, map);
 //     console.log(markers)
 //   });
-  couponData.value.filter((i) => i.position?.lat).map((c) =>{
-    addMarker(c, map)
-  })
 }
 function addMarker(coupon, map) {
     // Add the marker at the clicked location, and add the next-available label
@@ -305,12 +338,12 @@ function addMarker(coupon, map) {
       clickable: true,
       label:{
             text: coupon.title,
-            fontSize: "16px",
+            fontSize: "0",
             background: "white"
         },
       icon: {
-            url: `./icon/${coupon.category}.svg`,
-            scaledSize: {width: 30, height: 30},
+            url: `./icon/${coupon.category}.png`,
+            scaledSize: {width: 25, height: 25},
             labelOrigin: {x: 16, y: -10}
         },
       map: map,
@@ -328,7 +361,7 @@ function addMarker(coupon, map) {
 }
 function setMapOnAll(map, category) {
   for (let i = 0; i < markers.length; i++) {
-    markers[i].setMap(map);
+    markers[i]?.setMap(map);
   }
 }
 
@@ -468,6 +501,11 @@ const coupons = [
     left: 0;
     right: 0;
     margin: auto;
+}
+.custom-map-control-button {
+  width: 30px;
+  height: 30px;
+  right: 15px !important;
 }
 .arrow-upside {
     transform: rotate(180deg);
