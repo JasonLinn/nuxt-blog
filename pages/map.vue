@@ -36,11 +36,12 @@
             @click="isOpen = false"
             :options="{
                 // zoomControl: true,
+                minZoom: 11,
+                maxZoom: 20,
                 mapTypeControl: false,
                 // scaleControl: false,
-                // streetViewControl: false,
-                // rotateControl: false,
-                gestureHandling: none,
+                streetViewControl: false,
+                rotateControl: false,
                 fullscreenControl: false,
                 styles: [
   {
@@ -173,9 +174,8 @@ let markers = [];
 onMounted(()=>{
     if (mapRef) {
         mapRef.value?.$mapPromise?.then(map=> {
-            console.log(map, 'ppppp', google.maps)
           // addMyButton(map);
-
+          google.maps.gestureHandling = "greedy";
           couponData.value.filter((i) => i.position?.lat).map((c) =>{
             addMarker(c, map)
           })
@@ -193,9 +193,8 @@ onMounted(()=>{
               //set the icon with the new size to the marker
               markers = markers.map((marker) => {
                 marker.setMap(null)
-                console.log(marker, marker?.icon.size.width, 'mmmmmm')
-                marker.icon.size.height = markerHeight
-                marker.icon.size.width = markerWidth
+                marker.icon.scaledSize.height = markerHeight
+                marker.icon.scaledSize.width = markerWidth
 
                 if (marker.label) {
                   if (zoom > 12){
