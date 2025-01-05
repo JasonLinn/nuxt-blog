@@ -39,6 +39,7 @@
     <p>&copy; 2024 宜蘭旅遊通. 保留所有權利。</p>
 </footer>
 </template>
+<script></script>
 <style>
     .about-header {
         background-color: #2a90b6a6;
