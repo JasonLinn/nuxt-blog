@@ -26,6 +26,13 @@
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
+                to="/map"
+              >
+                <p class="">地圖搜尋(beta)</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
                 to="/about"
               >
                 <p class="">關於我們</p>
