@@ -145,7 +145,7 @@
     </template>
 </template>
 <script setup>
-import useCouponStore from "~~/store/coupon";
+import useCouponMapStore from "~~/store/couponMap";
 import { category, township } from '~/utils/category';
 // const handleLogout = store.resetUser;
 // const icon = {
@@ -160,18 +160,22 @@ let currentPage = ref(1)
 const selectedTown = ref(null)
 const selectedCate = ref(null)
 const isOpen = ref(false)
-const store = useCouponStore();
+const store = useCouponMapStore();
 let nowId = ref(1)
 let nowCoupon = reactive({})
 const couponObject = computed(() => store.getCouponData)
 const couponData = computed(() =>selectedCate ? couponObject?.value?.data?.items : couponObject?.value?.data?.items.filter((i) => i.category == selectedCate))
-// console.log(nowId, couponObject, 'nnnnn', couponData, selectedCate, 'eee')
-store.fetchAndSetCoupon({pageSize: 30})
+if (!couponData?.value?.length){
+  store.fetchAndSetCoupon({pageSize: 150})
+}
+
 const mapRef = ref({})
 let map;
 let infoWindow;
 let markers = [];
 onMounted(()=>{
+  // 避免還沒loading couponData
+  setTimeout(() => {
     if (mapRef) {
         mapRef.value?.$mapPromise?.then(map=> {
           // addMyButton(map);
@@ -287,6 +291,7 @@ onMounted(()=>{
             });
         })
       }
+  }, 500);
 })
 
 
@@ -363,7 +368,6 @@ function setMapOnAll(map, category) {
 //   hideMarkers();
 //   markers = [];
 // }
-console.log(couponObject?.value?.data?.items.filter((i) => i.position?.lat), 'tttttttccsddddd')
 // const markers = reactive([
 // {
 //     position: {lat: 24.669843988805, lng: 121.748609031434},

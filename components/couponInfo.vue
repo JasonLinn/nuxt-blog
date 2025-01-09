@@ -141,7 +141,7 @@
   <script setup>
   import liff from "@line/liff";
   import useReferralStore from "~/store/referral";
-  import useCouponStore from "~~/store/coupon";
+  import useCouponMapStore from "~~/store/couponMap";
   import useStore from "~/store";
   import { referral } from "~/utils/referral"
   import { index_liff_url } from "/utils/static"
@@ -149,7 +149,7 @@
   const store = useStore()
   const userData = computed(()=> store.getUserData)
   const userId = computed(()=> store.getUserId)
-  const couponStore = useCouponStore();
+  const couponStore = useCouponMapStore();
 
   const props = defineProps({
     couponId: {
@@ -213,7 +213,7 @@
 //     console.log(error.value)
 //     throw createError({ statusCode: 404 })
 //   }
-  console.log(article, 'aaaaaaaaarrrrrrrr', couponObject, couponObject.value.data.items)
+  // console.log(article, 'aaaaaaaaarrrrrrrr', couponObject, couponObject.value.data.items)
   const userInfo = useState('userInfo')
   
   const checkIsOnce = () => {
