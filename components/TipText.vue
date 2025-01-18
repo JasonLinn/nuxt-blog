@@ -16,7 +16,7 @@
     text-align: left;
     margin-top: 5px;
     margin-bottom: 15px;
-    line-height: 1.2;
+    line-height: 1.3;
 }
 .tip-text-title {
     margin-bottom: 5px;
