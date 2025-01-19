@@ -81,7 +81,7 @@
                           @click="received"
                           :id="coupon.gotTime"
                           v-if="!coupon.received"
-                        >標註為已兌換</button>
+                        >請店員點擊兌換</button>
                         <div class="coupon-footer" v-if="!coupon.received">此按鈕請交由門市人員點擊</div>
                     </div>
                     </div>
