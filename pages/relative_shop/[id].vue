@@ -154,7 +154,7 @@
   const indexRef = ref(0);
   let modal;
   let hash = []
-  const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
+  const liffUrl = 'https://yilanpass.com'
   const showModal = () => {
     modal.show();
   };
@@ -446,7 +446,7 @@
         .catch(error => window.alert('未登入LINE帳號'+ error));
   }
 const shareCopy = () => {
-  navigator.clipboard.writeText(relative_liff_url + route.path);
+  navigator.clipboard.writeText(liffUrl + route.path);
   window?.alert('已複製連結!')
 }
 const shareCoupon = () => {
