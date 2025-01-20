@@ -10,8 +10,8 @@
         </div>
         <div v-else-if="article" class="mb-8 flex w-full flex-col justify-center md:max-w-3xl">
           <Carousel>
-            <Slide v-for="img in article.cover" :key="img">
-              <img :src="img" class="cupon-img" />
+            <Slide v-for="(img, index) in article.cover" :key="img">
+              <img :src="img" @click="showImg(index)" class="cupon-img" />
             </Slide>
 
             <template #addons="{ slidesCount }">
@@ -19,6 +19,12 @@
               <Pagination v-if="slidesCount > 1" />
             </template>
         </Carousel>
+          <VueEasyLightbox
+            :visible="visibleRef"
+            :imgs="article.cover"
+            :index="indexRef"
+            @hide="onHide"
+          />
           <div class="cupon-time my-2 flex flex-col justify-between sm:my-0 sm:flex-row sm:items-center">
             <!-- <time class="my-2 text-sm text-gray-400">
               {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
@@ -144,12 +150,19 @@
   const modalRef = ref(null);
   const referralCode = ref('');
   const isOpenShare = ref(false)
+  const visibleRef = ref(false);
+  const indexRef = ref(0);
   let modal;
   let hash = []
   const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
   const showModal = () => {
     modal.show();
   };
+  const showImg = (index) => {
+    indexRef.value = index;
+    visibleRef.value = true;
+  };
+  const onHide = () => (visibleRef.value = false);
   const store = useReferralStore()
   let referralStore = ref(null)
   let isCheckReferral = ref(false)
