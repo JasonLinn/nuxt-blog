@@ -23,6 +23,20 @@
             <!-- <time class="my-2 text-sm text-gray-400">
               {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
             </time> -->
+            <div class="cupon-share" tabindex="0" @click="isOpenShare = !isOpenShare" @blur="isOpenShare = false">
+            <svg  xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-share-fill cupon-share-icon" viewBox="0 0 16 16">
+              <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
+            </svg>
+            <div class="cupon-share-list" v-show="isOpenShare" >
+                <svg @click="shareCopy" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                </svg>
+                <svg @click="shareCoupon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right cupon-share-icon" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
+                  <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
+                </svg>
+            </div>
+          </div>
             <div v-if="userInfo?.id === 1" class="flex-rowx flex gap-3">
               <NuxtLink
                 class="flex items-center text-sm text-gray-400 hover:font-semibold hover:text-emerald-500"
@@ -68,13 +82,28 @@
   }
   .cupon-time {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
   .cupon-title {
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 20px;
   }
+  .cupon-share {
+  position: relative;
+  z-index: 1;
+}
+.cupon-share-list {
+  width: 80px;
+  background-color: #c9e0f6;
+  position: absolute;
+  right: 0;
+  bottom: -40px;
+  padding: 10px;
+  border-radius: 40px;
+  display: flex;
+  justify-content: space-around;
+}
   .cupon-amount {
     font-size: 12px;
     color: #666;
@@ -114,6 +143,7 @@
   const { $bootstrap } = useNuxtApp();
   const modalRef = ref(null);
   const referralCode = ref('');
+  const isOpenShare = ref(false)
   let modal;
   let hash = []
   const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
@@ -381,33 +411,6 @@
               }
             ]
           },
-          // "footer": {
-          //   "type": "box",
-          //   "layout": "vertical",
-          //   "spacing": "sm",
-          //   "contents": [
-          //     {
-          //       "type": "separator"
-          //     },
-          //     {
-          //       "type": "button",
-          //       "style": "link",
-          //       "height": "sm",
-          //       "action": {
-          //         "type": "uri",
-          //         "label": "優惠券說明",
-          //         "uri": liffUrl + 'articles/' +article.value.id
-          //       }
-          //     },
-          //     {
-          //       "type": "box",
-          //       "layout": "vertical",
-          //       "contents": [],
-          //       "margin": "sm"
-          //     }
-          //   ],
-          //   "flex": 0
-          // }
         }
   
         liff.sendMessages([
@@ -429,7 +432,145 @@
         })
         .catch(error => window.alert('未登入LINE帳號'+ error));
   }
-  
+const shareCopy = () => {
+  navigator.clipboard.writeText(relative_liff_url + route.path);
+  window?.alert('已複製連結!')
+}
+const shareCoupon = () => {
+  liff
+  .shareTargetPicker(
+    [{
+    "type": "flex",
+    "altText": "宜蘭旅遊通-優惠券",
+    "contents":
+    {
+  "type": "bubble",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "box",
+        "layout": "horizontal",
+        "contents": [
+          {
+            "type": "image",
+            "url": article.value.cover[0],
+            "size": "full",
+            "aspectMode": "cover",
+            "aspectRatio": "2:1",
+            "gravity": "center",
+            "flex": 1
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "推薦",
+                "size": "xs",
+                "color": "#ffffff",
+                "align": "center",
+                "gravity": "center"
+              }
+            ],
+            "backgroundColor": "#EC3D44",
+            "paddingAll": "2px",
+            "paddingStart": "4px",
+            "paddingEnd": "4px",
+            "flex": 0,
+            "position": "absolute",
+            "offsetStart": "18px",
+            "offsetTop": "18px",
+            "cornerRadius": "100px",
+            "width": "48px",
+            "height": "25px"
+          }
+        ]
+      }
+    ],
+    "paddingAll": "0px"
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "text",
+                "contents": [],
+                "size": "xl",
+                "wrap": true,
+                "text": article.value.title,
+                "color": "#ffffff",
+                "weight": "bold"
+              },
+              // {
+              //   "type": "text",
+              //   "text": "3 Bedrooms, ¥35,000",
+              //   "color": "#ffffffcc",
+              //   "size": "sm"
+              // }
+            ],
+            "spacing": "sm"
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "text",
+                "text": "點我看更多",
+                "color": "#Ffffff",
+                "align": "center"
+              }
+            ],
+            "paddingAll": "13px",
+            "backgroundColor": "#ffffff1A",
+            "cornerRadius": "30px",
+            "margin": "xl"
+          }
+        ]
+      }
+    ],
+    "paddingAll": "20px",
+    "backgroundColor": "#464F69"
+  },
+  "action": {
+    "type": "uri",
+    "label": "action",
+    "uri": liffUrl + 'articles/' +article.value.id
+  }
+}
+}],
+    {
+      isMultiple: true,
+    }
+  )
+  .then(function (res) {
+    if (res) {
+      // succeeded in sending a message through TargetPicker
+      console.log(`[${res.status}] Message sent!`);
+    } else {
+      // sending message canceled
+      console.log("TargetPicker was closed!");
+    }
+  })
+  .catch(function (error) {
+    // something went wrong before sending a message
+    console.log("something wrong happen");
+  });
+}
+// func end
+
   useHead({
     title: article.value.title
   })
