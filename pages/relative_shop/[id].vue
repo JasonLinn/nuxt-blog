@@ -284,7 +284,7 @@
             "aspectMode": "cover",
             "action": {
               "type": "uri",
-              "uri": liffUrl + 'articles/' +article.value.id
+              "uri": liffUrl + '/relative_shop/' +article.value.id
             }
           },
           "body": {
@@ -298,7 +298,7 @@
                 "size": "xl",
                 "action": {
                   "type": "uri",
-                  "uri": liffUrl + 'articles/' +article.value.id
+                  "uri": liffUrl + '/relative_shop/' +article.value.id
                 }
               },
               //隱藏無用星星
@@ -341,7 +341,7 @@
                 "spacing": "sm",
                 "action": {
                   "type": "uri",
-                  "uri": liffUrl + 'articles/' +article.value.id
+                  "uri": liffUrl + '/relative_shop/' +article.value.id
                 },
                 "contents": [{
                     "type": "box",
@@ -560,7 +560,7 @@ const shareCoupon = () => {
   "action": {
     "type": "uri",
     "label": "action",
-    "uri": liffUrl + 'articles/' +article.value.id
+    "uri": liffUrl + '/relative_shop/' +article.value.id
   }
 }
 }],
