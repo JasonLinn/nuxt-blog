@@ -15,18 +15,18 @@ export default defineEventHandler(async (event) => {
       console.error(error)
       throw createError({
         statusCode: 500,
-        message: '無法刪除旅遊服務，請稍候再試'
+        message: '無法刪除代訂服務，請稍候再試'
       })
     })
 
   if (result.rowCount !== 1) {
     throw createError({
       statusCode: 400,
-      message: '刪除旅遊服務失敗，請稍候再試'
+      message: '刪除代訂服務失敗，請稍候再試'
     })
   }
 
   return {
-    message: '刪除旅遊服務成功'
+    message: '刪除代訂服務成功'
   }
 })

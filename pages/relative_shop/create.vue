@@ -5,7 +5,7 @@
           <div class="space-y-8 divide-y divide-gray-200">
             <div>
               <div class="mt-6">
-                <h3 class="create-title text-xl font-medium leading-6 text-gray-900">新增旅遊服務</h3>
+                <h3 class="create-title text-xl font-medium leading-6 text-gray-900">新增代訂服務</h3>
               </div>
               <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
                 <section class="col-md-12 create-part">
@@ -83,7 +83,7 @@
                     v-model="articleData.hash"
                     name="hash"
                     rows="4"
-                    placeholder="請撰寫旅遊服務序號..."
+                    placeholder="請撰寫代訂服務序號..."
                     class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
                 </div>
@@ -97,7 +97,7 @@
               </div> -->
                 <section class="col-md-12 create-part">
                   <label for="about" class="create-name block text-sm font-medium text-gray-700">
-                    旅遊服務內容：
+                    代訂服務內容：
                   </label>
                   <div class="mt-1">
                     <textarea
@@ -105,7 +105,7 @@
                       v-model="articleData.content"
                       name="content"
                       rows="4"
-                      placeholder="請撰寫旅遊服務內容..."
+                      placeholder="請撰寫代訂服務內容..."
                       class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                     />
                   </div>
