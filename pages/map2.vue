@@ -184,13 +184,13 @@
             m.position.lng() === parseFloat(location.position.lng)
           );
           
-          if (titleOverlay && titleOverlay.div) {
+          if (titleOverlay) {
             // 臨時顯示標題
-            titleOverlay.div.style.display = 'block';
+            titleOverlay.show();
             
             // 3秒後隱藏
             setTimeout(() => {
-              titleOverlay.div.style.display = 'none';
+              titleOverlay.hide();
             }, 3000);
           }
         }
@@ -218,8 +218,8 @@
       }
       
       // 根據標籤顯示設置顯示或隱藏標題覆蓋層
-      if (marker instanceof TitleOverlay && marker.div) {
-        marker.div.style.display = showLabels.value ? 'block' : 'none';
+      if (marker instanceof TitleOverlay) {
+        marker.toggle(showLabels.value);
       }
     });
   };
@@ -318,9 +318,7 @@
             );
             
             // 根據當前標籤顯示設置控制可見性
-            if (titleOverlay.div) {
-              titleOverlay.div.style.display = showLabels.value ? 'block' : 'none';
-            }
+            titleOverlay.toggle(showLabels.value);
             
             markers.push(titleOverlay);
           }
@@ -352,6 +350,7 @@
       }
       
       onAdd() {
+        // 創建標題容器
         const div = document.createElement('div');
         div.style.position = 'absolute';
         div.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
@@ -368,31 +367,58 @@
         div.style.whiteSpace = 'nowrap';
         div.style.pointerEvents = 'none'; // 允許點擊穿透
         div.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.3)';
+        div.style.transform = 'translate(-50%, -100%)'; // 使用 transform 進行居中和上移
+        div.style.marginTop = '-10px'; // 額外的上方間距
         div.innerHTML = this.title;
         
         // 初始時根據 showLabels 設置顯示狀態
         div.style.display = showLabels.value ? 'block' : 'none';
         
         this.div = div;
+        
+        // 將元素添加到覆蓋層窗格
         const panes = this.getPanes();
-        panes.overlayLayer.appendChild(div);
+        panes.overlayMouseTarget.appendChild(div);
       }
       
       draw() {
         if (!this.div) return;
         
+        // 獲取投影
         const overlayProjection = this.getProjection();
-        const position = overlayProjection.fromLatLngToDivPixel(this.position);
+        if (!overlayProjection) return;
         
-        // 將標題定位在標記上方
-        this.div.style.left = (position.x - this.div.offsetWidth / 2) + 'px';
-        this.div.style.top = (position.y - 40) + 'px'; // 上移40像素
+        // 將地理坐標轉換為像素坐標
+        const position = overlayProjection.fromLatLngToDivPixel(this.position);
+        if (!position) return;
+        
+        // 使用絕對定位設置標題位置
+        this.div.style.left = position.x + 'px';
+        this.div.style.top = position.y + 'px';
       }
       
       onRemove() {
         if (this.div) {
           this.div.parentNode.removeChild(this.div);
           this.div = null;
+        }
+      }
+      
+      hide() {
+        if (this.div) {
+          this.div.style.display = 'none';
+        }
+      }
+      
+      show() {
+        if (this.div) {
+          this.div.style.display = 'block';
+        }
+      }
+      
+      toggle(visible) {
+        if (this.div) {
+          this.div.style.display = visible ? 'block' : 'none';
         }
       }
       
@@ -521,8 +547,8 @@
     
     // 確保所有標題覆蓋層在初始時都是隱藏的
     markers.forEach(marker => {
-      if (marker instanceof TitleOverlay && marker.div) {
-        marker.div.style.display = 'none';
+      if (marker instanceof TitleOverlay) {
+        marker.hide();
       }
     });
     
@@ -542,6 +568,16 @@
               marker.setIcon(icon);
             }
           }
+        }
+      });
+    });
+    
+    // 添加地圖移動結束事件監聽器，確保標題位置正確更新
+    map.addListener('idle', () => {
+      // 觸發所有 TitleOverlay 的 draw 方法重新計算位置
+      markers.forEach(marker => {
+        if (marker instanceof TitleOverlay) {
+          marker.draw();
         }
       });
     });
@@ -604,7 +640,7 @@
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 16px;
     box-sizing: border-box;
   }
   
