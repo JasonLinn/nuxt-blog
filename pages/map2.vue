@@ -16,9 +16,6 @@
         </div>
       </div>
       <div id="map" ref="mapRef"></div>
-      <button class="location-btn" @click="getCurrentLocation">
-        <span class="location-icon">📍</span>
-      </button>
     </div>
   </template>
   
@@ -43,14 +40,13 @@
   const mapRef = ref(null);
   let map = null;
   let markers = [];
-  let userLocationMarker = null;
   
   // 地标类别
   const categories = [
-    { key: 'eat', name: '食', icon: '🍽️' },
-    { key: 'play', name: '樂', icon: '👕' },
-    { key: 'housing', name: '住', icon: '🏠' },
-    { key: 'traffic', name: '行', icon: '🚗' }
+    { key: 'eat', name: '食', icon: '🍽️', color: '#FF5722' },
+    { key: 'play', name: '樂', icon: '👕', color: '#2196F3' },
+    { key: 'housing', name: '住', icon: '🏠', color: '#4CAF50' },
+    { key: 'traffic', name: '行', icon: '🚗', color: '#FFC107' }
   ];
   
   // 示例地标数据
@@ -80,65 +76,6 @@
     updateMarkers();
   };
   
-  // 获取当前位置
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const userLocation = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          
-          // 移动地图到用户位置
-          map.setCenter(userLocation);
-          map.setZoom(16);
-          
-          // 如果已有用户位置标记，则移除
-          if (userLocationMarker) {
-            userLocationMarker.setMap(null);
-          }
-          
-          // 添加用户位置标记
-          userLocationMarker = new google.maps.Marker({
-            position: userLocation,
-            map: map,
-            title: '我的位置',
-            icon: {
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 10,
-              fillColor: '#4285F4',
-              fillOpacity: 1,
-              strokeColor: '#FFFFFF',
-              strokeWeight: 2
-            },
-            zIndex: 1000 // 确保用户位置标记显示在最上层
-          });
-          
-          // 添加信息窗口
-          const infoWindow = new google.maps.InfoWindow({
-            content: '<div><strong>我的位置</strong></div>'
-          });
-          
-          userLocationMarker.addListener('click', () => {
-            infoWindow.open(map, userLocationMarker);
-          });
-        },
-        (error) => {
-          console.error('获取位置失败:', error);
-          alert('无法获取您的位置，请确保已授予位置权限。');
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
-        }
-      );
-    } else {
-      alert('您的浏览器不支持地理位置功能。');
-    }
-  };
-  
   // 更新标记
   const updateMarkers = () => {
     // 清除现有标记
@@ -150,21 +87,29 @@
     // 添加符合当前活跃类别的标记
     if (couponData.value && Array.isArray(couponData.value)) {
       couponData.value.forEach(landmark => {
-        if (activeCategoriesMap[landmark.category]) {
-          const categoryObj = categories.find(cat => cat.key === landmark.category);
-          const icon = categoryObj ? categoryObj.icon : '';
-          
+        const categoryObj = categories.find(cat => cat.key === landmark.category);
+        
+        // 只有当该类别被激活时才显示标记
+        if (categoryObj && activeCategoriesMap[landmark.category]) {
           const marker = new google.maps.Marker({
             position: landmark.position,
             map: map,
-            title: landmark.name,
-            label: icon
+            title: landmark.title,
+            label: categoryObj.icon,
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              fillColor: categoryObj.color,
+              fillOpacity: 0.7,
+              strokeWeight: 1,
+              strokeColor: '#FFFFFF',
+              scale: 14
+            }
           });
           
           // 添加信息窗口
           const categoryName = categoryObj ? categoryObj.name : landmark.category;
           const infoWindow = new google.maps.InfoWindow({
-            content: `<div><strong>${landmark.name}</strong><br>类别: ${categoryName}</div>`
+            content: `<div><strong>${landmark.title}</strong><br>類別:${categoryName}</div>`
           });
           
           marker.addListener('click', () => {
@@ -212,10 +157,11 @@
     // 创建地图
     map = new google.maps.Map(mapRef.value, {
       center: center,
-      zoom: 15,
+      zoom: 12,
       mapTypeControl: true,
       streetViewControl: true,
-      fullscreenControl: true
+      fullscreenControl: true,
+      gestureHandling: "greedy"
     });
     
     // 初始化标记
@@ -288,36 +234,5 @@
   
   .category-btn.active:hover {
     background-color: #3367D6;
-  }
-  
-  .location-btn {
-    position: absolute;
-    bottom: 160px;
-    right: 6px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: white;
-    border: none;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    transition: all 0.2s;
-  }
-  
-  .location-btn:hover {
-    background-color: #f1f1f1;
-    transform: scale(1.05);
-  }
-  
-  .location-btn:active {
-    transform: scale(0.95);
-  }
-  
-  .location-icon {
-    font-size: 24px;
   }
   </style>
