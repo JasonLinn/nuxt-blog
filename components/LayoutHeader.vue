@@ -19,16 +19,16 @@
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
-                to="/relative"
+                to="/map"
               >
-                <p class="">代訂服務</p>
+                <p class="">優惠券地圖搜尋</p>
               </NuxtLink>
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
-                to="/map"
+                to="/relative"
               >
-                <p class="">地圖搜尋(beta)</p>
+                <p class="">代訂服務</p>
               </NuxtLink>
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
