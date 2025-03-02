@@ -51,7 +51,7 @@
       </button>
       
       <!-- 地標資訊面板 -->
-      <div class="map-info-panel" :class="{ 'map-info-panel-open': isInfoPanelOpen }">
+      <div class="map-info-panel" :class="{ 'map-info-panel-open': isInfoPanelOpen }" ref="infoPanelRef">
         <div class="map-info-toggle" @click="isInfoPanelOpen = !isInfoPanelOpen">
           <Icon name="ri:arrow-up-s-line" class="map-toggle" :class="{ 'arrow-upside': isInfoPanelOpen }" />
         </div>
@@ -63,7 +63,7 @@
   </template>
   
   <script setup>
-  import { ref, onMounted, reactive, computed, watch } from 'vue';
+  import { ref, onMounted, reactive, computed, watch, onUnmounted } from 'vue';
   import useCouponMapStore from "~~/store/couponMap";
 
     const store = useCouponMapStore();
@@ -82,6 +82,7 @@
   // 地標資訊面板控制
   const isInfoPanelOpen = ref(false);
   const selectedCoupon = ref(null);
+  const infoPanelRef = ref(null);
   
   // 地图容器引用
   const mapRef = ref(null);
@@ -311,6 +312,9 @@
           
           // 添加點擊事件
           marker.addListener('click', () => {
+            // 設置標記點擊標誌，防止面板被立即關閉
+            window.isMarkerClick = true;
+            
             showCouponInfo(landmark);
             highlightMarker(landmark);
           });
@@ -675,14 +679,51 @@
     }
   }, { deep: true });
   
-  // 組件掛載後初始化
+  // 點擊面板外部時關閉面板
+  const handleClickOutside = (event) => {
+    if (isInfoPanelOpen.value && infoPanelRef.value && !infoPanelRef.value.contains(event.target)) {
+      // 檢查點擊是否在地圖控制區域內
+      const controlBar = document.querySelector('.control-bar');
+      const locationBtn = document.querySelector('.location-btn');
+      
+      // 如果點擊在控制區域或定位按鈕上，不關閉面板
+      if ((controlBar && controlBar.contains(event.target)) || 
+          (locationBtn && locationBtn.contains(event.target))) {
+        return;
+      }
+      
+      // 檢查點擊是否在地圖標記上
+      // 由於地圖標記是由 Google Maps API 創建的，我們無法直接檢查 DOM 元素
+      // 因此，我們使用一個標記來判斷是否是標記點擊事件
+      if (window.isMarkerClick) {
+        window.isMarkerClick = false;
+        return;
+      }
+      
+      // 關閉面板
+      isInfoPanelOpen.value = false;
+    }
+  };
+  
+  // 在組件掛載後添加點擊事件監聽器
   onMounted(async () => {
     try {
+      // 初始化標記點擊標誌
+      window.isMarkerClick = false;
+      
       await loadGoogleMapsApi();
       initMap();
+      
+      // 添加點擊事件監聽器
+      document.addEventListener('click', handleClickOutside);
     } catch (error) {
       console.error('Failed to initialize Google Maps:', error);
     }
+  });
+  
+  // 在組件卸載前移除點擊事件監聽器
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
   });
   </script>
   
