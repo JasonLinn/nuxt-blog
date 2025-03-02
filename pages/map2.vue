@@ -41,7 +41,7 @@
             :class="{ active: showLabels }"
             class="option-btn"
           >
-            {{ showLabels ? '隱藏標籤' : '顯示標籤' }}
+            {{ showLabels ? '隱藏店名' : '顯示店名' }}
           </button>
         </div>
       </div>
@@ -227,7 +227,7 @@
   // 地標類別
   const categories = [
     { key: 'eat', name: '食', icon: '🍽️', color: '#FF5722' },
-    { key: 'play', name: '樂', icon: '👕', color: '#2196F3' },
+    { key: 'play', name: '樂', icon: '🎪', color: '#2196F3' },
     { key: 'housing', name: '住', icon: '🏠', color: '#4CAF50' },
     { key: 'traffic', name: '行', icon: '🚗', color: '#FFC107' }
   ];
@@ -536,7 +536,79 @@
       mapTypeControl: true,
       streetViewControl: true,
       fullscreenControl: true,
-      gestureHandling: "greedy"
+      gestureHandling: "greedy",
+      styles: [
+        {
+          featureType: 'administrative.land_parcel',
+          elementType: 'labels',
+          stylers: [
+            {
+              visibility: 'off'
+            }
+          ]
+        },
+        {
+          featureType: 'poi',
+          elementType: 'labels.text',
+          stylers: [
+            {
+              visibility: 'off'
+            }
+          ]
+        },
+        {
+          featureType: 'poi.business',
+          stylers: [
+            {
+              visibility: 'off'
+            }
+          ]
+        },
+        {
+          featureType: 'poi.park',
+          elementType: 'labels.text',
+          stylers: [
+            {
+              visibility: 'off'
+            }
+          ]
+        },
+        {
+          featureType: 'road.arterial',
+          elementType: 'labels',
+          stylers: [
+            {
+              visibility: 'off'
+            }
+          ]
+        },
+        {
+          featureType: 'road.highway',
+          elementType: 'labels',
+          stylers: [
+            {
+              visibility: 'off'
+            }
+          ]
+        },
+        {
+          featureType: 'road.local',
+          stylers: [
+            {
+              visibility: 'off'
+            }
+          ]
+        },
+        {
+          featureType: 'road.local',
+          elementType: 'labels',
+          stylers: [
+            {
+              visibility: 'off'
+            }
+          ]
+        }
+      ]
     });
     
     // 初始化 TitleOverlay 類
