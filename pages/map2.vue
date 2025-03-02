@@ -14,6 +14,27 @@
             {{ category.name }}
           </button>
         </div>
+        
+        <div class="search-container">
+          <input 
+            type="text" 
+            v-model="searchQuery" 
+            @input="handleSearch" 
+            placeholder="搜尋地點..." 
+            class="search-input"
+          />
+          <div v-if="searchResults.length > 0" class="search-results">
+            <div 
+              v-for="(result, index) in searchResults" 
+              :key="index" 
+              @click="navigateToLocation(result)"
+              class="search-result-item"
+            >
+              {{ result.title }}
+            </div>
+          </div>
+        </div>
+        
         <div class="control-options">
           <button 
             @click="toggleLabels"
@@ -56,6 +77,104 @@
   
   // 標籤顯示控制
   const showLabels = ref(false);
+  
+  // 搜尋功能
+  const searchQuery = ref('');
+  const searchResults = ref([]);
+  
+  // 處理搜尋
+  const handleSearch = () => {
+    if (!searchQuery.value.trim()) {
+      searchResults.value = [];
+      return;
+    }
+    
+    if (!couponData.value || !Array.isArray(couponData.value)) {
+      return;
+    }
+    
+    // 過濾符合搜尋條件的地點
+    const query = searchQuery.value.toLowerCase().trim();
+    searchResults.value = couponData.value
+      .filter(item => item.title && item.title.toLowerCase().includes(query))
+      .slice(0, 5); // 限制最多顯示5個結果
+  };
+  
+  // 導航到選擇的位置
+  const navigateToLocation = (location) => {
+    if (!map || !location.position) return;
+    
+    // 檢查位置對象是否有效
+    if (typeof location.position.lat !== 'number' || typeof location.position.lng !== 'number') {
+      console.error('無效的位置對象:', location);
+      return;
+    }
+    
+    // 移動地圖到選擇的位置
+    const position = new google.maps.LatLng(
+      parseFloat(location.position.lat),
+      parseFloat(location.position.lng)
+    );
+    
+    map.setCenter(position);
+    map.setZoom(16);
+    
+    // 清空搜尋結果
+    searchQuery.value = '';
+    searchResults.value = [];
+    
+    // 高亮顯示選中的標記
+    highlightMarker(location);
+  };
+  
+  // 高亮顯示選中的標記
+  const highlightMarker = (location) => {
+    // 先重置所有標記
+    updateMarkers();
+    
+    // 找到對應的標記並高亮顯示
+    markers.forEach(marker => {
+      if (marker instanceof google.maps.Marker && 
+          marker.getPosition && 
+          marker.getPosition().lat() === parseFloat(location.position.lat) && 
+          marker.getPosition().lng() === parseFloat(location.position.lng)) {
+        
+        // 臨時放大標記
+        const icon = marker.getIcon();
+        if (icon && icon.scale) {
+          const originalScale = icon.scale;
+          icon.scale = originalScale * 1.5;
+          marker.setIcon(icon);
+          
+          // 2秒後恢復原始大小
+          setTimeout(() => {
+            icon.scale = originalScale;
+            marker.setIcon(icon);
+          }, 2000);
+        }
+        
+        // 如果標籤未顯示，臨時顯示此標記的標題
+        if (!showLabels.value) {
+          // 找到對應的標題覆蓋層
+          const titleOverlay = markers.find(m => 
+            m instanceof TitleOverlay && 
+            m.position.lat() === parseFloat(location.position.lat) && 
+            m.position.lng() === parseFloat(location.position.lng)
+          );
+          
+          if (titleOverlay && titleOverlay.div) {
+            // 臨時顯示標題
+            titleOverlay.div.style.display = 'block';
+            
+            // 3秒後隱藏
+            setTimeout(() => {
+              titleOverlay.div.style.display = 'none';
+            }, 3000);
+          }
+        }
+      }
+    });
+  };
   
   // 切換標籤顯示/隱藏
   const toggleLabels = () => {
@@ -444,6 +563,50 @@
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
+  }
+  
+  .search-container {
+    position: relative;
+    margin: 10px 0;
+    width: 100%;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 0 0 4px 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 20;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .search-result-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+  
+  .search-result-item:last-child {
+    border-bottom: none;
+  }
+  
+  .search-result-item:hover {
+    background-color: #f5f5f5;
   }
   
   .control-options {
