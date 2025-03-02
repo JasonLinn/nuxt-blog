@@ -223,6 +223,9 @@
         div.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.3)';
         div.innerHTML = this.title;
         
+        // 初始時根據 showLabels 設置顯示狀態
+        div.style.display = showLabels.value ? 'block' : 'none';
+        
         this.div = div;
         const panes = this.getPanes();
         panes.overlayLayer.appendChild(div);
@@ -368,6 +371,13 @@
     
     // 初始化標記
     updateMarkers();
+    
+    // 確保所有標題覆蓋層在初始時都是隱藏的
+    markers.forEach(marker => {
+      if (marker instanceof TitleOverlay && marker.div) {
+        marker.div.style.display = 'none';
+      }
+    });
     
     // 添加縮放事件監聽器
     map.addListener('zoom_changed', () => {
