@@ -21,7 +21,7 @@
               <NuxtLink
                 to="/map"
               >
-                <p class="">優惠券地圖搜尋</p>
+                <p class="">優惠券(地圖搜尋)</p>
               </NuxtLink>
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
