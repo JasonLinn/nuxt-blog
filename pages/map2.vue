@@ -2,7 +2,7 @@
 <template>
     <div class="map-container">
       <div class="control-bar">
-        <div class="control-title">地标类别</div>
+        <div class="control-title">地標類別</div>
         <div class="control-buttons">
           <button 
             v-for="(category, index) in categories" 
@@ -20,7 +20,7 @@
             :class="{ active: showLabels }"
             class="option-btn"
           >
-            {{ showLabels ? '隐藏标签' : '显示标签' }}
+            {{ showLabels ? '隱藏標籤' : '顯示標籤' }}
           </button>
         </div>
       </div>
@@ -54,16 +54,16 @@
   let markers = [];
   let userLocationMarker = null;
   
-  // 标签显示控制
+  // 標籤顯示控制
   const showLabels = ref(false);
   
-  // 切换标签显示/隐藏
+  // 切換標籤顯示/隱藏
   const toggleLabels = () => {
     showLabels.value = !showLabels.value;
     updateMarkerLabels();
   };
   
-  // 更新标记标签显示
+  // 更新標記標籤顯示
   const updateMarkerLabels = () => {
     if (!window.google || !window.google.maps || !map) return;
     
@@ -71,19 +71,19 @@
       if (marker instanceof google.maps.Marker && marker.getLabel) {
         const label = marker.getLabel();
         if (label) {
-          // 始终显示表情符号，但根据showLabels控制标题显示
+          // 始終顯示表情符號，但根據showLabels控制標題顯示
           marker.setLabel(label);
         }
       }
       
-      // 根据标签显示设置显示或隐藏标题覆盖层
+      // 根據標籤顯示設置顯示或隱藏標題覆蓋層
       if (marker instanceof TitleOverlay && marker.div) {
         marker.div.style.display = showLabels.value ? 'block' : 'none';
       }
     });
   };
   
-  // 地标类别
+  // 地標類別
   const categories = [
     { key: 'eat', name: '食', icon: '🍽️', color: '#FF5722' },
     { key: 'play', name: '樂', icon: '👕', color: '#2196F3' },
@@ -91,7 +91,7 @@
     { key: 'traffic', name: '行', icon: '🚗', color: '#FFC107' }
   ];
   
-  // 活跃类别状态
+  // 活躍類別狀態
   const activeCategoriesMap = reactive({
     eat: true,
     play: true,
@@ -99,42 +99,40 @@
     traffic: true
   });
   
-  // 切换类别显示/隐藏
+  // 切換類別顯示/隱藏
   const toggleCategory = (category) => {
     activeCategoriesMap[category] = !activeCategoriesMap[category];
     updateMarkers();
   };
   
-  // 更新标记
+  // 更新標記
   const updateMarkers = () => {
-    // 清除现有标记
+    // 清除現有標記
     markers.forEach(marker => marker.setMap(null));
     markers = [];
-    
-    console.log(couponData.value, 'ddddddd', selectedCategory.value, couponObject.value);
-    
-    // 确保 Google Maps API 已加载
+
+    // 確保 Google Maps API 已載入
     if (!window.google || !window.google.maps) {
-      console.error('Google Maps API 尚未加载');
+      console.error('Google Maps API 尚未載入');
       return;
     }
     
-    // 添加符合当前活跃类别的标记
+    // 添加符合當前活躍類別的標記
     if (couponData.value && Array.isArray(couponData.value)) {
       couponData.value.forEach(landmark => {
-        // 检查位置对象是否有效
+        // 檢查位置對象是否有效
         if (!landmark.position || typeof landmark.position.lat !== 'number' || typeof landmark.position.lng !== 'number') {
-          console.error('无效的位置对象:', landmark);
-          return; // 跳过这个地标
+          console.error('無效的位置對象:', landmark);
+          return; // 跳過這個地標
         }
         
-        // 获取类别对象，如果找不到则尝试使用默认类别
+        // 獲取類別對象，如果找不到則嘗試使用默認類別
         const categoryKey = landmark.category || '';
         const categoryObj = categories.find(cat => cat.key === categoryKey);
         
-        // 只要该类别被激活就显示标记
+        // 只要該類別被激活就顯示標記
         if (categoryObj && activeCategoriesMap[categoryObj.key]) {
-          // 创建标记
+          // 創建標記
           const marker = new google.maps.Marker({
             position: new google.maps.LatLng(
               parseFloat(landmark.position.lat),
@@ -152,7 +150,7 @@
             },
             label: {
               text: categoryObj.icon,
-              fontSize: '16px', // 始终显示表情符号
+              fontSize: '16px', // 始終顯示表情符號
               fontWeight: 'bold'
             },
             zIndex: 1
@@ -160,9 +158,9 @@
           
           markers.push(marker);
           
-          // 添加标题标签
-          if (landmark.title) { // 创建标题覆盖层，但根据showLabels控制显示
-            // 创建自定义标题覆盖层
+          // 添加標題標籤
+          if (landmark.title) { // 創建標題覆蓋層，但根據showLabels控制顯示
+            // 創建自定義標題覆蓋層
             const titleOverlay = new TitleOverlay(
               new google.maps.LatLng(
                 parseFloat(landmark.position.lat),
@@ -172,7 +170,7 @@
               map
             );
             
-            // 根据当前标签显示设置控制可见性
+            // 根據當前標籤顯示設置控制可見性
             if (titleOverlay.div) {
               titleOverlay.div.style.display = showLabels.value ? 'block' : 'none';
             }
@@ -182,17 +180,17 @@
         }
       });
     } else {
-      console.error('couponData.value is not an array:', couponData.value);
+      console.error('couponData.value 不是陣列:', couponData.value);
     }
   };
   
-  // 自定义标题覆盖层类
+  // 自定義標題覆蓋層類
   let TitleOverlay;
   
-  // 初始化 TitleOverlay 类
+  // 初始化 TitleOverlay 類
   const initTitleOverlay = () => {
     if (!window.google || !window.google.maps) {
-      console.error('Google Maps API 尚未加载，无法初始化 TitleOverlay');
+      console.error('Google Maps API 尚未載入，無法初始化 TitleOverlay');
       return;
     }
     
@@ -221,7 +219,7 @@
         div.style.overflow = 'hidden';
         div.style.textOverflow = 'ellipsis';
         div.style.whiteSpace = 'nowrap';
-        div.style.pointerEvents = 'none'; // 允许点击穿透
+        div.style.pointerEvents = 'none'; // 允許點擊穿透
         div.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.3)';
         div.innerHTML = this.title;
         
@@ -236,7 +234,7 @@
         const overlayProjection = this.getProjection();
         const position = overlayProjection.fromLatLngToDivPixel(this.position);
         
-        // 将标题定位在标记上方
+        // 將標題定位在標記上方
         this.div.style.left = (position.x - this.div.offsetWidth / 2) + 'px';
         this.div.style.top = (position.y - 40) + 'px'; // 上移40像素
       }
@@ -257,12 +255,12 @@
     };
   };
   
-  // 获取当前位置
+  // 獲取當前位置
   const getCurrentLocation = () => {
-    // 确保 Google Maps API 已加载
+    // 確保 Google Maps API 已載入
     if (!window.google || !window.google.maps) {
-      console.error('Google Maps API 尚未加载');
-      alert('地图尚未完全加载，请稍后再试。');
+      console.error('Google Maps API 尚未載入');
+      alert('地圖尚未完全載入，請稍後再試。');
       return;
     }
     
@@ -274,16 +272,16 @@
             lng: position.coords.longitude
           };
           
-          // 移动地图到用户位置
+          // 移動地圖到用戶位置
           map.setCenter(userLocation);
           map.setZoom(16);
           
-          // 如果已有用户位置标记，则移除
+          // 如果已有用戶位置標記，則移除
           if (userLocationMarker) {
             userLocationMarker.setMap(null);
           }
           
-          // 添加用户位置标记
+          // 添加用戶位置標記
           userLocationMarker = new google.maps.Marker({
             position: new google.maps.LatLng(userLocation.lat, userLocation.lng),
             map: map,
@@ -301,12 +299,12 @@
               fontSize: '16px',
               fontWeight: 'bold'
             },
-            zIndex: 1000 // 确保用户位置标记显示在最上层
+            zIndex: 1000 // 確保用戶位置標記顯示在最上層
           });
         },
         (error) => {
-          console.error('获取位置失败:', error);
-          alert('无法获取您的位置，请确保已授予位置权限。');
+          console.error('獲取位置失敗:', error);
+          alert('無法獲取您的位置，請確保已授予位置權限。');
         },
         {
           enableHighAccuracy: true,
@@ -315,11 +313,11 @@
         }
       );
     } else {
-      alert('您的浏览器不支持地理位置功能。');
+      alert('您的瀏覽器不支援地理位置功能。');
     }
   };
   
-  // 异步加载Google Maps API
+  // 異步載入Google Maps API
   const loadGoogleMapsApi = () => {
     return new Promise((resolve, reject) => {
       if (window.google && window.google.maps) {
@@ -344,18 +342,18 @@
     });
   };
   
-  // 初始化地图
+  // 初始化地圖
   const initMap = () => {
-    // 确保 Google Maps API 已加载
+    // 確保 Google Maps API 已載入
     if (!window.google || !window.google.maps) {
-      console.error('Google Maps API 尚未加载，无法初始化地图');
+      console.error('Google Maps API 尚未載入，無法初始化地圖');
       return;
     }
     
-    // 默认位置（台北）
+    // 默認位置（宜蘭）
     const center = { lat: 24.677407, lng: 121.75371 };
     
-    // 创建地图
+    // 創建地圖
     map = new google.maps.Map(mapRef.value, {
       center: center,
       zoom: 12,
@@ -365,24 +363,24 @@
       gestureHandling: "greedy"
     });
     
-    // 初始化 TitleOverlay 类
+    // 初始化 TitleOverlay 類
     initTitleOverlay();
     
-    // 初始化标记
+    // 初始化標記
     updateMarkers();
     
-    // 添加缩放事件监听器
+    // 添加縮放事件監聽器
     map.addListener('zoom_changed', () => {
       const zoom = map.getZoom();
       
-      // 根据缩放级别调整标记大小，但不影响可见性
+      // 根據縮放級別調整標記大小，但不影響可見性
       markers.forEach(marker => {
         if (marker instanceof google.maps.Marker) {
-          // 根据缩放级别调整标记大小
+          // 根據縮放級別調整標記大小
           if (marker.getIcon) {
             const icon = marker.getIcon();
             if (icon && icon.scale) {
-              const newScale = 10 + (zoom / 3); // 根据缩放级别调整大小
+              const newScale = 10 + (zoom / 3); // 根據縮放級別調整大小
               icon.scale = newScale;
               marker.setIcon(icon);
             }
@@ -392,7 +390,7 @@
     });
   };
   
-  // 组件挂载后初始化
+  // 組件掛載後初始化
   onMounted(async () => {
     try {
       await loadGoogleMapsApi();
