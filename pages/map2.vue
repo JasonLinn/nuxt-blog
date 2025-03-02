@@ -152,8 +152,7 @@
   
   // 高亮顯示選中的標記
   const highlightMarker = (location) => {
-    // 先重置所有標記
-    updateMarkers();
+    // 不再調用 updateMarkers()，避免重新刷新所有標記
     
     // 找到對應的標記並高亮顯示
     markers.forEach(marker => {
