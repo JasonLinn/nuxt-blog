@@ -49,6 +49,16 @@
       <button class="location-btn" @click="getCurrentLocation">
         <span class="location-icon">📍</span>
       </button>
+      
+      <!-- 地標資訊面板 -->
+      <div class="map-info-panel" :class="{ 'map-info-panel-open': isInfoPanelOpen }">
+        <div class="map-info-toggle" @click="isInfoPanelOpen = !isInfoPanelOpen">
+          <Icon name="ri:arrow-up-s-line" class="map-toggle" :class="{ 'arrow-upside': isInfoPanelOpen }" />
+        </div>
+        <div class="map-info-wrapper" v-if="selectedCoupon && selectedCoupon.id">
+          <CouponInfo :couponId="selectedCoupon.id" :key="selectedCoupon.id"></CouponInfo>
+        </div>
+      </div>
     </div>
   </template>
   
@@ -69,6 +79,10 @@
     if (!couponData.value?.length){
         store.fetchAndSetCoupon({pageSize: 150});
     }
+  // 地標資訊面板控制
+  const isInfoPanelOpen = ref(false);
+  const selectedCoupon = ref(null);
+  
   // 地图容器引用
   const mapRef = ref(null);
   let map = null;
@@ -125,6 +139,15 @@
     
     // 高亮顯示選中的標記
     highlightMarker(location);
+    
+    // 顯示地標資訊
+    showCouponInfo(location);
+  };
+  
+  // 顯示地標資訊
+  const showCouponInfo = (coupon) => {
+    selectedCoupon.value = coupon;
+    isInfoPanelOpen.value = true;
   };
   
   // 高亮顯示選中的標記
@@ -273,6 +296,12 @@
               fontWeight: 'bold'
             },
             zIndex: 1
+          });
+          
+          // 添加點擊事件
+          marker.addListener('click', () => {
+            showCouponInfo(landmark);
+            highlightMarker(landmark);
           });
           
           markers.push(marker);
@@ -674,5 +703,50 @@
   
   .location-icon {
     font-size: 24px;
+  }
+  
+  .map-info-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(calc(100% - 30px));
+    transition: transform 0.3s ease;
+    z-index: 20;
+    max-height: 60vh;
+    overflow: hidden;
+  }
+  
+  .map-info-panel-open {
+    transform: translateY(0);
+  }
+  
+  .map-info-toggle {
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: #f9f9f9c7;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .map-toggle {
+    font-size: 24px;
+    color: #666;
+    transition: transform 0.3s ease;
+  }
+  
+  .arrow-upside {
+    transform: rotate(180deg);
+  }
+  
+  .map-info-wrapper {
+    padding: 15px;
+    overflow-y: auto;
+    max-height: calc(60vh - 30px);
   }
   </style>
