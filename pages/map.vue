@@ -63,7 +63,7 @@
   </template>
   
   <script setup>
-  import { ref, onMounted, reactive, computed } from 'vue';
+  import { ref, onMounted, reactive, computed, watch } from 'vue';
   import useCouponMapStore from "~~/store/couponMap";
 
     const store = useCouponMapStore();
@@ -666,6 +666,14 @@
       });
     });
   };
+  
+  // 監聽 couponData 變化，當數據加載完成後更新標記
+  watch(() => couponData.value, (newValue, oldValue) => {
+    if (newValue && Array.isArray(newValue) && newValue.length > 0 && map) {
+      console.log('couponData 已更新，重新加載標記');
+      updateMarkers();
+    }
+  }, { deep: true });
   
   // 組件掛載後初始化
   onMounted(async () => {
