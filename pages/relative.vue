@@ -13,6 +13,18 @@
         </select>
       </div>
       <div class="col-12">
+        <div class="search">
+          <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入關鍵字" v-model="searchText" @keyup.enter="inputText">
+          <svg
+            v-if="searchText"
+            @click="cleanText"
+            xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-x cancel-icon" viewBox="0 0 16 16">
+            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search search-icon" viewBox="0 0 16 16" @click="inputText">
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+          </svg>
+        </div>
         <div class="tag-list">
           <h2 class="tag-title">
             熱門:
@@ -20,18 +32,6 @@
           <span class="hot-tag" v-for="tag in hotTag" @click="clickTag">
             {{ tag }}
           </span>
-        </div>
-        <div class="search">
-          <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入關鍵字" v-model="searchText" @input="inputText">
-          <svg
-            v-if="searchText"
-            @click="cleanText"
-            xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-x cancel-icon" viewBox="0 0 16 16">
-            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search search-icon" viewBox="0 0 16 16">
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-          </svg>
         </div>
       </div>
       <div class="my-8 flex w-full max-w-4xl flex-col">
@@ -240,6 +240,7 @@
     position: absolute;
     right: 8px;
     top: 8px;
+    cursor: pointer;
   }
   .tag-title {
     display: inline-block;
