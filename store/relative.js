@@ -8,9 +8,10 @@ const initState = {
   },
   currentCate: '',
   currentPage: 0,
+  searchText: null,
   peding: null,
-    data: null,
-    error: null
+  data: null,
+  error: null
 };
 
 // 將其命名為useXXXStore，就像vue3的composable一樣
@@ -23,7 +24,7 @@ const useRelativeStore = defineStore("useRelativeStore", {
     resetRelative() {
       this.relativeData = initState.relativeData;
     },
-    async fetchAndSetRelative(cate) {
+    async fetchAndSetRelative(initData = {}) {
         const url = useRequestURL()
         const {
             pending,
@@ -31,9 +32,10 @@ const useRelativeStore = defineStore("useRelativeStore", {
             error
           } = await useFetch('/api/relative', {
             query: {
-                category: cate || initState.currentCate,
-                page: initState.currentPage,
-                pageSize: 10
+                category: initData.cate || initState.currentCate,
+                page: initData.currentPage || initState.currentPage,
+                searchText: initData.searchText || initState.searchText,
+                pageSize: initData.pageSize || 10
             }
         })
 

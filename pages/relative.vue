@@ -1,23 +1,17 @@
 <template>
     <div class="flex container">
-      <ul class="category flex w-full max-w-4xl">
-        <li class="category-item" :class="[!currentCate ? 'active' : '']">
-          <NuxtLink
-          :to="{
-            name: 'relative'
-          }">全</NuxtLink>
-        </li>
-        <li
-          v-for="cate in categoryRelative" class="category-item"
-          :class="[currentCate == cate.id ? 'active' : '']"
-        >
-          <NuxtLink
-            :to="{
-              name: 'cate_relative-id', params: { id: cate.id }
-            }"
-          >{{ cate.name }}</NuxtLink>
-        </li>
-      </ul>
+      <div class="selectWrapper">
+        <select class="category flex col-4 form-select" v-model="selectedCate" @change="clickCate">
+          <option value="">全</option>
+          <option
+            v-for="cate in categoryRelative" class="category-item"
+            :id="cate.id"
+            :value="cate.id"
+          >
+            {{ cate.name }}
+          </option>
+        </select>
+      </div>
       <div class="col-12">
         <div class="tag-list">
           <h2 class="tag-title">
@@ -28,7 +22,7 @@
           </span>
         </div>
         <div class="search">
-          <input type="text" class="searchInput" maximum-scale="1" placeholder="請輸入關鍵字" v-model="searchText">
+          <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入關鍵字" v-model="searchText" @input="inputText">
           <svg
             v-if="searchText"
             @click="cleanText"
@@ -59,7 +53,7 @@
                 :key="article.id"
                 class="cupon col-md-3"
               >
-              <div class="cupon-wrapper" v-if="!searchText || article.title.includes(searchText) || article.content.includes(searchText)">
+              <div class="cupon-wrapper">
                 <NuxtLink
                   class=""
                   :to="{
@@ -111,37 +105,44 @@
         </template>
   
         <!-- @@@@@分頁功能在此@@@@ -->
-        <!-- <nav
-          v-if="articlesResponse"
+        <nav
+          v-if="relativeObject?.data"
           class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
         >
           <div class="next-page flex flex-1 justify-center sm:justify">
             <NuxtLink
               v-if="currentPage > 1"
               class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+              @click="handlePageChange(currentPage - 1)"
               :to="{
-                name: 'index',
+                name: 'relative',
                 query: {
+                  cate: selectedCate,
                   page: currentPage - 1
                 }
               }"
             >
               <Icon name="ri:arrow-left-s-line" />
+              {{ currentPage - 1 }}
             </NuxtLink>
-            <label class="mx-2 text-sm text-gray-600">第 {{ articlesResponse.page }} 頁</label>
+            <label class="now-page">{{ currentPage }}</label>
             <NuxtLink
+              v-if="relativeObject?.data?.items.length == 10"
               class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+              @click="handlePageChange(currentPage + 1)"
               :to="{
-                name: 'index',
+                name: 'relative',
                 query: {
+                  cate: selectedCate,
                   page: currentPage + 1
                 }
               }"
             >
+              {{ currentPage + 1 }}
               <Icon name="ri:arrow-right-s-line" />
             </NuxtLink>
           </div>
-        </nav> -->
+        </nav>
       </div>
     </div>
   </template>
@@ -150,11 +151,14 @@
   .active {
     background-color: #ffefd2;
   }
+  .selectWrapper {
+    display: flex;
+  }
   .category {
     display: flex;
     flex-direction: row;
-    font-size: 22px;
-    margin: 10px 0 5px 0;
+    font-size: 16px;
+    margin: 10px 10px 10px 0;
     background-color: #fff;
     width: fit-content;
   }
@@ -165,6 +169,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 16px;
+  }
+  .now-page {
+    padding: 5px;
+    margin: 0 10px;
+    background-color: #f1f1f1;
+    border-radius: 50%;
   }
   .cupon {
   }
@@ -217,15 +228,13 @@
     position: relative;
   }
   .searchInput {
-    margin-bottom: 20px;
     font-size: 16px;
-    padding: 5px;
     width: 100%;
   }
   .cancel-icon {
     position: absolute;
     right: 3px;
-    top: 4px;
+    top: 6px;
   }
   .search-icon {
     position: absolute;
@@ -258,14 +267,16 @@
   <script setup>
   import { categoryRelative } from '~/utils/category';
   import useRelativeStore from "~~/store/relative";
+  import { watch } from 'vue';
   // const handleLogout = store.resetUser;
   
   const route = useRoute()
-  const currentPage = computed(() => parseInt(route?.query?.page) || 1)
+  const currentPage = ref(parseInt(route?.query?.page) || 1)
   const currentCate = computed(() => route?.query?.cate)
   const searchText = ref('')
+  const selectedCate = ref(route.query.cate || '')
   const store = useRelativeStore();
-  store.fetchAndSetRelative()
+  store.fetchAndSetRelative({searchText, cate: selectedCate.value, currentPage: currentPage.value})
   const hotTag = [
     '魔術',
     '派對'
@@ -281,6 +292,17 @@
   
   const relativeObject = computed(() => store.getRelativeData)
 
+  // 監聽路由變化，當頁碼變化時重新獲取數據
+  watch(() => route.query.page, (newPage) => {
+    if (newPage) {
+      currentPage.value = parseInt(newPage)
+      store.fetchAndSetRelative({
+        searchText: searchText.value, 
+        cate: selectedCate.value, 
+        currentPage: currentPage.value
+      })
+    }
+  })
   
   const date2LocaleString = (date) => {
     return new Date(date).toLocaleString('zh-TW')
@@ -294,10 +316,35 @@
   
   const clickTag = (e) => {
     searchText.value = e.target.textContent
+    store.fetchAndSetRelative({searchText: searchText.value, cate: selectedCate.value, currentPage: currentPage.value})
+  }
+  
+  const inputText = () => {
+    currentPage.value = 1
+    store.fetchAndSetRelative({searchText: searchText.value, cate: selectedCate.value, currentPage: currentPage.value})
   }
   
   const cleanText = () => {
     searchText.value = ''
+    store.fetchAndSetRelative({searchText: '', cate: selectedCate.value, currentPage: currentPage.value})
+  }
+  
+  const clickCate = () => {
+    currentPage.value = 1
+    navigateTo({
+      name: 'relative',
+      query: { cate: selectedCate.value }
+    })
+    store.fetchAndSetRelative({searchText: searchText.value, cate: selectedCate.value, currentPage: currentPage.value})
+  }
+  
+  const handlePageChange = (newPage) => {
+    currentPage.value = newPage
+    store.fetchAndSetRelative({
+      searchText: searchText.value,
+      cate: selectedCate.value,
+      currentPage: currentPage.value
+    })
   }
   </script>
   
