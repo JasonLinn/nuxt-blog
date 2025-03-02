@@ -598,7 +598,7 @@
   .map-container {
     position: relative;
     width: 100%;
-    height: calc(100vh - 68px);
+    height: calc(100vh - 70px);
   }
   
   #map {
@@ -610,7 +610,7 @@
     position: absolute;
     top: 10px;
     left: 10px;
-    z-index: 10;
+    z-index: 1;
     background-color: rgba(255, 255, 255, 0.9);
     padding: 10px;
     border-radius: 5px;
@@ -741,7 +741,7 @@
   }
   
   .map-info-panel {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
