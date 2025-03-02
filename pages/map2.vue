@@ -16,6 +16,9 @@
         </div>
       </div>
       <div id="map" ref="mapRef"></div>
+      <button class="location-btn" @click="getCurrentLocation">
+        <span class="location-icon">📍</span>
+      </button>
     </div>
   </template>
   
@@ -40,6 +43,7 @@
   const mapRef = ref(null);
   let map = null;
   let markers = [];
+  let userLocationMarker = null;
   
   // 地标类别
   const categories = [
@@ -74,6 +78,65 @@
     activeCategoriesMap[category] = !activeCategoriesMap[category];
     selectedCategory.value = category;
     updateMarkers();
+  };
+  
+  // 获取当前位置
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          
+          // 移动地图到用户位置
+          map.setCenter(userLocation);
+          map.setZoom(16);
+          
+          // 如果已有用户位置标记，则移除
+          if (userLocationMarker) {
+            userLocationMarker.setMap(null);
+          }
+          
+          // 添加用户位置标记
+          userLocationMarker = new google.maps.Marker({
+            position: userLocation,
+            map: map,
+            title: '我的位置',
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 10,
+              fillColor: '#4285F4',
+              fillOpacity: 1,
+              strokeColor: '#FFFFFF',
+              strokeWeight: 2
+            },
+            zIndex: 1000 // 确保用户位置标记显示在最上层
+          });
+          
+          // 添加信息窗口
+          const infoWindow = new google.maps.InfoWindow({
+            content: '<div><strong>我的位置</strong></div>'
+          });
+          
+          userLocationMarker.addListener('click', () => {
+            infoWindow.open(map, userLocationMarker);
+          });
+        },
+        (error) => {
+          console.error('获取位置失败:', error);
+          alert('无法获取您的位置，请确保已授予位置权限。');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      alert('您的浏览器不支持地理位置功能。');
+    }
   };
   
   // 更新标记
@@ -183,7 +246,7 @@
   .map-container {
     position: relative;
     width: 100%;
-    height: 100vh;
+    height: calc(100vh - 68px);
   }
   
   #map {
@@ -234,5 +297,36 @@
   
   .category-btn.active:hover {
     background-color: #3367D6;
+  }
+  
+  .location-btn {
+    position: absolute;
+    bottom: 160px;
+    right: 6px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: white;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.2s;
+  }
+  
+  .location-btn:hover {
+    background-color: #f1f1f1;
+    transform: scale(1.05);
+  }
+  
+  .location-btn:active {
+    transform: scale(0.95);
+  }
+  
+  .location-icon {
+    font-size: 24px;
   }
   </style>
