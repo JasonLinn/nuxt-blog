@@ -76,7 +76,6 @@
   // 切换类别显示/隐藏
   const toggleCategory = (category) => {
     activeCategoriesMap[category] = !activeCategoriesMap[category];
-    selectedCategory.value = category;
     updateMarkers();
   };
   
@@ -150,10 +149,12 @@
     // 添加符合当前活跃类别的标记
     if (couponData.value && Array.isArray(couponData.value)) {
       couponData.value.forEach(landmark => {
-        const categoryObj = categories.find(cat => cat.key === landmark.category);
+        // 获取类别对象，如果找不到则尝试使用默认类别
+        const categoryKey = landmark.category || '';
+        const categoryObj = categories.find(cat => cat.key === categoryKey);
         
-        // 只有当该类别被激活时才显示标记
-        if (categoryObj && activeCategoriesMap[landmark.category]) {
+        // 只要该类别被激活就显示标记
+        if (categoryObj && activeCategoriesMap[categoryObj.key]) {
           const marker = new google.maps.Marker({
             position: landmark.position,
             map: map,
