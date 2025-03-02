@@ -110,7 +110,19 @@
     // 過濾符合搜尋條件的地點
     const query = searchQuery.value.toLowerCase().trim();
     searchResults.value = couponData.value
-      .filter(item => item.title && item.title.toLowerCase().includes(query))
+      .filter(item => {
+        // 搜尋標題
+        const titleMatch = item.title && item.title.toLowerCase().includes(query);
+        
+        // 搜尋內容 (content)
+        const contentMatch = item.content && item.content.toLowerCase().includes(query);
+        
+        // 搜尋描述 (description)
+        const descriptionMatch = item.description && item.description.toLowerCase().includes(query);
+        
+        // 只要任一欄位符合即可
+        return titleMatch || contentMatch || descriptionMatch;
+      })
       .slice(0, 5); // 限制最多顯示5個結果
   };
   
