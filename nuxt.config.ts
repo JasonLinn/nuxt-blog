@@ -22,7 +22,8 @@ export default defineNuxtConfig({
     
     // 可以暴露給客戶端的公共鍵
     public: {
-      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY
+      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+      GA_MEASUREMENT_ID: process.env.GA_MEASUREMENT_ID || 'G-45PDMJHNT9' // 替換為您的 GA4 測量 ID
     },
   },
   vite: {
