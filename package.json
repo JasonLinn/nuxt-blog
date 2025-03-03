@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@fawmi/vue-google-maps": "^0.9.79",
+    "@googlemaps/js-api-loader": "^1.16.8",
     "@line/bot-sdk": "^9.2.2",
     "@line/liff": "^2.23.2",
     "@nuxtjs/ngrok": "^3.0.1",

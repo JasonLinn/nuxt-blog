@@ -65,6 +65,7 @@
   <script setup>
   import { ref, onMounted, reactive, computed, watch, onUnmounted } from 'vue';
   import useCouponMapStore from "~~/store/couponMap";
+  import { Loader } from '@googlemaps/js-api-loader';
 
     const store = useCouponMapStore();
     const couponObject = computed(() => store.getCouponData);
@@ -355,7 +356,7 @@
       return;
     }
     
-    TitleOverlay = class extends google.maps.OverlayView {
+    class TitleOverlay extends google.maps.OverlayView {
       constructor(position, title, map) {
         super();
         this.position = position;
@@ -366,7 +367,6 @@
       }
       
       onAdd() {
-        // 創建標題容器
         const div = document.createElement('div');
         div.style.position = 'absolute';
         div.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
@@ -381,18 +381,14 @@
         div.style.overflow = 'hidden';
         div.style.textOverflow = 'ellipsis';
         div.style.whiteSpace = 'nowrap';
-        div.style.pointerEvents = 'none'; // 允許點擊穿透
+        div.style.pointerEvents = 'none';
         div.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.3)';
-        div.style.transform = 'translate(-50%, -100%)'; // 使用 transform 進行居中和上移
-        div.style.marginTop = '-10px'; // 額外的上方間距
+        div.style.transform = 'translate(-50%, -100%)';
+        div.style.marginTop = '-10px';
         div.innerHTML = this.title;
-        
-        // 初始時根據 showLabels 設置顯示狀態
         div.style.display = showLabels.value ? 'block' : 'none';
         
         this.div = div;
-        
-        // 將元素添加到覆蓋層窗格
         const panes = this.getPanes();
         panes.overlayMouseTarget.appendChild(div);
       }
@@ -400,15 +396,12 @@
       draw() {
         if (!this.div) return;
         
-        // 獲取投影
         const overlayProjection = this.getProjection();
         if (!overlayProjection) return;
         
-        // 將地理坐標轉換為像素坐標
         const position = overlayProjection.fromLatLngToDivPixel(this.position);
         if (!position) return;
         
-        // 使用絕對定位設置標題位置
         this.div.style.left = position.x + 'px';
         this.div.style.top = position.y + 'px';
       }
@@ -437,14 +430,9 @@
           this.div.style.display = visible ? 'block' : 'none';
         }
       }
-      
-      setMap(map) {
-        if (map === null) {
-          this.onRemove();
-        }
-        super.setMap(map);
-      }
-    };
+    }
+
+    return TitleOverlay;
   };
   
   // 獲取當前位置
@@ -509,33 +497,26 @@
     }
   };
   
-  // 異步載入Google Maps API
-  const loadGoogleMapsApi = () => {
-    return new Promise((resolve, reject) => {
-      if (window.google && window.google.maps) {
-        resolve();
-        return;
-      }
+  // 異步載入 Google Maps API
+  const loadGoogleMapsApi = async () => {
+    try {
+      const { data: mapData } = await useFetch('/api/maps?type=key');
+      const googleMapsApiKey = mapData.value.key;
       
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD7HWVfZa4Tq-IGp0SsaCOanE4wtux-T74&callback=initGoogleMaps`;
-      script.async = true;
-      script.defer = true;
+      const loader = new Loader({
+        apiKey: googleMapsApiKey,
+        version: 'weekly'
+      });
       
-      window.initGoogleMaps = () => {
-        resolve();
-      };
-      
-      script.onerror = (error) => {
-        reject(new Error('Google Maps API failed to load'));
-      };
-      
-      document.head.appendChild(script);
-    });
+      await loader.load();
+    } catch (error) {
+      console.error('Failed to load Google Maps API:', error);
+      throw error;
+    }
   };
-  
+
   // 初始化地圖
-  const initMap = () => {
+  const initMap = async () => {
     // 確保 Google Maps API 已載入
     if (!window.google || !window.google.maps) {
       console.error('Google Maps API 尚未載入，無法初始化地圖');
@@ -628,7 +609,7 @@
     });
     
     // 初始化 TitleOverlay 類
-    initTitleOverlay();
+    TitleOverlay = initTitleOverlay();
     
     // 初始化標記
     updateMarkers();
@@ -712,7 +693,7 @@
       window.isMarkerClick = false;
       
       await loadGoogleMapsApi();
-      initMap();
+      await initMap();
       
       // 添加點擊事件監聽器
       document.addEventListener('click', handleClickOutside);
@@ -725,6 +706,21 @@
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
   });
+
+  // 修改地址查詢部分
+  const searchAddress = async (address) => {
+    try {
+      const { data } = await useFetch(`/api/maps?type=geocode&address=${encodeURIComponent(address)}`);
+      if (data.value.results && data.value.results.length > 0) {
+        const location = data.value.results[0].geometry.location;
+        // 處理位置數據
+        return location;
+      }
+    } catch (error) {
+      console.error('地址查詢失敗:', error);
+    }
+    return null;
+  };
   </script>
   
   <style scoped>
