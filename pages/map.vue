@@ -500,8 +500,12 @@
   // 異步載入 Google Maps API
   const loadGoogleMapsApi = async () => {
     try {
-      const { data: mapData } = await useFetch('/api/maps?type=key');
-      const googleMapsApiKey = mapData.value.key;
+      const config = useRuntimeConfig();
+      const googleMapsApiKey = config.public.GOOGLE_MAPS_API_KEY;
+
+      if (!googleMapsApiKey) {
+        throw new Error('Google Maps API Key not configured');
+      }
       
       const loader = new Loader({
         apiKey: googleMapsApiKey,

@@ -20,8 +20,9 @@ export default defineNuxtConfig({
     // 只在服務器端可用的私有鍵
     GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
     
-    // 可以暴露給客戶端的公共鍵（如果需要）
+    // 可以暴露給客戶端的公共鍵
     public: {
+      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY
     },
   },
   vite: {
