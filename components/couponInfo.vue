@@ -143,7 +143,6 @@
   import useReferralStore from "~/store/referral";
   import useCouponMapStore from "~~/store/couponMap";
   import useStore from "~/store";
-  import { referral } from "~/utils/referral"
   import { index_liff_url } from "/utils/static"
   const route = useRoute()
   const store = useStore()
@@ -280,18 +279,40 @@
       .catch((error) => alert(error))
   }
   
-  const checkReferral = () => {
-    referralStore.value = referral.find((ref) => {
-        return ref.code == referralCode.value
-    })
-  
-    if (referralStore?.value) {
-      isCheckReferral.value = true
-      alert('成功代入:' + referralStore?.value?.name)
-    } else {
-      alert('代碼錯誤')
+  const checkReferral = async () => {
+    try {
+      if (!referralCode.value) {
+        alert('請輸入推薦代碼');
+        return;
+      }
+
+      const response = await $fetch('/api/referral', {
+        method: 'POST',
+        body: {
+          code: referralCode.value
+        }
+      });
+
+      referralStore.value = response.data;
+      isCheckReferral.value = true;
+      alert('成功代入: ' + referralStore.value.name);
+
+    } catch (error) {
+      console.error('檢查推薦代碼時發生錯誤:', error);
+      
+      // 根据错误状态码显示不同的错误信息
+      if (error.response?.status === 404) {
+        alert('無效的推薦代碼');
+      } else if (error.response?.status === 400) {
+        alert('請輸入推薦代碼');
+      } else {
+        alert('系統錯誤，請稍後再試');
+      }
+      
+      referralStore.value = null;
+      isCheckReferral.value = false;
     }
-  }
+  };
   
   const handleHashRecive = () => {
     let articleHash = article.value.hash
