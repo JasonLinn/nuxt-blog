@@ -83,7 +83,7 @@
           【標籤】{{ article.tags }}
         </div>
         <div class="cupon-map">
-          【Google地圖】相關資訊產品可點選：<a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
+          【Google地圖】相關產品資訊可點選：<a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
         </div>
         <TipText></TipText>
         <div class="cupon-referral" v-if="article.isReferral">推薦店家: {{ referralStore?.name || `無` }}
@@ -718,7 +718,7 @@ useSeoMeta({
   background-color: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
-  font-size: 14px;
+  font-size: 15px;
 }
 .cupon-img {
   max-width: 100%;
