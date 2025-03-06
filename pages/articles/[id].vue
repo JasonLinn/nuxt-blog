@@ -77,15 +77,15 @@
           {{ article.title }}
         </h1>
         <div class="cupon-text">
-          {{ article.content }}
+          【優惠內容】{{ article.content }}
         </div>
-        <div class="cupon-tags">
-          {{ article.tags }}
+        <div v-if="article.tags" class="cupon-tags">
+          【標籤】{{ article.tags }}
+        </div>
+        <div class="cupon-map">
+          【Google地圖】相關資訊產品可點選：<a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
         </div>
         <TipText></TipText>
-        <div class="cupon-map">
-          查看Google地圖： <a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
-        </div>
         <div class="cupon-referral" v-if="article.isReferral">推薦店家: {{ referralStore?.name || `無` }}
           <svg v-show="referralStore?.name" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
@@ -98,23 +98,6 @@
         </div>
       </div>
       <div>
-      <!-- modal -->
-      <div class="modal fade" tabindex="-1" ref="modalRef">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              輸入兌換序號
-            </div>
-            <div class="modal-body">
-              <input type="text" v-model="hash">
-            </div>
-            <div class="modal-footer">
-              <button type="button" @click="handleHashRecive">確定</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- modal end -->
        <div class="coupon-pass" v-show="!article.isonce && !article.isReferral">出示即可使用</div>
        <div>
           <div class="cupon-amount" v-show="article.isReferral">
@@ -135,6 +118,24 @@
            <Icon v-show="iconLoading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
          </button>
        </div>
+
+       <!-- modal -->
+        <div class="modal fade" tabindex="-1" ref="modalRef">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                輸入兌換序號
+              </div>
+              <div class="modal-body">
+                <input type="text" v-model="hash">
+              </div>
+              <div class="modal-footer">
+                <button type="button" @click="handleHashRecive">確定</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <!-- modal end -->
     </div>
     </template>
   </div>
@@ -705,9 +706,19 @@ useSeoMeta({
   margin-bottom: 5px;
   white-space: pre-line;
   line-height: 1.3;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  font-size: 15px;
 }
 .cupon-tags {
-  margin-bottom: 25px;
+  margin-bottom: 5px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  font-size: 14px;
 }
 .cupon-img {
   max-width: 100%;
@@ -765,7 +776,36 @@ useSeoMeta({
   margin-bottom: 10px;
 }
 .cupon-map {
-  margin-bottom: 15px;
+  margin-bottom: 5px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.cupon-map a {
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cupon-map a:hover {
+  background-color: #e9ecef;
+  color: #0a58ca;
+  text-decoration: underline;
+}
+
+.cupon-map a::before {
+  content: "📍";
+  font-size: 1.2em;
 }
 .fererral-input{
   width: 100px;
