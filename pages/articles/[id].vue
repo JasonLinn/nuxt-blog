@@ -77,7 +77,7 @@
           {{ article.title }}
         </h1>
         <div class="cupon-text">
-          【優惠內容】{{ article.content }}
+          【優惠內容】<div>{{ article.content }}</div>
         </div>
         <div v-if="article.tags" class="cupon-tags">
           【標籤】{{ article.tags }}
