@@ -78,12 +78,12 @@
             {{ article.title }}
           </h1>
           <div class="cupon-text">
-            {{ article.content }}
+            【優惠內容】<div>{{ article.content }}</div>
+          </div>
+          <div class="cupon-map">
+            【Google地圖】相關產品資訊可點選： <a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
           </div>
           <TipText></TipText>
-          <div class="cupon-map">
-            查看Google地圖： <a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
-          </div>
           <div class="cupon-referral" v-if="article.isReferral">推薦店家: {{ referralStore?.name || `無` }}
             <svg v-show="referralStore?.name" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
               <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
@@ -710,9 +710,14 @@
   <style scoped>
   .cupon-text {
     overflow-wrap: break-word;
-    margin-bottom: 30px;
+    margin-bottom: 5px;
     white-space: pre-line;
     line-height: 1.3;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    font-size: 15px;
   }
   .cupon-img {
     max-width: 100%;
@@ -770,8 +775,35 @@
     margin-bottom: 10px;
   }
   .cupon-map {
-    margin-bottom: 15px;
+    margin-bottom: 5px;
+    padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  font-size: 15px;
   }
+  .cupon-map a {
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cupon-map a:hover {
+  background-color: #e9ecef;
+  color: #0a58ca;
+  text-decoration: underline;
+}
+
+.cupon-map a::before {
+  content: "📍";
+  font-size: 1.2em;
+}
   .fererral-input{
     width: 100px;
   }
