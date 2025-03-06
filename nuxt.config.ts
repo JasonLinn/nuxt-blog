@@ -22,8 +22,7 @@ export default defineNuxtConfig({
     
     // 可以暴露給客戶端的公共鍵
     public: {
-      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
-      GA_MEASUREMENT_ID: process.env.GA_MEASUREMENT_ID || 'G-45PDMJHNT9' // 替換為您的 GA4 測量 ID
+      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY
     },
   },
   vite: {
@@ -39,15 +38,7 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: ["@fawmi/vue-google-maps", "fast-deep-equal"],
-    },
-    // server: {
-    //   proxy: {
-    //     '/api/sendMsg': { // API 路由
-    //       target: 'https://api.line.me/', // 主要 Domain
-    //       changeOrigin: true,
-    //     },
-    //   },
-    // },
+    }
   },
   devtools: { enabled: true },
   ngrok: {
