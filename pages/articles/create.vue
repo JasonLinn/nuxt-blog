@@ -125,6 +125,36 @@
                 </div>
               </section>
               <section class="col-md-12 create-part">
+                <label for="cover" class="create-name block text-sm font-medium text-gray-700">
+                  請上傳代表性圖片：
+                </label>
+                <div class="mt-1">
+                  <input 
+                    type="file" 
+                    @change="handleFileUpload" 
+                    accept="image/*" 
+                    multiple 
+                    class="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-emerald-50 file:text-emerald-700
+                      hover:file:bg-emerald-100"
+                  />
+                </div>
+                <div class="create-img mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                  <div v-for="(image, index) in uploadedImages" :key="index" class="relative">
+                    <img :src="image.url" :alt="image.name" class="w-full h-32 object-cover rounded-lg" />
+                    <button 
+                      @click="removeImage(index)" 
+                      class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
                 <label for="about" class="create-name block text-sm font-medium text-gray-700">
                   <TipIcon/>優惠券內容：
                 </label>
@@ -167,15 +197,6 @@
                     placeholder="請撰寫優惠券序號..."
                     class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                   />
-                </div>
-              </section>
-              <section class="col-md-12 create-part">
-                <label for="cover" class="create-name block text-sm font-medium text-gray-700">
-                  請上傳代表性圖片(工程師用)：
-                </label>
-                <input type="file" @input="handleFileInput" multiple />
-                <div class="create-img">
-                  <img v-for="file in files" :key="file.name" :src="file.content" alt="file.name" />
                 </div>
               </section>
             </div>
@@ -237,10 +258,24 @@
   display: flex;
   justify-content: space-around;
 }
+.create-img {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.create-img img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 </style>
 
 <script setup>
-import { index_url } from '~/utils/static'
+import { ref, reactive } from 'vue'
 
 const articleData = reactive({
   title: '',
@@ -248,7 +283,7 @@ const articleData = reactive({
   adress: [],
   township: [],
   content: '',
-  cover: '',
+  cover: [],
   isReferral: false,
   isonce: false,
   amount: 10000,
@@ -258,58 +293,104 @@ const articleData = reactive({
   hashTag: '',
 })
 
-const { handleFileInput, files } = useFileStorage()
+const uploadedImages = ref([])
+
+const handleFileUpload = async (event) => {
+  const files = event.target.files
+  if (!files.length) return
+
+  for (let file of files) {
+    try {
+      console.log('開始上傳文件:', file.name)
+      
+      // 驗證文件類型
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('只允許上傳 JPEG、PNG 和 GIF 格式的圖片')
+      }
+
+      // 驗證文件大小 (5MB)
+      const maxSize = 5 * 1024 * 1024
+      if (file.size > maxSize) {
+        throw new Error('文件太大，最大允許 5MB')
+      }
+
+      // 創建 FormData
+      const formData = new FormData()
+      formData.append('file', file)
+
+      // 上傳到後端 API
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.error || '上傳失敗')
+      }
+
+      console.log('上傳成功:', data.url)
+      
+      // 添加到已上傳圖片列表
+      uploadedImages.value.push({
+        url: data.url,
+        name: file.name
+      })
+
+      // 更新 articleData.cover
+      if (!articleData.cover) articleData.cover = []
+      articleData.cover.push(data.url)
+
+    } catch (error) {
+      console.error('上傳錯誤:', error)
+      alert(`上傳失敗：${error.message}`)
+    }
+  }
+}
+
+const removeImage = (index) => {
+  uploadedImages.value.splice(index, 1)
+  articleData.cover.splice(index, 1)
+}
 
 const handleSubmit = async () => {
-  // if (!files.value[0]) {
-  //   alert('請上傳至少一個圖檔')
-  //   return
-  // }
-//files 有上傳才執行
-if (files.value[0]) {
-  files.value.map((file)=> {
-    articleData.cover.push(index_url + 'shop/' + file.name)
-  })
-
-  const response = await $fetch('/api/files', {
-		method: 'POST',
-		body: {
-			files: files.value,
-      url: 'shop/'
-		}
-	})
-}
-  let position = articleData.position.match(/\d+\.\d+/g)
-  await $fetch('/api/articles', {
-    method: 'POST',
-    body: {
-      title: articleData.title,
-      category: articleData.category,
-      adress: [articleData.adress],
-      township: [articleData.township],
-      content: articleData.content,
-      cover: articleData.cover.split(','),
-      amount: articleData.amount,
-      usedTimes: articleData.usedTimes,
-      isReferral: articleData.isReferral,
-      isonce: articleData.isonce,
-      hash: articleData.hash.split(','),
-      position: {
-        lng: Number(position[0]),
-        lat: Number(position[1])
-      },
-      tags: articleData.tags
-    }
-  })
-    .then((response) => {
-      navigateTo({
-        name: 'articles-id',
-        params: {
-          id: response.id
-        }
-      })
+  try {
+    let position = articleData.position.match(/\d+\.\d+/g)
+    
+    const response = await $fetch('/api/articles', {
+      method: 'POST',
+      body: {
+        title: articleData.title,
+        category: articleData.category,
+        adress: [articleData.adress],
+        township: [articleData.township],
+        content: articleData.content,
+        cover: articleData.cover,
+        amount: articleData.amount,
+        usedTimes: articleData.usedTimes,
+        isReferral: articleData.isReferral,
+        isonce: articleData.isonce,
+        hash: articleData.hash.split(','),
+        position: {
+          lng: Number(position[0]),
+          lat: Number(position[1])
+        },
+        tags: articleData.tags
+      }
     })
-    .catch((error) => alert(error))
+
+    navigateTo({
+      name: 'articles-id',
+      params: {
+        id: response.id
+      }
+    })
+  } catch (error) {
+    console.error('Submit error:', error)
+    alert('發布失敗，請重試')
+  }
 }
 
 definePageMeta({

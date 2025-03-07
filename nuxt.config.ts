@@ -19,10 +19,14 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // 只在服務器端可用的私有鍵
     GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+    GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+    GITHUB_USERNAME: process.env.GITHUB_USERNAME,
+    GITHUB_REPO: process.env.GITHUB_REPO,
     
     // 可以暴露給客戶端的公共鍵
     public: {
-      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY
+      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+      GA_MEASUREMENT_ID: process.env.GA_MEASUREMENT_ID || 'G-45PDMJHNT9'
     },
   },
   vite: {
