@@ -110,18 +110,27 @@
                 </div>
               </section>
               <section class="col-md-12 create-part">
-                <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
-                  <TipIcon/>圖片(用逗點分隔)：
+                <label for="coverUrl" class="edit-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>圖片 URL：
                 </label>
                 <div class="mt-1">
-                  <textarea
-                    id="hash"
-                    v-model="articleData.cover"
-                    name="hash"
-                    rows="4"
-                    placeholder="請輸入圖片網址..."
-                    class="w-100 w-full "
-                  />
+                  <div class="input-group">
+                    <input
+                      id="coverUrl"
+                      v-model="coverUrl"
+                      placeholder="請輸入圖片 URL"
+                      type="text"
+                      class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                      @keyup.enter="addCoverUrl"
+                    />
+                    <button 
+                      @click.prevent="addCoverUrl" 
+                      class="mt-2 btn btn-primary"
+                      :disabled="!coverUrl"
+                    >
+                      添加圖片 URL
+                    </button>
+                  </div>
                 </div>
               </section>
               <section class="col-md-12 create-part">
@@ -142,11 +151,12 @@
                       hover:file:bg-emerald-100"
                   />
                 </div>
+                <!-- 統一的圖片預覽區域 -->
                 <div class="create-img mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                  <div v-for="(image, index) in uploadedImages" :key="index" class="relative">
-                    <img :src="image.url" :alt="image.name" class="w-full h-32 object-cover rounded-lg" />
+                  <div v-for="(url, index) in articleData.cover" :key="index" class="relative">
+                    <img :src="url" :alt="'圖片 ' + (index + 1)" class="w-full h-32 object-cover rounded-lg" />
                     <button 
-                      @click="removeImage(index)" 
+                      @click.prevent="removeImage(index)" 
                       class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
                     >
                       ×
@@ -294,6 +304,7 @@ const articleData = reactive({
 })
 
 const uploadedImages = ref([])
+const coverUrl = ref('')
 
 const handleFileUpload = async (event) => {
   const files = event.target.files
@@ -333,13 +344,7 @@ const handleFileUpload = async (event) => {
 
       console.log('上傳成功:', data.url)
       
-      // 添加到已上傳圖片列表
-      uploadedImages.value.push({
-        url: data.url,
-        name: file.name
-      })
-
-      // 更新 articleData.cover
+      // 只添加到 articleData.cover
       if (!articleData.cover) articleData.cover = []
       articleData.cover.push(data.url)
 
@@ -351,8 +356,23 @@ const handleFileUpload = async (event) => {
 }
 
 const removeImage = (index) => {
-  uploadedImages.value.splice(index, 1)
   articleData.cover.splice(index, 1)
+}
+
+const addCoverUrl = () => {
+  if (coverUrl.value.trim()) {
+    try {
+      new URL(coverUrl.value)
+      if (!articleData.cover) {
+        articleData.cover = []
+      }
+      // 只添加到 articleData.cover
+      articleData.cover.push(coverUrl.value.trim())
+      coverUrl.value = ''
+    } catch (e) {
+      alert('請輸入有效的圖片 URL')
+    }
+  }
 }
 
 const handleSubmit = async () => {
