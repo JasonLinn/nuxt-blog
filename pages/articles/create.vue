@@ -47,7 +47,7 @@
               </section>
               <section class="col-md-12 create-part">
                 <label for="position" class="create-name block text-sm font-medium text-gray-700">
-                  <TipIcon/>經緯度:
+                  <TipIcon/>經緯度(例如: 24.63567884891394, 121.79100640000001):
                 </label>
                 <div class="mt-1">
                   <input
@@ -374,8 +374,8 @@ const handleSubmit = async () => {
         isonce: articleData.isonce,
         hash: articleData.hash.split(','),
         position: {
-          lng: Number(position[0]),
-          lat: Number(position[1])
+          lat: Number(position[0]),
+          lng: Number(position[1])
         },
         tags: articleData.tags
       }
