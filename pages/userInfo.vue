@@ -65,10 +65,10 @@
                               <td class="coupon-info-title">推薦店家：</td>
                               <td>{{ coupon.referral?.name || '無' }}</td>
                             </tr>
-                            <tr class="coupon-info-tr">
+                            <!-- <tr class="coupon-info-tr">
                               <td class="coupon-info-title">兌換序號：</td>
                               <td>{{ coupon.hash[0] || '無' }}</td>
-                            </tr>
+                            </tr> -->
                             <tr class="coupon-info-tr" v-if="coupon.qrCodeData">
                               <td class="coupon-info-title">條碼：</td>
                               <td>
@@ -238,7 +238,6 @@ onMounted(async () => {
       coupons.value.forEach(async (coupon, index) => {
         if (coupon.qrCodeData) {
           const canvas = document.getElementById(`barcode-${index}`);
-          console.log(coupon, index,canvas, 'sjjjjjjjjjk')
           if (canvas) {
             await generateBarcode(canvas, coupon.qrCodeData);
           }
