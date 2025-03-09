@@ -49,7 +49,7 @@
               <NuxtLink
                 v-if="!userData?.userId"
                 class="get"
-                :to="`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`"
+                :to="`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${host}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`"
               >
                 <p class="">登入LINE</p>
               </NuxtLink>
@@ -159,6 +159,7 @@ const userInfo = useState('userInfo')
 const showEdit = ref(false)
 const imgUrl = ref('')
 const route = useRoute()
+const { host } = useRequestURL()
 
 const store = useStore();
 const userData = computed(() => store.getUserData);
