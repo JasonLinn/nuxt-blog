@@ -163,7 +163,7 @@ import { index_liff_url } from "/utils/static"
 import { onMounted, onBeforeUnmount } from 'vue'
 import { defineAsyncComponent } from 'vue'
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle'
-import JsBarcode from 'jsbarcode'
+
 const route = useRoute()
 const store = useStore()
 const userData = computed(()=> store.getUserData)
@@ -347,6 +347,21 @@ const checkReferral = async () => {
   }
 };
 
+// 添加新的條碼生成函數
+const generateBarcode = async (canvas, text) => {
+  if (process.client) {
+    const JsBarcode = (await import('jsbarcode')).default;
+    JsBarcode(canvas, text, {
+      format: "CODE128",
+      width: 2,
+      height: 100,
+      displayValue: true,
+      fontSize: 20,
+      margin: 10
+    });
+  }
+}
+
 const handleHashRecive = async () => {
   try {
     // 從 API 獲取一組數字
@@ -361,16 +376,11 @@ const handleHashRecive = async () => {
     showQRCode.value = true
     
     // 在下一個 tick 生成條碼
-    nextTick(() => {
+    nextTick(async () => {
       const canvas = document.getElementById('barcode')
-      JsBarcode(canvas, qrCodeData.value, {
-        format: "CODE128",
-        width: 2,
-        height: 100,
-        displayValue: true,
-        fontSize: 20,
-        margin: 10
-      })
+      if (canvas) {
+        await generateBarcode(canvas, qrCodeData.value)
+      }
     })
 
     // 更新用戶優惠券資訊
@@ -387,7 +397,7 @@ const handleHashRecive = async () => {
     }
     
     hideModal()
-    }
+  }
 }
 
 const getCupon = async () => {

@@ -105,7 +105,6 @@ import useStore from "~~/store";
 import { AccordionContent, AccordionHeader, AccordionItem, AccordionRoot, AccordionTrigger } from 'radix-vue'
 import { Icon } from '@iconify/vue'
 import { ref, onMounted } from 'vue'
-import JsBarcode from 'jsbarcode'
 
 const store = useStore();
 const userName = store.getUserDisplayName
@@ -211,21 +210,30 @@ const received = (e) => {
 }
 
 const nextTick = ref(null)
+
+// 添加條碼生成函數
+const generateBarcode = async (canvas, text) => {
+  if (process.client) {
+    const JsBarcode = (await import('jsbarcode')).default;
+    JsBarcode(canvas, text, {
+      format: "CODE128",
+      width: 2,
+      height: 50,
+      displayValue: true,
+      fontSize: 12,
+      margin: 5
+    });
+  }
+}
+
 onMounted(() => {
   // 在組件掛載後生成條碼
-  nextTick(() => {
-    coupons.value?.forEach((coupon, index) => {
+  nextTick(async () => {
+    coupons.value?.forEach(async (coupon, index) => {
       if (coupon.qrCodeData) {
         const canvas = document.getElementById(`barcode-${index}`)
         if (canvas) {
-          JsBarcode(canvas, coupon.qrCodeData, {
-            format: "CODE128",
-            width: 2,
-            height: 50,
-            displayValue: true,
-            fontSize: 12,
-            margin: 5
-          })
+          await generateBarcode(canvas, coupon.qrCodeData)
         }
       }
     })
