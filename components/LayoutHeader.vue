@@ -45,18 +45,16 @@
                 <p class="">使用規範</p>
               </NuxtLink>
             </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+            <li v-if="!userData?.userId" class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
-                v-if="!userData?.userId"
                 class="get"
                 :to="`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${host}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`"
               >
                 <p class="">登入LINE</p>
               </NuxtLink>
             </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+            <li v-if="userData?.userId" class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
-                v-if="userData?.userId"
                 class="get"
                 to="/userInfo"
               >
