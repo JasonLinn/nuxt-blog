@@ -209,8 +209,6 @@ const received = (e) => {
   }
 }
 
-const nextTick = ref(null)
-
 // 添加條碼生成函數
 const generateBarcode = async (canvas, text) => {
   if (process.client) {
@@ -232,12 +230,11 @@ const generateBarcode = async (canvas, text) => {
 
 onMounted(async () => {
   if (process.client) {
-    // 等待 DOM 更新完成
-    await nextTick();
     // 等待優惠券數據加載
     await new Promise(resolve => setTimeout(resolve, 500));
     
     if (coupons.value) {
+      await nextTick();
       coupons.value.forEach(async (coupon, index) => {
         if (coupon.qrCodeData) {
           const canvas = document.getElementById(`barcode-${index}`);
