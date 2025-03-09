@@ -72,7 +72,12 @@
                             <tr class="coupon-info-tr" v-if="coupon.qrCodeData">
                               <td class="coupon-info-title">條碼：</td>
                               <td>
-                                <canvas :id="'barcode-' + index"></canvas>
+                                <div class="barcode-container">
+                                  <div v-if="!barcodeLoaded[index]" class="loading-icon">
+                                    <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
+                                  </div>
+                                  <canvas :id="'barcode-' + index"></canvas>
+                                </div>
                               </td>
                             </tr>
                             <tr class="coupon-info-tr">
@@ -104,7 +109,7 @@
 import useStore from "~~/store";
 import { AccordionContent, AccordionHeader, AccordionItem, AccordionRoot, AccordionTrigger } from 'radix-vue'
 import { Icon } from '@iconify/vue'
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 
 const store = useStore();
 const userName = store.getUserDisplayName
@@ -209,8 +214,10 @@ const received = (e) => {
   }
 }
 
-// 添加條碼生成函數
-const generateBarcode = async (canvas, text) => {
+const barcodeLoaded = ref({})
+
+// 修改條碼生成函數
+const generateBarcode = async (canvas, text, index) => {
   if (process.client) {
     try {
       const JsBarcode = (await import('jsbarcode')).default;
@@ -222,11 +229,29 @@ const generateBarcode = async (canvas, text) => {
         fontSize: 12,
         margin: 5
       });
+      barcodeLoaded.value[index] = true
     } catch (error) {
       console.error('生成條碼錯誤:', error);
+      barcodeLoaded.value[index] = false
     }
   }
 }
+
+// 監聽 coupons 的變化
+watch(() => coupons.value, async (newCoupons) => {
+  if (newCoupons && process.client) {
+    await nextTick();
+    newCoupons.forEach(async (coupon, index) => {
+      if (coupon.qrCodeData) {
+        barcodeLoaded.value[index] = false
+        const canvas = document.getElementById(`barcode-${index}`);
+        if (canvas) {
+          await generateBarcode(canvas, coupon.qrCodeData, index);
+        }
+      }
+    });
+  }
+}, { immediate: true });
 
 onMounted(async () => {
   if (process.client) {
@@ -239,7 +264,7 @@ onMounted(async () => {
         if (coupon.qrCodeData) {
           const canvas = document.getElementById(`barcode-${index}`);
           if (canvas) {
-            await generateBarcode(canvas, coupon.qrCodeData);
+            await generateBarcode(canvas, coupon.qrCodeData, index);
           }
         }
       });
@@ -568,6 +593,28 @@ onMounted(async () => {
   }
   to {
     height: 0;
+  }
+}
+
+.barcode-container {
+  position: relative;
+  min-height: 50px;
+}
+
+.loading-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 </style>
