@@ -104,7 +104,7 @@
 import useStore from "~~/store";
 import { AccordionContent, AccordionHeader, AccordionItem, AccordionRoot, AccordionTrigger } from 'radix-vue'
 import { Icon } from '@iconify/vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 
 const store = useStore();
 const userName = store.getUserDisplayName
@@ -214,31 +214,41 @@ const nextTick = ref(null)
 // 添加條碼生成函數
 const generateBarcode = async (canvas, text) => {
   if (process.client) {
-    const JsBarcode = (await import('jsbarcode')).default;
-    JsBarcode(canvas, text, {
-      format: "CODE128",
-      width: 2,
-      height: 50,
-      displayValue: true,
-      fontSize: 12,
-      margin: 5
-    });
+    try {
+      const JsBarcode = (await import('jsbarcode')).default;
+      await JsBarcode(canvas, text, {
+        format: "CODE128",
+        width: 2,
+        height: 50,
+        displayValue: true,
+        fontSize: 12,
+        margin: 5
+      });
+    } catch (error) {
+      console.error('生成條碼錯誤:', error);
+    }
   }
 }
 
-onMounted(() => {
-  // 在組件掛載後生成條碼
-  nextTick(async () => {
-    coupons.value?.forEach(async (coupon, index) => {
-      if (coupon.qrCodeData) {
-        const canvas = document.getElementById(`barcode-${index}`)
-        if (canvas) {
-          await generateBarcode(canvas, coupon.qrCodeData)
+onMounted(async () => {
+  if (process.client) {
+    // 等待 DOM 更新完成
+    await nextTick();
+    // 等待優惠券數據加載
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (coupons.value) {
+      coupons.value.forEach(async (coupon, index) => {
+        if (coupon.qrCodeData) {
+          const canvas = document.getElementById(`barcode-${index}`);
+          if (canvas) {
+            await generateBarcode(canvas, coupon.qrCodeData);
+          }
         }
-      }
-    })
-  })
-})
+      });
+    }
+  }
+});
 </script>
 
 <style lang="scss" scoped>
