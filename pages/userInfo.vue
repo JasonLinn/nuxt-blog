@@ -69,6 +69,12 @@
                               <td class="coupon-info-title">兌換序號：</td>
                               <td>{{ coupon.hash[0] || '無' }}</td>
                             </tr>
+                            <tr class="coupon-info-tr" v-if="coupon.qrCodeData">
+                              <td class="coupon-info-title">條碼：</td>
+                              <td>
+                                <canvas :id="'barcode-' + index"></canvas>
+                              </td>
+                            </tr>
                             <tr class="coupon-info-tr">
                               <td class="coupon-info-title">使用期限：</td>
                               <td>2025/6/30</td>
@@ -98,6 +104,9 @@
 import useStore from "~~/store";
 import { AccordionContent, AccordionHeader, AccordionItem, AccordionRoot, AccordionTrigger } from 'radix-vue'
 import { Icon } from '@iconify/vue'
+import { ref, onMounted } from 'vue'
+import JsBarcode from 'jsbarcode'
+
 const store = useStore();
 const userName = store.getUserDisplayName
 const userId = store.getUserId
@@ -200,6 +209,28 @@ const received = (e) => {
     .catch((error) => alert(error))
   }
 }
+
+const nextTick = ref(null)
+onMounted(() => {
+  // 在組件掛載後生成條碼
+  nextTick(() => {
+    coupons.value?.forEach((coupon, index) => {
+      if (coupon.qrCodeData) {
+        const canvas = document.getElementById(`barcode-${index}`)
+        if (canvas) {
+          JsBarcode(canvas, coupon.qrCodeData, {
+            format: "CODE128",
+            width: 2,
+            height: 50,
+            displayValue: true,
+            fontSize: 12,
+            margin: 5
+          })
+        }
+      }
+    })
+  })
+})
 </script>
 
 <style lang="scss" scoped>

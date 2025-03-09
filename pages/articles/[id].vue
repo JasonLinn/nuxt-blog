@@ -110,7 +110,7 @@
          <button v-show="checkIsOnce() && article.isonce && isCheckReferral" type="button" class="btn btn-light">
            每個帳號限領一次
          </button>
-         <button v-show="article.amount && article.hash[0]" type="button" class="btn btn-success" @click="showModal">
+         <button v-show="article.amount && article.hash[0] && isCheckReferral" type="button" class="btn btn-success" @click="showModal">
            領取限量優惠券
          </button>
          <button v-show="article.amount && !article.hash[0] && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="getCupon">
@@ -124,13 +124,27 @@
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                輸入兌換序號
+                <h5 class="modal-title">優惠券序號</h5>
+                <button type="button" class="btn-close" @click="hideModal"></button>
               </div>
-              <div class="modal-body">
-                <input type="text" v-model="hash">
+              <div class="modal-body text-center">
+                <div v-if="showQRCode" class="barcode-container">
+                  <canvas id="barcode"></canvas>
+                  <div class="hash-number mt-3">
+                    序號：{{ qrCodeData }}
+                  </div>
+                </div>
+                <div v-else>
+                  <p>點擊確定獲取序號</p>
+                </div>
               </div>
               <div class="modal-footer">
-                <button type="button" @click="handleHashRecive">確定</button>
+                <button v-if="!showQRCode" type="button" class="btn btn-primary" @click="handleHashRecive">
+                  確定
+                </button>
+                <button v-else type="button" class="btn btn-secondary" @click="hideModal()">
+                  關閉
+                </button>
               </div>
             </div>
           </div>
@@ -146,6 +160,10 @@ import liff from "@line/liff";
 import useReferralStore from "~/store/referral";
 import useStore from "~/store";
 import { index_liff_url } from "/utils/static"
+import { onMounted, onBeforeUnmount } from 'vue'
+import { defineAsyncComponent } from 'vue'
+import bootstrap from 'bootstrap/dist/js/bootstrap.bundle'
+import JsBarcode from 'jsbarcode'
 const route = useRoute()
 const store = useStore()
 const userData = computed(()=> store.getUserData)
@@ -156,12 +174,12 @@ const modalRef = ref(null);
 const referralCode = ref('');
 const isOpenShare = ref(false)
 let iconLoading = ref(false)
-let modal;
+let modal = null;
+const showQRCode = ref(false)
+const qrCodeData = ref('')
 let hash = []
 const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
-// const showModal = () => {
-//   modal.show();
-// };
+
 /*  lightbox  */
 let referralStore = ref(null)
 let isCheckReferral = ref(false)
@@ -189,15 +207,35 @@ const onHide = () => (visibleRef.value = false);
 //   return ref.code == store.getReferral.referral
 // })
 
-// onMounted(async () => {
-//   modal = $bootstrap.modal(modalRef.value);
-// });
+// 初始化 modal
+onMounted(() => {
+  if (modalRef.value) {
+    modal = new bootstrap.Modal(modalRef.value)
+  }
+})
 
-// onBeforeUnmount(() => {
-//   // 加上 dispose，避免切換頁面時或是 HMR 看到殘留畫面
-//   modal.dispose();
-// });
+// 清理 modal
+onBeforeUnmount(() => {
+  if (modal) {
+    modal.dispose()
+  }
+})
 
+// 顯示 modal 的方法
+const showModal = () => {
+  if (modal) {
+    showQRCode.value = false
+    qrCodeData.value = ''
+    modal.show()
+  }
+}
+
+// 關閉 modal 的方法
+const hideModal = () => {
+  if (modal) {
+    modal.hide()
+  }
+}
 
 const { pending, data: article, error } = await useFetch(`/api/articles/${route.params.id}`)
 // article.value.referral = referralStore
@@ -254,6 +292,8 @@ const patchUser = async (profile) => {
   article.value.referral = referralStore.value
   //增加領取時間
   article.value.gotTime = new Date()
+  //增加條碼數據
+  article.value.qrCodeData = qrCodeData.value
   //暫時填進已領優惠券
   userData?.value?.coupons.push(JSON.stringify(article.value))
   store.setUser(userData)
@@ -298,7 +338,7 @@ const checkReferral = async () => {
       alert('無效的推薦代碼');
     } else if (error.response?.status === 400) {
       alert('請輸入推薦代碼');
-    } else {
+  } else {
       alert('系統錯誤，請稍後再試');
     }
     
@@ -307,27 +347,51 @@ const checkReferral = async () => {
   }
 };
 
-const handleHashRecive = () => {
-  let articleHash = article.value.hash
-  let index = articleHash.findIndex((i) =>hash == i)
+const handleHashRecive = async () => {
+  try {
+    // 從 API 獲取一組數字
+    const response = await $fetch('/api/hash/generate', {
+      method: 'POST',
+      body: {
+        articleId: route.params.id
+      }
+    })
 
-  if (index >= 0) {
-    getCupon()
-    alert('序號正確')
-    modal.hide()
+    qrCodeData.value = response.hash
+    showQRCode.value = true
+    
+    // 在下一個 tick 生成條碼
+    nextTick(() => {
+      const canvas = document.getElementById('barcode')
+      JsBarcode(canvas, qrCodeData.value, {
+        format: "CODE128",
+        width: 2,
+        height: 100,
+        displayValue: true,
+        fontSize: 20,
+        margin: 10
+      })
+    })
+
+    // 更新用戶優惠券資訊
+    await patchUser(userData.value)
+    await sendPatch()
+
+  } catch (error) {
+    console.error('Error:', error)
+    
+    if (error.response?.status === 400) {
+      alert('參數錯誤：' + error.response._data.message)
     } else {
-      alert('序號錯誤')
+      alert('生成序號失敗，請稍後再試')
+    }
+    
+    hideModal()
     }
 }
 
 const getCupon = async () => {
   iconLoading = true
-
-  if (!userId.value) {
-    alert("請先登入")
-    navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
-    return
-  }
 
   if (userId.value) {
     await patchUser(userData.value)
@@ -820,5 +884,25 @@ useSeoMeta({
 }
 .carousel__slide {
   height: 180px;
+}
+
+.barcode-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: white;
+}
+
+.hash-number {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+  margin-top: 15px;
+}
+
+#barcode {
+  max-width: 100%;
+  height: auto;
 }
 </style>
