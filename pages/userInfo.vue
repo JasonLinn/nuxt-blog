@@ -238,6 +238,7 @@ onMounted(async () => {
       coupons.value.forEach(async (coupon, index) => {
         if (coupon.qrCodeData) {
           const canvas = document.getElementById(`barcode-${index}`);
+          console.log(coupon, index,canvas, 'sjjjjjjjjjk')
           if (canvas) {
             await generateBarcode(canvas, coupon.qrCodeData);
           }
