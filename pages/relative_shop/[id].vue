@@ -379,7 +379,7 @@
                       },
                       {
                         "type": "text",
-                        "text": article.value.hash[0] || '無序號' ,
+                        "text": article.value.hash || '無序號' ,
                         "wrap": true,
                         "color": "#666666",
                         "size": "sm",

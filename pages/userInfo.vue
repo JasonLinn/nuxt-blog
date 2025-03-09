@@ -67,7 +67,7 @@
                             </tr>
                             <!-- <tr class="coupon-info-tr">
                               <td class="coupon-info-title">兌換序號：</td>
-                              <td>{{ coupon.hash[0] || '無' }}</td>
+                              <td>{{ coupon.hash || '無' }}</td>
                             </tr> -->
                             <tr class="coupon-info-tr" v-if="coupon.qrCodeData">
                               <td class="coupon-info-title">條碼：</td>
