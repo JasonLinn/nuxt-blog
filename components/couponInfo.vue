@@ -125,10 +125,10 @@
            <button v-show="checkIsOnce() && article.isonce && isCheckReferral" type="button" class="btn btn-light">
              每個帳號限領一次
            </button>
-           <button v-show="article.amount && article.hash[0]" type="button" class="btn btn-success" @click="showModal">
+           <button v-show="article.amount && article.hash" type="button" class="btn btn-success" @click="showModal">
              領取限量優惠券
            </button>
-           <button v-show="article.amount && !article.hash[0] && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="getCupon">
+           <button v-show="article.amount && !article.hash && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="getCupon">
              領取優惠券
              <Icon v-show="iconLoading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
            </button>
@@ -454,7 +454,7 @@
                       },
                       {
                         "type": "text",
-                        "text": article.value.hash[0] || '無序號' ,
+                        "text": article.value.hash || '無序號' ,
                         "wrap": true,
                         "color": "#666666",
                         "size": "sm",
