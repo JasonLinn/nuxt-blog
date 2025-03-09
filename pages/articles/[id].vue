@@ -110,7 +110,7 @@
          <button v-show="checkIsOnce() && article.isonce && isCheckReferral" type="button" class="btn btn-light">
            每個帳號限領一次
          </button>
-         <button v-show="article.amount && article.hash[0] && isCheckReferral" type="button" class="btn btn-success" @click="showModal">
+         <button v-show="article.amount && article.hash[0] && isCheckReferral" type="button" class="btn btn-success" @click="handleHashRecive">
            領取限量優惠券
          </button>
          <button v-show="article.amount && !article.hash[0] && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="getCupon">
@@ -119,37 +119,13 @@
          </button>
        </div>
 
-       <!-- modal -->
-        <div class="modal fade" tabindex="-1" ref="modalRef">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">優惠券序號</h5>
-                <button type="button" class="btn-close" @click="hideModal"></button>
-              </div>
-              <div class="modal-body text-center">
-                <div v-if="showQRCode" class="barcode-container">
-                  <canvas id="barcode"></canvas>
-                  <div class="hash-number mt-3">
-                    序號：{{ qrCodeData }}
-                  </div>
-                </div>
-                <div v-else>
-                  <p>點擊確定獲取序號</p>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button v-if="!showQRCode" type="button" class="btn btn-primary" @click="handleHashRecive">
-                  確定
-                </button>
-                <button v-else type="button" class="btn btn-secondary" @click="hideModal()">
-                  關閉
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      <!-- modal end -->
+       <!-- 條碼顯示區域 -->
+       <div v-if="showQRCode" class="barcode-container">
+         <canvas id="barcode"></canvas>
+         <div class="hash-number mt-3">
+           序號：{{ qrCodeData }}
+         </div>
+       </div>
     </div>
     </template>
   </div>
@@ -915,7 +891,10 @@ useSeoMeta({
   flex-direction: column;
   align-items: center;
   padding: 20px;
+  margin-top: 20px;
   background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
 }
 
 .hash-number {
