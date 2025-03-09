@@ -364,6 +364,14 @@ const generateBarcode = async (canvas, text) => {
 
 const handleHashRecive = async () => {
   try {
+    // 檢查是否已登入
+    if (!userId.value) {
+      alert("請先登入")
+      hideModal()
+      navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
+      return
+    }
+
     // 從 API 獲取一組數字
     const response = await $fetch('/api/hash/generate', {
       method: 'POST',
@@ -402,6 +410,12 @@ const handleHashRecive = async () => {
 
 const getCupon = async () => {
   iconLoading = true
+
+  if (!userId.value) {
+    alert("請先登入")
+    navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
+    return
+  }
 
   if (userId.value) {
     await patchUser(userData.value)
