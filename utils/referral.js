@@ -3,6 +3,10 @@ export const referral = [
     code: 'jinbnb',
     name: '衿日林民宿',
   },
+  {
+    code: 'ytmorg2025',
+    name: '宜蘭觀光民宿行銷協會',
+  },
   {code:'202536T',name:'好望角民宿'},
   {code:'20253DW',name:'衿日林民宿'},
   {code:'20253FG',name:'靜園休閒民宿'},
