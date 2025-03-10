@@ -110,7 +110,13 @@
          <button v-show="checkIsOnce() && article.isonce && isCheckReferral" type="button" class="btn btn-light">
            每個帳號限領一次
          </button>
+         <button v-show="checkIsOnce() && article.isonce && !isCheckReferral" type="button" class="btn btn-light">
+           每個帳號限領一次
+         </button>
          <button v-show="article.amount && article.hash && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="handleHashRecive">
+           領取限量優惠券
+         </button>
+         <button v-show="article.amount && article.hash && !isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="handleHashRecive">
            領取限量優惠券
          </button>
          <button v-show="article.amount && !article.hash && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="getCupon">
