@@ -195,18 +195,14 @@
                 </div>
               </section>
               <section class="col-md-12 create-part">
-                <label for="hash" class="edit-name block text-sm font-medium text-gray-700">
-                  序號(用逗點分隔)：
+                <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>是否有序號：
                 </label>
                 <div class="mt-1">
-                  <textarea
-                    id="hash"
-                    v-model="articleData.hash"
-                    name="hash"
-                    rows="4"
-                    placeholder="請撰寫優惠券序號..."
-                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                  />
+                  <input type="radio" id="hashTrue" value="true" v-model="articleData.hash">
+                  <label for="hashTrue">是</label>
+                  <input type="radio" id="hashFalse" value="false" v-model="articleData.hash">
+                  <label for="hashFalse">否</label>
                 </div>
               </section>
             </div>
@@ -298,7 +294,7 @@ const articleData = reactive({
   isonce: false,
   amount: 10000,
   usedTimes: 0,
-  hash: '',
+  hash: false,
   position: '',
   hashTag: '',
 })
@@ -392,7 +388,7 @@ const handleSubmit = async () => {
         usedTimes: articleData.usedTimes,
         isReferral: articleData.isReferral,
         isonce: articleData.isonce,
-        hash: articleData.hash.split(','),
+        hash: articleData.hash,
         position: {
           lat: Number(position[0]),
           lng: Number(position[1])

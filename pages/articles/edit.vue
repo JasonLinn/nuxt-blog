@@ -155,17 +155,13 @@
               </section>
               <section class="col-md-12 edit-part">
                 <label for="cover" class="edit-name block text-sm font-medium text-gray-700">
-                  序號：
+                  <TipIcon/>是否有序號：
                 </label>
                 <div class="mt-1">
-                  <textarea
-                    id="hash"
-                    v-model="articleData.hash"
-                    name="hash"
-                    rows="4"
-                    placeholder="請撰寫優惠券序號..."
-                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                  />
+                  <input type="radio" id="hashTrue" value="true" v-model="articleData.hash">
+                  <label for="hashTrue">是</label>
+                  <input type="radio" id="hashFalse" value="false" v-model="articleData.hash">
+                  <label for="hashFalse">否</label>
                 </div>
               </section>
             </div>
@@ -235,7 +231,6 @@ if (error.value) {
 // 先轉字串
 articleData.value.adress = await articleData.value.adress.toString()
 articleData.value.township = await articleData.value.township.toString()
-articleData.value.hash = await articleData.value.hash.toString()
 articleData.value.cover = await articleData.value.cover.toString()
 articleData.value.position = await '經度：' + articleData.value.position?.lng + ' 緯度：' + articleData.value.position?.lat
 
@@ -255,7 +250,7 @@ const handleSubmit = async () => {
       isReferral: articleData.value.isReferral,
       isonce: articleData.value.isonce,
       // 轉陣列
-      hash: articleData.value.hash.split(','),
+      hash: articleData.value.hash,
       position: {
         lng: Number(position[0]),
         lat: Number(position[1])
