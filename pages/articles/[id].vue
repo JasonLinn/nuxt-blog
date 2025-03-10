@@ -110,7 +110,7 @@
          <button v-show="checkIsOnce() && article.isonce && isCheckReferral" type="button" class="btn btn-light">
            每個帳號限領一次
          </button>
-         <button v-show="article.amount && article.hash && isCheckReferral" type="button" class="btn btn-success" @click="handleHashRecive">
+         <button v-show="article.amount && article.hash && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="handleHashRecive">
            領取限量優惠券
          </button>
          <button v-show="article.amount && !article.hash && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="getCupon">
@@ -120,12 +120,12 @@
        </div>
 
        <!-- 條碼顯示區域 -->
-       <div v-if="showQRCode" class="barcode-container">
+       <!-- <div v-if="showQRCode" class="barcode-container">
          <canvas id="barcode"></canvas>
          <div class="hash-number mt-3">
            序號：{{ qrCodeData }}
          </div>
-       </div>
+       </div> -->
     </div>
     </template>
   </div>
@@ -138,7 +138,6 @@ import useStore from "~/store";
 import { index_liff_url } from "/utils/static"
 import { onMounted, onBeforeUnmount } from 'vue'
 import { defineAsyncComponent } from 'vue'
-import bootstrap from 'bootstrap/dist/js/bootstrap.bundle'
 
 const route = useRoute()
 const store = useStore()
@@ -185,21 +184,26 @@ const onHide = () => (visibleRef.value = false);
 
 // 初始化 modal
 onMounted(() => {
-  if (modalRef.value) {
-    modal = new bootstrap.Modal(modalRef.value)
+  if (process.client && typeof document !== 'undefined' && modalRef.value) {
+    // 在客戶端動態導入 bootstrap
+    import('bootstrap/dist/js/bootstrap.bundle').then((bootstrap) => {
+      modal = new bootstrap.default.Modal(modalRef.value);
+    }).catch(error => {
+      console.error('無法加載 Bootstrap:', error);
+    });
   }
 })
 
 // 清理 modal
 onBeforeUnmount(() => {
-  if (modal) {
+  if (process.client && modal) {
     modal.dispose()
   }
 })
 
 // 顯示 modal 的方法
 const showModal = () => {
-  if (modal) {
+  if (process.client && modal) {
     showQRCode.value = false
     qrCodeData.value = ''
     modal.show()
@@ -208,7 +212,7 @@ const showModal = () => {
 
 // 關閉 modal 的方法
 const hideModal = () => {
-  if (modal) {
+  if (process.client && modal) {
     modal.hide()
   }
 }
@@ -233,6 +237,8 @@ const checkIsOnce = () => {
 }
 
 const handleDeleteArticle = () => {
+  if (!process.client) return;
+  
   const answer = confirm('你確定要刪除優惠券嗎？')
 
   if (answer) {
@@ -260,7 +266,9 @@ const sendPatch = async () => {
     .then((response) => {
       article.value.amount = response.amount
     })
-    .catch((error) => alert(error))
+    .catch((error) => {
+      if (process.client) alert(error)
+    })
 }
 
 const patchUser = async (profile) => {
@@ -282,16 +290,18 @@ const patchUser = async (profile) => {
         }
     })
     .then((response) => {
-      alert('領取成功!')
+      if (process.client) alert('領取成功!')
       navigateTo('/userInfo')
     })
-    .catch((error) => alert(error))
+    .catch((error) => {
+      if (process.client) alert(error)
+    })
 }
 
 const checkReferral = async () => {
   try {
     if (!referralCode.value) {
-      alert('請輸入推薦代碼');
+      if (process.client) alert('請輸入推薦代碼');
       return;
     }
 
@@ -304,18 +314,20 @@ const checkReferral = async () => {
 
     referralStore.value = response.data;
     isCheckReferral.value = true;
-    alert('成功代入: ' + referralStore.value.name);
+    if (process.client) alert('成功代入: ' + referralStore.value.name);
 
   } catch (error) {
     console.error('檢查推薦代碼時發生錯誤:', error);
     
     // 根据错误状态码显示不同的错误信息
-    if (error.response?.status === 404) {
-      alert('無效的推薦代碼');
-    } else if (error.response?.status === 400) {
-      alert('請輸入推薦代碼');
-  } else {
-      alert('系統錯誤，請稍後再試');
+    if (process.client) {
+      if (error.response?.status === 404) {
+        alert('無效的推薦代碼');
+      } else if (error.response?.status === 400) {
+        alert('請輸入推薦代碼');
+      } else {
+        alert('系統錯誤，請稍後再試');
+      }
     }
     
     referralStore.value = null;
@@ -325,27 +337,51 @@ const checkReferral = async () => {
 
 // 添加新的條碼生成函數
 const generateBarcode = async (canvas, text) => {
-  if (process.client) {
-    const JsBarcode = (await import('jsbarcode')).default;
-    JsBarcode(canvas, text, {
-      format: "CODE128",
-      width: 2,
-      height: 100,
-      displayValue: true,
-      fontSize: 20,
-      margin: 10
-    });
+  // 確保在客戶端環境並且 document 存在
+  if (process.client && typeof document !== 'undefined' && canvas) {
+    try {
+      const JsBarcode = (await import('jsbarcode')).default;
+      JsBarcode(canvas, text, {
+        format: "CODE128",
+        width: 2,
+        height: 100,
+        displayValue: true,
+        fontSize: 20,
+        margin: 10
+      });
+    } catch (error) {
+      console.error('生成條碼錯誤:', error);
+    }
   }
 }
+
+// 添加一個函數來生成 LINE 登錄 URL
+const getLineLoginUrl = (state) => {
+  if (!process.client || typeof window === 'undefined') return '';
+  
+  // 獲取當前的 URL 協議和主機名
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  const port = window.location.port ? `:${window.location.port}` : '';
+  const baseUrl = `${protocol}//${hostname}${port}`;
+  
+  // 構建完整的回調 URL
+  const redirectUri = encodeURIComponent(`${baseUrl}/line_callback`);
+  
+  return `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=${redirectUri}&state=${state}&bot_prompt=normal&scope=openid%20email%20profile`;
+};
 
 const handleHashRecive = async () => {
   try {
     // 檢查是否已登入
     if (!userId.value) {
-      alert("請先登入")
-      hideModal()
-      navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
-      return
+      if (process.client) {
+        alert("請先登入");
+        hideModal();
+        // 使用函數生成 LINE 登錄 URL
+        navigateTo(getLineLoginUrl(route.path), { external: true });
+      }
+      return;
     }
 
     // 從 API 獲取一組數字
@@ -359,13 +395,19 @@ const handleHashRecive = async () => {
     qrCodeData.value = response.hash
     showQRCode.value = true
     
-    // 在下一個 tick 生成條碼
-    nextTick(async () => {
-      const canvas = document.getElementById('barcode')
-      if (canvas) {
-        await generateBarcode(canvas, qrCodeData.value)
-      }
-    })
+    // 確保只在客戶端生成條碼
+    if (process.client) {
+      // 在下一個 tick 生成條碼
+      nextTick(async () => {
+        // 確保 document 存在
+        if (typeof document !== 'undefined') {
+          const canvas = document.getElementById('barcode')
+          if (canvas) {
+            await generateBarcode(canvas, qrCodeData.value)
+          }
+        }
+      })
+    }
 
     // 更新用戶優惠券資訊
     await patchUser(userData.value)
@@ -374,13 +416,15 @@ const handleHashRecive = async () => {
   } catch (error) {
     console.error('Error:', error)
     
-    if (error.response?.status === 400) {
-      alert('參數錯誤：' + error.response._data.message)
-    } else {
-      alert('生成序號失敗，請稍後再試')
+    if (process.client) {
+      if (error.response?.status === 400) {
+        alert('參數錯誤：' + error.response._data.message)
+      } else {
+        alert('生成序號失敗，請稍後再試')
+      }
+      
+      hideModal()
     }
-    
-    hideModal()
   }
 }
 
@@ -388,15 +432,18 @@ const getCupon = async () => {
   iconLoading = true
 
   if (!userId.value) {
-    alert("請先登入")
-    navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
+    if (process.client) {
+      alert("請先登入");
+      // 使用函數生成 LINE 登錄 URL
+      navigateTo(getLineLoginUrl(route.path), { external: true });
+    }
     return
   }
 
   if (userId.value) {
     await patchUser(userData.value)
     await sendPatch()
-  } else {
+  } else if (process.client) {
     await liff.getProfile().then(profile => {
       patchUser(profile)
     })
@@ -606,10 +653,14 @@ const getCupon = async () => {
       .catch(error => window.alert('未登入LINE帳號'+ error));
 }
 const shareCopy = () => {
-  navigator.clipboard.writeText(index_liff_url + route.path);
-  window?.alert('已複製連結!')
+  if (process.client) {
+    navigator.clipboard.writeText(index_liff_url + route.path);
+    window?.alert('已複製連結!')
+  }
 }
 const shareCoupon = () => {
+  if (!process.client) return;
+  
   liff
   .shareTargetPicker(
     [{
