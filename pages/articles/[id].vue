@@ -100,7 +100,7 @@
       <div>
        <div class="coupon-pass" v-show="!article.isonce && !article.isReferral">出示即可使用</div>
        <div>
-          <div class="cupon-amount" v-show="article.isReferral">
+          <div class="cupon-amount" v-show="article.isReferral || article.isonce">
             剩餘數量: {{ article.amount }}
           </div>
          <button v-show="article.isReferral && !isCheckReferral" type="button" class="btn btn-light">
