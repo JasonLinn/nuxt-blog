@@ -106,22 +106,25 @@
          <button v-show="article.isReferral && !isCheckReferral" type="button" class="btn btn-light">
            請輸入推薦代碼
          </button>
-         <!-- 領券按鈕 -->
+         <!-- 只能領一次  需推薦碼 -->
          <button v-show="checkIsOnce() && article.isonce && isCheckReferral" type="button" class="btn btn-light">
            每個帳號限領一次
          </button>
+         <!-- 只能領一次  並且不用推薦碼 -->
          <button v-show="checkIsOnce() && article.isonce && !isCheckReferral" type="button" class="btn btn-light">
            每個帳號限領一次
          </button>
          <button v-show="article.amount && article.hash && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="handleHashRecive">
            領取限量優惠券
          </button>
-         <button v-show="article.amount && article.hash && !isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="handleHashRecive">
-           領取限量優惠券
-         </button>
+         <!-- 限量優惠券  需推薦碼 -->
          <button v-show="article.amount && !article.hash && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="getCupon">
            領取優惠券
            <Icon v-show="iconLoading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
+         </button>
+         <!-- 限量優惠券  並且不用推薦碼 -->
+         <button v-show="article.amount && article.hash && !isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="handleHashRecive">
+           領取限量優惠券
          </button>
        </div>
 
