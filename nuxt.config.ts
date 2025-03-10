@@ -76,5 +76,12 @@ export default defineNuxtConfig({
     // {OR} use environment variables (recommended)
     // mount: process.env.mount
     // you need to set the mount in your .env file at the root of your project
-},
+  },
+  // 添加對 CommonJS 模塊的支持
+  build: {
+    transpile: ['utils/hashDatabase.cjs']
+  },
+  alias: {
+    '@': resolve(__dirname, './')
+  }
 });
