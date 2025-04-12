@@ -63,21 +63,59 @@
                     />
                   </div>
                 </section> -->
-                <section class="edit-part col-span-12">
-                  <label for="cover" class="block text-sm font-medium text-gray-700">
-                    代表性圖片連結
+                <section class="col-md-12 create-part">
+                  <label for="coverUrl" class="edit-name block text-sm font-medium text-gray-700">
+                    <TipIcon/>圖片 URL：
                   </label>
                   <div class="mt-1">
-                    <textarea
-                      id="cover"
-                      v-model="articleData.cover"
-                      placeholder="請撰輸入網址連結"
-                      name="cover"
-                      type="text"
-                      rows="4"
-                      autocomplete="cover"
-                      class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                    <div class="input-group">
+                      <input
+                        id="coverUrl"
+                        v-model="coverUrl"
+                        placeholder="請輸入圖片 URL"
+                        type="text"
+                        class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                        @keyup.enter="addCoverUrl"
+                      />
+                      <button 
+                        @click.prevent="addCoverUrl" 
+                        class="mt-2 btn btn-primary"
+                        :disabled="!coverUrl"
+                      >
+                        添加圖片 URL
+                      </button>
+                    </div>
+                  </div>
+                </section>
+                <section class="col-md-12 create-part">
+                  <label for="cover" class="create-name block text-sm font-medium text-gray-700">
+                    請上傳代表性圖片：
+                  </label>
+                  <div class="mt-1">
+                    <input 
+                      type="file" 
+                      @change="handleFileUpload" 
+                      accept="image/*" 
+                      multiple 
+                      class="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-emerald-50 file:text-emerald-700
+                        hover:file:bg-emerald-100"
                     />
+                  </div>
+                  <!-- 統一的圖片預覽區域 -->
+                  <div class="create-img mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                    <div v-for="(url, index) in articleData.cover" :key="index" class="relative">
+                      <img :src="url" :alt="'圖片 ' + (index + 1)" class="w-full h-32 object-cover rounded-lg" />
+                      <button 
+                        @click.prevent="removeImage(index)" 
+                        class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 </section>
   
@@ -147,8 +185,23 @@
     display: flex;
     justify-content: space-around;
   }
+  .create-img {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .create-img img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
   </style>
   <script setup>
+  import { ref } from 'vue';
   const route = useRoute()
   
   const { data: articleData, error } = await useFetch(`/api/relative/${route.query.id}`)
@@ -157,8 +210,86 @@
     throw createError({ statusCode: 400, message: '您要更新的代訂服務不存在或已經被刪除' })
   }
   
+  // 確保cover是數組
+  if (typeof articleData.value.cover === 'string') {
+    articleData.value.cover = articleData.value.cover.split(',');
+  }
+
   // 先轉字串
   articleData.value.hash = await articleData.value.hash.toString()
+  
+  const coverUrl = ref('')
+
+  const addCoverUrl = () => {
+    if (coverUrl.value.trim()) {
+      try {
+        new URL(coverUrl.value)
+        if (!Array.isArray(articleData.value.cover)) {
+          articleData.value.cover = []
+        }
+        articleData.value.cover.push(coverUrl.value.trim())
+        coverUrl.value = ''
+      } catch (e) {
+        alert('請輸入有效的圖片 URL')
+      }
+    }
+  }
+
+  const removeImage = (index) => {
+    articleData.value.cover.splice(index, 1)
+  }
+
+  const handleFileUpload = async (event) => {
+    const files = event.target.files
+    if (!files.length) return
+
+    for (let file of files) {
+      try {
+        console.log('開始上傳文件:', file.name)
+        
+        // 驗證文件類型
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+        if (!allowedTypes.includes(file.type)) {
+          throw new Error('只允許上傳 JPEG、PNG 和 GIF 格式的圖片')
+        }
+
+        // 驗證文件大小 (5MB)
+        const maxSize = 5 * 1024 * 1024
+        if (file.size > maxSize) {
+          throw new Error('文件太大，最大允許 5MB')
+        }
+
+        // 創建 FormData
+        const formData = new FormData()
+        formData.append('file', file)
+
+        // 上傳到後端 API
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        const data = await response.json()
+
+        if (!data.success) {
+          throw new Error(data.error || '上傳失敗')
+        }
+
+        console.log('上傳成功:', data.url)
+        
+        // 確保 cover 是數組
+        if (!Array.isArray(articleData.value.cover)) {
+          articleData.value.cover = []
+        }
+        
+        articleData.value.cover.push(data.url)
+
+      } catch (error) {
+        console.error('上傳錯誤:', error)
+        alert(`上傳失敗：${error.message}`)
+      }
+    }
+  }
   
   const handleSubmit = async () => {
     await $fetch(`/api/relative/${route.query.id}`, {
