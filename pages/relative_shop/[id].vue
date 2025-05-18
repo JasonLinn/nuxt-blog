@@ -171,9 +171,6 @@
     margin-left: 15px;
     background-color: #ff9742;
   }
-  .carousel__slide {
-    max-height: 180px;
-  }
 </style>
   
   <script setup>

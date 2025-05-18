@@ -942,9 +942,6 @@ useSeoMeta({
   margin-left: 15px;
   background-color: #ff9742;
 }
-.carousel__slide {
-  height: 180px;
-}
 
 .barcode-container {
   display: flex;

@@ -83,8 +83,8 @@
                     <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                       {{ date2LocaleString(article.updated_at) }}
                     </time> -->
-                    <p class="index-cupon-text" v-html="formatContent(article.content, 300)">
-                    </p>
+                    <div class="index-cupon-text" v-html="formatContent(article.content, 300)">
+                    </div>
                   </div>
                   <!-- <span
                     aria-hidden="true"

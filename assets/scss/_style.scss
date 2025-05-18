@@ -73,5 +73,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .cupon-text p {
-    margin-bottom: 1em !important;
+    // margin-bottom: 1em !important;
+}
+
+.carousel__slide {
+    height: 450px;
+}
+
+@media screen and (max-width: 768px) {
+    .carousel__slide {
+        height: 180px;
+    }
 }
