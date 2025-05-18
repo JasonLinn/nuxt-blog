@@ -94,14 +94,27 @@
                     代訂服務內容：
                   </label>
                   <div class="mt-1">
-                    <textarea
-                      id="content"
-                      v-model="articleData.content"
-                      name="content"
-                      rows="4"
-                      placeholder="請撰寫代訂服務內容..."
-                      class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                    />
+                    <ClientOnly>
+                      <!-- Quill 編輯器容器 -->
+                      <div id="quill-editor" class="w-100 h-64 editor-container"></div>
+                      <!-- 隱藏的 textarea 用於保存內容 -->
+                      <textarea 
+                        id="quill-content-hidden" 
+                        v-model="articleData.content" 
+                        style="display: none;"
+                      ></textarea>
+                      
+                      <template #fallback>
+                        <textarea
+                          id="content-fallback"
+                          v-model="articleData.content"
+                          name="content"
+                          rows="8"
+                          placeholder="正在載入編輯器..."
+                          class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                        />
+                      </template>
+                    </ClientOnly>
                   </div>
                 </section>
               </div>
@@ -174,11 +187,30 @@
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
+
+  .editor-container {
+    min-height: 200px;
+  }
+
+  .ql-container {
+    font-size: 16px;
+    border-bottom-left-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+  }
+
+  .ql-toolbar {
+    border-top-left-radius: 0.375rem;
+    border-top-right-radius: 0.375rem;
+    background-color: #f9fafb;
+  }
   </style>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { categoryRelative } from '~/utils/category';
+
+// Quill 實例
+let quill = null;
 
 const articleData = reactive({
     title: '',
@@ -191,6 +223,85 @@ const articleData = reactive({
 })
 const isReferral = ref(false)
 const coverUrl = ref('')
+
+// 初始化 Quill 編輯器
+onMounted(() => {
+  // 確保只在客戶端執行
+  if (process.client) {
+    // 加載 Quill CDN
+    const quillCSS = document.createElement('link');
+    quillCSS.href = 'https://cdn.quilljs.com/1.3.6/quill.snow.css';
+    quillCSS.rel = 'stylesheet';
+    document.head.appendChild(quillCSS);
+
+    const quillScript = document.createElement('script');
+    quillScript.src = 'https://cdn.quilljs.com/1.3.6/quill.min.js';
+    quillScript.onload = initQuill;
+    document.head.appendChild(quillScript);
+  }
+});
+
+// Quill 初始化狀態標誌
+let quillInitialized = false;
+
+function initQuill() {
+  // 確保只在客戶端執行
+  if (!process.client) return;
+  
+  if (quillInitialized) return;
+
+  // 確保 DOM 元素存在
+  const editorContainer = document.getElementById('quill-editor');
+  if (!editorContainer) return;
+
+  // 確保 Quill 已加載
+  if (typeof window === 'undefined' || !window.Quill) return;
+
+  quill = new window.Quill('#quill-editor', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ 'header': 1 }, { 'header': 2 }],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        [{ 'script': 'sub' }, { 'script': 'super' }],
+        [{ 'indent': '-1' }, { 'indent': '+1' }],
+        [{ 'direction': 'rtl' }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'font': [] }],
+        [{ 'align': [] }],
+        ['clean'],
+        ['link', 'image', 'video']
+      ]
+    },
+    placeholder: '請撰寫代訂服務內容...'
+  });
+
+  quillInitialized = true;
+
+  // 初始內容
+  if (quill && articleData && articleData.content) {
+    try {
+      quill.root.innerHTML = articleData.content;
+    } catch (error) {
+      console.error('設置編輯器內容錯誤：', error);
+    }
+  }
+
+  // 監聽內容變化
+  quill.on('text-change', () => {
+    try {
+      if (articleData) {
+        articleData.content = quill.root.innerHTML;
+      }
+    } catch (error) {
+      console.error('更新內容錯誤：', error);
+    }
+  });
+}
 
 const handleFileUpload = async (event) => {
   const files = event.target.files
@@ -255,17 +366,24 @@ const removeImage = (index) => {
 }
 
 const handleSubmit = async () => {
+  try {
+    // 驗證必填欄位
+    if (!articleData.title || !articleData.category) {
+      alert('請填寫必要欄位！');
+      return;
+    }
+
     await $fetch('/api/relative', {
       method: 'POST',
       body: {
         title: articleData.title,
         category: articleData.category,
-        content: articleData.content,
+        content: articleData.content || '', // 添加空字串作為默認值
         cover: articleData.cover,
         amount: articleData.amount,
         usedTimes: articleData.usedTimes,
         isReferral: isReferral.value,
-        hash: articleData.hash.split(',')
+        hash: articleData.hash ? articleData.hash.split(',') : []
       }
     })
       .then((response) => {
@@ -277,7 +395,11 @@ const handleSubmit = async () => {
         })
       })
       .catch((error) => alert(error))
+  } catch (error) {
+    console.error('提交錯誤：', error);
+    alert('提交失敗，請檢查所有欄位後重試');
   }
+}
   
   definePageMeta({
     middleware: 'auth'

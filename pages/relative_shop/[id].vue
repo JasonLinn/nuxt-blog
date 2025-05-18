@@ -68,8 +68,7 @@
           <h1 class="cupon-title break-words text-4xl font-semibold text-gray-700">
             {{ article.title }}
           </h1>
-          <div class="cupon-text">
-            {{ article.content }}
+          <div class="cupon-text" v-html="article.content">
           </div>
         </div>
         <RelativeFooter></RelativeFooter>
@@ -80,9 +79,45 @@
   .cupon-text {
     overflow-wrap: break-word;
     margin-bottom: 30px;
-    white-space: pre-line;
-    line-height: 1.3;
+    white-space: pre-wrap;
+    line-height: 1.5;
   }
+
+  /* 文章內容格式樣式 */
+  .cupon-text strong {
+    font-weight: bold;
+  }
+  
+  .cupon-text em {
+    font-style: italic;
+  }
+  
+  .cupon-text u {
+    text-decoration: underline;
+  }
+  
+  .cupon-text ol {
+    list-style-type: decimal;
+    padding-left: 1.5em;
+  }
+  
+  .cupon-text ul {
+    list-style-type: disc;
+    padding-left: 1.5em;
+  }
+  
+  .cupon-text blockquote {
+    border-left: 3px solid #ccc;
+    padding-left: 1em;
+    margin-left: 0;
+    color: #666;
+  }
+  
+  .cupon-text h1, .cupon-text h2, .cupon-text h3, .cupon-text h4, .cupon-text h5, .cupon-text h6 {
+    font-weight: bold;
+    margin: 1em 0 0.5em;
+  }
+  
   .cupon-img {
     max-width: 100%;
   }

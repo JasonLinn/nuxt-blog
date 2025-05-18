@@ -83,8 +83,7 @@
                     <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                       {{ date2LocaleString(article.updated_at) }}
                     </time> -->
-                    <p class="index-cupon-text">
-                      {{ article.content.replace(/\n/g, ' ').substring(0, 300) }}
+                    <p class="index-cupon-text" v-html="formatContent(article.content, 300)">
                     </p>
                   </div>
                   <!-- <span
@@ -221,8 +220,14 @@
     color: #272727;
     font-size: 14px;
     overflow: hidden;
-    white-space: nowrap;
+    height: 1.2em; /* 約三行文字高度 */
+    position: relative;
+    display: -webkit-box;
+    -webkit-line-clamp: 1; /* 顯示三行 */
+    -webkit-box-orient: vertical;
     text-overflow: ellipsis;
+    white-space: nowrap;
+        align-content: flex-end;
   }
   .search {
     position: relative;
@@ -346,6 +351,29 @@
       cate: selectedCate.value,
       currentPage: currentPage.value
     })
+  }
+  
+  const formatContent = (content, maxLength) => {
+    // 確保只在客戶端執行DOM操作
+    if (process.client) {
+      // 创建临时 DOM 元素来解析 HTML
+      const tempElement = document.createElement('div');
+      tempElement.innerHTML = content;
+      
+      // 获取纯文本内容
+      const textContent = tempElement.textContent || tempElement.innerText;
+      
+      // 如果纯文本长度小于限制，直接返回原始 HTML
+      if (textContent.length <= maxLength) {
+        return content;
+      }
+      
+      // 否则，返回截断的 HTML，但注意不要截断HTML标签
+      return content.substring(0, maxLength) + '...';
+    }
+    
+    // 在服务器端简单地截断
+    return content.substring(0, maxLength) + '...';
   }
   </script>
   
