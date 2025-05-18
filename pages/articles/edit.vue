@@ -121,6 +121,45 @@
                     class="articleCover w-100"
                   />
                 </div>
+                
+                <!-- 添加圖片預覽和排序功能 -->
+                <div class="mt-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">圖片預覽與排序：</label>
+                  <div class="create-img grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                    <div v-for="(url, index) in coverArray" :key="index" class="relative">
+                      <img :src="url" :alt="'圖片 ' + (index + 1)" class="w-full h-32 object-cover rounded-lg" />
+                      <div class="absolute top-2 right-2 flex gap-1">
+                        <button 
+                          @click.prevent="removeImage(index)" 
+                          class="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                          title="刪除"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div class="absolute bottom-2 right-2 flex gap-1">
+                        <button 
+                          @click.prevent="moveImage(index, 'up')" 
+                          class="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-800"
+                          :disabled="index === 0"
+                          :class="{'opacity-50 cursor-not-allowed': index === 0}"
+                          title="上移"
+                        >
+                          ↑
+                        </button>
+                        <button 
+                          @click.prevent="moveImage(index, 'down')" 
+                          class="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-800"
+                          :disabled="index === coverArray.length - 1"
+                          :class="{'opacity-50 cursor-not-allowed': index === coverArray.length - 1}"
+                          title="下移"
+                        >
+                          ↓
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </section>
 
               <section class="edit-part col-span-12">
@@ -217,8 +256,24 @@
   display: flex;
   justify-content: space-around;
 }
+
+.create-img {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.create-img img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 </style>
 <script setup>
+import { ref, onMounted, computed } from 'vue';
 import { township } from '~/utils/category';
 const route = useRoute()
 
@@ -233,6 +288,44 @@ articleData.value.adress = await articleData.value.adress.toString()
 articleData.value.township = await articleData.value.township.toString()
 articleData.value.cover = await articleData.value.cover.toString()
 articleData.value.position = await '經度：' + articleData.value.position?.lng + ' 緯度：' + articleData.value.position?.lat
+
+// 計算屬性用於圖片預覽和排序
+const coverArray = computed({
+  get: () => {
+    return articleData.value.cover ? articleData.value.cover.split(',').filter(url => url.trim()) : [];
+  },
+  set: (newArray) => {
+    articleData.value.cover = newArray.join(',');
+  }
+});
+
+// 移除圖片
+const removeImage = (index) => {
+  const newArray = [...coverArray.value];
+  newArray.splice(index, 1);
+  coverArray.value = newArray;
+  articleData.value.cover = newArray.join(',');
+};
+
+// 移動圖片順序
+const moveImage = (index, direction) => {
+  const newArray = [...coverArray.value];
+  
+  if (direction === 'up' && index > 0) {
+    // 與上一個元素交換位置
+    const temp = newArray[index];
+    newArray[index] = newArray[index - 1];
+    newArray[index - 1] = temp;
+  } else if (direction === 'down' && index < newArray.length - 1) {
+    // 與下一個元素交換位置
+    const temp = newArray[index];
+    newArray[index] = newArray[index + 1];
+    newArray[index + 1] = temp;
+  }
+  
+  coverArray.value = newArray;
+  articleData.value.cover = newArray.join(',');
+};
 
 const handleSubmit = async () => {
   console.log(articleData, 'ddddd')

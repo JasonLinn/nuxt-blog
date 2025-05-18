@@ -109,12 +109,35 @@
                   <div class="create-img mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                     <div v-for="(url, index) in articleData.cover" :key="index" class="relative">
                       <img :src="url" :alt="'圖片 ' + (index + 1)" class="w-full h-32 object-cover rounded-lg" />
-                      <button 
-                        @click.prevent="removeImage(index)" 
-                        class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
-                      >
-                        ×
-                      </button>
+                      <div class="absolute top-2 right-2 flex gap-1">
+                        <button 
+                          @click.prevent="removeImage(index)" 
+                          class="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                          title="刪除"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div class="absolute bottom-2 right-2 flex gap-1">
+                        <button 
+                          @click.prevent="moveImage(index, 'up')" 
+                          class="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-800"
+                          :disabled="index === 0"
+                          :class="{'opacity-50 cursor-not-allowed': index === 0}"
+                          title="上移"
+                        >
+                          ↑
+                        </button>
+                        <button 
+                          @click.prevent="moveImage(index, 'down')" 
+                          class="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-800"
+                          :disabled="index === articleData.cover.length - 1"
+                          :class="{'opacity-50 cursor-not-allowed': index === articleData.cover.length - 1}"
+                          title="下移"
+                        >
+                          ↓
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </section>
@@ -398,6 +421,21 @@
 
   const removeImage = (index) => {
     articleData.value.cover.splice(index, 1)
+  }
+
+  // 新增移動圖片功能
+  const moveImage = (index, direction) => {
+    if (direction === 'up' && index > 0) {
+      // 與上一個元素交換位置
+      const temp = articleData.value.cover[index];
+      articleData.value.cover[index] = articleData.value.cover[index - 1];
+      articleData.value.cover[index - 1] = temp;
+    } else if (direction === 'down' && index < articleData.value.cover.length - 1) {
+      // 與下一個元素交換位置
+      const temp = articleData.value.cover[index];
+      articleData.value.cover[index] = articleData.value.cover[index + 1];
+      articleData.value.cover[index + 1] = temp;
+    }
   }
 
   const handleFileUpload = async (event) => {
