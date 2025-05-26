@@ -204,6 +204,7 @@
     width: 100%;
     object-fit: cover;
     border-radius: 10px;
+    height: auto;
   }
   .cupon-category {
     display: inline-block;
@@ -266,7 +267,7 @@
     color: #222222;
   }
   .carousel__slide {
-    height: 165px;
+    height: 190px;
   }
   </style>
   
