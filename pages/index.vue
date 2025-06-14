@@ -6,20 +6,22 @@
           全
         </option> -->
         <option
-          v-for="cate in category" class="category-item"
+          v-for="cate in category" 
+          class="category-item"
+          :key="cate.id"
           :id="cate.id"
           :value="cate.id"
         >
           {{ cate.name }}
         </option>
       </select>
-      <select class="form-select col-4 category" name="township" id="township"  v-model="selectedTown" @change="clickTown">
-        <option :value = null>選擇地區</option>
-        <option v-for="town in township" :value="town.name">{{town.name}}</option>
+      <select class="form-select col-4 category" name="township" id="township" v-model="selectedTown" @change="clickTown">
+        <option :value="null">選擇地區</option>
+        <option v-for="town in township" :key="town.name" :value="town.name">{{ town.name }}</option>
       </select>
     </div>
     <div class="search">
-        <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText" @input="inputText">
+        <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText" @input="handleSearchInput">
         <svg
           v-if="searchText"
           @click="cleanText"
@@ -35,30 +37,31 @@
         <h2 class="tag-title">
           熱門:
         </h2>
-        <span class="hot-tag" v-for="tag in hotTag" @click="clickTag">
+        <span class="hot-tag" v-for="tag in hotTag" :key="tag" @click="clickTag(tag)">
           {{ tag }}
         </span>
       </div>
     </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
-      <div v-if="couponObject.pending">
-        <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
+      <div v-if="isLoading" class="loading-container">
+        <Icon class="h-8 w-8 text-gray-500 animate-spin" name="eos-icons:loading" />
+        <span class="ml-2 text-gray-500">載入中...</span>
       </div>
-      <template v-else>
-        <div v-if="couponObject.error">
-          <span class="text-gray-500">發生了一點錯誤，請稍後再嘗試</span>
-          <p class="my-2 text-rose-500">{{ couponObject.error }}</p>
-        </div>
-        <div v-else-if="!couponObject.data || couponObject?.data?.items.length === 0">
-          <span class="text-gray-500">目前尚無最新優惠券</span>
-        </div>
-        <div v-else class="md:border-l md:border-gray-100">
-          <div class="row">
-            <article
-              v-for="article in couponObject.data.items"
-              :key="article.id"
-              class="cupon col-md-3"
-            >
+      <div v-else-if="couponObject.error" class="error-container">
+        <span class="text-gray-500">發生了一點錯誤，請稍後再嘗試</span>
+        <p class="my-2 text-rose-500">{{ couponObject.error }}</p>
+        <button @click="retryFetch" class="retry-btn">重試</button>
+      </div>
+      <div v-else-if="!couponObject.data || couponObject?.data?.items.length === 0" class="no-data-container">
+        <span class="text-gray-500">目前尚無相關優惠券</span>
+      </div>
+      <div v-else class="md:border-l md:border-gray-100">
+        <div class="row">
+          <article
+            v-for="article in couponObject.data.items"
+            :key="article.id"
+            class="cupon col-md-3"
+          >
             <div class="cupon-wrapper">
               <NuxtLink
                 class=""
@@ -70,15 +73,16 @@
                 }"
               >
                 <Carousel>
-                  <Slide v-for="(img, index) in article.cover" :key="img">
+                  <Slide v-for="(img, index) in article.cover" :key="`${article.id}-${index}`">
                     <img
                       :alt="article.title"
                       height="165"
                       width="366"
                       format="webp"
-                      :src="img.replace('https://yilanpass.com', '.')"
+                      :src="processImageSrc(img)"
                       class="cupon-img"
                       placeholder-class="card"
+                      loading="lazy"
                     />
                   </Slide>
 
@@ -93,7 +97,7 @@
                     <span class="">{{ article.title }}</span>
                   </h2>
                   <span class="cupon-category">
-                    {{ hadleCategory(article.category) }}
+                    {{ getCategoryName(article.category) }}
                   </span>
                   <span class="cupon-category">
                     {{ article.township[0] }}
@@ -105,7 +109,7 @@
                     {{ date2LocaleString(article.updated_at) }}
                   </time> -->
                   <p class="index-cupon-text">
-                    {{ article.content.replace(/\n/g, ' ').substring(0, 300) }}
+                    {{ truncateContent(article.content) }}
                   </p>
                 </div>
                 <!-- <span
@@ -120,65 +124,72 @@
               <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
                 {{ date2LocaleString(article.updated_at) }}
               </time> -->
-            </article>
-          </div>
-          <!-- @@@@@分頁功能在此@@@@ -->
-          <nav
-            class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
-          >
-            <div class="next-page flex flex-1 justify-center sm:justify">
-              <NuxtLink
-                v-if="currentPage > 1"
-                class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-                @click="currentPage = currentPage - 1"
-                :to="{
-                  name: 'index',
-                  query: {
-                    cate: selectedCate,
-                    page: currentPage - 1
-                  }
-                }"
-              >
-                <Icon name="ri:arrow-left-s-line" />
-                {{ currentPage -1 }}
-              </NuxtLink>
-              <label class="now-page">{{ currentPage }}</label>
-              <NuxtLink
-                v-if="couponObject?.data?.items.length == 10"
-                class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-                @click="currentPage = currentPage + 1"
-                :to="{
-                  name: 'index',
-                  query: {
-                    cate: selectedCate,
-                    page: currentPage + 1
-                  }
-                }"
-              >
-              {{ currentPage +1 }}
-                <Icon name="ri:arrow-right-s-line" />
-              </NuxtLink>
-            </div>
-          </nav>
+          </article>
         </div>
-      </template>
+        <nav
+          class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
+          v-if="totalPages > 1"
+        >
+          <div class="next-page flex flex-1 justify-center sm:justify">
+            <NuxtLink
+              v-if="currentPage > 1"
+              class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+              :to="getPaginationLink(currentPage - 1)"
+            >
+              <Icon name="ri:arrow-left-s-line" />
+              {{ currentPage -1 }}
+            </NuxtLink>
+            <label class="now-page">{{ currentPage }}</label>
+            <NuxtLink
+              v-if="currentPage < totalPages"
+              class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
+              :to="getPaginationLink(currentPage + 1)"
+            >
+              {{ currentPage +1 }}
+              <Icon name="ri:arrow-right-s-line" />
+            </NuxtLink>
+          </div>
+
+        </nav>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { category, township } from '~/utils/category';
-import useCouponStore from "~~/store/coupon";
-// const handleLogout = store.resetUser;
+import { category, township } from '~/utils/category'
+import useCouponStore from "~~/store/coupon"
+
+// SEO 優化
+useSeoMeta({
+  title: '優惠券列表 - 探索最新優惠',
+  ogTitle: '優惠券列表 - 探索最新優惠',
+  description: '探索宜蘭最新的優惠券和特價活動，包含伴手禮、租車、湯屋等各類優惠',
+  ogDescription: '探索宜蘭最新的優惠券和特價活動，包含伴手禮、租車、湯屋等各類優惠',
+  keywords: '優惠券,宜蘭,伴手禮,租車,湯屋,特價,活動'
+})
 
 const route = useRoute()
-const currentCate = computed(() => route?.query?.cate)
+const router = useRouter()
+
 const searchText = ref('')
-let currentPage = ref(1)
 const selectedTown = ref(null)
 const selectedCate = ref('')
-const store = useCouponStore();
-store.fetchAndSetCoupon({selectedCate, selectedTown, currentPage, searchText})
+const isLoading = ref(false)
+
+const currentPage = computed(() => {
+  return Math.max(parseInt(route.query.page) || 1, 1)
+})
+
+onMounted(() => {
+  selectedCate.value = route.query.cate || ''
+  selectedTown.value = route.query.town || null
+  searchText.value = route.query.search || ''
+})
+
+const store = useCouponStore()
+
+// 移除直接調用，改為透過 watcher 統一處理
 const hotTag = [
   '伴手禮',
   '租車',
@@ -187,51 +198,109 @@ const hotTag = [
 
 const couponObject = computed(() => store.getCouponData)
 
+const totalPages = computed(() => {
+  return couponObject.value?.data?.pagination?.totalPages || 1
+})
 
-const date2LocaleString = (date) => {
-  return new Date(date).toLocaleString('zh-TW')
+let searchTimeout = null
+const handleSearchInput = () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    updateRoute({ search: searchText.value, page: 1 })
+  }, 500)
 }
 
-const hadleCategory = (cate) => {
-  const oringal = category.find((item) => item.id == cate)
-
-  return oringal ? oringal.name : '未分類'
+const categoryCache = new Map()
+const getCategoryName = (cateId) => {
+  if (!categoryCache.has(cateId)) {
+    const found = category.find((item) => item.id == cateId)
+    categoryCache.set(cateId, found ? found.name : '未分類')
+  }
+  return categoryCache.get(cateId)
 }
 
-const clickTag = (e) => {
-  searchText.value = e.target.textContent
+const processImageSrc = (img) => {
+  return img.replace('https://yilanpass.com', '.')
 }
 
-const inputText = () => {
-  currentPage.value = 1
+const truncateContent = (content) => {
+  return content.replace(/\n/g, ' ').substring(0, 300)
+}
+
+const updateRoute = (queryUpdates) => {
+  const newQuery = {
+    cate: selectedCate.value || undefined,
+    town: selectedTown.value || undefined,
+    search: searchText.value || undefined,
+    page: currentPage.value || undefined,
+    ...queryUpdates
+  }
+  
+  Object.keys(newQuery).forEach(key => {
+    if (newQuery[key] === undefined || newQuery[key] === null || newQuery[key] === '') {
+      delete newQuery[key]
+    }
+  })
+  
+  router.push({ name: 'index', query: newQuery })
+}
+
+const getPaginationLink = (page) => {
+  return {
+    name: 'index',
+    query: {
+      ...route.query,
+      page: page
+    }
+  }
+}
+
+const clickTag = (tag) => {
+  searchText.value = tag
+  updateRoute({ search: tag, page: 1 })
 }
 
 const cleanText = () => {
   searchText.value = ''
+  updateRoute({ search: undefined, page: 1 })
 }
 
-const clickCate = (e) => {
-  console.log(e.target, selectedCate, 'eeeee', currentCate)
-  currentPage.value = 1
-  // if (selectedCate.value == 'index') {
-  //   return
-  // }
-  navigateTo({
-    name: 'index',
-    query: { cate: selectedCate.value }
-  })
-  // navigateTo({
-  //   name: 'cate-id', params: { id: selectedCate.value }
-  // })
+const clickCate = () => {
+  updateRoute({ cate: selectedCate.value, page: 1 })
 }
 
-const clickTown = (e) => {
-  currentPage.value = 1
+const clickTown = () => {
+  updateRoute({ town: selectedTown.value, page: 1 })
+}
 
-  navigateTo({
-    name: 'index',
-    query: { cate: selectedCate.value }
-  })
+const retryFetch = () => {
+  fetchData()
+}
+
+const fetchData = async () => {
+  isLoading.value = true
+  try {
+    await store.fetchAndSetCoupon({
+      selectedCate: selectedCate.value,
+      selectedTown: selectedTown.value,
+      currentPage: currentPage.value,
+      searchText: searchText.value
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
+
+watch(() => route.query, async (newQuery) => {
+  selectedCate.value = newQuery.cate || ''
+  selectedTown.value = newQuery.town || null
+  searchText.value = newQuery.search || ''
+  
+  await fetchData()
+}, { immediate: true })
+
+const date2LocaleString = (date) => {
+  return new Date(date).toLocaleString('zh-TW')
 }
 </script>
 <style lang="scss" scoped>
@@ -240,17 +309,46 @@ const clickTown = (e) => {
 }
 .selectWrapper {
   display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 .category {
   display: flex;
   flex-direction: row;
   font-size: 16px;
-  margin: 10px 10px 10px 0;
+  margin: 10px 0;
   background-color: #fff;
   width: fit-content;
+  min-width: 150px;
 }
 .category-item {
   padding: 10px;
+}
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.error-container {
+  text-align: center;
+  padding: 40px;
+}
+.retry-btn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.retry-btn:hover {
+  background-color: #2563eb;
+}
+.no-data-container {
+  text-align: center;
+  padding: 40px;
 }
 .next-page {
   display: flex;
@@ -259,24 +357,28 @@ const clickTown = (e) => {
   font-size: 16px;
 }
 .now-page {
-  padding: 5px;
+  padding: 8px 12px;
   margin: 0 10px;
   background-color: #f1f1f1;
-  border-radius: 50%;
+  border-radius: 4px;
+  font-weight: bold;
 }
+
 .cupon {
 }
 .cupon-wrapper {
   overflow: hidden;
   margin-bottom: 20px;
+  transition: transform 0.2s ease;
 }
 .cupon-wrapper:hover {
-  // box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  transform: translateY(-2px);
 }
 .cupon-title {
   font-size: 16px;
   font-weight: 800;
   color: #613030;
+  line-height: 1.4;
 }
 .cupon-info {
   padding: 13px 8px 15px 8px;
@@ -292,17 +394,19 @@ const clickTown = (e) => {
   display: inline-block;
   object-fit: cover;
   border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+.cupon-wrapper:hover .cupon-img {
+  transform: scale(1.05);
 }
 .cupon-category {
   display: inline-block;
   font-size: 14px;
-  padding: 3px;
-  // color: rgb(117, 117, 117);
+  padding: 4px 8px;
   color: #5db0be;
   background-color: rgba(100,179,244,.1);
-  margin: 10px 0;
-  margin-left: -2px;
-  margin-right: 10px;
+  margin: 10px 5px 10px 0;
+  border-radius: 4px;
 }
 .cupon-once {
   background-color: #ffdcdc8a;
@@ -311,47 +415,106 @@ const clickTown = (e) => {
 .index-cupon-text {
   color: #272727;
   font-size: 14px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 .search {
   position: relative;
+  margin-bottom: 15px;
 }
 .searchInput {
   font-size: 16px;
   width: 100%;
+  padding-right: 35px;
 }
-.cancel-icon {
-  position: absolute;
-  right: 3px;
-  top: 6px;
-}
-.search-icon {
+.cancel-icon, .search-icon {
   position: absolute;
   right: 8px;
-  top: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 .tag-title {
   display: inline-block;
   font-size: 14px;
   font-weight: bold;
+  margin-right: 10px;
 }
 .tag-list {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 .hot-tag {
   background-color: #ffe9ac69;
   border-radius: 6px;
-  padding: 5px;
-  margin: 10px 3px;
+  padding: 6px 10px;
+  margin: 5px 5px 5px 0;
   font-size: 12px;
   display: inline-block;
   color: #222222;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.hot-tag:hover {
+  background-color: #ffe9ac;
+  transform: translateY(-1px);
+}
+
+// 響應式設計優化
+@media (max-width: 768px) {
+  .selectWrapper {
+    flex-direction: column;
+  }
+  
+  .category {
+    width: 100%;
+    margin: 5px 0;
+  }
+  
+  .pagination-info {
+    display: none;
+  }
+  
+  .cupon {
+    margin-bottom: 15px;
+  }
+  
+  .next-page {
+    font-size: 14px;
+  }
+}
+
+// 性能優化：使用 will-change 屬性
+.cupon-wrapper {
+  will-change: transform;
+}
+
+.cupon-img {
+  will-change: transform;
+}
+
+// 提升點擊體驗
+.hot-tag, .retry-btn {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .carousel__slide {
   height: 165px;
+}
+@media (max-width: 768px) {
+  .selectWrapper {
+    flex-direction: column;
+  }
+  
+  .category {
+    width: 100%;
+    margin: 5px 0;
+  }
 }
 </style>
 <style>

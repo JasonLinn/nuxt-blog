@@ -1,6 +1,19 @@
-import { Pool } from 'pg'
+import { Pool, PoolClient } from 'pg'
+
+interface HashItem {
+  id: number
+  index: string
+  hash: string
+}
+
+interface HashListItem {
+  index: string
+  hash: string
+}
 
 class HashDatabase {
+  private pool: Pool
+
   constructor() {
     this.pool = new Pool({
       connectionString: process.env.DATABASE_URL || 'postgresql://user:password@ap-southeast-1.aws.neon.tech/nuxt-marketing'
@@ -8,8 +21,8 @@ class HashDatabase {
   }
 
   // 初始化 hash 列表
-  async initializeHashList(hashList) {
-    const client = await this.pool.connect()
+  async initializeHashList(hashList: HashListItem[]): Promise<boolean> {
+    const client: PoolClient = await this.pool.connect()
     try {
       await client.query('BEGIN')
       
@@ -57,8 +70,8 @@ class HashDatabase {
   }
 
   // 獲取一個可用的 hash
-  async getAvailableHash() {
-    const client = await this.pool.connect()
+  async getAvailableHash(): Promise<HashItem | null> {
+    const client: PoolClient = await this.pool.connect()
     try {
       await client.query('BEGIN')
       
@@ -100,8 +113,8 @@ class HashDatabase {
   }
 
   // 記錄 hash 使用情況
-  async recordHashUsage(index, hash, articleId) {
-    const client = await this.pool.connect()
+  async recordHashUsage(index: string, hash: string, articleId: string): Promise<boolean> {
+    const client: PoolClient = await this.pool.connect()
     try {
       await client.query(
         'INSERT INTO used_hash (index_number, hash_value, article_id) VALUES ($1, $2, $3)',
@@ -117,8 +130,8 @@ class HashDatabase {
   }
 
   // 檢查 hash 是否已被使用
-  async isHashUsed(hashValue) {
-    const client = await this.pool.connect()
+  async isHashUsed(hashValue: string): Promise<boolean> {
+    const client: PoolClient = await this.pool.connect()
     try {
       const result = await client.query(
         'SELECT COUNT(*) FROM used_hash WHERE hash_value = $1',
@@ -131,6 +144,11 @@ class HashDatabase {
     } finally {
       client.release()
     }
+  }
+
+  // 關閉資料庫連接池
+  async close(): Promise<void> {
+    await this.pool.end()
   }
 }
 
