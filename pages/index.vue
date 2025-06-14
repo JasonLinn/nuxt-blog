@@ -465,7 +465,7 @@ const date2LocaleString = (date) => {
   
   .category {
     width: 100%;
-    margin: 5px 0;
+    margin: 5px 0 -5px 0;
   }
   
   .pagination-info {
@@ -490,16 +490,6 @@ const date2LocaleString = (date) => {
 }
 .carousel__slide {
   height: 165px;
-}
-@media (max-width: 768px) {
-  .selectWrapper {
-    flex-direction: column;
-  }
-  
-  .category {
-    width: 100%;
-    margin: 5px 0;
-  }
 }
 </style>
 <style>
