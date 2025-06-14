@@ -369,10 +369,6 @@ const date2LocaleString = (date) => {
 .cupon-wrapper {
   overflow: hidden;
   margin-bottom: 20px;
-  transition: transform 0.2s ease;
-}
-.cupon-wrapper:hover {
-  transform: translateY(-2px);
 }
 .cupon-title {
   font-size: 16px;
@@ -394,10 +390,6 @@ const date2LocaleString = (date) => {
   display: inline-block;
   object-fit: cover;
   border-radius: 10px;
-  transition: transform 0.3s ease;
-}
-.cupon-wrapper:hover .cupon-img {
-  transform: scale(1.05);
 }
 .cupon-category {
   display: inline-block;
@@ -489,14 +481,7 @@ const date2LocaleString = (date) => {
   }
 }
 
-// 性能優化：使用 will-change 屬性
-.cupon-wrapper {
-  will-change: transform;
-}
-
-.cupon-img {
-  will-change: transform;
-}
+// 移除不必要的 will-change 屬性
 
 // 提升點擊體驗
 .hot-tag, .retry-btn {
