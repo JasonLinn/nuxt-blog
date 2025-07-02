@@ -6,7 +6,7 @@
           全
         </option> -->
         <option
-          v-for="cate in category" 
+          v-for="cate in category"
           class="category-item"
           :key="cate.id"
           :id="cate.id"
@@ -71,6 +71,7 @@
                     id: article.id
                   }
                 }"
+                @click="trackCouponView(article.id)"
               >
                 <Carousel>
                   <Slide v-for="(img, index) in article.cover" :key="`${article.id}-${index}`">
@@ -185,16 +186,42 @@ onMounted(() => {
   selectedCate.value = route.query.cate || ''
   selectedTown.value = route.query.town || null
   searchText.value = route.query.search || ''
+
+  // 獲取熱門標籤
+  fetchHotTags()
 })
 
 const store = useCouponStore()
 
-// 移除直接調用，改為透過 watcher 統一處理
-const hotTag = [
-  '伴手禮',
-  '租車',
-  '湯屋'
-]
+// 熱門標籤
+const hotTag = ref(['伴手禮', '租車', '湯屋'])
+
+// 從 API 獲取熱門標籤
+const fetchHotTags = async () => {
+  try {
+    const response = await $fetch('/api/hot-tags', {
+      query: { limit: 3 }
+    })
+    if (response?.hotTags?.length) {
+      hotTag.value = response.hotTags
+    }
+  } catch (error) {
+    console.error('獲取熱門標籤失敗:', error)
+    // 保持預設值
+  }
+}
+
+// 記錄優惠券點擊（瀏覽量）
+const trackCouponView = async (couponId) => {
+  try {
+    await $fetch(`/api/articles/view/${couponId}`, {
+      method: 'POST'
+    })
+  } catch (error) {
+    console.error('記錄瀏覽量失敗:', error)
+    // 不影響使用者體驗，靜默失敗
+  }
+}
 
 const couponObject = computed(() => store.getCouponData)
 
