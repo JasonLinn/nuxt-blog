@@ -89,7 +89,7 @@ export const referral = [
   {code:'2025KW4',name:'東昇咖啡備品'},
   {code:'2025L4M',name:'浪宜夏'},
   {code:'2025L9J',name:'浪漫希臘民宿'},
-  {code:'2025LGX',name:''},
+  {code:'2025LGX',name:'好好民宿'},
   {code:'2025LNF',name:''},
   {code:'2025LTF',name:''},
   {code:'2025LXM',name:''},
