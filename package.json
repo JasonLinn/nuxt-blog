@@ -8,7 +8,10 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "eslint --ext .js,.vue ."
+    "lint": "eslint --ext .js,.vue .",
+    "db:init": "node scripts/init-homestays-db.cjs",
+    "db:migrate": "node scripts/run-migration.js",
+    "db:migrate-homestays": "node scripts/run-homestays-migration.cjs"
   },
   "devDependencies": {
     "@neondatabase/serverless": "^0.6.0",
@@ -35,6 +38,7 @@
     "@nuxtjs/ngrok": "^3.0.1",
     "@pinia/nuxt": "^0.5.1",
     "axios": "^1.7.2",
+    "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.3",
     "jsbarcode": "^3.11.6",
     "jwt-decode": "^4.0.0",
@@ -42,7 +46,8 @@
     "pinia": "^2.1.7",
     "qs": "^6.13.0",
     "radix-vue": "^1.9.7",
-    "sass": "^1.77.4"
+    "sass": "^1.77.4",
+    "ws": "^8.18.3"
   },
   "overrides": {
     "vue": "latest"
