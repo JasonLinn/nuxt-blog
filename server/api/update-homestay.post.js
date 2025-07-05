@@ -39,6 +39,20 @@ export default defineEventHandler(async (event) => {
     try {
       await client.query('BEGIN');
 
+      // 處理圖片資料 - 支援新的 images 陣列和舊的 image_url
+      let finalImages = [];
+      let primaryImageUrl = '';
+      
+      if (updateData.images && Array.isArray(updateData.images) && updateData.images.length > 0) {
+        // 如果有新的圖片陣列，使用它
+        finalImages = updateData.images.filter(url => url && url.trim());
+        primaryImageUrl = finalImages[0] || '';
+      } else if (updateData.image_url) {
+        // 如果沒有新的圖片陣列但有舊的單一圖片URL，使用它
+        finalImages = [updateData.image_url];
+        primaryImageUrl = updateData.image_url;
+      }
+
       // 更新民宿基本資訊
       const updateHomestayQuery = `
         UPDATE homestays 
@@ -47,20 +61,22 @@ export default defineEventHandler(async (event) => {
           location = $2,
           city = $3,
           image_url = $4,
-          website = $5,
-          phone = $6,
-          capacity_description = $7,
-          min_guests = $8,
-          max_guests = $9,
+          images = $5,
+          website = $6,
+          phone = $7,
+          capacity_description = $8,
+          min_guests = $9,
+          max_guests = $10,
           updated_at = CURRENT_TIMESTAMP
-        WHERE id = $10 AND available = true
+        WHERE id = $11 AND status = 'approved'
       `;
 
       const homestayValues = [
         updateData.name,
         updateData.location,
         updateData.city || null,
-        updateData.image_url || null,
+        primaryImageUrl || null,
+        finalImages, // PostgreSQL 陣列
         updateData.website || null,
         updateData.phone || null,
         updateData.capacity_description || null,
@@ -78,6 +94,23 @@ export default defineEventHandler(async (event) => {
         });
       }
 
+      // 處理環境類型更新
+      if (updateData.types && Array.isArray(updateData.types)) {
+        // 先刪除現有的類型
+        await client.query('DELETE FROM homestay_types WHERE homestay_id = $1', [homestayId]);
+        
+        // 插入新的類型
+        if (updateData.types.length > 0) {
+          const typeQueries = updateData.types.map(type => 
+            client.query(
+              'INSERT INTO homestay_types (homestay_id, type_name) VALUES ($1, $2)',
+              [homestayId, type]
+            )
+          );
+          await Promise.all(typeQueries);
+        }
+      }
+
       // 提交交易
       await client.query('COMMIT');
 
@@ -90,10 +123,12 @@ export default defineEventHandler(async (event) => {
           city: updateData.city,
           phone: updateData.phone,
           website: updateData.website,
-          image_url: updateData.image_url,
+          image_url: primaryImageUrl,
+          images: finalImages,
           capacity_description: updateData.capacity_description,
           min_guests: updateData.min_guests,
-          max_guests: updateData.max_guests
+          max_guests: updateData.max_guests,
+          types: updateData.types || []
         }
       };
 

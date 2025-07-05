@@ -102,16 +102,99 @@
               />
             </div>
 
+            <!-- 更新圖片編輯區塊 -->
             <div class="form-group">
-              <label class="form-label">圖片網址</label>
-              <input
-                v-model="editData.image_url"
-                type="url"
-                class="form-input"
-                :disabled="saving"
-              />
-              <div v-if="editData.image_url" class="image-preview">
-                <img :src="editData.image_url" :alt="editData.name" />
+              <label class="form-label">民宿圖片</label>
+              
+              <!-- 圖片網址輸入 (逗點分隔) -->
+              <div class="mt-1 w-full">
+                <textarea
+                  v-model="editData.images_string"
+                  placeholder="請輸入圖片網址，多張圖片用逗點分隔&#10;例如：https://example.com/image1.jpg,https://example.com/image2.jpg"
+                  class="form-textarea"
+                  :disabled="saving"
+                  rows="3"
+                />
+                <div class="input-hint">
+                  支援多張圖片，請用逗點分隔網址。第一張圖片將作為主要圖片顯示。
+                </div>
+              </div>
+              
+              <!-- 圖片預覽與排序功能 -->
+              <div v-if="imagesArray && imagesArray.length > 0" class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">圖片預覽與排序：</label>
+                <div class="images-grid">
+                  <div v-for="(url, index) in imagesArray" :key="index" class="image-item">
+                    <img :src="url" :alt="'民宿圖片 ' + (index + 1)" class="preview-image" />
+                    
+                    <!-- 主要圖片標籤 -->
+                    <div v-if="index === 0" class="main-image-badge">
+                      主要圖片
+                    </div>
+                    
+                    <!-- 操作按鈕 -->
+                    <div class="image-controls">
+                      <!-- 刪除按鈕 -->
+                      <button 
+                        @click.prevent="removeImage(index)" 
+                        class="control-btn delete-btn"
+                        :disabled="saving"
+                        title="刪除圖片"
+                      >
+                        ×
+                      </button>
+                      
+                      <!-- 排序按鈕 -->
+                      <div class="sort-controls">
+                        <button 
+                          @click.prevent="moveImage(index, 'up')" 
+                          class="control-btn sort-btn"
+                          :disabled="index === 0 || saving"
+                          :class="{'opacity-50 cursor-not-allowed': index === 0}"
+                          title="向前移動"
+                        >
+                          ↑
+                        </button>
+                        <button 
+                          @click.prevent="moveImage(index, 'down')" 
+                          class="control-btn sort-btn"
+                          :disabled="index === imagesArray.length - 1 || saving"
+                          :class="{'opacity-50 cursor-not-allowed': index === imagesArray.length - 1}"
+                          title="向後移動"
+                        >
+                          ↓
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- 圖片順序顯示 -->
+                    <div class="image-order">
+                      {{ index + 1 }}
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="mt-2 text-sm text-gray-600">
+                  總共 {{ imagesArray.length }} 張圖片。拖曳可調整順序，第一張為主要圖片。
+                </div>
+              </div>
+              
+              <!-- 保留舊的單一圖片輸入 (向後相容) -->
+              <div v-if="!imagesArray || imagesArray.length === 0" class="mt-4">
+                <label class="form-label">單一圖片網址 (舊格式)</label>
+                <input
+                  v-model="editData.image_url"
+                  type="url"
+                  class="form-input"
+                  :disabled="saving"
+                  placeholder="https://example.com/image.jpg"
+                />
+                <div v-if="editData.image_url" class="image-preview">
+                  <img :src="editData.image_url" :alt="editData.name" />
+                </div>
+                <div class="input-hint">
+                  建議使用上方的多圖片功能，此欄位僅供向後相容。
+                </div>
               </div>
             </div>
 
@@ -281,7 +364,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { navigateTo } from 'nuxt/app';
 
 // SEO設定
@@ -304,6 +387,8 @@ const editData = ref({
   phone: '',
   website: '',
   image_url: '',
+  images: [],
+  images_string: '',
   capacity_description: '',
   min_guests: null,
   max_guests: null,
@@ -317,10 +402,51 @@ const editData = ref({
   }
 });
 
+// 計算屬性用於圖片預覽和排序
+const imagesArray = computed({
+  get: () => {
+    return editData.value.images_string ? 
+      editData.value.images_string.split(',').map(url => url.trim()).filter(url => url) : 
+      [];
+  },
+  set: (newArray) => {
+    editData.value.images_string = newArray.join(',');
+    editData.value.images = newArray;
+  }
+});
+
 const message = ref({
   text: '',
   type: ''
 });
+
+// 移除圖片
+const removeImage = (index) => {
+  const newArray = [...imagesArray.value];
+  newArray.splice(index, 1);
+  imagesArray.value = newArray;
+  showMessage('圖片已移除', 'info');
+};
+
+// 移動圖片順序
+const moveImage = (index, direction) => {
+  const newArray = [...imagesArray.value];
+  
+  if (direction === 'up' && index > 0) {
+    // 與上一個元素交換位置
+    const temp = newArray[index];
+    newArray[index] = newArray[index - 1];
+    newArray[index - 1] = temp;
+  } else if (direction === 'down' && index < newArray.length - 1) {
+    // 與下一個元素交換位置
+    const temp = newArray[index];
+    newArray[index] = newArray[index + 1];
+    newArray[index + 1] = temp;
+  }
+  
+  imagesArray.value = newArray;
+  showMessage(`圖片已${direction === 'up' ? '前移' : '後移'}`, 'info');
+};
 
 // 可選擇的環境類型
 const availableTypes = [
@@ -352,6 +478,16 @@ const loadHomestayData = async () => {
     if (response.success) {
       const data = response.bnb;
       
+      // 處理圖片資料 - 優先使用 images 陣列
+      let images = [];
+      if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+        images = data.images;
+      } else if (data.image_urls && Array.isArray(data.image_urls) && data.image_urls.length > 0) {
+        images = data.image_urls;
+      } else if (data.image_url) {
+        images = [data.image_url];
+      }
+      
       // 設定編輯資料
       editData.value = {
         name: data.name || '',
@@ -359,7 +495,9 @@ const loadHomestayData = async () => {
         city: data.address || '',
         phone: data.contact?.phone || '',
         website: data.contact?.website || '',
-        image_url: data.image_urls?.[0] || '',
+        image_url: images[0] || '',
+        images: images,
+        images_string: images.join(','),
         capacity_description: data.description || '',
         min_guests: data.min_guests || null,
         max_guests: data.max_guests || null,
@@ -410,8 +548,12 @@ const handleUpdate = async () => {
   try {
     saving.value = true;
     
+    // 更新 images 陣列
+    editData.value.images = imagesArray.value;
+    
     const updateData = {
-      ...editData.value
+      ...editData.value,
+      images: editData.value.images
     };
 
     const response = await $fetch('/api/update-homestay', {
@@ -790,5 +932,129 @@ onMounted(() => {
   .form-actions {
     flex-direction: column;
   }
+}
+
+// 新增圖片相關樣式
+.input-hint {
+  font-size: 12px;
+  color: #718096;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.image-item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: white;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: #667eea;
+  }
+}
+
+.preview-image {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+.main-image-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.image-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.control-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.delete-btn {
+  background: #e53e3e;
+  color: white;
+  font-size: 16px;
+  
+  &:hover:not(:disabled) {
+    background: #c53030;
+    transform: scale(1.1);
+  }
+}
+
+.sort-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sort-btn {
+  background: #4a5568;
+  color: white;
+  font-size: 12px;
+  
+  &:hover:not(:disabled) {
+    background: #2d3748;
+    transform: scale(1.1);
+  }
+}
+
+.image-order {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
 }
 </style> 
