@@ -89,7 +89,7 @@ const useHomestayStore = defineStore("homestayStore", {
               area: homestay.location || '未知地區',
               address: homestay.city || '',
               description: homestay.capacity_description || '暫無描述',
-              image_urls: homestay.image_url ? [homestay.image_url] : [],
+              image_urls: homestay.image_urls && homestay.image_urls.length > 0 ? homestay.image_urls : (homestay.image_url ? [homestay.image_url] : []),
               min_guests: homestay.min_guests || null,
               max_guests: homestay.max_guests || null,
               features: {

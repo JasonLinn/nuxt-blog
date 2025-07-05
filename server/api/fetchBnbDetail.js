@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
         h.location,
         h.city,
         h.image_url,
+        h.images,
         h.website,
         h.phone,
         h.capacity_description,
@@ -89,6 +90,16 @@ export default defineEventHandler(async (event) => {
 
     console.log('類型數量:', typesResult.rows.length, '價格選項數量:', pricingResult.rows.length);
 
+    // 處理圖片資料 - 優先使用 images 陣列
+    let imageUrls = [];
+    if (homestay.images && Array.isArray(homestay.images) && homestay.images.length > 0) {
+      // 使用新的 images 陣列，過濾掉空值
+      imageUrls = homestay.images.filter(url => url && url.trim());
+    } else if (homestay.image_url) {
+      // 備用：使用舊的 image_url 欄位
+      imageUrls = [homestay.image_url];
+    }
+
     // 轉換為舊格式以相容現有頁面
     const bnb = {
       id: homestay.id,
@@ -96,7 +107,7 @@ export default defineEventHandler(async (event) => {
       area: homestay.location,
       address: homestay.city,
       description: homestay.capacity_description,
-      image_urls: [homestay.image_url],
+      image_urls: imageUrls,
       features: {
         peopleTypes: [homestay.capacity_description],
         environmentTypes: typesResult.rows.map(row => row.type_name)

@@ -109,6 +109,7 @@ export default defineEventHandler(async (event) => {
         h.location,
         h.city,
         h.image_url,
+        h.images,
         h.website,
         h.phone,
         h.capacity_description,
@@ -221,11 +222,24 @@ export default defineEventHandler(async (event) => {
     }
 
     // 合併資料
-    const enrichedHomestays = filteredHomestays.map(homestay => ({
-      ...homestay,
-      types: typesMap[homestay.id] || [],
-      pricing_options: pricingMap[homestay.id] || []
-    }));
+    const enrichedHomestays = filteredHomestays.map(homestay => {
+      // 處理圖片資料 - 優先使用 images 陣列
+      let imageUrls = [];
+      if (homestay.images && Array.isArray(homestay.images) && homestay.images.length > 0) {
+        // 使用新的 images 陣列，過濾掉空值
+        imageUrls = homestay.images.filter(url => url && url.trim());
+      } else if (homestay.image_url) {
+        // 備用：使用舊的 image_url 欄位
+        imageUrls = [homestay.image_url];
+      }
+
+      return {
+        ...homestay,
+        image_urls: imageUrls, // 新增 image_urls 欄位用於前端
+        types: typesMap[homestay.id] || [],
+        pricing_options: pricingMap[homestay.id] || []
+      };
+    });
 
     const finalResult = {
       homestays: enrichedHomestays,

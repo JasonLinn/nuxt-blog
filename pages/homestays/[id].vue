@@ -48,18 +48,104 @@
           
           <!-- 民宿圖片 -->
           <div class="homestay-image-container">
-            <div v-if="bnb.image_urls && bnb.image_urls.length > 0" class="homestay-image">
-              <img :src="bnb.image_urls[0]" :alt="bnb.name" class="main-image" />
-              <div class="image-overlay">
-                <div class="image-count" v-if="bnb.image_urls.length > 1">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
-                    <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+            <div v-if="bnb.image_urls && bnb.image_urls.length > 0" class="image-gallery">
+              <!-- 主圖展示 -->
+              <div class="main-image-container">
+                <img 
+                  :src="bnb.image_urls[currentMainImageIndex]" 
+                  :alt="`${bnb.name} - 主圖`" 
+                  class="main-image" 
+                  @click="openLightbox(currentMainImageIndex)"
+                />
+                
+                <!-- 導航按鈕 -->
+                <button 
+                  v-if="bnb.image_urls.length > 1"
+                  @click="prevMainImage"
+                  class="image-nav-btn prev-main-btn"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
                   </svg>
-                  {{ bnb.image_urls.length }} 張照片
+                </button>
+                
+                <button 
+                  v-if="bnb.image_urls.length > 1"
+                  @click="nextMainImage"
+                  class="image-nav-btn next-main-btn"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+                  </svg>
+                </button>
+                
+                <!-- 圖片資訊覆層 -->
+                <div class="image-overlay">
+                  <div class="image-info">
+                    <div class="image-count">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                        <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                      </svg>
+                      {{ currentMainImageIndex + 1 }} / {{ bnb.image_urls.length }}
+                    </div>
+                    <button class="fullscreen-btn" @click="openLightbox(currentMainImageIndex)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5M.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5"/>
+                      </svg>
+                      檢視大圖
+                    </button>
+                  </div>
                 </div>
               </div>
+              
+              <!-- 縮圖導航 -->
+              <div v-if="bnb.image_urls.length > 1" class="thumbnail-gallery">
+                <div class="thumbnail-container">
+                  <div 
+                    v-for="(imageUrl, index) in bnb.image_urls" 
+                    :key="index"
+                    class="thumbnail-item"
+                    :class="{ 'active': index === currentMainImageIndex }"
+                    @click="setMainImage(index)"
+                  >
+                    <img 
+                      :src="imageUrl" 
+                      :alt="`${bnb.name} - 縮圖 ${index + 1}`" 
+                      class="thumbnail-image"
+                    />
+                    <div class="thumbnail-overlay">
+                      <div class="thumbnail-number">{{ index + 1 }}</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 縮圖導航按鈕 -->
+                <button 
+                  v-if="showThumbnailNav.prev"
+                  @click="scrollThumbnails('prev')"
+                  class="thumbnail-nav-btn prev-thumb-btn"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+                  </svg>
+                </button>
+                
+                <button 
+                  v-if="showThumbnailNav.next"
+                  @click="scrollThumbnails('next')"
+                  class="thumbnail-nav-btn next-thumb-btn"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+                  </svg>
+                </button>
+              </div>
+              
+
             </div>
+            
+            <!-- 沒有圖片的情況 -->
             <div v-else class="no-image">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
@@ -243,11 +329,20 @@
         </div>
       </div>
     </div>
+
+    <!-- EasyLightbox 組件 -->
+    <VueEasyLightbox
+      v-if="lightboxVisible"
+      :imgs="lightboxImages"
+      :index="lightboxIndex"
+      :visible="lightboxVisible"
+      @hide="lightboxVisible = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, onUnmounted } from 'vue';
 import { useRoute } from 'nuxt/app';
 import useHomestayStore from '~/store/homestay.js';
 
@@ -258,12 +353,74 @@ const bnb = ref(null);
 const loading = ref(true);
 const error = ref(null);
 
+// 圖片畫廊相關狀態
+const currentMainImageIndex = ref(0);
+const lightboxVisible = ref(false);
+const lightboxIndex = ref(0);
+
+// 縮圖導航狀態
+const showThumbnailNav = ref({
+  prev: false,
+  next: false
+});
+
 // 使用 homestay store
 const homestayStore = useHomestayStore();
 
-// 調試信息
-console.log('路由參數:', route.params);
-console.log('民宿ID:', bnbId);
+// 計算 lightbox 圖片陣列
+const lightboxImages = computed(() => {
+  if (!bnb.value?.image_urls) return [];
+  return bnb.value.image_urls.map(url => ({ src: url }));
+});
+
+// 圖片導航函數
+const nextMainImage = () => {
+  if (bnb.value?.image_urls && bnb.value.image_urls.length > 1) {
+    currentMainImageIndex.value = (currentMainImageIndex.value + 1) % bnb.value.image_urls.length;
+  }
+};
+
+const prevMainImage = () => {
+  if (bnb.value?.image_urls && bnb.value.image_urls.length > 1) {
+    currentMainImageIndex.value = currentMainImageIndex.value === 0 
+      ? bnb.value.image_urls.length - 1 
+      : currentMainImageIndex.value - 1;
+  }
+};
+
+const setMainImage = (index) => {
+  currentMainImageIndex.value = index;
+};
+
+// Lightbox 控制函數
+const openLightbox = (index) => {
+  lightboxIndex.value = index;
+  lightboxVisible.value = true;
+};
+
+// 縮圖滾動控制
+const scrollThumbnails = (direction) => {
+  // 這裡可以實現縮圖滾動邏輯
+  // 暫時保持簡單實現
+  if (direction === 'next') {
+    nextMainImage();
+  } else {
+    prevMainImage();
+  }
+};
+
+// 鍵盤導航支援
+const handleKeydown = (event) => {
+  if (!bnb.value?.image_urls) return;
+  
+  if (event.key === 'ArrowLeft') {
+    prevMainImage();
+  } else if (event.key === 'ArrowRight') {
+    nextMainImage();
+  } else if (event.key === 'Escape') {
+    lightboxVisible.value = false;
+  }
+};
 
 // 獲取民宿詳細資料
 const fetchBnbDetail = async () => {
@@ -319,7 +476,19 @@ const fetchBnbDetail = async () => {
 onMounted(() => {
   console.log('組件已掛載，開始獲取數據');
   fetchBnbDetail();
+  
+  // 添加鍵盤事件監聽器
+  window.addEventListener('keydown', handleKeydown);
 });
+
+// 組件卸載時清理事件監聽器
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
+});
+
+// 調試信息
+console.log('路由參數:', route.params);
+console.log('民宿ID:', bnbId);
 </script>
 
 <style lang="scss" scoped>
@@ -540,12 +709,20 @@ onMounted(() => {
   position: relative;
 }
 
-.homestay-image {
+.image-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// 主圖容器
+.main-image-container {
   position: relative;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease;
+  cursor: pointer;
   
   &:hover {
     transform: translateY(-5px);
@@ -554,23 +731,84 @@ onMounted(() => {
 
 .main-image {
   width: 100%;
-  height: 300px;
+  height: 400px;
   object-fit: cover;
   display: block;
+  transition: transform 0.3s ease;
   
   @media (max-width: 768px) {
     height: 250px;
   }
+  
+  &:hover {
+    transform: scale(1.02);
+  }
 }
 
+// 主圖導航按鈕
+.image-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 5;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
+    opacity: 1;
+    
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.prev-main-btn {
+  left: 16px;
+}
+
+.next-main-btn {
+  right: 16px;
+}
+
+.main-image-container:hover .image-nav-btn {
+  opacity: 1;
+}
+
+// 圖片資訊覆層
 .image-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
   padding: 20px;
   color: white;
+}
+
+.image-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .image-count {
@@ -581,20 +819,179 @@ onMounted(() => {
   font-weight: 500;
 }
 
-.no-image {
+.fullscreen-btn {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+}
+
+// 縮圖畫廊
+.thumbnail-gallery {
+  position: relative;
+  padding: 0 40px;
+  
+  @media (max-width: 768px) {
+    padding: 0 30px;
+  }
+}
+
+.thumbnail-container {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 8px;
+  
+  // 隱藏滾動條但保持滾動功能
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+    
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}
+
+.thumbnail-item {
+  position: relative;
+  flex: 0 0 80px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &.active {
+    border-color: #3498db;
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    flex: 0 0 60px;
+    height: 45px;
+  }
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.thumbnail-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
   align-items: center;
   justify-content: center;
-  height: 300px;
-  background: #f8f9fa;
-  border: 2px dashed #dee2e6;
-  border-radius: 16px;
-  color: #6c757d;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.thumbnail-item:hover .thumbnail-overlay {
+  opacity: 1;
+}
+
+.thumbnail-item.active .thumbnail-overlay {
+  opacity: 0;
+}
+
+.thumbnail-number {
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 4px;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 縮圖導航按鈕
+.thumbnail-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   
-  p {
-    margin-top: 10px;
-    font-size: 16px;
+  &:hover {
+    background: white;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.prev-thumb-btn {
+  left: 8px;
+}
+
+.next-thumb-btn {
+  right: 8px;
+}
+
+
+
+.homestay-image {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
   }
 }
 
