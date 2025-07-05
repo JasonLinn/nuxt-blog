@@ -182,20 +182,7 @@
                 </div>
               </div>
               
-              <!-- 批量輸入區域 (保留原功能) -->
-              <div class="batch-input-section">
-                <label class="upload-label">批量輸入 (進階)</label>
-                <textarea
-                  v-model="editData.images_string"
-                  placeholder="可直接貼上多個圖片網址，用逗點分隔&#10;例如：https://example.com/image1.jpg,https://example.com/image2.jpg"
-                  class="form-textarea"
-                  :disabled="saving"
-                  rows="3"
-                />
-                <div class="upload-hint">
-                  進階功能：可直接貼上多個圖片URL，用逗點分隔
-                </div>
-              </div>
+
               
               <!-- 圖片預覽與排序功能 -->
               <div v-if="imagesArray && imagesArray.length > 0" class="mt-4">
@@ -524,7 +511,6 @@ const editData = ref({
   },
   image_url: '',
   images: [], // 新增 images 陣列
-  images_string: '', // 新增用於編輯的字串格式
   capacity_description: '',
   min_guests: null,
   max_guests: null,
@@ -543,12 +529,9 @@ const editData = ref({
 // 計算屬性用於圖片預覽和排序
 const imagesArray = computed({
   get: () => {
-    return editData.value.images_string ? 
-      editData.value.images_string.split(',').map(url => url.trim()).filter(url => url) : 
-      [];
+    return editData.value.images || [];
   },
   set: (newArray) => {
-    editData.value.images_string = newArray.join(',');
     editData.value.images = newArray;
   }
 });
@@ -758,7 +741,6 @@ const setupEditDataFromAuth = (homestayData) => {
       },
       image_url: images[0] || '',
       images: images,
-      images_string: images.join(','),
       capacity_description: homestayData.capacity_description || '',
       min_guests: homestayData.min_guests || null,
       max_guests: homestayData.max_guests || null,
