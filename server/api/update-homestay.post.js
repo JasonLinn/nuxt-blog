@@ -90,8 +90,8 @@ export default defineEventHandler(async (event) => {
         updateData.capacity_description || null,
         updateData.min_guests || null,
         updateData.max_guests || null,
-        updateData.theme_features || [],
-        updateData.service_amenities || [],
+        JSON.stringify(updateData.theme_features || []),
+        JSON.stringify(updateData.service_amenities || []),
         homestayId
       ];
 

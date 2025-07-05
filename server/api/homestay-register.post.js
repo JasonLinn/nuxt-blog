@@ -148,8 +148,8 @@ export default defineEventHandler(async (event) => {
         capacity_description || null,
         min_guests || null,
         max_guests || null,
-        theme_features || [],
-        service_amenities || [],
+        JSON.stringify(theme_features || []),
+        JSON.stringify(service_amenities || []),
         email,
         passwordHash
       ];
