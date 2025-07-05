@@ -60,6 +60,13 @@ export default defineEventHandler(async (event) => {
 
     const homestay = result.rows[0];
 
+    // 調試：檢查從資料庫讀取的特色資料
+    console.log('從資料庫讀取的民宿資料:');
+    console.log('theme_features:', homestay.theme_features);
+    console.log('service_amenities:', homestay.service_amenities);
+    console.log('theme_features type:', typeof homestay.theme_features);
+    console.log('service_amenities type:', typeof homestay.service_amenities);
+
     // 獲取民宿類型
     const typesQuery = `
       SELECT type_name 

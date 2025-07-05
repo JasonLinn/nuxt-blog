@@ -25,6 +25,13 @@ export default defineEventHandler(async (event) => {
     const homestayId = decoded.data.id;
     const updateData = await readBody(event);
 
+    // 調試：檢查接收到的特色資料
+    console.log('接收到的更新資料:');
+    console.log('theme_features:', updateData.theme_features);
+    console.log('service_amenities:', updateData.service_amenities);
+    console.log('theme_features type:', typeof updateData.theme_features);
+    console.log('service_amenities type:', typeof updateData.service_amenities);
+
     // 驗證必要欄位
     if (!updateData.name || !updateData.location) {
       throw createError({
