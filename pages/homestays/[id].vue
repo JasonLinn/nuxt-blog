@@ -227,16 +227,19 @@
           </div>
 
           <!-- 主題特色 -->
-          <div v-if="bnb.features && bnb.features.themeFeatures && bnb.features.themeFeatures.length > 0" class="info-card compact">
+          <div class="info-card compact">
             <div class="card-header">
               <div class="card-icon">🏠</div>
               <h3 class="card-title">主題特色</h3>
             </div>
             <div class="card-content">
-              <div class="tag-container">
+              <div v-if="bnb.features && bnb.features.themeFeatures && bnb.features.themeFeatures.length > 0" class="tag-container">
                 <div v-for="(feature, index) in bnb.features.themeFeatures" :key="index" class="feature-tag theme">
                   {{ feature }}
                 </div>
+              </div>
+              <div v-else class="no-data">
+                <p>暫無主題特色資訊</p>
               </div>
             </div>
           </div>
@@ -244,16 +247,19 @@
 
 
           <!-- 服務設施 -->
-          <div v-if="bnb.features && bnb.features.serviceAmenities && bnb.features.serviceAmenities.length > 0" class="info-card compact">
+          <div class="info-card compact">
             <div class="card-header">
               <div class="card-icon">🎯</div>
               <h3 class="card-title">服務設施</h3>
             </div>
             <div class="card-content">
-              <div class="tag-container">
+              <div v-if="bnb.features && bnb.features.serviceAmenities && bnb.features.serviceAmenities.length > 0" class="tag-container">
                 <div v-for="(service, index) in bnb.features.serviceAmenities" :key="index" class="feature-tag service">
                   {{ service }}
                 </div>
+              </div>
+              <div v-else class="no-data">
+                <p>暫無服務設施資訊</p>
               </div>
             </div>
           </div>
@@ -1127,9 +1133,37 @@ console.log('民宿ID:', bnbId);
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   &.environment {
     background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+    }
+  }
+  
+  &.theme {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+  }
+  
+  &.service {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #333;
+    box-shadow: 0 2px 8px rgba(252, 182, 159, 0.3);
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(252, 182, 159, 0.4);
+    }
   }
 }
 
