@@ -64,11 +64,14 @@ export default defineEventHandler(async (event) => {
           images = $5,
           website = $6,
           phone = $7,
-          capacity_description = $8,
-          min_guests = $9,
-          max_guests = $10,
+          social_line = $8,
+          social_instagram = $9,
+          social_facebook = $10,
+          capacity_description = $11,
+          min_guests = $12,
+          max_guests = $13,
           updated_at = CURRENT_TIMESTAMP
-        WHERE id = $11 AND status = 'approved'
+        WHERE id = $14 AND status = 'approved'
       `;
 
       const homestayValues = [
@@ -79,6 +82,9 @@ export default defineEventHandler(async (event) => {
         finalImages, // PostgreSQL 陣列
         updateData.website || null,
         updateData.phone || null,
+        updateData.social?.line || null,
+        updateData.social?.instagram || null,
+        updateData.social?.facebook || null,
         updateData.capacity_description || null,
         updateData.min_guests || null,
         updateData.max_guests || null,
@@ -123,6 +129,7 @@ export default defineEventHandler(async (event) => {
           city: updateData.city,
           phone: updateData.phone,
           website: updateData.website,
+          social: updateData.social || {},
           image_url: primaryImageUrl,
           images: finalImages,
           capacity_description: updateData.capacity_description,

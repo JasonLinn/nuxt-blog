@@ -35,6 +35,9 @@ export default defineEventHandler(async (event) => {
         h.images,
         h.website,
         h.phone,
+        h.social_line,
+        h.social_instagram,
+        h.social_facebook,
         h.capacity_description,
         h.min_guests,
         h.max_guests,
@@ -121,7 +124,9 @@ export default defineEventHandler(async (event) => {
       contact: {
         phone: homestay.phone,
         website: homestay.website,
-        line: null
+        line: homestay.social_line,
+        instagram: homestay.social_instagram,
+        facebook: homestay.social_facebook
       },
       // 新增欄位
       rating: homestay.rating,

@@ -1,4 +1,4 @@
-import { pool } from '@/server/utils/db'
+import { couponPool } from '../../utils/coupon-db.js'
 
 export default defineEventHandler(async (event) => {
   if (event.context?.auth?.user?.id !== 1) {

@@ -43,7 +43,7 @@
       </div>
     </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
-      <div v-if="isLoading" class="loading-container">
+      <div v-if="couponObject.pending" class="loading-container">
         <Icon class="h-8 w-8 text-gray-500 animate-spin" name="eos-icons:loading" />
         <span class="ml-2 text-gray-500">載入中...</span>
       </div>
@@ -176,7 +176,6 @@ const router = useRouter()
 const searchText = ref('')
 const selectedTown = ref(null)
 const selectedCate = ref('')
-const isLoading = ref(false)
 
 const currentPage = computed(() => {
   return Math.max(parseInt(route.query.page) || 1, 1)
@@ -305,7 +304,6 @@ const retryFetch = () => {
 }
 
 const fetchData = async () => {
-  isLoading.value = true
   try {
     await store.fetchAndSetCoupon({
       selectedCate: selectedCate.value,
@@ -313,8 +311,8 @@ const fetchData = async () => {
       currentPage: currentPage.value,
       searchText: searchText.value
     })
-  } finally {
-    isLoading.value = false
+  } catch (error) {
+    console.error('載入優惠券失敗:', error)
   }
 }
 

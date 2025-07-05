@@ -285,6 +285,20 @@
                     <a :href="bnb.contact.line" target="_blank" class="contact-link">加入LINE</a>
                   </div>
                 </div>
+                <div v-if="bnb.contact.instagram" class="contact-item">
+                  <div class="contact-icon">📷</div>
+                  <div class="contact-info">
+                    <div class="contact-label">Instagram</div>
+                    <a :href="bnb.contact.instagram" target="_blank" class="contact-link">關注IG</a>
+                  </div>
+                </div>
+                <div v-if="bnb.contact.facebook" class="contact-item">
+                  <div class="contact-icon">📘</div>
+                  <div class="contact-info">
+                    <div class="contact-label">Facebook</div>
+                    <a :href="bnb.contact.facebook" target="_blank" class="contact-link">前往粉專</a>
+                  </div>
+                </div>
               </div>
               <div v-else class="no-data">
                 <p>暫無聯絡資訊</p>

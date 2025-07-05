@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 
 const initState = {
   couponData: {
-    peding: null,
+    pending: true,  // 初始為載入狀態
     data: null,
     error: null
   },
@@ -10,9 +10,9 @@ const initState = {
   township: [],
   searchText: null,
   currentPage: 0,
-  peding: null,
-    data: null,
-    error: null
+  pending: true,  // 初始為載入狀態
+  data: null,
+  error: null
 };
 
 // 將其命名為useXXXStore，就像vue3的composable一樣
@@ -26,24 +26,30 @@ const useCouponStore = defineStore("useCouponStore", {
       this.couponData = initState.couponData;
     },
     async fetchAndSetCoupon(initData) {
-        const {
-            pending,
-            data,
-            error
-          } = await useFetch('/api/articles', {
-            query: {
-                category: initData.selectedCate || initState.currentCate,
-                township: initData.selectedTown || initState.township,
-                searchText: initData.searchText || initState.searchText,
-                page: initData.currentPage || initState.currentPage,
-                pageSize: initData.pageSize || 10
-            }
-        })
-      this.couponData =  {
-        pending,
-        data,
-        error
-      };
+      this.couponData.pending = true;
+      this.couponData.error = null;
+      
+      try {
+        const data = await $fetch('/api/articles', {
+          query: {
+            category: initData.selectedCate || initState.currentCate,
+            township: initData.selectedTown || initState.township,
+            searchText: initData.searchText || initState.searchText,
+            page: initData.currentPage || initState.currentPage,
+            pageSize: initData.pageSize || 10
+          }
+        });
+        
+        this.couponData.data = data;
+        this.couponData.pending = false;
+        
+        return { pending: false, data, error: null };
+      } catch (error) {
+        this.couponData.error = error;
+        this.couponData.pending = false;
+        
+        return { pending: false, data: null, error };
+      }
     },
   },
   getters: {

@@ -106,19 +106,99 @@
               :key="bnb.id"
               class="bnb col-md-3"
             >
-            <div class="bnb-wrapper" @click.prevent.stop="navigateToBnb(bnb.id, $event)" style="cursor: pointer;">
+            <div 
+              class="bnb-wrapper" 
+              @click.prevent.stop="navigateToBnb(bnb.id, $event)" 
+              @mouseenter="hoveredBnb = bnb.id"
+              @mouseleave="hoveredBnb = null"
+              style="cursor: pointer;"
+            >
               <div class="bnb-img-wrapper">
-                <img
-                  :alt="bnb.name"
-                  height="165"
-                  width="366"
-                  :src="bnb.image_urls && bnb.image_urls.length > 0 ? bnb.image_urls[0] : '/images/bnb-placeholder.jpg'"
-                  class="bnb-img"
-                  placeholder-class="card"
-                  style="pointer-events: none;"
-                />
+                <!-- 多圖展示 - 如果有多張圖片就顯示輪播，否則顯示單張 -->
+                <div v-if="bnb.image_urls && bnb.image_urls.length > 1" class="mini-slider">
+                  <div class="slider-container">
+                    <img
+                      v-for="(imageUrl, imageIndex) in bnb.image_urls.slice(0, 5)"
+                      :key="imageIndex"
+                      :src="imageUrl"
+                      :alt="`${bnb.name} - 圖片 ${imageIndex + 1}`"
+                      class="slider-image"
+                      :class="{ 'active': currentImageIndex[bnb.id] === imageIndex }"
+                      style="pointer-events: none;"
+                    />
+                    
+                    <!-- 左右導航按鈕 -->
+                    <button 
+                      v-if="bnb.image_urls.length > 1"
+                      @click.stop="prevImage(bnb.id, bnb.image_urls.length)"
+                      class="nav-btn prev-btn"
+                      :style="{ opacity: hoveredBnb === bnb.id ? 1 : 0 }"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+                      </svg>
+                    </button>
+                    
+                    <button 
+                      v-if="bnb.image_urls.length > 1"
+                      @click.stop="nextImage(bnb.id, bnb.image_urls.length)"
+                      class="nav-btn next-btn"
+                      :style="{ opacity: hoveredBnb === bnb.id ? 1 : 0 }"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <!-- 圖片指示器 -->
+                  <div v-if="bnb.image_urls.length > 1" class="image-indicators">
+                    <button
+                      v-for="(imageUrl, imageIndex) in bnb.image_urls.slice(0, 5)"
+                      :key="imageIndex"
+                      @click.stop="setCurrentImage(bnb.id, imageIndex)"
+                      class="indicator-dot"
+                      :class="{ 'active': currentImageIndex[bnb.id] === imageIndex }"
+                    ></button>
+                    <span v-if="bnb.image_urls.length > 5" class="more-images">
+                      +{{ bnb.image_urls.length - 5 }}
+                    </span>
+                  </div>
+                  
+                  <!-- 圖片數量標籤 -->
+                  <div class="image-count-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                      <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                    </svg>
+                    {{ bnb.image_urls.length }}
+                  </div>
+                </div>
+                
+                <!-- 單張圖片顯示 -->
+                <div v-else class="single-image">
+                  <img
+                    :alt="bnb.name"
+                    height="165"
+                    width="366"
+                    :src="bnb.image_urls && bnb.image_urls.length > 0 ? bnb.image_urls[0] : '/images/bnb-placeholder.jpg'"
+                    class="bnb-img"
+                    style="pointer-events: none;"
+                  />
+                  <!-- 如果只有一張圖片，也顯示圖片數量 -->
+                  <div v-if="bnb.image_urls && bnb.image_urls.length === 1" class="image-count-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                      <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                    </svg>
+                    1
+                  </div>
+                </div>
               </div>
-              <div class="bnb-info" style="pointer-events: none;">
+              <div 
+                class="bnb-info" 
+                style="pointer-events: none;"
+              >
                 <!-- 未來可用的標籤位置 - 目前隱藏
                 <div v-if="bnb.featured" class="featured-badge" style="pointer-events: none;">
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" style="pointer-events: none;">
@@ -226,6 +306,10 @@ const selectedArea = ref(null);
 const guestCount = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 8;
+
+// 圖片輪播相關狀態
+const currentImageIndex = ref({});
+const hoveredBnb = ref(null);
 
 // 從store獲取資料
 const bnbsData = computed(() => homestayStore.getAllHomestays);
@@ -451,6 +535,56 @@ const navigateToBnb = (id, event) => {
   
   return false;
 }
+
+// 圖片輪播控制函數
+const initializeImageIndex = (bnbId) => {
+  if (!currentImageIndex.value[bnbId]) {
+    currentImageIndex.value[bnbId] = 0;
+  }
+};
+
+const nextImage = (bnbId, totalImages) => {
+  initializeImageIndex(bnbId);
+  currentImageIndex.value[bnbId] = (currentImageIndex.value[bnbId] + 1) % Math.min(totalImages, 5);
+};
+
+const prevImage = (bnbId, totalImages) => {
+  initializeImageIndex(bnbId);
+  currentImageIndex.value[bnbId] = currentImageIndex.value[bnbId] === 0 
+    ? Math.min(totalImages, 5) - 1 
+    : currentImageIndex.value[bnbId] - 1;
+};
+
+const setCurrentImage = (bnbId, imageIndex) => {
+  currentImageIndex.value[bnbId] = imageIndex;
+};
+
+// 自動輪播（可選 - 當滑鼠懸停時）
+const autoSlideInterval = ref({});
+
+const startAutoSlide = (bnbId, totalImages) => {
+  if (autoSlideInterval.value[bnbId]) return;
+  
+  autoSlideInterval.value[bnbId] = setInterval(() => {
+    nextImage(bnbId, totalImages);
+  }, 3000); // 每3秒切換一張
+};
+
+const stopAutoSlide = (bnbId) => {
+  if (autoSlideInterval.value[bnbId]) {
+    clearInterval(autoSlideInterval.value[bnbId]);
+    autoSlideInterval.value[bnbId] = null;
+  }
+};
+
+// 監聽資料變化，初始化圖片索引
+watch(bnbsData, (newData) => {
+  if (newData && newData.length > 0) {
+    newData.forEach(bnb => {
+      initializeImageIndex(bnb.id);
+    });
+  }
+}, { immediate: true });
 </script>
 
 <style lang="scss" scoped>
@@ -860,4 +994,201 @@ const navigateToBnb = (id, event) => {
   justify-content: center;
   height: 100%;
 }
+
+/* 新增多圖輪播樣式 */
+.mini-slider {
+  position: relative;
+  height: 165px;
+  overflow: hidden;
+  border-radius: 10px 10px 0 0;
+}
+
+.slider-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.slider-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  border-radius: 10px 10px 0 0;
+}
+
+.slider-image.active {
+  opacity: 1;
+}
+
+.single-image {
+  height: 165px;
+  overflow: hidden;
+  border-radius: 10px 10px 0 0;
+  position: relative;
+}
+
+/* 導航按鈕樣式 */
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 3;
+  backdrop-filter: blur(4px);
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  &:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+}
+
+.prev-btn {
+  left: 8px;
+}
+
+.next-btn {
+  right: 8px;
+}
+
+/* 圖片指示器樣式 */
+.image-indicators {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  z-index: 3;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: scale(1.2);
+  }
+  
+  &.active {
+    background: white;
+    transform: scale(1.3);
+  }
+}
+
+.more-images {
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+/* 圖片數量標籤樣式 */
+.image-count-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(4px);
+  z-index: 3;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .nav-btn {
+    width: 28px;
+    height: 28px;
+    
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+  
+  .prev-btn {
+    left: 6px;
+  }
+  
+  .next-btn {
+    right: 6px;
+  }
+  
+  .image-indicators {
+    bottom: 6px;
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  
+  .indicator-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .image-count-badge {
+    top: 6px;
+    right: 6px;
+    padding: 3px 6px;
+    font-size: 10px;
+    
+    svg {
+      width: 10px;
+      height: 10px;
+    }
+  }
+}
+
+/* Hover 效果增強 */
+.bnb-wrapper:hover .mini-slider .nav-btn {
+  opacity: 1 !important;
+}
+
+.bnb-wrapper:hover .image-indicators {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.bnb-wrapper:hover .image-count-badge {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* 舊的圖片樣式保持不變 */
 </style> 

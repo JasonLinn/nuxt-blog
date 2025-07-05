@@ -102,27 +102,110 @@
               />
             </div>
 
+            <!-- 社群媒體資訊 -->
+            <h3 class="section-title">社群媒體連結</h3>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">LINE 連結</label>
+                <input
+                  v-model="editData.social.line"
+                  type="url"
+                  class="form-input"
+                  placeholder="https://line.me/ti/p/YOUR_LINE_ID"
+                  :disabled="saving"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Instagram</label>
+                <input
+                  v-model="editData.social.instagram"
+                  type="url"
+                  class="form-input"
+                  placeholder="https://instagram.com/YOUR_ACCOUNT"
+                  :disabled="saving"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Facebook</label>
+              <input
+                v-model="editData.social.facebook"
+                type="url"
+                class="form-input"
+                placeholder="https://facebook.com/YOUR_PAGE"
+                :disabled="saving"
+              />
+            </div>
+
             <!-- 更新圖片編輯區塊 -->
             <div class="form-group">
               <label class="form-label">民宿圖片</label>
               
-              <!-- 圖片網址輸入 (逗點分隔) -->
-              <div class="mt-1 w-full">
+              <!-- 檔案上傳區塊 -->
+              <div class="upload-section">
+                <label class="upload-label">上傳圖片檔案</label>
+                <input 
+                  type="file" 
+                  @change="handleFileUpload" 
+                  accept="image/*" 
+                  multiple 
+                  :disabled="saving"
+                  class="file-input"
+                />
+                <div class="upload-hint">
+                  支援 JPG、PNG、GIF 格式，單檔最大 5MB，可一次選擇多張圖片
+                </div>
+              </div>
+              
+              <!-- 手動添加圖片URL -->
+              <div class="url-input-section">
+                <label class="upload-label">或手動添加圖片網址</label>
+                <div class="url-input-group">
+                  <input
+                    v-model="newImageUrl"
+                    type="url"
+                    class="form-input"
+                    placeholder="請輸入圖片網址，例如：https://example.com/image.jpg"
+                    :disabled="saving"
+                    @keyup.enter="addImageUrl"
+                  />
+                  <button 
+                    @click.prevent="addImageUrl" 
+                    class="add-url-btn"
+                    :disabled="!newImageUrl || saving"
+                  >
+                    添加圖片
+                  </button>
+                </div>
+              </div>
+              
+              <!-- 批量輸入區域 (保留原功能) -->
+              <div class="batch-input-section">
+                <label class="upload-label">批量輸入 (進階)</label>
                 <textarea
                   v-model="editData.images_string"
-                  placeholder="請輸入圖片網址，多張圖片用逗點分隔&#10;例如：https://example.com/image1.jpg,https://example.com/image2.jpg"
+                  placeholder="可直接貼上多個圖片網址，用逗點分隔&#10;例如：https://example.com/image1.jpg,https://example.com/image2.jpg"
                   class="form-textarea"
                   :disabled="saving"
                   rows="3"
                 />
-                <div class="input-hint">
-                  支援多張圖片，請用逗點分隔網址。第一張圖片將作為主要圖片顯示。
+                <div class="upload-hint">
+                  進階功能：可直接貼上多個圖片URL，用逗點分隔
                 </div>
               </div>
               
               <!-- 圖片預覽與排序功能 -->
               <div v-if="imagesArray && imagesArray.length > 0" class="mt-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">圖片預覽與排序：</label>
+                <div class="preview-header">
+                  <label class="block text-sm font-medium text-gray-700">圖片預覽與管理</label>
+                  <div class="preview-stats">
+                    共 {{ imagesArray.length }} 張圖片
+                  </div>
+                </div>
+                
                 <div class="images-grid">
                   <div v-for="(url, index) in imagesArray" :key="index" class="image-item">
                     <img :src="url" :alt="'民宿圖片 ' + (index + 1)" class="preview-image" />
@@ -172,39 +255,51 @@
                       {{ index + 1 }}
                     </div>
                   </div>
+                  
+                  <!-- 添加新圖片的佔位符 -->
+                  <div class="add-image-placeholder" @click="triggerFileInput">
+                    <div class="placeholder-content">
+                      <Icon name="mdi:plus" class="placeholder-icon" />
+                      <span>點擊上傳</span>
+                    </div>
+                  </div>
                 </div>
                 
-                <div class="mt-2 text-sm text-gray-600">
-                  總共 {{ imagesArray.length }} 張圖片。拖曳可調整順序，第一張為主要圖片。
+                <div class="image-tips">
+                  <Icon name="mdi:information-outline" class="tip-icon" />
+                  <span>第一張圖片將作為主要圖片顯示。可拖曳調整順序，或使用上下箭頭按鈕。</span>
                 </div>
               </div>
               
-              <!-- 保留舊的單一圖片輸入 (向後相容) -->
-              <div v-if="!imagesArray || imagesArray.length === 0" class="mt-4">
-                <label class="form-label">單一圖片網址 (舊格式)</label>
-                <input
-                  v-model="editData.image_url"
-                  type="url"
-                  class="form-input"
-                  :disabled="saving"
-                  placeholder="https://example.com/image.jpg"
-                />
-                <div v-if="editData.image_url" class="image-preview">
-                  <img :src="editData.image_url" :alt="editData.name" />
-                </div>
-                <div class="input-hint">
-                  建議使用上方的多圖片功能，此欄位僅供向後相容。
+              <!-- 空狀態 -->
+              <div v-else class="empty-state">
+                <div class="empty-content" @click="triggerFileInput">
+                  <Icon name="mdi:image-plus" class="empty-icon" />
+                  <h3>尚未添加圖片</h3>
+                  <p>點擊上傳圖片或輸入圖片網址</p>
                 </div>
               </div>
+              
+              <!-- 隱藏的檔案輸入框 -->
+              <input 
+                ref="fileInputRef"
+                type="file" 
+                @change="handleFileUpload" 
+                accept="image/*" 
+                multiple 
+                :disabled="saving"
+                style="display: none;"
+              />
             </div>
 
             <div class="form-group">
-              <label class="form-label">容量描述</label>
+              <label class="form-label">民宿介紹</label>
               <textarea
                 v-model="editData.capacity_description"
                 class="form-textarea"
                 :disabled="saving"
                 rows="3"
+                placeholder="請描述您的民宿特色、環境介紹、設施等..."
               ></textarea>
             </div>
 
@@ -380,15 +475,22 @@ const loading = ref(true);
 const saving = ref(false);
 const homestay = ref(null);
 const originalData = ref(null);
+const newImageUrl = ref(''); // 新增圖片URL輸入
+const fileInputRef = ref(null); // 檔案輸入框引用
 const editData = ref({
   name: '',
   location: '',
   city: '',
   phone: '',
   website: '',
+  social: {
+    line: '',
+    instagram: '',
+    facebook: ''
+  },
   image_url: '',
-  images: [],
-  images_string: '',
+  images: [], // 新增 images 陣列
+  images_string: '', // 新增用於編輯的字串格式
   capacity_description: '',
   min_guests: null,
   max_guests: null,
@@ -419,6 +521,101 @@ const message = ref({
   text: '',
   type: ''
 });
+
+// 觸發檔案選擇
+const triggerFileInput = () => {
+  if (!saving.value && fileInputRef.value) {
+    fileInputRef.value.click();
+  }
+};
+
+// 處理檔案上傳
+const handleFileUpload = async (event) => {
+  const files = event.target.files;
+  if (!files.length) return;
+
+  saving.value = true;
+  showMessage('正在上傳圖片...', 'info');
+
+  try {
+    for (let file of files) {
+      console.log('開始上傳文件:', file.name);
+      
+      // 驗證文件類型
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error(`檔案 ${file.name} 格式不支援，只允許 JPEG、PNG 和 GIF 格式`);
+      }
+
+      // 驗證文件大小 (5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        throw new Error(`檔案 ${file.name} 太大，最大允許 5MB`);
+      }
+
+      // 創建 FormData
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // 首先嘗試 GitHub 上傳，如果失敗則使用本地上傳
+      let response;
+      try {
+        response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+      } catch (error) {
+        console.warn('GitHub 上傳失敗，嘗試本地上傳:', error);
+        // 使用本地上傳作為備用
+        response = await fetch('/api/upload-local', {
+          method: 'POST',
+          body: formData
+        });
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || `上傳 ${file.name} 失敗`);
+      }
+
+      console.log('上傳成功:', data.url);
+      
+      // 添加到圖片陣列
+      const currentImages = imagesArray.value;
+      currentImages.push(data.url);
+      imagesArray.value = currentImages;
+    }
+
+    showMessage(`成功上傳 ${files.length} 張圖片！`, 'success');
+
+  } catch (error) {
+    console.error('上傳錯誤:', error);
+    showMessage(`上傳失敗：${error.message}`, 'error');
+  } finally {
+    saving.value = false;
+    // 清空檔案輸入
+    if (event.target) {
+      event.target.value = '';
+    }
+  }
+};
+
+// 添加手動輸入的圖片URL
+const addImageUrl = () => {
+  if (newImageUrl.value.trim()) {
+    try {
+      new URL(newImageUrl.value);
+      const currentImages = imagesArray.value;
+      currentImages.push(newImageUrl.value.trim());
+      imagesArray.value = currentImages;
+      newImageUrl.value = '';
+      showMessage('圖片已添加', 'success');
+    } catch (e) {
+      showMessage('請輸入有效的圖片 URL', 'error');
+    }
+  }
+};
 
 // 移除圖片
 const removeImage = (index) => {
@@ -459,9 +656,15 @@ const availableTypes = [
 const checkAuth = async () => {
   try {
     const response = await $fetch('/api/homestay-auth');
-    if (response.success) {
+    
+    if (response.success && response.homestay) {
       homestay.value = response.homestay;
-      await loadHomestayData();
+      
+      // 直接從 auth API 回應設定編輯資料
+      setupEditDataFromAuth(response.homestay);
+    } else {
+      console.error('身份驗證失敗或無民宿資料');
+      await navigateTo('/homestay-login');
     }
   } catch (error) {
     console.error('身份驗證失敗:', error);
@@ -471,54 +674,55 @@ const checkAuth = async () => {
   }
 };
 
-// 載入民宿資料
-const loadHomestayData = async () => {
+// 從身份驗證回應直接設定編輯資料
+const setupEditDataFromAuth = (homestayData) => {
   try {
-    const response = await $fetch(`/api/fetchBnbDetail?id=${homestay.value.id}`);
-    if (response.success) {
-      const data = response.bnb;
-      
-      // 處理圖片資料 - 優先使用 images 陣列
-      let images = [];
-      if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-        images = data.images;
-      } else if (data.image_urls && Array.isArray(data.image_urls) && data.image_urls.length > 0) {
-        images = data.image_urls;
-      } else if (data.image_url) {
-        images = [data.image_url];
-      }
-      
-      // 設定編輯資料
-      editData.value = {
-        name: data.name || '',
-        location: data.area || '',
-        city: data.address || '',
-        phone: data.contact?.phone || '',
-        website: data.contact?.website || '',
-        image_url: images[0] || '',
-        images: images,
-        images_string: images.join(','),
-        capacity_description: data.description || '',
-        min_guests: data.min_guests || null,
-        max_guests: data.max_guests || null,
-        available: true,
-        types: data.features?.environmentTypes || [],
-        pricing: {
-          weekdayRoom: extractPrice(data.prices?.weekday),
-          weekendRoom: extractPrice(data.prices?.weekend),
-          weekdayPackage: extractPrice(data.prices?.fullRentWeekday),
-          weekendPackage: extractPrice(data.prices?.fullRentWeekend)
-        }
-      };
-      
-      // 保存原始資料
-      originalData.value = JSON.parse(JSON.stringify(editData.value));
+    // 處理圖片資料
+    let images = [];
+    if (homestayData.images && Array.isArray(homestayData.images) && homestayData.images.length > 0) {
+      images = homestayData.images.filter(url => url && url.trim());
+    } else if (homestayData.image_url) {
+      images = [homestayData.image_url];
     }
+    
+    // 設定編輯資料
+    editData.value = {
+      name: homestayData.name || '',
+      location: homestayData.location || '',
+      city: homestayData.city || '',
+      phone: homestayData.phone || '',
+      website: homestayData.website || '',
+      social: {
+        line: homestayData.social_line || '',
+        instagram: homestayData.social_instagram || '',
+        facebook: homestayData.social_facebook || ''
+      },
+      image_url: images[0] || '',
+      images: images,
+      images_string: images.join(','),
+      capacity_description: homestayData.capacity_description || '',
+      min_guests: homestayData.min_guests || null,
+      max_guests: homestayData.max_guests || null,
+      available: homestayData.available || true,
+      types: homestayData.types || [],
+      pricing: {
+        weekdayRoom: null,
+        weekendRoom: null,
+        weekdayPackage: null,
+        weekendPackage: null
+      }
+    };
+    
+    // 保存原始資料
+    originalData.value = JSON.parse(JSON.stringify(editData.value));
+    
   } catch (error) {
-    console.error('載入民宿資料失敗:', error);
-    showMessage('載入資料失敗', 'error');
+    console.error('設定編輯資料失敗:', error);
+    showMessage(`設定資料失敗: ${error.message}`, 'error');
   }
 };
+
+
 
 // 從格式化價格中提取數字
 const extractPrice = (priceString) => {
@@ -539,6 +743,7 @@ const showMessage = (text, type = 'success') => {
 const resetForm = () => {
   if (originalData.value) {
     editData.value = JSON.parse(JSON.stringify(originalData.value));
+    newImageUrl.value = ''; // 重置新圖片URL輸入
     showMessage('已重置為原始資料', 'info');
   }
 };
@@ -1056,5 +1261,180 @@ onMounted(() => {
   justify-content: center;
   font-size: 12px;
   font-weight: 600;
+}
+
+// 新增上傳相關樣式
+.upload-section, .url-input-section, .batch-input-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.upload-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #2d3748;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.file-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: #4a5568;
+  
+  &:hover:not(:disabled) {
+    border-color: #667eea;
+    background: #f0f4ff;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.url-input-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  
+  .form-input {
+    flex: 1;
+    margin-bottom: 0;
+  }
+}
+
+.add-url-btn {
+  padding: 12px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  
+  &:hover:not(:disabled) {
+    background: #5a67d8;
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.preview-stats {
+  font-size: 14px;
+  color: #718096;
+  background: #edf2f7;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.add-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+  background: #f7fafc;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+    transform: translateY(-2px);
+  }
+}
+
+.placeholder-content {
+  text-align: center;
+  color: #718096;
+  
+  .placeholder-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  span {
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+  background: #f7fafc;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+  }
+}
+
+.empty-content {
+  .empty-icon {
+    font-size: 48px;
+    color: #cbd5e0;
+    margin-bottom: 16px;
+  }
+  
+  h3 {
+    font-size: 18px;
+    color: #4a5568;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  
+  p {
+    color: #718096;
+    font-size: 14px;
+  }
+}
+
+.image-tips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  background: #ebf8ff;
+  border-radius: 8px;
+  border-left: 4px solid #3182ce;
+  font-size: 14px;
+  color: #2c5282;
+  
+  .tip-icon {
+    flex-shrink: 0;
+    font-size: 16px;
+  }
 }
 </style> 

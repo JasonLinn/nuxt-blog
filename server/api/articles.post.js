@@ -1,4 +1,4 @@
-import { pool } from '@/server/utils/db'
+import { couponPool } from '../utils/coupon-db.js'
 
 export default defineEventHandler(async (event) => {
   if (event.context?.auth?.user?.id !== 1) {
@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   }
   const body = await readBody(event)
 
-  const articleRecord = await pool
+  const articleRecord = await couponPool
     .query('INSERT INTO "article" ("title", "category", "adress", "township", "content", "cover", "amount", "used_times", "isReferral", "hash", "isonce", "position", "tags") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *;', [
       body.title,
       body.category,

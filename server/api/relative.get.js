@@ -1,4 +1,9 @@
-import { pool } from '@/server/utils/db'
+import { Pool } from '@neondatabase/serverless'
+
+// 優惠券資料庫連線
+const couponPool = new Pool({
+  connectionString: 'postgresql://nuxt-marketing_owner:ys7ZNVhOrg9c@ep-rough-voice-a1ele0z6-pooler.ap-southeast-1.aws.neon.tech/nuxt-marketing'
+})
 
 export default defineEventHandler(async (event) => {
   try {
@@ -50,7 +55,7 @@ export default defineEventHandler(async (event) => {
     // 先執行計數查詢
     let countResult
     try {
-      countResult = await pool.query(countQuery, sqlParams)
+      countResult = await couponPool.query(countQuery, sqlParams)
     } catch (countError) {
       console.error('Count query error:', countError)
       throw countError
@@ -59,7 +64,7 @@ export default defineEventHandler(async (event) => {
     // 再執行數據查詢
     let dataResult
     try {
-      dataResult = await pool.query(dataQuery, dataParams)
+      dataResult = await couponPool.query(dataQuery, dataParams)
     } catch (dataError) {
       console.error('Data query error:', dataError)
       throw dataError

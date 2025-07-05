@@ -18,6 +18,7 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     // 只在服務器端可用的私有鍵
+    DATABASE_URL: process.env.DATABASE_URL,
     GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_USERNAME: process.env.GITHUB_USERNAME,
@@ -42,6 +43,12 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: ["@fawmi/vue-google-maps", "fast-deep-equal"],
+    },
+    define: {
+      global: 'globalThis',
+    },
+    ssr: {
+      noExternal: ['form-data', 'axios']
     }
   },
   devtools: { enabled: true },
@@ -80,6 +87,14 @@ export default defineNuxtConfig({
   // 添加對 CommonJS 模塊的支持
   build: {
     transpile: ['utils/hashDatabase.cjs']
+  },
+  ssr: {
+    noExternal: ['axios', 'form-data']
+  },
+  nitro: {
+    experimental: {
+      wasm: true
+    }
   },
   alias: {
     '@': resolve(__dirname, './')

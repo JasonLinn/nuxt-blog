@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
       types,
       phone,
       website,
+      social,
       pricing
     } = body;
 
@@ -108,6 +109,9 @@ export default defineEventHandler(async (event) => {
           images,
           website,
           phone,
+          social_line,
+          social_instagram,
+          social_facebook,
           capacity_description,
           min_guests,
           max_guests,
@@ -120,7 +124,7 @@ export default defineEventHandler(async (event) => {
           updated_at
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 
-          $11, $12, 'pending', false, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+          $11, $12, $13, $14, $15, 'pending', false, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         )
         RETURNING id, name, status
       `;
@@ -134,6 +138,9 @@ export default defineEventHandler(async (event) => {
         finalImages,
         website || null,
         phone || null,
+        social?.line || null,
+        social?.instagram || null,
+        social?.facebook || null,
         capacity_description || null,
         min_guests || null,
         max_guests || null,

@@ -293,6 +293,52 @@
               </div>
             </div>
 
+            <!-- 社群媒體資訊 -->
+            <h4 class="subsection-title">📱 社群媒體（選填）</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">LINE 連結</label>
+                <input
+                  v-model="formData.social.line"
+                  type="url"
+                  class="form-input"
+                  placeholder="https://line.me/ti/p/YOUR_LINE_ID"
+                  :disabled="submitting"
+                />
+                <div class="input-hint">
+                  請提供 LINE 官方帳號或個人 LINE 連結
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Instagram</label>
+                <input
+                  v-model="formData.social.instagram"
+                  type="url"
+                  class="form-input"
+                  placeholder="https://instagram.com/YOUR_ACCOUNT"
+                  :disabled="submitting"
+                />
+                <div class="input-hint">
+                  請提供 Instagram 帳號連結
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Facebook</label>
+              <input
+                v-model="formData.social.facebook"
+                type="url"
+                class="form-input"
+                placeholder="https://facebook.com/YOUR_PAGE"
+                :disabled="submitting"
+              />
+              <div class="input-hint">
+                請提供 Facebook 粉絲專頁或個人頁面連結
+              </div>
+            </div>
+
             <!-- 價格設定 -->
             <h4 class="subsection-title">💰 價格設定（選填）</h4>
             <div class="form-row">
@@ -477,6 +523,11 @@ const formData = ref({
   // 步驟 3: 聯絡資訊
   phone: '',
   website: '',
+  social: {
+    line: '',
+    instagram: '',
+    facebook: ''
+  },
   pricing: {
     weekdayRoom: null,
     weekendRoom: null,
@@ -648,6 +699,11 @@ const resetForm = () => {
     types: [],
     phone: '',
     website: '',
+    social: {
+      line: '',
+      instagram: '',
+      facebook: ''
+    },
     pricing: {
       weekdayRoom: null,
       weekendRoom: null,

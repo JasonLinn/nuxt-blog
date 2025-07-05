@@ -1,4 +1,4 @@
-import { pool } from '@/server/utils/db'
+import { pool } from '../utils/db.js'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

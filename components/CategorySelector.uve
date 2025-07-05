@@ -1,0 +1,63 @@
+<template>
+  <div class="map-options" id="mapCate">
+    <div
+      v-for="cate in categories"
+      :key="cate.id"
+      @click="selectCategory(cate.id)"
+      :class="{ 'cateActive': selectedCate === cate.id }"
+      class="map-oitem"
+    >
+      {{ cate.name }}
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { defineProps, defineEmits } from 'vue';
+
+const props = defineProps({
+  categories: {
+    type: Array,
+    required: true,
+  },
+  selectedCate: {
+    type: [String, Number],
+    default: null,
+  },
+});
+
+const emit = defineEmits(['update:selectedCate']);
+
+const selectCategory = (id) => {
+  emit('update:selectedCate', id);
+};
+</script>
+
+<style scoped>
+.map-options {
+  display: flex;
+  position: absolute;
+  width: 80%;
+  height: 40px;
+  background-color: #fff;
+  z-index: 1;
+  justify-content: space-around;
+  align-items: center;
+  top: 78px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.map-oitem {
+  flex: 1;
+  text-align: center;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cateActive {
+  background-color: #ccc;
+}
+</style>

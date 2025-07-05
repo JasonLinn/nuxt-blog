@@ -61,6 +61,20 @@
                 <p class="">查看已領</p>
               </NuxtLink>
             </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
+                to="/homestay-register"
+              >
+                <p class="">民宿註冊申請</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
+                to="/homestay-login"
+              >
+                <p class="">民宿業者登入</p>
+              </NuxtLink>
+            </li>
           </ul>
         </div>
       </nav>
@@ -80,6 +94,17 @@
         </NuxtLink>
         <!-- <div class="user-status">{{displayName ? `Hi, ${displayName}` : '未登入'}}</div> -->
       </div>
+      
+      <!-- 主要導航連結 -->
+      <div class="nav-links">
+        <NuxtLink to="/homestay-register" class="nav-link">
+          民宿註冊申請
+        </NuxtLink>
+        <NuxtLink to="/homestay-login" class="nav-link">
+          民宿業者登入
+        </NuxtLink>
+      </div>
+      
       <div class="user-info group relative p-2" v-show="userData" v-on:click="navOpen=!navOpen">
         <img class="user-img" :src="userData?.pictureUrl" :alt="userData?.displayName">
       </div>
@@ -235,13 +260,47 @@ const toggleEdit = () => {
 }
 .index-nav {
   width: 100%;
-  display: inline-grid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
 }
 .nav-wrapper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
+
+/* 主要導航連結樣式 */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  
+  @media (max-width: 768px) {
+    display: none; /* 在手機版隱藏，使用側邊選單 */
+  }
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+}
+
 .index-title {
   text-decoration: none;
   color: #000;

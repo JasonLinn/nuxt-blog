@@ -1,4 +1,9 @@
-import { pool } from '@/server/utils/db'
+import { Pool } from '@neondatabase/serverless'
+
+// 優惠券資料庫連線
+const couponPool = new Pool({
+  connectionString: 'postgresql://nuxt-marketing_owner:ys7ZNVhOrg9c@ep-rough-voice-a1ele0z6-pooler.ap-southeast-1.aws.neon.tech/nuxt-marketing'
+})
 
 export default defineEventHandler(async (event) => {
 //   if (event.context?.auth?.user?.id !== 1) {
@@ -10,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const relativeId = await getRouterParam(event, 'id')
   const body = await readBody(event)
 
-  const relativeRecord = await pool
+  const relativeRecord = await couponPool
     .query(
       'UPDATE "relative" SET "title" = $1, "category" = $2, "content" = $3, "cover" = $4, "amount" = $5, "hash" = $6, "updated_at" = NOW() WHERE "id" = $7 RETURNING *;',
       [body.title, body.category, body.content, body.cover, body.amount, body.hash, relativeId]

@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { pool } from '../utils/db.js';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -21,9 +22,58 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    const homestayId = decoded.data.id;
+
+    // 獲取完整的民宿資料
+    const homestayQuery = `
+      SELECT 
+        id,
+        name,
+        location,
+        city,
+        image_url,
+        images,
+        website,
+        phone,
+        social_line,
+        social_instagram,
+        social_facebook,
+        capacity_description,
+        min_guests,
+        max_guests,
+        available,
+        status
+      FROM homestays
+      WHERE id = $1 AND available = true AND status = 'approved'
+    `;
+
+    const result = await pool.query(homestayQuery, [homestayId]);
+    
+    if (result.rows.length === 0) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: '民宿不存在或已停用'
+      });
+    }
+
+    const homestay = result.rows[0];
+
+    // 獲取民宿類型
+    const typesQuery = `
+      SELECT type_name 
+      FROM homestay_types 
+      WHERE homestay_id = $1
+      ORDER BY type_name
+    `;
+    
+    const typesResult = await pool.query(typesQuery, [homestayId]);
+
     return {
       success: true,
-      homestay: decoded.data
+      homestay: {
+        ...homestay,
+        types: typesResult.rows.map(row => row.type_name)
+      }
     };
 
   } catch (error) {
