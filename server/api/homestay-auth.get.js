@@ -41,6 +41,9 @@ export default defineEventHandler(async (event) => {
         capacity_description,
         min_guests,
         max_guests,
+        theme_features,
+        area_locations,
+        service_amenities,
         available,
         status
       FROM homestays

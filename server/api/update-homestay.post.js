@@ -70,8 +70,11 @@ export default defineEventHandler(async (event) => {
           capacity_description = $11,
           min_guests = $12,
           max_guests = $13,
+          theme_features = $14,
+          area_locations = $15,
+          service_amenities = $16,
           updated_at = CURRENT_TIMESTAMP
-        WHERE id = $14 AND status = 'approved'
+        WHERE id = $17 AND status = 'approved'
       `;
 
       const homestayValues = [
@@ -88,6 +91,9 @@ export default defineEventHandler(async (event) => {
         updateData.capacity_description || null,
         updateData.min_guests || null,
         updateData.max_guests || null,
+        updateData.theme_features || [],
+        updateData.area_locations || [],
+        updateData.service_amenities || [],
         homestayId
       ];
 

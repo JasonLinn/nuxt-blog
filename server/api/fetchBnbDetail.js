@@ -41,6 +41,9 @@ export default defineEventHandler(async (event) => {
         h.capacity_description,
         h.min_guests,
         h.max_guests,
+        h.theme_features,
+        h.area_locations,
+        h.service_amenities,
         h.min_price,
         h.max_price,
         h.average_price,
@@ -113,7 +116,10 @@ export default defineEventHandler(async (event) => {
       image_urls: imageUrls,
       features: {
         peopleTypes: [homestay.capacity_description],
-        environmentTypes: typesResult.rows.map(row => row.type_name)
+        environmentTypes: typesResult.rows.map(row => row.type_name),
+        themeFeatures: homestay.theme_features || [],
+        areaLocations: homestay.area_locations || [],
+        serviceAmenities: homestay.service_amenities || []
       },
       prices: {
         weekday: null,

@@ -226,6 +226,51 @@
             </div>
           </div>
 
+          <!-- 主題特色 -->
+          <div v-if="bnb.features && bnb.features.themeFeatures && bnb.features.themeFeatures.length > 0" class="info-card compact">
+            <div class="card-header">
+              <div class="card-icon">🏠</div>
+              <h3 class="card-title">主題特色</h3>
+            </div>
+            <div class="card-content">
+              <div class="tag-container">
+                <div v-for="(feature, index) in bnb.features.themeFeatures" :key="index" class="feature-tag theme">
+                  {{ feature }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 鄰近景點 -->
+          <div v-if="bnb.features && bnb.features.areaLocations && bnb.features.areaLocations.length > 0" class="info-card compact">
+            <div class="card-header">
+              <div class="card-icon">📍</div>
+              <h3 class="card-title">鄰近景點</h3>
+            </div>
+            <div class="card-content">
+              <div class="tag-container">
+                <div v-for="(location, index) in bnb.features.areaLocations" :key="index" class="feature-tag location">
+                  {{ location }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 服務設施 -->
+          <div v-if="bnb.features && bnb.features.serviceAmenities && bnb.features.serviceAmenities.length > 0" class="info-card compact">
+            <div class="card-header">
+              <div class="card-icon">🎯</div>
+              <h3 class="card-title">服務設施</h3>
+            </div>
+            <div class="card-content">
+              <div class="tag-container">
+                <div v-for="(service, index) in bnb.features.serviceAmenities" :key="index" class="feature-tag service">
+                  {{ service }}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- 第三行：價格資訊 + 聯絡資訊 -->
           <div class="info-card compact">
             <div class="card-header">
@@ -1261,6 +1306,68 @@ console.log('民宿ID:', bnbId);
   p {
     margin: 0;
     font-size: 15px;
+  }
+}
+
+// 特色標籤容器和樣式
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.feature-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &.environment {
+    background: linear-gradient(135deg, #48c78e 0%, #00d4aa 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(72, 199, 142, 0.3);
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(72, 199, 142, 0.4);
+    }
+  }
+  
+  &.theme {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+  }
+  
+  &.location {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    color: #333;
+    box-shadow: 0 2px 8px rgba(255, 154, 158, 0.3);
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 154, 158, 0.4);
+    }
+  }
+  
+  &.service {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #333;
+    box-shadow: 0 2px 8px rgba(252, 182, 159, 0.3);
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(252, 182, 159, 0.4);
+    }
   }
 }
 

@@ -421,6 +421,54 @@
               </div>
             </div>
 
+            <!-- 主題特色 -->
+            <div class="form-group">
+              <label class="form-label">🏠 主題特色</label>
+              <div class="checkbox-group">
+                <label v-for="feature in themeFeatures" :key="feature" class="checkbox-item">
+                  <input
+                    v-model="editData.theme_features"
+                    type="checkbox"
+                    :value="feature"
+                    :disabled="saving"
+                  />
+                  <span class="checkbox-label">{{ feature }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 旅遊所在地 -->
+            <div class="form-group">
+              <label class="form-label">📍 鄰近旅遊景點</label>
+              <div class="checkbox-group">
+                <label v-for="location in areaLocations" :key="location" class="checkbox-item">
+                  <input
+                    v-model="editData.area_locations"
+                    type="checkbox"
+                    :value="location"
+                    :disabled="saving"
+                  />
+                  <span class="checkbox-label">{{ location }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 服務內容 -->
+            <div class="form-group">
+              <label class="form-label">🎯 服務內容</label>
+              <div class="checkbox-group">
+                <label v-for="service in serviceAmenities" :key="service" class="checkbox-item">
+                  <input
+                    v-model="editData.service_amenities"
+                    type="checkbox"
+                    :value="service"
+                    :disabled="saving"
+                  />
+                  <span class="checkbox-label">{{ service }}</span>
+                </label>
+              </div>
+            </div>
+
             <div class="form-group">
               <label class="form-label">
                 <input
@@ -496,6 +544,9 @@ const editData = ref({
   max_guests: null,
   available: true,
   types: [],
+  theme_features: [],
+  area_locations: [],
+  service_amenities: [],
   pricing: {
     weekdayRoom: null,
     weekendRoom: null,
@@ -652,6 +703,33 @@ const availableTypes = [
   '秘境隱居型'
 ];
 
+// 主題特色選項
+const themeFeatures = [
+  '包棟民宿',
+  '電梯/一樓孝親房民宿',
+  '獨棟、莊園民宿',
+  '親子民宿',
+  '寵物民宿',
+  '海景民宿',
+  '市區民宿',
+  '夜市民宿',
+  '車站周邊住宿'
+];
+
+// 旅遊所在地選項
+const areaLocations = [
+  '宜蘭市', '五結鄉', '頭城鎮', '冬山鄉', '礁溪鄉', 
+  '蘇澳鎮', '壯圍鄉', '三星鄉', '員山鄉', '大同鄉', '羅東鎮'
+];
+
+// 服務內容選項
+const serviceAmenities = [
+  '美味早餐', '方便停車', '有停車位(場)', '可停遊覽車',
+  '有陽台房型', '有浴缸房型', '有公用客廳', '一樓孝親房',
+  '戶外戲水池', '有烤肉場地', '歡唱設備', '可借用廚房',
+  '可打麻將', '可帶寵物入住', '可刷國旅卡', '電動麻將桌', '充電樁'
+];
+
 // 檢查登入狀態
 const checkAuth = async () => {
   try {
@@ -705,6 +783,9 @@ const setupEditDataFromAuth = (homestayData) => {
       max_guests: homestayData.max_guests || null,
       available: homestayData.available || true,
       types: homestayData.types || [],
+      theme_features: homestayData.theme_features || [],
+      area_locations: homestayData.area_locations || [],
+      service_amenities: homestayData.service_amenities || [],
       pricing: {
         weekdayRoom: null,
         weekendRoom: null,
