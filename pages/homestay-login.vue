@@ -51,7 +51,7 @@
 
       <div class="login-footer">
         <div class="back-link">
-          <NuxtLink to="/bnbs" class="link">返回民宿列表</NuxtLink>
+          <NuxtLink to="/homestay-list" class="link">返回民宿列表</NuxtLink>
         </div>
       </div>
     </div>

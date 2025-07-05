@@ -1,0 +1,1072 @@
+<template>
+  <div class="homestay-detail">
+    <!-- 載入狀態 -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">載入中...</p>
+    </div>
+
+    <!-- 錯誤狀態 -->
+    <div v-else-if="error" class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h3 class="error-title">載入失敗</h3>
+      <p class="error-message">{{ error }}</p>
+      <button @click="fetchBnbDetail" class="retry-btn">重新載入</button>
+    </div>
+
+    <!-- 找不到民宿 -->
+    <div v-else-if="!bnb" class="not-found-container">
+      <div class="not-found-icon">🏠</div>
+      <h3 class="not-found-title">找不到民宿</h3>
+      <p class="not-found-message">您查看的民宿可能已下架或不存在</p>
+      <NuxtLink to="/homestay-list" class="back-to-list-btn">回到列表</NuxtLink>
+    </div>
+
+    <!-- 民宿詳情 -->
+    <div v-else class="homestay-content">
+      <!-- 頂部導航 -->
+      <div class="top-nav">
+        <NuxtLink to="/homestay-list" class="back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+          </svg>
+          <span>返回列表</span>
+        </NuxtLink>
+        
+        <div class="owner-actions">
+          <span class="owner-hint">{{ bnb.name }} 的業者？</span>
+        </div>
+      </div>
+
+      <!-- 主要內容 -->
+      <div class="main-content">
+        <!-- 民宿標題區 -->
+        <div class="homestay-header">
+          <div class="homestay-info">
+            <h1 class="homestay-title">{{ bnb.name }}</h1>
+          </div>
+          
+          <!-- 民宿圖片 -->
+          <div class="homestay-image-container">
+            <div v-if="bnb.image_urls && bnb.image_urls.length > 0" class="homestay-image">
+              <img :src="bnb.image_urls[0]" :alt="bnb.name" class="main-image" />
+              <div class="image-overlay">
+                <div class="image-count" v-if="bnb.image_urls.length > 1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                    <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                  </svg>
+                  {{ bnb.image_urls.length }} 張照片
+                </div>
+              </div>
+            </div>
+            <div v-else class="no-image">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+              </svg>
+              <p>暫無圖片</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 詳細信息卡片 -->
+        <div class="info-cards">
+          <!-- 第一行：民宿介紹（全寬） -->
+          <div v-if="bnb.description" class="info-card full-width">
+            <div class="card-header">
+              <div class="card-icon">📝</div>
+              <h3 class="card-title">民宿介紹</h3>
+            </div>
+            <div class="card-content">
+              <p class="description">{{ bnb.description }}</p>
+            </div>
+          </div>
+
+          <!-- 第二行：住宿人數 + 環境特色 -->
+          <div class="info-card compact">
+            <div class="card-header">
+              <div class="card-icon">👥</div>
+              <h3 class="card-title">住宿人數</h3>
+            </div>
+            <div class="card-content">
+              <div v-if="bnb.min_guests || bnb.max_guests" class="guest-capacity">
+                <div class="capacity-info">
+                  <div class="capacity-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M15 14v1H1v-1c0-1 1-4 7-4s7 3 7 4Zm-9.995-.944v-.002.002ZM8.5 8.018A2.5 2.5 0 1 0 8.5 3a2.5 2.5 0 0 0 0 5.018Z"/>
+                      <path d="M2.5 8.018A2.5 2.5 0 1 0 2.5 3a2.5 2.5 0 0 0 0 5.018Z"/>
+                      <path d="M13.5 8.018A2.5 2.5 0 1 0 13.5 3a2.5 2.5 0 0 0 0 5.018Z"/>
+                    </svg>
+                  </div>
+                  <div class="capacity-details">
+                    <div class="capacity-range">
+                      <span v-if="bnb.min_guests && bnb.max_guests" class="guest-count">
+                        {{ bnb.min_guests }} - {{ bnb.max_guests }} 人
+                      </span>
+                      <span v-else-if="bnb.max_guests" class="guest-count">
+                        最多 {{ bnb.max_guests }} 人
+                      </span>
+                      <span v-else-if="bnb.min_guests" class="guest-count">
+                        最少 {{ bnb.min_guests }} 人
+                      </span>
+                    </div>
+                    <div class="capacity-description">
+                      適合的住宿人數範圍
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="no-data">
+                <p>暫無人數資訊</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card compact">
+            <div class="card-header">
+              <div class="card-icon">🌿</div>
+              <h3 class="card-title">環境特色</h3>
+            </div>
+            <div class="card-content">
+              <div v-if="bnb.features && bnb.features.environmentTypes && bnb.features.environmentTypes.length > 0" class="tag-container">
+                <div v-for="(type, index) in bnb.features.environmentTypes" :key="index" class="feature-tag environment">
+                  {{ type }}
+                </div>
+              </div>
+              <div v-else class="no-data">
+                <p>暫無環境特色資訊</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 第三行：價格資訊 + 聯絡資訊 -->
+          <div class="info-card compact">
+            <div class="card-header">
+              <div class="card-icon">💰</div>
+              <h3 class="card-title">價格資訊</h3>
+            </div>
+            <div class="card-content">
+              <div v-if="bnb.prices" class="price-grid">
+                <div v-if="bnb.prices.weekday" class="price-item">
+                  <div class="price-label">平日價格</div>
+                  <div class="price-amount">{{ bnb.prices.weekday }}</div>
+                </div>
+                <div v-if="bnb.prices.weekend" class="price-item">
+                  <div class="price-label">假日價格</div>
+                  <div class="price-amount">{{ bnb.prices.weekend }}</div>
+                </div>
+                <div v-if="bnb.prices.fullRentWeekday" class="price-item">
+                  <div class="price-label">平日包棟</div>
+                  <div class="price-amount">{{ bnb.prices.fullRentWeekday }}</div>
+                </div>
+                <div v-if="bnb.prices.fullRentWeekend" class="price-item">
+                  <div class="price-label">假日包棟</div>
+                  <div class="price-amount">{{ bnb.prices.fullRentWeekend }}</div>
+                </div>
+              </div>
+              <div v-else class="no-data">
+                <p>暫無價格資訊</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card compact">
+            <div class="card-header">
+              <div class="card-icon">📞</div>
+              <h3 class="card-title">聯絡資訊</h3>
+            </div>
+            <div class="card-content">
+              <div v-if="bnb.contact" class="contact-list">
+                <div v-if="bnb.contact.phone" class="contact-item">
+                  <div class="contact-icon">📱</div>
+                  <div class="contact-info">
+                    <div class="contact-label">電話</div>
+                    <a :href="`tel:${bnb.contact.phone}`" class="contact-link">{{ bnb.contact.phone }}</a>
+                  </div>
+                </div>
+                <div v-if="bnb.contact.website" class="contact-item">
+                  <div class="contact-icon">🌐</div>
+                  <div class="contact-info">
+                    <div class="contact-label">網站</div>
+                    <a :href="bnb.contact.website" target="_blank" class="contact-link">前往官網</a>
+                  </div>
+                </div>
+                <div v-if="bnb.contact.line" class="contact-item">
+                  <div class="contact-icon">💬</div>
+                  <div class="contact-info">
+                    <div class="contact-label">LINE</div>
+                    <a :href="bnb.contact.line" target="_blank" class="contact-link">加入LINE</a>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="no-data">
+                <p>暫無聯絡資訊</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 位置資訊 -->
+          <div class="info-card full-width">
+            <div class="card-header">
+              <div class="card-icon">📍</div>
+              <h3 class="card-title">位置資訊</h3>
+            </div>
+            <div class="card-content">
+              <div class="location-info">
+                <div class="location-tag">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                  </svg>
+                  <span>{{ bnb.area }}</span>
+                </div>
+                <div v-if="bnb.address" class="address-tag">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4z"/>
+                    <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+                  </svg>
+                  <span>{{ bnb.address }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 業者登入按鈕 -->
+        <div class="owner-login-section">
+          <NuxtLink to="/homestay-login" class="owner-login-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+            </svg>
+            <span>{{ bnb.name }} 的業者登入</span>
+          </NuxtLink>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'nuxt/app';
+import useHomestayStore from '~/store/homestay.js';
+
+// 直接從URL獲取ID參數
+const route = useRoute();
+const bnbId = route.params.id;
+const bnb = ref(null);
+const loading = ref(true);
+const error = ref(null);
+
+// 使用 homestay store
+const homestayStore = useHomestayStore();
+
+// 調試信息
+console.log('路由參數:', route.params);
+console.log('民宿ID:', bnbId);
+
+// 獲取民宿詳細資料
+const fetchBnbDetail = async () => {
+  try {
+    loading.value = true;
+    console.log('正在獲取民宿詳情，ID:', bnbId);
+    
+        // 首先嘗試從 store 獲取資料
+    console.log('🔍 嘗試從 store 獲取民宿資料, ID:', bnbId);
+    let homestayData = homestayStore.getHomestayById(bnbId);
+    
+    if (homestayData) {
+      console.log('✅ 從 store 成功獲取民宿資料:', homestayData.name);
+      bnb.value = homestayData;
+      // 更新查看次數
+      homestayStore.updateViewCount(bnbId);
+    } else {
+      console.log('❌ store 中沒有找到民宿，可能是直接輸入URL訪問');
+      console.log('📊 store 狀態: hasData =', homestayStore.hasData, ', 民宿數量 =', homestayStore.getAllHomestays.length);
+      
+      // 直接使用單一民宿API，不再調用fetchHomestays
+      console.log('📡 調用單一民宿 API 獲取資料');
+      const response = await fetch(`/api/fetchBnbDetail?id=${bnbId}`);
+      console.log('API響應狀態:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`API返回錯誤狀態: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('獲取的數據:', data);
+      
+      if (data.bnb) {
+        bnb.value = data.bnb;
+        console.log('✅ 已設置民宿數據:', bnb.value.name);
+      } else if (data.error) {
+        error.value = data.error;
+        console.error('API返回錯誤:', data.error);
+      } else {
+        error.value = '找不到民宿資料';
+        console.error('API未返回有效數據');
+      }
+    }
+    
+    loading.value = false;
+  } catch (err) {
+    error.value = err.message;
+    loading.value = false;
+    console.error('獲取民宿詳細資料失敗', err);
+  }
+};
+
+onMounted(() => {
+  console.log('組件已掛載，開始獲取數據');
+  fetchBnbDetail();
+});
+</script>
+
+<style lang="scss" scoped>
+.homestay-detail {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0;
+}
+
+// 載入狀態
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 20px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 18px;
+  color: #666;
+  font-weight: 500;
+}
+
+// 錯誤狀態
+.error-container, .not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 20px;
+  padding: 20px;
+  text-align: center;
+}
+
+.error-icon, .not-found-icon {
+  font-size: 64px;
+  margin-bottom: 10px;
+}
+
+.error-title, .not-found-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.error-message, .not-found-message {
+  font-size: 16px;
+  color: #666;
+  margin: 10px 0;
+}
+
+.retry-btn, .back-to-list-btn {
+  padding: 12px 24px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+  }
+}
+
+// 主要內容
+.homestay-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+// 頂部導航
+.top-nav {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 15px;
+  }
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    color: #2980b9;
+    transform: translateX(-2px);
+  }
+}
+
+.owner-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
+}
+
+.owner-hint {
+  color: #666;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+// 主要內容區
+.main-content {
+  padding: 25px 20px;
+  
+  @media (max-width: 768px) {
+    padding: 20px 15px;
+  }
+}
+
+// 民宿標題區
+.homestay-header {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 25px;
+  margin-bottom: 32px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+}
+
+.homestay-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.homestay-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+  line-height: 1.2;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+}
+
+.homestay-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.location-tag, .address-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  border-radius: 8px;
+  color: #2980b9;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.address-tag {
+  background: rgba(46, 204, 113, 0.1);
+  border-color: rgba(46, 204, 113, 0.2);
+  color: #27ae60;
+}
+
+// 民宿圖片
+.homestay-image-container {
+  position: relative;
+}
+
+.homestay-image {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.main-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  display: block;
+  
+  @media (max-width: 768px) {
+    height: 250px;
+  }
+}
+
+.image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  padding: 20px;
+  color: white;
+}
+
+.image-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.no-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 16px;
+  color: #6c757d;
+  
+  p {
+    margin-top: 10px;
+    font-size: 16px;
+  }
+}
+
+// 資訊卡片
+.info-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  &.compact {
+    // 保持原有樣式不變
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f1f3f4;
+}
+
+.card-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  color: white;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.card-content {
+  line-height: 1.6;
+}
+
+.description {
+  color: #5a6c7d;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+// 標籤容器
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.feature-tag {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  
+  &.environment {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  }
+}
+
+// 住宿人數容量樣式
+.guest-capacity {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+.capacity-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  border-radius: 16px;
+  color: white;
+  width: 100%;
+  max-width: 300px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.capacity-icon {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    color: white;
+  }
+}
+
+.capacity-details {
+  flex: 1;
+  text-align: left;
+}
+
+.capacity-range {
+  margin-bottom: 5px;
+}
+
+.guest-count {
+  font-size: 18px;
+  font-weight: 600;
+  display: block;
+}
+
+.capacity-description {
+  font-size: 13px;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+// 價格網格
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.price-item {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  border-left: 4px solid #28a745;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+  }
+}
+
+.price-label {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.price-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #28a745;
+}
+
+// 聯絡清單
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #e9ecef;
+    transform: translateX(3px);
+  }
+}
+
+.contact-icon {
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  border-radius: 6px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.contact-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.contact-link {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  display: block;
+  word-break: break-all;
+  
+  &:hover {
+    color: #2980b9;
+    text-decoration: underline;
+  }
+}
+
+// 無資料狀態
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #95a5a6;
+  font-style: italic;
+  
+  p {
+    margin: 0;
+    font-size: 15px;
+  }
+}
+
+// 位置資訊樣式
+.location-info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.location-tag, .address-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 15px;
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+  
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.address-tag {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+  
+  &:hover {
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+  }
+}
+
+// 業者登入按鈕區域
+.owner-login-section {
+  margin-top: 40px;
+  padding: 30px;
+  text-align: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+.owner-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
+    text-decoration: none;
+  }
+  
+  svg {
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover svg {
+    transform: scale(1.1);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 10px 24px;
+    font-size: 14px;
+    gap: 8px;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+// 響應式設計
+@media (max-width: 768px) {
+  .homestay-header {
+    text-align: center;
+  }
+  
+  .homestay-meta {
+    align-items: center;
+  }
+  
+  .location-tag, .address-tag {
+    justify-content: center;
+  }
+  
+  .price-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .contact-item {
+    flex-direction: row;
+    text-align: left;
+    gap: 10px;
+    padding: 8px 12px;
+  }
+  
+  .contact-info {
+    text-align: left;
+  }
+  
+  .contact-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+  
+  .location-info {
+    gap: 10px;
+  }
+  
+  .location-tag, .address-tag {
+    padding: 10px 14px;
+    font-size: 14px;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+  
+  // 手機版人數容量樣式
+  .capacity-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    max-width: 100%;
+  }
+  
+  .capacity-details {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .homestay-title {
+    font-size: 1.5rem;
+  }
+  
+  .info-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .owner-login-section {
+    margin-top: 30px;
+    padding: 20px;
+  }
+  
+  .price-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tag-container {
+    justify-content: center;
+  }
+  
+  // 小螢幕人數容量樣式
+  .capacity-info {
+    padding: 15px;
+  }
+  
+  .guest-count {
+    font-size: 16px;
+  }
+  
+  .capacity-description {
+    font-size: 12px;
+  }
+  
+  .contact-item {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  
+  .contact-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+  
+  .contact-label {
+    font-size: 11px;
+  }
+  
+  .contact-link {
+    font-size: 14px;
+  }
+  
+  .location-tag, .address-tag {
+    padding: 8px 12px;
+    font-size: 13px;
+    
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+}
+</style> 

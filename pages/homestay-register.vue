@@ -110,36 +110,28 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label required">所在地區</label>
+                <label class="form-label required">所在鄉鎮市</label>
                 <select
                   v-model="formData.location"
                   class="form-select"
                   required
                   :disabled="submitting"
                 >
-                  <option value="">請選擇地區</option>
-                  <option value="礁溪溫泉區">礁溪溫泉區</option>
-                  <option value="宜蘭市區">宜蘭市區</option>
-                  <option value="羅東夜市">羅東夜市</option>
-                  <option value="冬山河">冬山河</option>
-                  <option value="蘇澳">蘇澳</option>
-                  <option value="頭城">頭城</option>
-                  <option value="三星">三星</option>
-                  <option value="員山">員山</option>
-                  <option value="五結">五結</option>
-                  <option value="壯圍">壯圍</option>
-                  <option value="大同">大同</option>
-                  <option value="南澳">南澳</option>
+                  <option value="">請選擇鄉鎮市</option>
+                  <option v-for="township in townships" :key="township.zipcode" :value="township.name">
+                    {{ township.name }}
+                  </option>
                 </select>
               </div>
               
               <div class="form-group">
-                <label class="form-label">詳細地址</label>
+                <label class="form-label required">詳細地址</label>
                 <input
                   v-model="formData.city"
                   type="text"
                   class="form-input"
                   placeholder="請輸入詳細地址"
+                  required
                   :disabled="submitting"
                 />
               </div>
@@ -377,7 +369,7 @@
           <p>審核結果將發送至您的信箱：<strong>{{ formData.email }}</strong></p>
           <div class="success-actions">
             <button @click="resetForm" class="btn-primary">申請其他民宿</button>
-            <nuxt-link to="/bnbs" class="btn-secondary">瀏覽民宿列表</nuxt-link>
+            <nuxt-link to="/homestay-list" class="btn-secondary">瀏覽民宿列表</nuxt-link>
           </div>
         </div>
 
@@ -395,6 +387,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { township } from '~/utils/category.js';
 
 // SEO 設定
 useHead({
@@ -448,6 +441,9 @@ const availableTypes = [
   '秘境隱居型'
 ];
 
+// 鄉鎮市資料
+const townships = township;
+
 // 驗證邏輯
 const canNextStep = computed(() => {
   if (currentStep.value === 1) {
@@ -459,7 +455,7 @@ const canNextStep = computed(() => {
            formData.value.password.length >= 6;
   }
   if (currentStep.value === 2) {
-    return formData.value.name && formData.value.location;
+    return formData.value.name && formData.value.location && formData.value.city;
   }
   return true;
 });

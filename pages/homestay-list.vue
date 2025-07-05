@@ -216,15 +216,21 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { navigateTo } from 'nuxt/app';
+import useHomestayStore from '~/store/homestay.js';
 
-const bnbsData = ref([]);
-const loading = ref(true);
-const error = ref(null);
+// 使用 homestay store
+const homestayStore = useHomestayStore();
+
 const searchText = ref('');
 const selectedArea = ref(null);
 const guestCount = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 8;
+
+// 從store獲取資料
+const bnbsData = computed(() => homestayStore.getAllHomestays);
+const loading = computed(() => homestayStore.getLoading);
+const error = computed(() => homestayStore.getError);
 
 // 熱門環境標籤 - 更新為與新資料庫匹配
 const hotEnvironmentTypes = [
@@ -234,18 +240,8 @@ const hotEnvironmentTypes = [
   '包棟'
 ];
 
-// 獲取所有區域
-const areas = computed(() => {
-  const areaSet = new Set();
-  if (Array.isArray(bnbsData.value)) {
-    bnbsData.value.forEach(bnb => {
-      if (bnb.area) {
-        areaSet.add(bnb.area);
-      }
-    });
-  }
-  return Array.from(areaSet).sort();
-});
+// 獲取所有區域 - 使用store的getter
+const areas = computed(() => homestayStore.getAllAreas);
 
 // 除錯用：監控篩選條件變化
 const debugFilters = () => {
@@ -337,89 +333,41 @@ const filterByArea = () => {
   currentPage.value = 1;
 }
 
-// 從 MCP 獲取民宿資料
+// 從 store 獲取民宿資料
 const fetchBnbsData = async () => {
   console.log('=== fetchBnbsData 開始執行 ===');
+  console.log('📊 Store初始狀態檢查:');
+  console.log('- hasData:', homestayStore.hasData);
+  console.log('- 民宿數量:', homestayStore.getAllHomestays.length);
+  console.log('- loading:', homestayStore.getLoading);
+  console.log('- error:', homestayStore.getError);
   
   try {
-    console.log('設置 loading = true');
-    loading.value = true;
-    error.value = null;
+    // 使用 store 的 fetchHomestays 方法
+    console.log('🔄 開始從API獲取資料...');
+    await homestayStore.fetchHomestays();
+    console.log('✅ 從 store 獲取民宿資料成功');
     
-    console.log('開始載入民宿資料...');
+    console.log('📊 Store載入後狀態:');
+    console.log('- hasData:', homestayStore.hasData);
+    console.log('- 民宿數量:', homestayStore.getAllHomestays.length);
+    console.log('- loading:', homestayStore.getLoading);
+    console.log('- error:', homestayStore.getError);
     
-    // 使用 Nuxt 的 $fetch 工具獲取資料
-    const data = await $fetch('/api/fetchBnbs', {
-      query: {
-        limit: 100
-      }
-    });
-    console.log('API回傳資料:', data);
-    
-    if (data.success && data.homestays && Array.isArray(data.homestays)) {
-      console.log('開始處理民宿資料...');
-      
-      // 簡化的資料處理，避免複雜邏輯出錯
-      bnbsData.value = data.homestays.map(homestay => {
-        console.log('處理民宿:', homestay.name);
-        
-        // 簡化價格處理
-        const prices = {
-          weekday: homestay.min_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.min_price)}` : '請洽詢',
-          weekend: homestay.max_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.max_price)}` : '請洽詢',
-          fullRentWeekday: null,
-          fullRentWeekend: null
-        };
-        
-        return {
-        id: homestay.id,
-        name: homestay.name || '未命名民宿',
-        area: homestay.location || '未知地區',
-        description: homestay.capacity_description || '暫無描述',
-        image_urls: homestay.image_url ? [homestay.image_url] : [],
-          min_guests: homestay.min_guests || null,
-          max_guests: homestay.max_guests || null,
-        features: {
-            peopleTypes: [],
-          environmentTypes: homestay.types || []
-        },
-          prices: prices,
-        contact: {
-          phone: homestay.phone,
-          website: homestay.website,
-        },
-        featured: homestay.featured || false,
-          view_count: homestay.view_count || 0,
-          rating: homestay.rating || null,
-          total_reviews: homestay.total_reviews || 0
-        };
-      });
-      
-      console.log('資料處理完成，設置 bnbsData');
-      console.log('成功載入民宿資料:', bnbsData.value.length, '筆');
-      console.log('第一筆資料:', bnbsData.value[0]);
-      
-    } else {
-      console.error('API回傳格式錯誤:', data);
-      error.value = data.error || '獲取資料失敗';
-      bnbsData.value = [];
+    if (homestayStore.getAllHomestays.length > 0) {
+      console.log('📝 前3個民宿示例:', homestayStore.getAllHomestays.slice(0, 3).map(h => ({
+        id: h.id,
+        name: h.name,
+        type: typeof h.id
+      })));
     }
-    
-  } catch (err) {
-    console.error('載入民宿資料失敗:', err);
-    error.value = `載入失敗: ${err.message}`;
-    bnbsData.value = [];
-  } finally {
-    // 無論成功或失敗都要設置 loading = false
-    loading.value = false;
-    console.log('finally: 設置 loading = false');
     
     // 確保響應式更新
     await nextTick();
     
     // 立即檢查篩選狀態
     setTimeout(() => {
-      console.log('=== 狀態檢查 ===');
+      console.log('=== 最終狀態檢查 ===');
       console.log('loading:', loading.value);
       console.log('error:', error.value);
       console.log('bnbsData.length:', bnbsData.value.length);
@@ -427,6 +375,9 @@ const fetchBnbsData = async () => {
       console.log('paginatedBnbs.length:', paginatedBnbs.value.length);
       debugFilters();
     }, 100);
+    
+  } catch (err) {
+    console.error('載入民宿資料失敗:', err);
   }
   
   console.log('=== fetchBnbsData 執行完成 ===');
@@ -473,6 +424,12 @@ const navigateToBnb = (id, event) => {
   console.log('=== 點擊事件觸發 ===');
   console.log('民宿 ID:', id);
   
+  // 檢查store狀態
+  console.log('🏪 導航前Store狀態:');
+  console.log('- hasData:', homestayStore.hasData);
+  console.log('- 民宿數量:', homestayStore.getAllHomestays.length);
+  console.log('- 目標民宿是否存在:', homestayStore.getHomestayById(id) ? '是' : '否');
+  
   // 確保阻止所有默認行為
   if (event) {
     event.preventDefault();
@@ -485,12 +442,12 @@ const navigateToBnb = (id, event) => {
     return false;
   }
 
-  // 延遲導航，確保事件處理完成
-  setTimeout(() => {
-    const targetUrl = `/homestays/${id}`;
-    console.log('延遲導航到:', targetUrl);
-    window.location.href = targetUrl;
-  }, 100);
+  // 先更新查看次數
+  homestayStore.updateViewCount(id);
+  
+  // 使用 navigateTo 而不是 window.location.href 來保持store狀態
+  console.log('🚀 使用 navigateTo 導航到:', `/homestays/${id}`);
+  navigateTo(`/homestays/${id}`);
   
   return false;
 }

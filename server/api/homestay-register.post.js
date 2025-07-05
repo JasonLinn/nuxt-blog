@@ -21,10 +21,10 @@ export default defineEventHandler(async (event) => {
     } = body;
 
     // 驗證必要欄位
-    if (!account || !password || !email || !name || !location) {
+    if (!account || !password || !email || !name || !location || !city) {
       throw createError({
         statusCode: 400,
-        statusMessage: '帳號、密碼、信箱、民宿名稱和地區為必填欄位'
+        statusMessage: '帳號、密碼、信箱、民宿名稱、地區和詳細地址為必填欄位'
       });
     }
 
@@ -115,7 +115,7 @@ export default defineEventHandler(async (event) => {
         account, // 保持為字串，因為資料庫 id 欄位是 VARCHAR 類型
         name,
         location,
-        city || null,
+        city, // city 已經在前面驗證過為必填，不需要 || null
         image_url || null,
         website || null,
         phone || null,
