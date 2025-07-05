@@ -138,7 +138,58 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">民宿圖片網址</label>
+              <label class="form-label">民宿圖片</label>
+              
+              <!-- 手動輸入圖片 URL -->
+              <div class="input-group">
+                <input
+                  v-model="coverUrl"
+                  type="url"
+                  class="form-input"
+                  placeholder="請輸入圖片 URL"
+                  :disabled="submitting"
+                  @keyup.enter="addCoverUrl"
+                />
+                <button 
+                  @click.prevent="addCoverUrl" 
+                  class="add-url-btn"
+                  :disabled="!coverUrl || submitting"
+                >
+                  添加圖片 URL
+                </button>
+              </div>
+              
+              <!-- 檔案上傳 -->
+              <div class="file-upload-section">
+                <input 
+                  type="file" 
+                  @change="handleFileUpload" 
+                  accept="image/*" 
+                  multiple 
+                  :disabled="submitting"
+                  class="file-input"
+                />
+                <div class="upload-hint">支援 JPG、PNG、GIF 格式，單檔最大 5MB</div>
+              </div>
+              
+              <!-- 圖片預覽 -->
+              <div v-if="formData.images && formData.images.length > 0" class="image-gallery">
+                <div v-for="(url, index) in formData.images" :key="index" class="image-item">
+                  <img :src="url" :alt="'民宿圖片 ' + (index + 1)" class="preview-image" />
+                  <button 
+                    @click.prevent="removeImage(index)" 
+                    class="remove-btn"
+                    :disabled="submitting"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 保留原有的單一圖片URL欄位作為向後相容 -->
+            <div class="form-group" v-if="!formData.images || formData.images.length === 0">
+              <label class="form-label">主要圖片網址 (選填)</label>
               <input
                 v-model="formData.image_url"
                 type="url"
@@ -417,6 +468,7 @@ const formData = ref({
   location: '',
   city: '',
   image_url: '',
+  images: [], // 新增多圖片陣列
   capacity_description: '',
   min_guests: null,
   max_guests: null,
@@ -433,6 +485,9 @@ const formData = ref({
   },
   agreeTerms: false
 });
+
+// 圖片上傳相關
+const coverUrl = ref('');
 
 // 可選擇的環境類型
 const availableTypes = [
@@ -471,6 +526,79 @@ const nextStep = () => {
   }
 };
 
+// 處理檔案上傳
+const handleFileUpload = async (event) => {
+  const files = event.target.files;
+  if (!files.length) return;
+
+  for (let file of files) {
+    try {
+      console.log('開始上傳文件:', file.name);
+      
+      // 驗證文件類型
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('只允許上傳 JPEG、PNG 和 GIF 格式的圖片');
+      }
+
+      // 驗證文件大小 (5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        throw new Error('文件太大，最大允許 5MB');
+      }
+
+      // 創建 FormData
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // 上傳到後端 API
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || '上傳失敗');
+      }
+
+      console.log('上傳成功:', data.url);
+      
+      // 添加到 formData.images 陣列
+      if (!formData.value.images) formData.value.images = [];
+      formData.value.images.push(data.url);
+
+    } catch (error) {
+      console.error('上傳錯誤:', error);
+      alert(`上傳失敗：${error.message}`);
+    }
+  }
+};
+
+// 添加手動輸入的圖片URL
+const addCoverUrl = () => {
+  if (coverUrl.value.trim()) {
+    try {
+      new URL(coverUrl.value);
+      if (!formData.value.images) {
+        formData.value.images = [];
+      }
+      formData.value.images.push(coverUrl.value.trim());
+      coverUrl.value = '';
+    } catch (e) {
+      alert('請輸入有效的圖片 URL');
+    }
+  }
+};
+
+// 移除圖片
+const removeImage = (index) => {
+  if (formData.value.images && formData.value.images.length > index) {
+    formData.value.images.splice(index, 1);
+  }
+};
+
 // 提交表單
 const handleSubmit = async () => {
   if (!canSubmit.value) return;
@@ -502,6 +630,7 @@ const resetForm = () => {
   currentStep.value = 1;
   showSuccess.value = false;
   errorMessage.value = '';
+  coverUrl.value = '';
   
   formData.value = {
     account: '',
@@ -512,6 +641,7 @@ const resetForm = () => {
     location: '',
     city: '',
     image_url: '',
+    images: [], // 重置圖片陣列
     capacity_description: '',
     min_guests: null,
     max_guests: null,
@@ -962,6 +1092,118 @@ const resetForm = () => {
   
   .checkbox-group {
     grid-template-columns: 1fr;
+  }
+}
+
+// 新增圖片上傳樣式
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  
+  .form-input {
+    flex: 1;
+  }
+  
+  .add-url-btn {
+    padding: 12px 20px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    
+    &:hover:not(:disabled) {
+      background: #5a6fd8;
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.file-upload-section {
+  margin-bottom: 15px;
+  
+  .file-input {
+    width: 100%;
+    padding: 12px;
+    border: 2px dashed #e1e5e9;
+    border-radius: 8px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover:not(:disabled) {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+  
+  .upload-hint {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 5px;
+  }
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+  
+  .image-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    .preview-image {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .remove-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      background: rgba(220, 53, 69, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      
+      &:hover:not(:disabled) {
+        background: #dc3545;
+        transform: scale(1.1);
+      }
+      
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
   }
 }
 </style> 

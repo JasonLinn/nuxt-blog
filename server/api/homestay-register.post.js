@@ -12,12 +12,14 @@ export default defineEventHandler(async (event) => {
       location,
       city,
       image_url,
+      images,
       capacity_description,
       min_guests,
       max_guests,
       types,
       phone,
-      website
+      website,
+      pricing
     } = body;
 
     // 驗證必要欄位
@@ -81,6 +83,16 @@ export default defineEventHandler(async (event) => {
         });
       }
 
+      // 處理圖片資料
+      let finalImages = [];
+      if (images && Array.isArray(images) && images.length > 0) {
+        // 如果有新的圖片陣列，使用它
+        finalImages = images;
+      } else if (image_url) {
+        // 如果沒有新的圖片陣列但有舊的單一圖片URL，使用它
+        finalImages = [image_url];
+      }
+
       // 加密密碼
       const saltRounds = 12;
       const passwordHash = await bcrypt.hash(password, saltRounds);
@@ -93,6 +105,7 @@ export default defineEventHandler(async (event) => {
           location,
           city,
           image_url,
+          images,
           website,
           phone,
           capacity_description,
@@ -103,10 +116,11 @@ export default defineEventHandler(async (event) => {
           status,
           available,
           featured,
-          created_at
+          created_at,
+          updated_at
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 
-          $11, $12, 'pending', false, false, CURRENT_TIMESTAMP
+          $11, $12, 'pending', false, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         )
         RETURNING id, name, status
       `;
@@ -116,7 +130,8 @@ export default defineEventHandler(async (event) => {
         name,
         location,
         city, // city 已經在前面驗證過為必填，不需要 || null
-        image_url || null,
+        finalImages.length > 0 ? finalImages[0] : '',
+        finalImages,
         website || null,
         phone || null,
         capacity_description || null,
