@@ -106,15 +106,15 @@
             <h3 class="section-title">社群媒體連結</h3>
             
             <div class="form-row">
-              <div class="form-group">
+            <div class="form-group">
                 <label class="form-label">LINE 連結</label>
-                <input
+              <input
                   v-model="editData.social.line"
-                  type="url"
-                  class="form-input"
+                type="url"
+                class="form-input"
                   placeholder="https://line.me/ti/p/YOUR_LINE_ID"
-                  :disabled="saving"
-                />
+                :disabled="saving"
+              />
               </div>
               
               <div class="form-group">
@@ -437,21 +437,7 @@
               </div>
             </div>
 
-            <!-- 旅遊所在地 -->
-            <div class="form-group">
-              <label class="form-label">📍 鄰近旅遊景點</label>
-              <div class="checkbox-group">
-                <label v-for="location in areaLocations" :key="location" class="checkbox-item">
-                  <input
-                    v-model="editData.area_locations"
-                    type="checkbox"
-                    :value="location"
-                    :disabled="saving"
-                  />
-                  <span class="checkbox-label">{{ location }}</span>
-                </label>
-              </div>
-            </div>
+
 
             <!-- 服務內容 -->
             <div class="form-group">
@@ -545,7 +531,6 @@ const editData = ref({
   available: true,
   types: [],
   theme_features: [],
-  area_locations: [],
   service_amenities: [],
   pricing: {
     weekdayRoom: null,
@@ -716,11 +701,7 @@ const themeFeatures = [
   '車站周邊住宿'
 ];
 
-// 旅遊所在地選項
-const areaLocations = [
-  '宜蘭市', '五結鄉', '頭城鎮', '冬山鄉', '礁溪鄉', 
-  '蘇澳鎮', '壯圍鄉', '三星鄉', '員山鄉', '大同鄉', '羅東鎮'
-];
+
 
 // 服務內容選項
 const serviceAmenities = [
@@ -762,9 +743,9 @@ const setupEditDataFromAuth = (homestayData) => {
     } else if (homestayData.image_url) {
       images = [homestayData.image_url];
     }
-    
-    // 設定編輯資料
-    editData.value = {
+      
+      // 設定編輯資料
+      editData.value = {
       name: homestayData.name || '',
       location: homestayData.location || '',
       city: homestayData.city || '',
@@ -784,18 +765,17 @@ const setupEditDataFromAuth = (homestayData) => {
       available: homestayData.available || true,
       types: homestayData.types || [],
       theme_features: homestayData.theme_features || [],
-      area_locations: homestayData.area_locations || [],
       service_amenities: homestayData.service_amenities || [],
-      pricing: {
+        pricing: {
         weekdayRoom: null,
         weekendRoom: null,
         weekdayPackage: null,
         weekendPackage: null
-      }
-    };
-    
-    // 保存原始資料
-    originalData.value = JSON.parse(JSON.stringify(editData.value));
+        }
+      };
+      
+      // 保存原始資料
+      originalData.value = JSON.parse(JSON.stringify(editData.value));
     
   } catch (error) {
     console.error('設定編輯資料失敗:', error);

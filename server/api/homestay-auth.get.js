@@ -42,7 +42,6 @@ export default defineEventHandler(async (event) => {
         min_guests,
         max_guests,
         theme_features,
-        area_locations,
         service_amenities,
         available,
         status

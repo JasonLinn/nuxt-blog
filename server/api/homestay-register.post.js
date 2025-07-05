@@ -18,7 +18,6 @@ export default defineEventHandler(async (event) => {
       max_guests,
       types,
       theme_features,
-      area_locations,
       service_amenities,
       phone,
       website,
@@ -119,7 +118,6 @@ export default defineEventHandler(async (event) => {
           min_guests,
           max_guests,
           theme_features,
-          area_locations,
           service_amenities,
           email,
           password_hash,
@@ -130,7 +128,7 @@ export default defineEventHandler(async (event) => {
           updated_at
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 
-          $11, $12, $13, $14, $15, $16, $17, $18, 'pending', false, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+          $11, $12, $13, $14, $15, $16, $17, 'pending', false, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         )
         RETURNING id, name, status
       `;
@@ -151,7 +149,6 @@ export default defineEventHandler(async (event) => {
         min_guests || null,
         max_guests || null,
         theme_features || [],
-        area_locations || [],
         service_amenities || [],
         email,
         passwordHash

@@ -241,20 +241,7 @@
             </div>
           </div>
 
-          <!-- 鄰近景點 -->
-          <div v-if="bnb.features && bnb.features.areaLocations && bnb.features.areaLocations.length > 0" class="info-card compact">
-            <div class="card-header">
-              <div class="card-icon">📍</div>
-              <h3 class="card-title">鄰近景點</h3>
-            </div>
-            <div class="card-content">
-              <div class="tag-container">
-                <div v-for="(location, index) in bnb.features.areaLocations" :key="index" class="feature-tag location">
-                  {{ location }}
-                </div>
-              </div>
-            </div>
-          </div>
+
 
           <!-- 服務設施 -->
           <div v-if="bnb.features && bnb.features.serviceAmenities && bnb.features.serviceAmenities.length > 0" class="info-card compact">
@@ -1348,16 +1335,7 @@ console.log('民宿ID:', bnbId);
     }
   }
   
-  &.location {
-    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-    color: #333;
-    box-shadow: 0 2px 8px rgba(255, 154, 158, 0.3);
-    
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(255, 154, 158, 0.4);
-    }
-  }
+
   
   &.service {
     background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
