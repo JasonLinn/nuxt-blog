@@ -1,9 +1,4 @@
-import { Pool } from '@neondatabase/serverless'
-
-// 優惠券資料庫連線
-const couponPool = new Pool({
-  connectionString: 'postgresql://nuxt-marketing_owner:ys7ZNVhOrg9c@ep-rough-voice-a1ele0z6-pooler.ap-southeast-1.aws.neon.tech/nuxt-marketing'
-})
+import { couponPool } from '../utils/coupon-db.js'
 
 export default defineEventHandler(async (event) => {
   try {
