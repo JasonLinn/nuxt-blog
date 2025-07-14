@@ -1,10 +1,19 @@
-import { pool } from '@/server/utils/db'
+import pkg from 'pg'
+const { Pool } = pkg
+
+// 優惠券專用資料庫連線
+const couponPool = new Pool({
+  connectionString: 'postgresql://nuxt-marketing_owner:ys7ZNVhOrg9c@ep-rough-voice-a1ele0z6-pooler.ap-southeast-1.aws.neon.tech/nuxt-marketing?sslmode=require&channel_binding=require',
+  ssl: {
+    rejectUnauthorized: false
+  }
+})
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     console.log(event, body, 'dfadfsdfcccc')
 
-  const couponRecord = await pool
+  const couponRecord = await couponPool
     .query(
       'UPDATE "user" SET "coupons" =  $1 WHERE "user_id" = $2 RETURNING *;',
       [body.coupons, body.userId]
