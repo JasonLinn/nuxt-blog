@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   }
   const articleId = getRouterParam(event, 'id')
 
-  const result = await pool
+  const result = await couponPool
     .query('DELETE FROM "article" WHERE "id" = $1;', [articleId])
     .catch((error) => {
       console.error(error)
