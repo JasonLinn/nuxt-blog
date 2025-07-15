@@ -115,7 +115,11 @@ const store = useStore();
 const userName = store.getUserDisplayName
 const userId = store.getUserId
 store.getCoupons(userId)
-const coupons = computed(() => store.getUserCoupons)
+const coupons = computed(() => {
+  const data = store.getUserCoupons
+  // 確保回傳值為陣列且過濾掉 null/undefined
+  return Array.isArray(data) ? data.filter(Boolean) : []
+})
 
 const accordionItems = [
   {
