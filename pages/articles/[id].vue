@@ -240,14 +240,23 @@ const checkIsOnce = () => {
   const whiteList = []
   // 查詢該帳號是否領過
   wasGet = userData?.value?.coupons.some((cup)=> {
-    return JSON.parse(cup).id == article.value.id
+    try {
+      const parsed = JSON.parse(cup)
+      return parsed && article.value && parsed.id == article.value.id
+    } catch (e) {
+      console.log('JSON.parse 失敗:', cup, e)
+      return false
+    }
   })
-  return wasGet && article.value.isonce
+  return wasGet && article.value && article.value.isonce
 }
 
 const handleDeleteArticle = () => {
   if (!process.client) return;
-  
+  if (!article.value) {
+    console.log('無法刪除，article 不存在')
+    return
+  }
   const answer = confirm('你確定要刪除優惠券嗎？')
 
   if (answer) {
@@ -258,13 +267,16 @@ const handleDeleteArticle = () => {
         navigateTo('/')
       })
       .catch((error) => {
-        console.error(error)
-        alert(error)
+        console.log(error)
       })
   }
 }
 
 const sendPatch = async () => {
+  if (!article.value || typeof article.value.amount !== 'number') {
+    console.log('article.value 或 amount 無效', article.value)
+    return
+  }
   await $fetch(`/api/cupon`, {
       method: 'PATCH',
         body: {
@@ -273,14 +285,22 @@ const sendPatch = async () => {
         }
     })
     .then((response) => {
-      article.value.amount = response.amount
+      if (response && typeof response.amount === 'number') {
+        article.value.amount = response.amount
+      } else {
+        console.log('PATCH 回傳 amount 無效', response)
+      }
     })
     .catch((error) => {
-      if (process.client) alert(error)
+      if (process.client) console.log(error)
     })
 }
 
 const patchUser = async (profile) => {
+  if (!article.value) {
+    console.log('patchUser: article 不存在')
+    return
+  }
   // 設定推薦店家
   article.value.referral = referralStore.value
   //增加領取時間
@@ -288,7 +308,11 @@ const patchUser = async (profile) => {
   //增加條碼數據
   article.value.qrCodeData = qrCodeData.value
   //暫時填進已領優惠券
-  userData?.value?.coupons.push(JSON.stringify(article.value))
+  if (userData?.value?.coupons && Array.isArray(userData.value.coupons)) {
+    userData.value.coupons.push(JSON.stringify(article.value))
+  } else {
+    console.log('userData.value.coupons 無效', userData.value)
+  }
   store.setUser(userData)
   //打API更新資料庫
   await $fetch(`/api/user/appendCoupon`, {
@@ -303,7 +327,7 @@ const patchUser = async (profile) => {
       navigateTo('/userInfo')
     })
     .catch((error) => {
-      if (process.client) alert(error)
+      if (process.client) console.log(error)
     })
 }
 
