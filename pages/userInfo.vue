@@ -5,7 +5,7 @@
             <!-- <textarea name="" id="" cols="30" rows="10" v-model="text"></textarea> -->
             <h2 class="cupon-geted">{{userName}} 您好，以下是已領優惠券：</h2>
             <hr>
-            <div v-if="coupons" class="coupon-list">
+            <div v-if="coupons && Array.isArray(coupons) && coupons.length" class="coupon-list">
                 <div v-if="!coupons?.length">尚未領取優惠券</div>
                 <Icon v-if="!coupons?.length" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
                 <article
