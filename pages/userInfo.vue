@@ -200,7 +200,7 @@ const received = (e) => {
       .then((response) => {
         console.log(response)
       })
-      .catch((error) => alert(error))
+      .catch((error) => console.log(error))
 
 
     $fetch(`/api/user/updateCoupon`, {
@@ -214,7 +214,7 @@ const received = (e) => {
       alert('已標註兌換!')
       await store.setCoupons(newCoupons)
     })
-    .catch((error) => alert(error))
+    .catch((error) => console.log(error))
   }
 }
 
