@@ -9,6 +9,14 @@
         <p class="my-2 text-rose-500">{{ error }}</p>
       </div>
       <div v-else-if="article" class="mb-8 flex w-full flex-col justify-center md:max-w-3xl">
+        <!-- 麵包屑 -->
+        <nav class="mb-4 text-sm">
+          <div class="flex items-center gap-2 text-gray-500">
+            <NuxtLink to="/" class="hover:text-blue-600">首頁</NuxtLink>
+            <span class="text-gray-400">/</span>
+            <span class="text-gray-700">{{ article.title }}</span>
+          </div>
+        </nav>
         <!-- <div class="mt-4 flex justify-center">
           <img :src="article.cover" class="cupon-img" />
         </div> -->
