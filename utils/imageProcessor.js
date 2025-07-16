@@ -21,12 +21,14 @@ const config = {
     progressive: true
   },
   
-  // 裁剪設定
+  // 調整尺寸設定（預設不調整尺寸，只壓縮）
   resize: {
-    width: 800,
-    height: 600,
-    fit: 'cover', // cover, contain, fill, inside, outside
-    withoutEnlargement: true
+    enabled: false, // 預設不調整尺寸
+    maxWidth: 800,   // 最大寬度
+    maxHeight: 600,  // 最大高度
+    fit: 'inside',   // inside: 保持比例，完整顯示；contain: 同inside
+    withoutEnlargement: true, // 不放大小圖片
+    maintainAspectRatio: true // 保持原始比例
   },
   
   // 支援的圖片格式
@@ -78,14 +80,44 @@ async function processImage(inputPath, outputPath, options = {}) {
     const metadata = await processor.metadata()
     console.log(`📊 處理圖片: ${path.basename(inputPath)} (${metadata.width}x${metadata.height}, ${Math.round(metadata.size / 1024)}KB)`)
     
-    // 調整大小和裁剪
-    if (processingOptions.resize) {
-      processor = processor.resize({
-        width: processingOptions.resize.width,
-        height: processingOptions.resize.height,
-        fit: processingOptions.resize.fit,
-        withoutEnlargement: processingOptions.resize.withoutEnlargement
-      })
+    // 調整大小（僅在啟用時）
+    if (processingOptions.resize && processingOptions.resize.enabled) {
+      // 使用 maxWidth 和 maxHeight 來保持比例
+      const resizeOptions = {
+        fit: processingOptions.resize.fit || 'inside',
+        withoutEnlargement: processingOptions.resize.withoutEnlargement || true
+      }
+      
+      // 如果指定了最大寬度和高度，使用它們
+      if (processingOptions.resize.maxWidth && processingOptions.resize.maxHeight) {
+        resizeOptions.width = processingOptions.resize.maxWidth
+        resizeOptions.height = processingOptions.resize.maxHeight
+      } 
+      // 向後兼容：如果還在使用舊的 width/height 屬性
+      else if (processingOptions.resize.width && processingOptions.resize.height) {
+        resizeOptions.width = processingOptions.resize.width
+        resizeOptions.height = processingOptions.resize.height
+      }
+      // 如果只指定了寬度，按比例計算高度
+      else if (processingOptions.resize.maxWidth) {
+        resizeOptions.width = processingOptions.resize.maxWidth
+      }
+      // 如果只指定了高度，按比例計算寬度
+      else if (processingOptions.resize.maxHeight) {
+        resizeOptions.height = processingOptions.resize.maxHeight
+      }
+      
+      processor = processor.resize(resizeOptions)
+      
+      const sizeInfo = resizeOptions.width && resizeOptions.height 
+        ? `最大 ${resizeOptions.width}x${resizeOptions.height}`
+        : resizeOptions.width 
+          ? `最大寬度 ${resizeOptions.width}px`
+          : `最大高度 ${resizeOptions.height}px`
+      
+      console.log(`🔄 按比例調整: ${sizeInfo} (保持原始比例)`)
+    } else {
+      console.log(`📐 保持原始尺寸: ${metadata.width}x${metadata.height}`)
     }
     
     // 根據輸出格式設定壓縮
@@ -272,10 +304,12 @@ function getAllImageFiles(dir) {
 async function processForWeb(inputDir, customConfig = {}) {
   const webConfig = {
     resize: {
-      width: 800,
-      height: 600,
-      fit: 'cover',
-      withoutEnlargement: true
+      enabled: false, // 預設不調整尺寸，只壓縮
+      maxWidth: 800,  // 最大寬度
+      maxHeight: 600, // 最大高度
+      fit: 'inside',  // 保持比例
+      withoutEnlargement: true,
+      maintainAspectRatio: true
     },
     compression: {
       quality: 80,
@@ -297,10 +331,12 @@ async function processForWeb(inputDir, customConfig = {}) {
 async function createThumbnails(inputDir, customConfig = {}) {
   const thumbnailConfig = {
     resize: {
-      width: 300,
-      height: 200,
-      fit: 'cover',
-      withoutEnlargement: true
+      enabled: true, // 縮圖需要調整尺寸
+      maxWidth: 300,  // 最大寬度
+      maxHeight: 200, // 最大高度
+      fit: 'inside',  // 保持比例，不裁剪
+      withoutEnlargement: true,
+      maintainAspectRatio: true
     },
     compression: {
       quality: 70,

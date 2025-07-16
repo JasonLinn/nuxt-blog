@@ -17,7 +17,7 @@ const QUICK_CONFIGS = {
   shop: {
     path: path.join(__dirname, '../public/shop'),
     config: {
-      resize: { width: 800, height: 600, fit: 'cover' },
+      resize: { enabled: false }, // 只壓縮，不調整尺寸
       compression: { quality: 80 },
       outputFormat: 'jpeg',
       backup: { enabled: true, folder: 'backup_original' }
@@ -26,7 +26,7 @@ const QUICK_CONFIGS = {
   relative: {
     path: path.join(__dirname, '../public/relative'),
     config: {
-      resize: { width: 800, height: 600, fit: 'cover' },
+      resize: { enabled: false }, // 只壓縮，不調整尺寸
       compression: { quality: 80 },
       outputFormat: 'jpeg',
       backup: { enabled: true, folder: 'backup_original' }
@@ -35,7 +35,7 @@ const QUICK_CONFIGS = {
   all: {
     path: path.join(__dirname, '../public'),
     config: {
-      resize: { width: 800, height: 600, fit: 'cover' },
+      resize: { enabled: false }, // 只壓縮，不調整尺寸
       compression: { quality: 80 },
       outputFormat: 'jpeg',
       backup: { enabled: true, folder: 'backup_original' }
@@ -55,7 +55,7 @@ async function quickProcess(target = 'shop') {
   
   try {
     console.log(`📁 處理目錄: ${config.path}`)
-    console.log(`⚙️  配置: Web優化 (800x600, 80%品質)`)
+    console.log(`⚙️  配置: 壓縮優化 (保持原始尺寸, 80%品質)`)
     console.log(`💾 備份: 啟用`)
     
     const startTime = Date.now()

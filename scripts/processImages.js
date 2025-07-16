@@ -18,39 +18,39 @@ const IMAGE_DIRS = {
 
 // 處理模式配置
 const PROCESSING_MODES = {
+  compress: {
+    name: '純壓縮',
+    description: '只壓縮不改變尺寸 (80% 品質) - 推薦',
+    config: {
+      resize: { enabled: false },
+      compression: { quality: 80 },
+      outputFormat: 'jpeg'
+    }
+  },
   web: {
     name: 'Web 優化',
-    description: '適合網頁顯示的壓縮 (800x600, 80% 品質)',
+    description: '適合網頁顯示的壓縮 (最大800x600, 保持比例, 80% 品質)',
     config: {
-      resize: { width: 800, height: 600, fit: 'cover' },
+      resize: { enabled: true, maxWidth: 800, maxHeight: 600, fit: 'inside', maintainAspectRatio: true },
       compression: { quality: 80 },
       outputFormat: 'jpeg'
     }
   },
   mobile: {
     name: '手機優化', 
-    description: '適合手機顯示的壓縮 (600x400, 75% 品質)',
+    description: '適合手機顯示的壓縮 (最大600x400, 保持比例, 75% 品質)',
     config: {
-      resize: { width: 600, height: 400, fit: 'cover' },
+      resize: { enabled: true, maxWidth: 600, maxHeight: 400, fit: 'inside', maintainAspectRatio: true },
       compression: { quality: 75 },
       outputFormat: 'jpeg'
     }
   },
   thumbnail: {
     name: '縮圖',
-    description: '創建縮圖 (300x200, 70% 品質)',
+    description: '創建縮圖 (最大300x200, 保持比例, 70% 品質)',
     config: {
-      resize: { width: 300, height: 200, fit: 'cover' },
+      resize: { enabled: true, maxWidth: 300, maxHeight: 200, fit: 'inside', maintainAspectRatio: true },
       compression: { quality: 70 },
-      outputFormat: 'jpeg'
-    }
-  },
-  compress: {
-    name: '壓縮',
-    description: '只壓縮不改變尺寸 (85% 品質)',
-    config: {
-      resize: null,
-      compression: { quality: 85 },
       outputFormat: 'jpeg'
     }
   },
@@ -58,7 +58,7 @@ const PROCESSING_MODES = {
     name: 'WebP 轉換',
     description: '轉換為 WebP 格式 (80% 品質)',
     config: {
-      resize: { width: 800, height: 600, fit: 'cover' },
+      resize: { enabled: false },
       compression: { quality: 80 },
       outputFormat: 'webp'
     }
