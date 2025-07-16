@@ -37,9 +37,14 @@
         <h2 class="tag-title">
           熱門:
         </h2>
-        <span class="hot-tag" v-for="tag in hotTag" :key="tag" @click="clickTag(tag)">
-          {{ tag }}
-        </span>
+        <template v-if="couponObject.pending">
+          <span class="hot-tag skeleton skeleton-hot-tag" v-for="n in 3" :key="`skeleton-tag-${n}`">&nbsp;</span>
+        </template>
+        <template v-else>
+          <span class="hot-tag" v-for="tag in hotTag" :key="tag" @click="clickTag(tag)">
+            {{ tag }}
+          </span>
+        </template>
       </div>
     </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
@@ -499,6 +504,12 @@ const date2LocaleString = (date) => {
   color: #222222;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+.skeleton-hot-tag {
+  min-width: 40px;
+  min-height: 24px;
+  color: transparent;
+  pointer-events: none;
 }
 .hot-tag:hover {
   background-color: #ffe9ac;
