@@ -12,10 +12,31 @@
 
     <!-- 主要內容 -->
     <div class="main-content">
-      <!-- 載入中 -->
-      <div v-if="loading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <span class="loading-text">載入中...</span>
+      <!-- 載入中 - 骨架屏效果 -->
+      <div v-if="loading" class="content-section">
+        <div class="cards-grid">
+          <div
+            v-for="n in 8"
+            :key="`skeleton-${n}`"
+            class="card skeleton-card"
+          >
+            <div class="card-content">
+              <div class="card-header">
+                <div class="skeleton skeleton-title"></div>
+                <div class="skeleton skeleton-btn"></div>
+              </div>
+              
+              <div class="tags-container">
+                <div class="skeleton skeleton-tag"></div>
+                <div class="skeleton skeleton-tag-small"></div>
+              </div>
+
+              <div class="info-section">
+                <div class="skeleton skeleton-time"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 錯誤訊息 -->
@@ -470,5 +491,83 @@ definePageMeta({
   font-size: 14px;
   color: #6c757d;
   margin: 0;
+}
+
+/* 骨架屏動畫效果 */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-card {
+  pointer-events: none;
+  cursor: default;
+}
+
+.skeleton-card:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 骨架屏元素尺寸 */
+.skeleton-title {
+  height: 16px;
+  width: 70%;
+  margin-bottom: 4px;
+}
+
+.skeleton-btn {
+  height: 20px;
+  width: 40px;
+  border-radius: 4px;
+}
+
+.skeleton-tag {
+  height: 20px;
+  width: 50px;
+  border-radius: 16px;
+}
+
+.skeleton-tag-small {
+  height: 20px;
+  width: 35px;
+  border-radius: 16px;
+}
+
+.skeleton-time {
+  height: 12px;
+  width: 60%;
+}
+
+/* 響應式骨架屏調整 */
+@media (max-width: 639px) {
+  .skeleton-title {
+    width: 85%;
+  }
+  
+  .skeleton-time {
+    width: 75%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .skeleton-title {
+    width: 65%;
+  }
+  
+  .skeleton-time {
+    width: 55%;
+  }
 }
 </style>

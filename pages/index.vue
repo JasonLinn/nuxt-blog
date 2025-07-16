@@ -43,9 +43,32 @@
       </div>
     </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
-      <div v-if="couponObject.pending" class="loading-container">
-        <Icon class="h-8 w-8 text-gray-500 animate-spin" name="eos-icons:loading" />
-        <span class="ml-2 text-gray-500">載入中...</span>
+      <div v-if="couponObject.pending" class="md:border-l md:border-gray-100">
+        <div class="row">
+          <article
+            v-for="n in 8"
+            :key="`skeleton-${n}`"
+            class="cupon col-md-3"
+          >
+            <div class="cupon-wrapper skeleton-card">
+              <div class="skeleton-carousel">
+                <div class="skeleton skeleton-image"></div>
+              </div>
+              <div class="cupon-info">
+                <h2 class="cupon-title">
+                  <div class="skeleton skeleton-title"></div>
+                </h2>
+                <div class="skeleton-tags">
+                  <div class="skeleton skeleton-category"></div>
+                  <div class="skeleton skeleton-category-small"></div>
+                  <div class="skeleton skeleton-category-once"></div>
+                </div>
+                <div class="skeleton skeleton-content"></div>
+                <div class="skeleton skeleton-content-line2"></div>
+              </div>
+            </div>
+          </article>
+        </div>
       </div>
       <div v-else-if="couponObject.error" class="error-container">
         <span class="text-gray-500">發生了一點錯誤，請稍後再嘗試</span>
@@ -480,6 +503,101 @@ const date2LocaleString = (date) => {
 .hot-tag:hover {
   background-color: #ffe9ac;
   transform: translateY(-1px);
+}
+
+/* 骨架屏動畫效果 */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-card {
+  pointer-events: none;
+  cursor: default;
+}
+
+.skeleton-carousel {
+  height: 165px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+.skeleton-title {
+  height: 20px;
+  width: 80%;
+  margin-bottom: 8px;
+}
+
+.skeleton-tags {
+  margin: 10px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.skeleton-category {
+  height: 22px;
+  width: 50px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.skeleton-category-small {
+  height: 22px;
+  width: 35px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.skeleton-category-once {
+  height: 22px;
+  width: 40px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.skeleton-content {
+  height: 16px;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.skeleton-content-line2 {
+  height: 16px;
+  width: 75%;
+}
+
+/* 響應式骨架屏調整 */
+@media (max-width: 768px) {
+  .skeleton-title {
+    width: 90%;
+  }
+  
+  .skeleton-carousel {
+    height: 140px;
+  }
+  
+  .skeleton-tags {
+    gap: 5px;
+  }
 }
 
 // 響應式設計優化
