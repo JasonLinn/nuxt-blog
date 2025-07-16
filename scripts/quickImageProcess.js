@@ -17,7 +17,14 @@ const QUICK_CONFIGS = {
   shop: {
     path: path.join(__dirname, '../public/shop'),
     config: {
-      resize: { enabled: false }, // 只壓縮，不調整尺寸
+      resize: {
+        enabled: true,
+        maxWidth: 800,
+        maxHeight: 600,
+        fit: 'inside',
+        maintainAspectRatio: true,
+        withoutEnlargement: true
+      },
       compression: { quality: 80 },
       outputFormat: 'jpeg',
       backup: { enabled: true, folder: 'backup_original' }
@@ -26,7 +33,14 @@ const QUICK_CONFIGS = {
   relative: {
     path: path.join(__dirname, '../public/relative'),
     config: {
-      resize: { enabled: false }, // 只壓縮，不調整尺寸
+      resize: {
+        enabled: true,
+        maxWidth: 800,
+        maxHeight: 600,
+        fit: 'inside',
+        maintainAspectRatio: true,
+        withoutEnlargement: true
+      },
       compression: { quality: 80 },
       outputFormat: 'jpeg',
       backup: { enabled: true, folder: 'backup_original' }
@@ -35,7 +49,14 @@ const QUICK_CONFIGS = {
   all: {
     path: path.join(__dirname, '../public'),
     config: {
-      resize: { enabled: false }, // 只壓縮，不調整尺寸
+      resize: {
+        enabled: true,
+        maxWidth: 800,
+        maxHeight: 600,
+        fit: 'inside',
+        maintainAspectRatio: true,
+        withoutEnlargement: true
+      },
       compression: { quality: 80 },
       outputFormat: 'jpeg',
       backup: { enabled: true, folder: 'backup_original' }

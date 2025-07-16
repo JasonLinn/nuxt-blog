@@ -171,24 +171,43 @@ async function processImage(inputPath, outputPath, options = {}) {
  */
 async function batchProcess(inputDir, options = {}) {
   console.log(`🚀 開始批量處理圖片: ${inputDir}`)
-  
+  if (!fs.existsSync(inputDir)) {
+    console.error(`❌ 目錄不存在: ${inputDir}`)
+    return
+  }
+
   const processingOptions = { ...config, ...options }
-  
+
   // 創建備份目錄
   let backupDir = null
   if (processingOptions.backup.enabled) {
     backupDir = createBackupDir(inputDir)
   }
-  
+
+  // 處理紀錄檔案路徑
+  const recordPath = path.join(inputDir, 'image-process-record.json')
+  let record = {}
+  if (fs.existsSync(recordPath)) {
+    try {
+      record = JSON.parse(fs.readFileSync(recordPath, 'utf-8'))
+    } catch (e) {
+      console.warn('⚠️  處理紀錄檔讀取失敗，將重新建立')
+      record = {}
+    }
+  }
+
   // 獲取所有圖片文件
   const files = getAllImageFiles(inputDir)
-  console.log(`📁 找到 ${files.length} 個圖片文件`)
-  
+  console.log(`📁 找到 ${files.length} 個圖片文件於: ${inputDir}`)
+  if (files.length > 0) {
+    files.forEach(f => console.log(`  - ${f}`))
+  }
+
   if (files.length === 0) {
     console.log('❌ 沒有找到任何圖片文件')
     return
   }
-  
+
   const results = {
     total: files.length,
     processed: 0,
@@ -197,37 +216,57 @@ async function batchProcess(inputDir, options = {}) {
     totalOriginalSize: 0,
     totalCompressedSize: 0
   }
-  
+
   // 處理每個文件
   for (const file of files) {
     const fileName = path.basename(file)
     const fileExt = path.extname(file).toLowerCase()
-    
+    console.log(`\n---\n🔍 準備處理: ${file}`)
+
     // 跳過已經是備份目錄的文件
     if (file.includes(config.backup.folder)) {
       console.log(`⏭️  跳過備份目錄文件: ${fileName}`)
       results.skipped++
       continue
     }
-    
-    // 備份原始文件
-    if (backupDir) {
-      backupFile(file, backupDir)
+
+    // 判斷紀錄檔，若已處理過則跳過
+    if (record[fileName] && record[fileName].status === 'done') {
+      console.log(`⏭️  已處理過，跳過: ${fileName}`)
+      results.skipped++
+      continue
     }
-    
+
+    // 備份原始文件
+    let backupOk = true
+    if (backupDir) {
+      backupOk = backupFile(file, backupDir)
+    }
+    // 若備份已存在也可視為已處理過
+    if (!backupOk) {
+      console.log(`⏭️  備份已存在，視為已處理: ${fileName}`)
+      record[fileName] = { status: 'done', skipped: true, time: new Date().toISOString() }
+      results.skipped++
+      continue
+    }
+
     // 生成輸出路徑
     const outputFileName = processingOptions.outputFormat === 'jpeg' && fileExt !== '.jpg' && fileExt !== '.jpeg'
       ? fileName.replace(fileExt, '.jpg')
       : fileName
-    
+
     const outputPath = path.join(inputDir, outputFileName)
-    
+    console.log(`📤 輸出路徑: ${outputPath}`)
+
     // 如果輸出路徑和輸入路徑不同，創建臨時文件
     const tempOutputPath = file === outputPath ? file + '.tmp' : outputPath
-    
+    if (tempOutputPath !== outputPath) {
+      console.log(`📝 使用臨時檔案: ${tempOutputPath}`)
+    }
+
     // 處理圖片
     const result = await processImage(file, tempOutputPath, processingOptions)
-    
+
     if (result.success) {
       // 如果使用臨時文件，替換原文件
       if (tempOutputPath !== outputPath) {
@@ -238,24 +277,36 @@ async function batchProcess(inputDir, options = {}) {
       } else {
         fs.renameSync(tempOutputPath, file) // 替換原文件
       }
-      
+
       results.processed++
       results.totalOriginalSize += result.originalSize
       results.totalCompressedSize += result.compressedSize
+      record[fileName] = { status: 'done', time: new Date().toISOString() }
+      console.log(`✅ 已完成: ${fileName}`)
     } else {
       results.failed++
       // 清理臨時文件
       if (fs.existsSync(tempOutputPath)) {
         fs.unlinkSync(tempOutputPath)
       }
+      record[fileName] = { status: 'fail', error: result.error, time: new Date().toISOString() }
+      console.log(`❌ 處理失敗: ${fileName} (${result.error})`)
     }
   }
-  
+
+  // 寫入紀錄檔
+  try {
+    fs.writeFileSync(recordPath, JSON.stringify(record, null, 2), 'utf-8')
+    console.log(`📝 已更新處理紀錄檔: ${recordPath}`)
+  } catch (e) {
+    console.warn('⚠️  無法寫入處理紀錄檔', e.message)
+  }
+
   // 顯示統計結果
   const totalCompressionRatio = results.totalOriginalSize > 0 
     ? ((1 - results.totalCompressedSize / results.totalOriginalSize) * 100).toFixed(1)
     : 0
-  
+
   console.log('\n📊 批量處理完成統計:')
   console.log(`✅ 成功處理: ${results.processed} 個文件`)
   console.log(`⏭️  跳過: ${results.skipped} 個文件`)
@@ -263,7 +314,8 @@ async function batchProcess(inputDir, options = {}) {
   console.log(`💾 原始總大小: ${(results.totalOriginalSize / 1024 / 1024).toFixed(2)} MB`)
   console.log(`💾 壓縮後總大小: ${(results.totalCompressedSize / 1024 / 1024).toFixed(2)} MB`)
   console.log(`📉 整體壓縮率: ${totalCompressionRatio}%`)
-  
+  console.log(`📂 處理目錄: ${inputDir}`)
+
   return results
 }
 
