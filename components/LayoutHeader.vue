@@ -33,6 +33,13 @@
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
+                to="/launch-schedule"
+              >
+                <p class="">上架時間列表</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
                 to="/about"
               >
                 <p class="">關於我們</p>
@@ -61,7 +68,7 @@
                 <p class="">查看已領</p>
               </NuxtLink>
             </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+            <!-- <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
                 to="/homestay-register"
               >
@@ -74,7 +81,7 @@
               >
                 <p class="">民宿業者登入</p>
               </NuxtLink>
-            </li>
+            </li> -->
           </ul>
         </div>
       </nav>
