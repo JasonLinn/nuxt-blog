@@ -11,7 +11,10 @@
     "lint": "eslint --ext .js,.vue .",
     "db:init": "node scripts/init-homestays-db.cjs",
     "db:migrate": "node scripts/run-migration.js",
-    "db:migrate-homestays": "node scripts/run-homestays-migration.cjs"
+    "db:migrate-homestays": "node scripts/run-homestays-migration.cjs",
+    "images:process": "node scripts/processImages.js",
+    "images:web": "node -e \"import('./scripts/processImages.js').then(m => m.main())\"",
+    "images:backup": "node -e \"console.log('手動備份功能，請使用 images:process 選擇備份選項')\""
   },
   "devDependencies": {
     "@neondatabase/serverless": "^0.6.0",
@@ -47,6 +50,7 @@
     "qs": "^6.13.0",
     "radix-vue": "^1.9.7",
     "sass": "^1.77.4",
+    "sharp": "^0.33.5",
     "ws": "^8.18.3"
   },
   "overrides": {
