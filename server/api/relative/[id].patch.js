@@ -1,7 +1,7 @@
 import { Pool, neonConfig } from '@neondatabase/serverless'
 
 // 強制使用 HTTP fetch 連線，避免 serverless 環境 WebSocket 問題
-neonConfig.fetchConnection = true;
+neonConfig.webSocket = false;
 
 // 優惠券資料庫連線
 const couponPool = new Pool({
