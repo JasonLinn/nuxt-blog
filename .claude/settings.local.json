@@ -6,7 +6,17 @@
       "Bash(find:*)",
       "Bash(chmod:*)",
       "Bash(npm install:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "mcp__neon-database__list_projects",
+      "mcp__neon-database__prepare_database_migration",
+      "mcp__neon-database__run_sql",
+      "mcp__neon-database__complete_database_migration",
+      "Bash(mkdir:*)",
+      "Bash(npm run dev:*)",
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(npm run lint)",
+      "Bash(npx eslint:*)"
     ],
     "deny": []
   }

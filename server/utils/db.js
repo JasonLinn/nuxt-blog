@@ -16,6 +16,18 @@ export const pool = new Pool({
   connectionTimeoutMillis: 10000,
 })
 
+// 便利的查詢函數
+export const query = async (text, params = []) => {
+  try {
+    const result = await pool.query(text, params)
+    return result
+  } catch (error) {
+    console.error('Database query error:', error)
+    throw error
+  }
+}
+
 export default {
-  pool
+  pool,
+  query
 }

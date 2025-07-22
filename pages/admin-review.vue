@@ -2,7 +2,12 @@
   <div class="admin-review-container">
     <div class="admin-header">
       <h1>民宿審核管理</h1>
-      <button @click="logout" class="logout-btn">登出</button>
+      <div class="admin-nav">
+        <NuxtLink to="/admin/yilan-activities" class="admin-nav-link">
+          宜蘭活動管理
+        </NuxtLink>
+        <button @click="logout" class="logout-btn">登出</button>
+      </div>
     </div>
 
     <div v-if="loading" class="loading">
@@ -205,6 +210,29 @@ onMounted(() => {
 
 .logout-btn:hover {
   background-color: #c53030;
+}
+
+.admin-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.admin-nav-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.admin-nav-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  color: white;
 }
 
 .loading, .error, .no-data {

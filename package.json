@@ -17,7 +17,7 @@
     "images:backup": "node -e \"console.log('手動備份功能，請使用 images:process 選擇備份選項')\""
   },
   "devDependencies": {
-    "@neondatabase/serverless": "^0.6.0",
+    "@neondatabase/serverless": "^0.6.1",
     "@nuxt/devtools": "latest",
     "@nuxt/image": "^1.8.1",
     "@nuxtjs/eslint-config": "^12.0.0",
@@ -43,6 +43,7 @@
     "axios": "^1.7.2",
     "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.3",
+    "formidable": "^3.5.4",
     "jsbarcode": "^3.11.6",
     "jwt-decode": "^4.0.0",
     "pg": "^8.13.3",

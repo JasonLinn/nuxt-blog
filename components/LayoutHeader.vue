@@ -33,6 +33,13 @@
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
+                to="/yilan-activities"
+              >
+                <p class="">宜蘭活動總匯</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
                 to="/launch-schedule"
               >
                 <p class="">上架時間列表</p>
@@ -104,6 +111,9 @@
       
       <!-- 主要導航連結 -->
       <div class="nav-links">
+        <NuxtLink to="/yilan-activities" class="nav-link">
+          宜蘭活動總匯
+        </NuxtLink>
         <NuxtLink to="/homestay-register" class="nav-link">
           民宿註冊申請
         </NuxtLink>
