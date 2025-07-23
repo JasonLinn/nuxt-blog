@@ -66,14 +66,19 @@ const useHomestayStore = defineStore("homestayStore", {
           }
         });
         
-        console.log('API回傳資料:', data);
+        console.log('🔍 API回傳資料詳細檢查:', {
+          success: data.success,
+          hasHomestays: !!data.homestays,
+          homestaysLength: data.homestays?.length,
+          firstHomestay: data.homestays?.[0]?.name
+        });
         
         if (data.success && data.homestays && Array.isArray(data.homestays)) {
-          console.log('開始處理民宿資料...');
+          console.log('✅ 開始處理民宿資料，總數:', data.homestays.length);
           
           // 處理資料格式
-          const processedHomestays = data.homestays.map(homestay => {
-            console.log('處理民宿:', homestay.name, 'ID:', homestay.id, 'ID類型:', typeof homestay.id);
+          const processedHomestays = data.homestays.map((homestay, index) => {
+            console.log(`📝 處理第${index + 1}個民宿:`, homestay.name, 'ID:', homestay.id);
             
             // 處理價格
             const prices = {
@@ -211,6 +216,15 @@ const useHomestayStore = defineStore("homestayStore", {
         lastFetchTime: state.lastFetchTime,
         isValid: state.lastFetchTime && (Date.now() - state.lastFetchTime) / (1000 * 60) < state.cacheTimeout
       };
+    },
+    
+    // 清除快取
+    clearCache() {
+      console.log('🗑️ 清除 homestay store 快取');
+      this.homestays = [];
+      this.loading = false;
+      this.error = null;
+      this.lastFetchTime = null;
     }
   }
 });

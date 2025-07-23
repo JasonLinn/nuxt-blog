@@ -473,9 +473,31 @@ watch([searchText, selectedArea, guestCount], () => {
   debugFilters(); // 除錯輸出
 }, { deep: true, immediate: false });
 
-onMounted(() => {
-  console.log('onMounted 觸發 - 開始載入民宿資料');
-  fetchBnbsData();
+onMounted(async () => {
+  console.log('🚀 onMounted 觸發 - 開始載入民宿資料');
+  
+  // 強制清除 store 快取
+  homestayStore.clearCache();
+  
+  // 強制重新載入
+  try {
+    await fetchBnbsData();
+    
+    // 如果仍然沒有資料，直接調用 API
+    if (homestayStore.getAllHomestays.length === 0) {
+      console.warn('⚠️ Store 載入失敗，直接調用 API...');
+      
+      const response = await $fetch('/api/fetchBnbs', { query: { limit: 20 } });
+      if (response.success && response.homestays) {
+        console.log('✅ 直接 API 調用成功，設置資料:', response.homestays.length);
+        homestayStore.setHomestays(response.homestays);
+      }
+    }
+    
+    console.log('🏁 最終載入結果:', homestayStore.getAllHomestays.length, '筆民宿');
+  } catch (error) {
+    console.error('❌ 載入失敗:', error);
+  }
 });
 
 // 在資料載入後執行除錯
