@@ -1,159 +1,272 @@
 <template>
-  <div class="container mx-auto p-6">
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-800 mb-2">宜蘭活動總匯管理</h1>
-      <p class="text-gray-600">管理活動投稿審核、編輯與發布</p>
-    </div>
-
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div class="p-6 border-b border-gray-200">
-        <div class="flex flex-wrap gap-4 items-center">
-          <div class="flex-1 min-w-64">
-            <input 
-              v-model="searchQuery" 
-              type="text" 
-              placeholder="搜尋活動標題或提交人..." 
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div class="flex gap-2">
-            <select v-model="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-              <option value="">所有狀態</option>
-              <option value="pending">待審核</option>
-              <option value="approved">已上架</option>
-              <option value="rejected">已退回</option>
-            </select>
-            <select v-model="dateFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-              <option value="">所有時間</option>
-              <option value="today">今天</option>
-              <option value="week">本週</option>
-              <option value="month">本月</option>
-            </select>
+  <div class="admin-panel">
+    <div class="container">
+      <!-- 美麗的標題區 -->
+      <div class="hero-header">
+        <div class="hero-content">
+          <h1 class="hero-title">宜蘭活動總匯管理</h1>
+          <p class="hero-subtitle">管理活動投稿審核、編輯與發布</p>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-number">{{ activities.filter(a => a.status === 'pending').length }}</div>
+              <div class="stat-label">待審核</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">{{ activities.filter(a => a.status === 'approved').length }}</div>
+              <div class="stat-label">已上架</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">{{ activities.filter(a => a.status === 'rejected').length }}</div>
+              <div class="stat-label">已退回</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div v-if="loading" class="p-8 text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-        <p class="mt-4 text-gray-600">載入中...</p>
-      </div>
-
-      <div v-else-if="filteredActivities.length === 0" class="p-8 text-center text-gray-500">
-        <p>目前沒有符合條件的活動投稿</p>
-      </div>
-
-      <div v-else class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">活動標題</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">提交人</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">活動日期</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">提交時間</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="activity in paginatedActivities" :key="activity.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4">
-                <div class="text-sm font-medium text-gray-900">{{ activity.title }}</div>
-                <div class="text-sm text-gray-500 truncate max-w-xs">{{ activity.description }}</div>
-              </td>
-              <td class="px-6 py-4">
-                <div class="text-sm text-gray-900">{{ activity.submitter_name }}</div>
-                <div class="text-sm text-gray-500">{{ activity.submitter_email }}</div>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-900">
-                {{ formatDate(activity.event_date) }}
-                <div v-if="activity.event_time" class="text-xs text-gray-500">{{ activity.event_time }}</div>
-              </td>
-              <td class="px-6 py-4">
-                <span :class="getStatusClass(activity.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
-                  {{ getStatusText(activity.status) }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-500">
-                {{ formatDateTime(activity.created_at) }}
-              </td>
-              <td class="px-6 py-4 text-sm font-medium space-x-2">
-                <button 
-                  @click="viewActivity(activity.id)"
-                  class="text-blue-600 hover:text-blue-900 transition-colors"
-                >
-                  查看
-                </button>
-                <button 
-                  v-if="activity.status === 'pending'"
-                  @click="approveActivity(activity.id)"
-                  class="text-green-600 hover:text-green-900 transition-colors"
-                >
-                  通過
-                </button>
-                <button 
-                  @click="editActivity(activity.id)"
-                  class="text-yellow-600 hover:text-yellow-900 transition-colors"
-                >
-                  編輯
-                </button>
-                <button 
-                  v-if="activity.status === 'pending'"
-                  @click="rejectActivity(activity.id)"
-                  class="text-red-600 hover:text-red-900 transition-colors"
-                >
-                  退回
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-200">
-        <div class="flex items-center justify-between">
-          <div class="text-sm text-gray-700">
-            顯示第 {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredActivities.length) }} 項，共 {{ filteredActivities.length }} 項
+      <!-- 美麗的篩選器 -->
+      <div class="filter-section">
+        <div class="filter-card">
+          <div class="filter-header">
+            <h3 class="filter-title">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
+              </svg>
+              篩選與搜尋
+            </h3>
           </div>
-          <div class="flex space-x-2">
+          <div class="filter-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="search-wrapper">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="search-icon" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                  </svg>
+                  <input 
+                    v-model="searchQuery" 
+                    type="text" 
+                    placeholder="搜尋活動標題或提交人..." 
+                    class="search-input"
+                  />
+                </div>
+              </div>
+              <div class="col-md-3">
+                <select v-model="statusFilter" class="filter-select">
+                  <option value="">所有狀態</option>
+                  <option value="pending">待審核</option>
+                  <option value="approved">已上架</option>
+                  <option value="rejected">已退回</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <select v-model="dateFilter" class="filter-select">
+                  <option value="">所有時間</option>
+                  <option value="today">今天</option>
+                  <option value="week">本週</option>
+                  <option value="month">本月</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 載入狀態 -->
+      <div v-if="loading" class="loading-section">
+        <div class="loading-card">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">載入活動資料中...</p>
+        </div>
+      </div>
+
+      <!-- 空狀態 -->
+      <div v-else-if="filteredActivities.length === 0" class="empty-section">
+        <div class="empty-card">
+          <div class="empty-icon">🎨</div>
+          <h3 class="empty-title">沒有找到符合條件的活動</h3>
+          <p class="empty-message">試試調整搜尋條件或等待新的活動投稿</p>
+        </div>
+      </div>
+
+      <!-- 活動列表 -->
+      <div v-else class="activities-grid">
+        <div 
+          v-for="activity in paginatedActivities" 
+          :key="activity.id"
+          class="activity-card"
+        >
+          <!-- 活動狀態標籤 -->
+          <div class="activity-status">
+            <span :class="getStatusClass(activity.status)" class="status-badge">
+              <svg v-if="activity.status === 'pending'" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                <path d="M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
+              </svg>
+              <svg v-else-if="activity.status === 'approved'" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01zm.287 5.984-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+              </svg>
+              {{ getStatusText(activity.status) }}
+            </span>
+          </div>
+
+          <!-- 活動內容 -->
+          <div class="activity-content">
+            <h4 class="activity-title">{{ activity.title }}</h4>
+            <p class="activity-description">{{ activity.description }}</p>
+            
+            <div class="activity-meta">
+              <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+                </svg>
+                <span>{{ activity.submitter_name }}</span>
+              </div>
+              <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5 0M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                </svg>
+                <span>{{ formatDate(activity.event_date) }}</span>
+              </div>
+              <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/>
+                  <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
+                </svg>
+                <span>{{ formatDateTime(activity.created_at) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 操作按鈕 -->
+          <div class="activity-actions">
+            <button 
+              @click="viewActivity(activity.id)"
+              class="action-btn view-btn"
+              type="button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+              </svg>
+              查看
+            </button>
+            <button 
+              v-if="activity.status === 'pending'"
+              @click="approveActivity(activity.id)"
+              class="action-btn approve-btn"
+              type="button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01zm.287 5.984-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
+              </svg>
+              通過
+            </button>
+            <button 
+              @click="editActivity(activity.id)"
+              class="action-btn edit-btn"
+              type="button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708L1.707 13.001 0 16l2.999-1.707L12.146.146zM4.161 13.489l-.065.065c-.096-.096-.194-.197-.289-.289a1 1 0 0 1-.289-.289l.065-.065L3.207 13 4.161 13.489z"/>
+              </svg>
+              編輯
+            </button>
+            <button 
+              v-if="activity.status === 'pending'"
+              @click="rejectActivity(activity.id)"
+              class="action-btn reject-btn"
+              type="button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+              </svg>
+              退回
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 美麗的分頁 -->
+      <div v-if="totalPages > 1" class="pagination-section">
+        <div class="pagination-card">
+          <div class="pagination-info">
+            <span class="info-text">
+              顯示第 {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredActivities.length) }} 項，共 {{ filteredActivities.length }} 項
+            </span>
+          </div>
+          <div class="pagination-controls">
             <button 
               @click="currentPage--" 
               :disabled="currentPage === 1"
-              class="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              class="pagination-btn"
+              :class="{ disabled: currentPage === 1 }"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+              </svg>
               上一頁
             </button>
-            <span class="px-3 py-1 text-sm">第 {{ currentPage }} / {{ totalPages }} 頁</span>
+            <span class="page-indicator">第 {{ currentPage }} / {{ totalPages }} 頁</span>
             <button 
               @click="currentPage++" 
               :disabled="currentPage === totalPages"
-              class="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              class="pagination-btn"
+              :class="{ disabled: currentPage === totalPages }"
             >
               下一頁
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+              </svg>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 退回原因輸入對話框 -->
-    <div v-if="showRejectModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 class="text-lg font-semibold mb-4">退回活動投稿</h3>
-        <textarea 
-          v-model="rejectionReason" 
-          placeholder="請輸入退回原因..." 
-          class="w-full p-3 border border-gray-300 rounded-lg resize-none h-32 focus:ring-2 focus:ring-red-500"
-        ></textarea>
-        <div class="flex justify-end gap-3 mt-4">
+    <!-- 美麗的退回對話框 -->
+    <div v-if="showRejectModal" class="modal-overlay">
+      <div class="reject-modal">
+        <div class="modal-header">
+          <h3 class="modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+            </svg>
+            退回活動投稿
+          </h3>
+          <button class="modal-close" @click="showRejectModal = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="rejectionReason" class="form-label">退回原因</label>
+            <textarea 
+              id="rejectionReason"
+              v-model="rejectionReason" 
+              class="reason-textarea" 
+              rows="4"
+              placeholder="請詳細說明退回的原因，以便提交者了解如何改進..."
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
           <button 
-            @click="showRejectModal = false" 
-            class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+            class="modal-btn cancel-btn" 
+            @click="showRejectModal = false"
           >
             取消
           </button>
           <button 
-            @click="confirmReject" 
-            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            class="modal-btn confirm-btn" 
+            :disabled="!rejectionReason.trim()"
+            @click="confirmReject"
           >
             確認退回
           </button>
@@ -231,10 +344,10 @@ const paginatedActivities = computed(() => {
 
 const getStatusClass = (status) => {
   switch (status) {
-    case 'pending': return 'bg-yellow-100 text-yellow-800'
-    case 'approved': return 'bg-green-100 text-green-800'
-    case 'rejected': return 'bg-red-100 text-red-800'
-    default: return 'bg-gray-100 text-gray-800'
+    case 'pending': return 'status-pending'
+    case 'approved': return 'status-approved'
+    case 'rejected': return 'status-rejected'
+    default: return 'status-unknown'
   }
 }
 
@@ -321,3 +434,7 @@ onMounted(() => {
   fetchActivities()
 })
 </script>
+
+<style scoped lang="scss">
+@import '~/assets/scss/yilan-activities-admin.scss';
+</style>

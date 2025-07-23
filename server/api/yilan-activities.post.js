@@ -41,44 +41,64 @@ export default defineEventHandler(async (event) => {
     
     // 提取表單數據
     const getData = (field) => {
-      return Array.isArray(fields[field]) ? fields[field][0] : fields[field] || ''
+      const value = Array.isArray(fields[field]) ? fields[field][0] : fields[field]
+      return value || null
     }
     
+    const getBooleanData = (field) => {
+      const value = getData(field)
+      return value === 'true' || value === true
+    }
+
+    // 構建活動資料
     const activityData = {
       title: getData('title'),
       description: getData('description'),
-      images: imageUrls,
-      event_date: getData('event_date'),
-      event_time: getData('event_time') || null,
-      location: getData('location') || null,
-      activity_type: getData('activity_type') || null,
+      images: imageUrls.length > 0 ? imageUrls : null,
+      event_date: getData('event_start_date'),
+      end_date: getData('event_end_date'),
+      event_time: getData('event_start_time'),
+      end_time: getData('event_end_time'),
+      location: getData('location'),
+      activity_type: getData('activity_type'),
       organizer_name: getData('organizer_name'),
       organizer_email: getData('organizer_email'),
-      organizer_phone: getData('organizer_phone') || null,
-      contact_info: getData('contact_info') || null,
-      submitter_name: getData('submitter_name'),
-      submitter_email: getData('submitter_email'),
+      organizer_phone: getData('organizer_phone'),
+      contact_info: getData('organizer_contact'),
+      submitter_name: getData('submitter_name') || getData('organizer_name'),
+      submitter_email: getData('submitter_email') || getData('organizer_email'),
       status: 'pending'
     }
     
     // 驗證必填欄位
-    if (!activityData.title || !activityData.description || !activityData.event_date ||
-        !activityData.organizer_name || !activityData.organizer_email ||
-        !activityData.submitter_name || !activityData.submitter_email) {
+    const requiredFields = ['title', 'description', 'event_date', 'organizer_name', 'organizer_email', 'submitter_name', 'submitter_email']
+    for (const field of requiredFields) {
+      if (!activityData[field] || activityData[field].toString().trim() === '') {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Missing required field: ${field}`
+        })
+      }
+    }
+    
+    // 如果有結束日期，驗證多天活動
+    const isMultiDay = getBooleanData('is_multi_day')
+    if (isMultiDay && !activityData.end_date) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Missing required fields'
+        statusMessage: 'End date is required for multi-day events'
       })
     }
     
-    // 插入數據庫
+    // 使用正確的表結構進行插入
     const sql = `
       INSERT INTO yilan_activities (
-        title, description, images, event_date, event_time, location, activity_type,
-        organizer_name, organizer_email, organizer_phone, contact_info,
-        submitter_name, submitter_email, status, created_at, updated_at
+        title, description, images, event_date, end_date, event_time, end_time, is_multi_day,
+        location, activity_type, organizer_name, organizer_email, organizer_phone,
+        contact_info, submitter_name, submitter_email, status, created_at, updated_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 
+        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
       ) RETURNING id
     `
     
@@ -87,7 +107,10 @@ export default defineEventHandler(async (event) => {
       activityData.description,
       activityData.images,
       activityData.event_date,
+      activityData.end_date,
       activityData.event_time,
+      activityData.end_time,
+      isMultiDay,
       activityData.location,
       activityData.activity_type,
       activityData.organizer_name,
@@ -98,6 +121,8 @@ export default defineEventHandler(async (event) => {
       activityData.submitter_email,
       activityData.status
     ]
+    
+    console.log('Attempting to insert activity with params:', params)
     
     const result = await query(sql, params)
     const newActivity = result.rows[0]
@@ -114,6 +139,12 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     console.error('Error creating activity:', error)
     
+    // 詳細錯誤日誌
+    if (error.code) {
+      console.error('Database error code:', error.code)
+      console.error('Database error detail:', error.detail)
+    }
+    
     // 如果是驗證錯誤，返回適當的狀態碼
     if (error.statusCode) {
       throw error
@@ -121,7 +152,8 @@ export default defineEventHandler(async (event) => {
     
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to submit activity'
+      statusMessage: 'Failed to submit activity',
+      cause: error
     })
   }
 })

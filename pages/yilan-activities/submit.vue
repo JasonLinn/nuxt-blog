@@ -86,37 +86,102 @@
                 </div>
               </div>
 
-              <!-- 時間地點 -->
+              <!-- 活動時間設定 -->
+              <div class="mb-3">
+                <div class="form-check">
+                  <input
+                    id="is_multi_day"
+                    v-model="form.is_multi_day"
+                    type="checkbox"
+                    class="form-check-input"
+                    @change="handleMultiDayChange"
+                  />
+                  <label for="is_multi_day" class="form-check-label">
+                    跨日活動（多天活動）
+                  </label>
+                </div>
+              </div>
+
+              <!-- 活動日期 -->
               <div class="row">
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label for="event_date" class="form-label"
-                      >活動日期 <span class="text-danger">*</span></label
+                    <label for="event_start_date" class="form-label"
+                      >{{ form.is_multi_day ? '開始日期' : '活動日期' }} <span class="text-danger">*</span></label
                     >
                     <input
-                      id="event_date"
-                      v-model="form.event_date"
+                      id="event_start_date"
+                      v-model="form.event_start_date"
                       type="date"
                       class="form-control"
-                      :class="{ 'is-invalid': errors.event_date }"
+                      :class="{ 'is-invalid': errors.event_start_date }"
                       :min="today"
                       required
+                      @change="handleStartDateChange"
                     />
-                    <div v-if="errors.event_date" class="invalid-feedback">
-                      {{ errors.event_date }}
+                    <div v-if="errors.event_start_date" class="invalid-feedback">
+                      {{ errors.event_start_date }}
                     </div>
+                  </div>
+                </div>
+                <div v-if="form.is_multi_day" class="col-md-6">
+                  <div class="mb-3">
+                    <label for="event_end_date" class="form-label"
+                      >結束日期 <span class="text-danger">*</span></label
+                    >
+                    <input
+                      id="event_end_date"
+                      v-model="form.event_end_date"
+                      type="date"
+                      class="form-control"
+                      :class="{ 'is-invalid': errors.event_end_date }"
+                      :min="form.event_start_date || today"
+                      :required="form.is_multi_day"
+                    />
+                    <div v-if="errors.event_end_date" class="invalid-feedback">
+                      {{ errors.event_end_date }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 活動時間 -->
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="event_start_time" class="form-label">
+                      {{ form.is_multi_day ? '開始時間' : '活動時間' }}
+                    </label>
+                    <input
+                      id="event_start_time"
+                      v-model="form.event_start_time"
+                      type="time"
+                      class="form-control"
+                      :class="{ 'is-invalid': errors.event_start_time }"
+                    />
+                    <div v-if="errors.event_start_time" class="invalid-feedback">
+                      {{ errors.event_start_time }}
+                    </div>
+                    <div class="form-text">選填，如有明確時間請填寫</div>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label for="event_time" class="form-label">活動時間</label>
+                    <label for="event_end_time" class="form-label">結束時間</label>
                     <input
-                      id="event_time"
-                      v-model="form.event_time"
+                      id="event_end_time"
+                      v-model="form.event_end_time"
                       type="time"
                       class="form-control"
+                      :class="{ 'is-invalid': errors.event_end_time }"
+                      :disabled="!form.event_start_time && !form.is_multi_day"
                     />
-                    <div class="form-text">選填，如有明確時間請填寫</div>
+                    <div v-if="errors.event_end_time" class="invalid-feedback">
+                      {{ errors.event_end_time }}
+                    </div>
+                    <div class="form-text">
+                      {{ form.is_multi_day ? '選填，多天活動的最終結束時間' : '選填，需先填寫開始時間' }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -162,22 +227,98 @@
                 </div>
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label for="organizer_contact" class="form-label"
-                      >聯絡方式 <span class="text-danger">*</span></label
+                    <label for="organizer_email" class="form-label"
+                      >主辦單位信箱 <span class="text-danger">*</span></label
                     >
+                    <input
+                      id="organizer_email"
+                      v-model="form.organizer_email"
+                      type="email"
+                      class="form-control"
+                      :class="{ 'is-invalid': errors.organizer_email }"
+                      placeholder="請輸入主辦單位信箱"
+                      maxlength="100"
+                      required
+                    />
+                    <div v-if="errors.organizer_email" class="invalid-feedback">
+                      {{ errors.organizer_email }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="organizer_phone" class="form-label">主辦單位電話</label>
+                    <input
+                      id="organizer_phone"
+                      v-model="form.organizer_phone"
+                      type="tel"
+                      class="form-control"
+                      placeholder="請輸入聯絡電話"
+                      maxlength="20"
+                    />
+                    <div class="form-text">選填，建議填寫以便聯繫</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="organizer_contact" class="form-label">其他聯絡方式</label>
                     <input
                       id="organizer_contact"
                       v-model="form.organizer_contact"
                       type="text"
                       class="form-control"
-                      :class="{ 'is-invalid': errors.organizer_contact }"
-                      placeholder="電話、Email 或 LINE ID"
+                      placeholder="LINE ID、Facebook 等"
+                      maxlength="100"
+                    />
+                    <div class="form-text">選填，如 LINE ID、社群媒體等</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 提交者信息 -->
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="submitter_name" class="form-label"
+                      >提交者姓名 <span class="text-danger">*</span></label
+                    >
+                    <input
+                      id="submitter_name"
+                      v-model="form.submitter_name"
+                      type="text"
+                      class="form-control"
+                      :class="{ 'is-invalid': errors.submitter_name }"
+                      placeholder="請輸入您的姓名"
+                      maxlength="50"
+                      required
+                    />
+                    <div v-if="errors.submitter_name" class="invalid-feedback">
+                      {{ errors.submitter_name }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="submitter_email" class="form-label"
+                      >提交者信箱 <span class="text-danger">*</span></label
+                    >
+                    <input
+                      id="submitter_email"
+                      v-model="form.submitter_email"
+                      type="email"
+                      class="form-control"
+                      :class="{ 'is-invalid': errors.submitter_email }"
+                      placeholder="請輸入您的信箱"
                       maxlength="100"
                       required
                     />
-                    <div v-if="errors.organizer_contact" class="invalid-feedback">
-                      {{ errors.organizer_contact }}
+                    <div v-if="errors.submitter_email" class="invalid-feedback">
+                      {{ errors.submitter_email }}
                     </div>
+                    <div class="form-text">用於接收審核結果通知</div>
                   </div>
                 </div>
               </div>
@@ -304,11 +445,18 @@ const form = reactive({
   title: '',
   description: '',
   activity_type: '',
-  event_date: '',
-  event_time: '',
+  event_start_date: '',
+  event_end_date: '',
+  event_start_time: '',
+  event_end_time: '',
+  is_multi_day: false,
   location: '',
   organizer_name: '',
+  organizer_email: '',
+  organizer_phone: '',
   organizer_contact: '',
+  submitter_name: '',
+  submitter_email: '',
   price: null,
   capacity: null,
   website: '',
@@ -329,6 +477,28 @@ const today = computed(() => {
   const date = new Date()
   return date.toISOString().split('T')[0]
 })
+
+// 處理多天活動切換
+const handleMultiDayChange = () => {
+  if (!form.is_multi_day) {
+    form.event_end_date = ''
+    delete errors.event_end_date
+  } else {
+    // 如果開啟多天活動，自動設定結束日期為開始日期
+    if (form.event_start_date) {
+      form.event_end_date = form.event_start_date
+    }
+  }
+}
+
+// 處理開始日期變更
+const handleStartDateChange = () => {
+  // 如果是多天活動且結束日期早於開始日期，自動調整結束日期
+  if (form.is_multi_day && form.event_end_date && form.event_end_date < form.event_start_date) {
+    form.event_end_date = form.event_start_date
+  }
+  delete errors.event_start_date
+}
 
 // 處理圖片上傳
 const handleImageUpload = (event) => {
@@ -368,10 +538,17 @@ const validateForm = () => {
     title: '活動標題',
     description: '活動描述',
     activity_type: '活動類型',
-    event_date: '活動日期',
+    event_start_date: form.is_multi_day ? '開始日期' : '活動日期',
     location: '活動地點',
     organizer_name: '主辦單位',
-    organizer_contact: '聯絡方式'
+    organizer_email: '主辦單位信箱',
+    submitter_name: '提交者姓名',
+    submitter_email: '提交者信箱'
+  }
+
+  // 如果是多天活動，結束日期也是必填
+  if (form.is_multi_day) {
+    requiredFields.event_end_date = '結束日期'
   }
 
   Object.entries(requiredFields).forEach(([field, label]) => {
@@ -382,8 +559,36 @@ const validateForm = () => {
   })
 
   // 日期驗證
-  if (form.event_date && new Date(form.event_date) < new Date()) {
-    errors.event_date = '活動日期不能早於今天'
+  if (form.event_start_date && new Date(form.event_start_date) < new Date()) {
+    errors.event_start_date = '活動日期不能早於今天'
+    isValid = false
+  }
+
+  // 多天活動日期範圍驗證
+  if (form.is_multi_day && form.event_start_date && form.event_end_date) {
+    if (new Date(form.event_end_date) < new Date(form.event_start_date)) {
+      errors.event_end_date = '結束日期不能早於開始日期'
+      isValid = false
+    }
+  }
+
+  // 時間範圍驗證
+  if (form.event_start_time && form.event_end_time && !form.is_multi_day) {
+    // 單日活動時間驗證
+    if (form.event_start_date && form.event_end_time <= form.event_start_time) {
+      errors.event_end_time = '結束時間必須晚於開始時間'
+      isValid = false
+    }
+  }
+
+  // Email 格式驗證
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (form.organizer_email && !emailRegex.test(form.organizer_email)) {
+    errors.organizer_email = '請輸入有效的電子信箱格式'
+    isValid = false
+  }
+  if (form.submitter_email && !emailRegex.test(form.submitter_email)) {
+    errors.submitter_email = '請輸入有效的電子信箱格式'
     isValid = false
   }
 
