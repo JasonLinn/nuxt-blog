@@ -12,17 +12,17 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    // 轉換ID為整數
-    const homestayId = parseInt(id, 10);
+    // 保持ID為字符串格式，避免前導零被丟失
+    const homestayId = String(id).trim();
     
-    if (isNaN(homestayId)) {
+    if (!homestayId) {
       return {
         success: false,
-        error: 'ID 格式不正確'
+        error: 'ID 不能為空'
       };
     }
 
-    console.log('查詢民宿詳情，原始ID:', id, '轉換後ID:', homestayId);
+    console.log('查詢民宿詳情，ID:', homestayId, '(類型: string)');
 
     // 獲取民宿基本資訊
     const homestayQuery = `
