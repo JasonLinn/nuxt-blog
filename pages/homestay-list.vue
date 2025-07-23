@@ -476,10 +476,7 @@ watch([searchText, selectedArea, guestCount], () => {
 onMounted(async () => {
   console.log('🚀 onMounted 觸發 - 開始載入民宿資料');
   
-  // 強制清除 store 快取
-  homestayStore.clearCache();
-  
-  // 強制重新載入
+  // 載入民宿資料
   try {
     await fetchBnbsData();
     
