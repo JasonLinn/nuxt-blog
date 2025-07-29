@@ -109,54 +109,80 @@
                   <label for="isonceFalse">否</label>
                 </div>
               </section>
-              <section class="edit-part col-span-12">
-                <label for="cover" class="block text-sm font-medium text-gray-700">
-                  <TipIcon/>圖片連結(用逗點分隔)：
+              <section class="col-md-12 create-part">
+                <label for="coverUrl" class="edit-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>圖片 URL：
                 </label>
-                <div class="mt-1 w-full">
-                  <textarea
-                    v-model="articleData.cover"
-                    placeholder="請撰輸入圖片網址"
-                    name="cover"
-                    class="articleCover w-100"
+                <div class="mt-1">
+                  <div class="input-group">
+                    <input
+                      id="coverUrl"
+                      v-model="coverUrl"
+                      placeholder="請輸入圖片 URL"
+                      type="text"
+                      class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                      @keyup.enter="addCoverUrl"
+                    />
+                    <button 
+                      @click.prevent="addCoverUrl" 
+                      class="mt-2 btn btn-primary"
+                      :disabled="!coverUrl"
+                    >
+                      添加圖片 URL
+                    </button>
+                  </div>
+                </div>
+              </section>
+              <section class="col-md-12 create-part">
+                <label for="cover" class="create-name block text-sm font-medium text-gray-700">
+                  請上傳代表性圖片：
+                </label>
+                <div class="mt-1">
+                  <input 
+                    type="file" 
+                    @change="handleFileUpload" 
+                    accept="image/*" 
+                    multiple 
+                    class="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-emerald-50 file:text-emerald-700
+                      hover:file:bg-emerald-100"
                   />
                 </div>
-                
-                <!-- 添加圖片預覽和排序功能 -->
-                <div class="mt-4">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">圖片預覽與排序：</label>
-                  <div class="create-img grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                    <div v-for="(url, index) in coverArray" :key="index" class="relative">
-                      <img :src="url" :alt="'圖片 ' + (index + 1)" class="w-full h-32 object-cover rounded-lg" />
-                      <div class="absolute top-2 right-2 flex gap-1">
-                        <button 
-                          @click.prevent="removeImage(index)" 
-                          class="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
-                          title="刪除"
-                        >
-                          ×
-                        </button>
-                      </div>
-                      <div class="absolute bottom-2 right-2 flex gap-1">
-                        <button 
-                          @click.prevent="moveImage(index, 'up')" 
-                          class="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-800"
-                          :disabled="index === 0"
-                          :class="{'opacity-50 cursor-not-allowed': index === 0}"
-                          title="上移"
-                        >
-                          ↑
-                        </button>
-                        <button 
-                          @click.prevent="moveImage(index, 'down')" 
-                          class="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-800"
-                          :disabled="index === coverArray.length - 1"
-                          :class="{'opacity-50 cursor-not-allowed': index === coverArray.length - 1}"
-                          title="下移"
-                        >
-                          ↓
-                        </button>
-                      </div>
+                <!-- 統一的圖片預覽區域 -->
+                <div class="create-img mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                  <div v-for="(url, index) in coverArray" :key="index" class="relative">
+                    <img :src="url" :alt="'圖片 ' + (index + 1)" class="w-full h-32 object-cover rounded-lg" />
+                    <div class="absolute top-2 right-2 flex gap-1">
+                      <button 
+                        @click.prevent="removeImage(index)" 
+                        class="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                        title="刪除"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div class="absolute bottom-2 right-2 flex gap-1">
+                      <button 
+                        @click.prevent="moveImage(index, 'up')" 
+                        class="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-800"
+                        :disabled="index === 0"
+                        :class="{'opacity-50 cursor-not-allowed': index === 0}"
+                        title="上移"
+                      >
+                        ↑
+                      </button>
+                      <button 
+                        @click.prevent="moveImage(index, 'down')" 
+                        class="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-800"
+                        :disabled="index === coverArray.length - 1"
+                        :class="{'opacity-50 cursor-not-allowed': index === coverArray.length - 1}"
+                        title="下移"
+                      >
+                        ↓
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -271,10 +297,17 @@
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+.create-img {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
 </style>
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { township } from '~/utils/category';
+import { category, township } from '~/utils/category';
 const route = useRoute()
 
 const { data: articleData, error } = await useFetch(`/api/articles/${route.query.id}`)
@@ -289,6 +322,8 @@ articleData.value.township = await articleData.value.township.toString()
 articleData.value.cover = await articleData.value.cover.toString()
 articleData.value.position = await '經度：' + articleData.value.position?.lng + ' 緯度：' + articleData.value.position?.lat
 
+const coverUrl = ref('')
+
 // 計算屬性用於圖片預覽和排序
 const coverArray = computed({
   get: () => {
@@ -299,12 +334,75 @@ const coverArray = computed({
   }
 });
 
+const addCoverUrl = () => {
+  if (coverUrl.value.trim()) {
+    try {
+      new URL(coverUrl.value)
+      const newArray = [...coverArray.value];
+      newArray.push(coverUrl.value.trim());
+      coverArray.value = newArray;
+      coverUrl.value = ''
+    } catch (e) {
+      alert('請輸入有效的圖片 URL')
+    }
+  }
+}
+
+const handleFileUpload = async (event) => {
+  const files = event.target.files
+  if (!files.length) return
+
+  for (let file of files) {
+    try {
+      console.log('開始上傳文件:', file.name)
+      
+      // 驗證文件類型
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('只允許上傳 JPEG、PNG 和 GIF 格式的圖片')
+      }
+
+      // 驗證文件大小 (5MB)
+      const maxSize = 5 * 1024 * 1024
+      if (file.size > maxSize) {
+        throw new Error('文件太大，最大允許 5MB')
+      }
+
+      // 創建 FormData
+      const formData = new FormData()
+      formData.append('file', file)
+
+      // 上傳到後端 API
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.error || '上傳失敗')
+      }
+
+      console.log('上傳成功:', data.url)
+      
+      // 添加到 coverArray
+      const newArray = [...coverArray.value];
+      newArray.push(data.url);
+      coverArray.value = newArray;
+
+    } catch (error) {
+      console.error('上傳錯誤:', error)
+      alert(`上傳失敗：${error.message}`)
+    }
+  }
+}
+
 // 移除圖片
 const removeImage = (index) => {
   const newArray = [...coverArray.value];
   newArray.splice(index, 1);
   coverArray.value = newArray;
-  articleData.value.cover = newArray.join(',');
 };
 
 // 移動圖片順序
@@ -324,13 +422,19 @@ const moveImage = (index, direction) => {
   }
   
   coverArray.value = newArray;
-  articleData.value.cover = newArray.join(',');
 };
 
 const handleSubmit = async () => {
-  console.log(articleData, 'ddddd')
-  let position = articleData.value.position.match(/\d+\.\d+/g)
-  await $fetch(`/api/articles/${route.query.id}`, {
+  try {
+    // 驗證必填欄位
+    if (!articleData.value || !articleData.value.title || !articleData.value.category) {
+      alert('請填寫必要欄位！');
+      return;
+    }
+    
+    console.log(articleData, 'ddddd')
+    let position = articleData.value.position.match(/\d+\.\d+/g)
+    await $fetch(`/api/articles/${route.query.id}`, {
     method: 'PATCH',
     body: {
       title: articleData.value.title,
@@ -338,7 +442,7 @@ const handleSubmit = async () => {
       content: articleData.value.content,
       adress: articleData.value.adress.split(','),
       township: articleData.value.township.split(','),
-      cover: articleData.value.cover.split(','),
+      cover: coverArray.value,
       amount: articleData.value.amount,
       isReferral: articleData.value.isReferral,
       isonce: articleData.value.isonce,
@@ -359,7 +463,11 @@ const handleSubmit = async () => {
         }
       })
     })
-    .catch((error) => alert(error))
+            .catch((error) => alert(error))
+    } catch (error) {
+      console.error('提交錯誤：', error);
+      alert('提交失敗，請檢查所有欄位後重試');
+    }
 }
 
 definePageMeta({
