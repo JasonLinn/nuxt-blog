@@ -159,15 +159,6 @@
       </div>
     </div>
     <div class="my-8 flex w-full max-w-4xl flex-col">
-      <!-- 除錯資訊 - 暫時顯示 -->
-      <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px;">
-        <strong>除錯資訊:</strong><br>
-        loading: {{ loading }}<br>
-        error: {{ error }}<br>
-        bnbsData.length: {{ bnbsData.length }}<br>
-        filteredBnbs.length: {{ filteredBnbs.length }}<br>
-        paginatedBnbs.length: {{ paginatedBnbs.length }}
-      </div>
       
       <div v-if="loading">
         <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
