@@ -91,27 +91,36 @@ const useHomestayStore = defineStore("homestayStore", {
             return {
               id: homestay.id,
               name: homestay.name || '未命名民宿',
-              area: homestay.location || '未知地區',
-              address: homestay.city || '',
-              description: homestay.capacity_description || '暫無描述',
+              area: homestay.area || homestay.location || '未知地區',
+              address: homestay.address || homestay.city || '',
+              description: homestay.description || homestay.capacity_description || '暫無描述',
               image_urls: homestay.image_urls && homestay.image_urls.length > 0 ? homestay.image_urls : (homestay.image_url ? [homestay.image_url] : []),
               min_guests: homestay.min_guests || null,
               max_guests: homestay.max_guests || null,
-              features: {
-                peopleTypes: [homestay.capacity_description || ''],
-                environmentTypes: homestay.types || []
+              features: homestay.features || {
+                peopleTypes: [homestay.capacity_description || ''].filter(Boolean),
+                environmentTypes: homestay.types || [],
+                themeFeatures: homestay.theme_features || [],
+                serviceAmenities: homestay.service_amenities || []
               },
-              prices: prices,
-              contact: {
+              prices: homestay.prices || {
+                weekday: homestay.min_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.min_price)}` : '請洽詢',
+                weekend: homestay.max_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.max_price)}` : '請洽詢',
+                fullRentWeekday: null,
+                fullRentWeekend: null
+              },
+              contact: homestay.contact || {
                 phone: homestay.phone,
                 website: homestay.website,
-                line: homestay.line_id || null
+                line: homestay.social_line || homestay.line_id || null,
+                instagram: homestay.social_instagram || null,
+                facebook: homestay.social_facebook || null
               },
               featured: homestay.featured || false,
               view_count: homestay.view_count || 0,
               rating: homestay.rating || null,
               total_reviews: homestay.total_reviews || 0,
-              // 新增欄位以匹配fetchBnbDetail API的結構
+              // 保留原始欄位以匹配fetchBnbDetail API的結構
               min_price: homestay.min_price,
               max_price: homestay.max_price,
               average_price: homestay.average_price

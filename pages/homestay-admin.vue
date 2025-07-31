@@ -27,6 +27,12 @@
             <p class="admin-subtitle">編輯您的民宿資訊</p>
           </div>
           <div class="header-right">
+            <NuxtLink to="/homestay-list" class="back-to-list-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+              </svg>
+              回到民宿列表
+            </NuxtLink>
             <button @click="handleLogout" class="logout-btn">
               登出
             </button>
@@ -906,6 +912,41 @@ onMounted(() => {
     margin: 0;
   }
   
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .back-to-list-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: #5a67d8;
+      transform: translateY(-1px);
+    }
+    
+    svg {
+      transition: transform 0.3s ease;
+    }
+    
+    &:hover svg {
+      transform: translateX(-2px);
+    }
+  }
+  
   .logout-btn {
     background: #e53e3e;
     color: white;
@@ -1175,6 +1216,17 @@ onMounted(() => {
     flex-direction: column;
     gap: 16px;
     text-align: center;
+  }
+  
+  .header-right {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .back-to-list-btn, .logout-btn {
+    width: 100%;
+    justify-content: center;
   }
   
   .form-actions {

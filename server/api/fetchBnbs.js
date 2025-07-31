@@ -101,7 +101,7 @@ export default defineEventHandler(async (event) => {
     const orderBy = orderMap[filters.sort_by] || 'h.rating';
     const orderDirection = filters.order === 'asc' ? 'ASC' : 'DESC';
 
-    // 優化後的主查詢 - 只選取必要欄位
+    // 優化後的主查詢 - 包含前端所需的完整欄位
     const mainQuery = `
       SELECT 
         h.id,
@@ -112,9 +112,14 @@ export default defineEventHandler(async (event) => {
         h.images,
         h.website,
         h.phone,
+        h.social_line,
+        h.social_instagram,
+        h.social_facebook,
         h.capacity_description,
         h.min_guests,
         h.max_guests,
+        h.theme_features,
+        h.service_amenities,
         h.min_price,
         h.max_price,
         h.average_price,
@@ -233,11 +238,54 @@ export default defineEventHandler(async (event) => {
         imageUrls = [homestay.image_url];
       }
 
+      // 處理價格資訊 - 與 fetchBnbDetail 保持一致的格式
+      const prices = {
+        weekday: homestay.min_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.min_price)}` : null,
+        weekend: homestay.max_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.max_price)}` : null,
+        fullRentWeekday: null,
+        fullRentWeekend: null
+      };
+
+      // 從 pricing_options 中獲取包棟價格
+      const pricingOptions = pricingMap[homestay.id] || [];
+      pricingOptions.forEach(pricing => {
+        const formattedPrice = `NT$ ${new Intl.NumberFormat('zh-TW').format(pricing.amount)}`;
+        
+        if (pricing.is_package) {
+          if (pricing.is_weekday) {
+            prices.fullRentWeekday = formattedPrice;
+          } else {
+            prices.fullRentWeekend = formattedPrice;
+          }
+        }
+      });
+
       return {
         ...homestay,
-        image_urls: imageUrls, // 新增 image_urls 欄位用於前端
+        // 前端期待的欄位格式
+        area: homestay.location,
+        address: homestay.city,
+        description: homestay.capacity_description,
+        image_urls: imageUrls,
         types: typesMap[homestay.id] || [],
-        pricing_options: pricingMap[homestay.id] || []
+        pricing_options: pricingMap[homestay.id] || [],
+        // features 欄位，與 fetchBnbDetail API 保持一致
+        features: {
+          peopleTypes: [homestay.capacity_description].filter(Boolean),
+          environmentTypes: typesMap[homestay.id] || [],
+          themeFeatures: homestay.theme_features || [],
+          serviceAmenities: homestay.service_amenities || []
+        },
+        // prices 欄位，與 fetchBnbDetail API 保持一致
+        prices: prices,
+        // contact 欄位，與 fetchBnbDetail API 保持一致
+        contact: {
+          phone: homestay.phone,
+          website: homestay.website,
+          line: homestay.social_line,
+          instagram: homestay.social_instagram,
+          facebook: homestay.social_facebook
+        }
       };
     });
 
