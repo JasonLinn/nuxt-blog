@@ -127,7 +127,8 @@ export default defineEventHandler(async (event) => {
           updated_at
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 
-          $11, $12, $13, $14, $15, $16, $17, $18, 'pending', false, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+          $11, $12, $13, $14, $15, $16, $17, $18, 'approved', false, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+          -- TODO: 測試階段暫時直接設為 approved，正式上線後改回 pending
         )
         RETURNING id, name, status
       `;
@@ -165,11 +166,11 @@ export default defineEventHandler(async (event) => {
 
       return {
         success: true,
-        message: '民宿申請已成功提交，等待管理員審核',
+        message: '民宿申請已成功提交並自動通過審核', // TODO: 測試階段訊息，正式上線後改回「等待管理員審核」
         data: {
           id: homestayId,
           name: name,
-          status: 'pending',
+          status: 'approved', // TODO: 測試階段暫時直接設為 approved，正式上線後改回 pending
           email: email,
           created_at: new Date().toISOString()
         }
