@@ -209,22 +209,7 @@
             </div>
           </div>
 
-          <div class="info-card compact">
-            <div class="card-header">
-              <div class="card-icon">🌿</div>
-              <h3 class="card-title">環境特色</h3>
-            </div>
-            <div class="card-content">
-              <div v-if="bnb.features && bnb.features.environmentTypes && bnb.features.environmentTypes.length > 0" class="tag-container">
-                <div v-for="(type, index) in bnb.features.environmentTypes" :key="index" class="feature-tag environment">
-                  {{ type }}
-                </div>
-              </div>
-              <div v-else class="no-data">
-                <p>暫無環境特色資訊</p>
-              </div>
-            </div>
-          </div>
+
 
           <!-- 主題特色 -->
           <div class="info-card compact">

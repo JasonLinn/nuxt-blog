@@ -87,32 +87,6 @@ export default defineEventHandler(async (event) => {
     const homestays = homestaysResult.rows;
     const total = parseInt(countResult.rows[0].total);
 
-    // 為每個民宿獲取環境類型
-    if (homestays.length > 0) {
-      const homestayIds = homestays.map(h => h.id);
-      const typesQuery = `
-        SELECT homestay_id, type_name 
-        FROM homestay_types 
-        WHERE homestay_id = ANY($1)
-        ORDER BY homestay_id, type_name
-      `;
-      
-      const typesResult = await pool.query(typesQuery, [homestayIds]);
-      
-      // 組織類型資料
-      const typesMap = {};
-      typesResult.rows.forEach(row => {
-        if (!typesMap[row.homestay_id]) {
-          typesMap[row.homestay_id] = [];
-        }
-        typesMap[row.homestay_id].push(row.type_name);
-      });
-
-      // 將類型資料合併到民宿資料中
-      homestays.forEach(homestay => {
-        homestay.types = typesMap[homestay.id] || [];
-      });
-    }
 
     return {
       success: true,

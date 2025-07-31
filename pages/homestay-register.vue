@@ -248,26 +248,15 @@
               </div>
             </div>
 
-            <!-- 環境類型 -->
-            <div class="form-group">
-              <label class="form-label">環境特色</label>
-              <div class="checkbox-group">
-                <label v-for="type in availableTypes" :key="type" class="checkbox-item">
-                  <input
-                    type="checkbox"
-                    :value="type"
-                    v-model="formData.types"
-                    :disabled="submitting"
-                  />
-                  <span class="checkbox-text">{{ type }}</span>
-                </label>
-              </div>
-            </div>
+
 
             <!-- 主題特色 -->
             <div class="form-group">
               <label class="form-label">🏠 主題特色（可多選）</label>
-              <div class="checkbox-group">
+              <div v-if="featuresLoading" class="loading-hint">
+                載入特色選項中...
+              </div>
+              <div v-else class="checkbox-group">
                 <label v-for="feature in themeFeatures" :key="feature" class="checkbox-item">
                   <input
                     type="checkbox"
@@ -285,7 +274,10 @@
             <!-- 服務內容 -->
             <div class="form-group">
               <label class="form-label">🎯 服務內容（可多選）</label>
-              <div class="checkbox-group">
+              <div v-if="featuresLoading" class="loading-hint">
+                載入服務選項中...
+              </div>
+              <div v-else class="checkbox-group">
                 <label v-for="service in serviceAmenities" :key="service" class="checkbox-item">
                   <input
                     type="checkbox"
@@ -517,7 +509,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { township } from '~/utils/category.js';
 
 // SEO 設定
@@ -576,35 +568,12 @@ const formData = ref({
 // 圖片上傳相關
 const coverUrl = ref('');
 
-// 可選擇的環境類型
-const availableTypes = [
-  '自然景觀型',
-  '都市便利型',
-  '秘境隱居型'
-];
-
-// 主題特色選項
-const themeFeatures = [
-  '包棟民宿',
-  '電梯/一樓孝親房民宿',
-  '獨棟、莊園民宿',
-  '親子民宿',
-  '寵物民宿',
-  '海景民宿',
-  '市區民宿',
-  '夜市民宿',
-  '車站周邊住宿'
-];
 
 
-
-// 服務內容選項
-const serviceAmenities = [
-  '美味早餐', '方便停車', '有停車位(場)', '可停遊覽車',
-  '有陽台房型', '有浴缸房型', '有公用客廳', '一樓孝親房',
-  '戶外戲水池', '有烤肉場地', '歡唱設備', '可借用廚房',
-  '可打麻將', '可帶寵物入住', '可刷國旅卡', '電動麻將桌', '充電樁'
-];
+// 動態載入的特色選項
+const themeFeatures = ref([]);
+const serviceAmenities = ref([]);
+const featuresLoading = ref(true);
 
 // 鄉鎮市資料
 const townships = township;
@@ -735,6 +704,47 @@ const handleSubmit = async () => {
   }
 };
 
+// 載入特色選項
+const loadFeatureOptions = async () => {
+  try {
+    featuresLoading.value = true;
+    const response = await $fetch('/api/features-options');
+    
+    if (response.success) {
+      themeFeatures.value = response.data.themeFeatures || [];
+      serviceAmenities.value = response.data.serviceAmenities || [];
+      console.log('特色選項載入成功:', {
+        themeFeatures: themeFeatures.value.length,
+        serviceAmenities: serviceAmenities.value.length
+      });
+    } else {
+      console.error('載入特色選項失敗:', response.error);
+      // 使用備用選項
+      setFallbackOptions();
+    }
+  } catch (error) {
+    console.error('載入特色選項錯誤:', error);
+    // 使用備用選項
+    setFallbackOptions();
+  } finally {
+    featuresLoading.value = false;
+  }
+};
+
+// 設置備用選項
+const setFallbackOptions = () => {
+  themeFeatures.value = [
+    '包棟民宿', '電梯/一樓孝親房民宿', '獨棟、莊園民宿', '親子民宿',
+    '寵物民宿', '海景民宿', '市區民宿', '夜市民宿', '車站周邊住宿'
+  ];
+  serviceAmenities.value = [
+    '美味早餐', '方便停車', '有停車位(場)', '可停遊覽車',
+    '有陽台房型', '有浴缸房型', '有公用客廳', '一樓孝親房',
+    '戶外戲水池', '有烤肉場地', '歌唱設備', '可借用廚房',
+    '可打麻將', '可帶寵物入住', '可刷國旅卡', '電動麻將桌', '充電樁'
+  ];
+};
+
 // 重置表單
 const resetForm = () => {
   currentStep.value = 1;
@@ -755,7 +765,7 @@ const resetForm = () => {
     capacity_description: '',
     min_guests: null,
     max_guests: null,
-    types: [],
+
     theme_features: [],
     service_amenities: [],
     phone: '',
@@ -773,7 +783,15 @@ const resetForm = () => {
     },
     agreeTerms: false
   };
+  
+  // 重新載入特色選項
+  loadFeatureOptions();
 };
+
+// 頁面載入時初始化
+onMounted(() => {
+  loadFeatureOptions();
+});
 </script>
 
 <style scoped lang="scss">
@@ -1210,6 +1228,17 @@ const resetForm = () => {
   .checkbox-group {
     grid-template-columns: 1fr;
   }
+}
+
+// 載入中提示樣式
+.loading-hint {
+  padding: 20px;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px dashed #dee2e6;
 }
 
 // 新增圖片上傳樣式

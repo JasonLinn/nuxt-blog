@@ -157,13 +157,6 @@ export default defineEventHandler(async (event) => {
     // 批量獲取民宿類型和價格資訊
     const homestayIds = homestays.map(h => h.id);
     
-    // 批量查詢類型
-    const typesQuery = `
-      SELECT homestay_id, type_name 
-      FROM homestay_types 
-      WHERE homestay_id = ANY($1)
-      ORDER BY homestay_id, type_name
-    `;
     
     // 批量查詢價格選項
     const pricingQuery = `
@@ -180,19 +173,8 @@ export default defineEventHandler(async (event) => {
 
     console.log('執行批量關聯查詢');
     
-    const [typesResult, pricingResult] = await Promise.all([
-      pool.query(typesQuery, [homestayIds]),
-      pool.query(pricingQuery, [homestayIds])
-    ]);
+    const pricingResult = await pool.query(pricingQuery, [homestayIds]);
 
-    // 組織類型資料
-    const typesMap = {};
-    typesResult.rows.forEach(row => {
-      if (!typesMap[row.homestay_id]) {
-        typesMap[row.homestay_id] = [];
-      }
-      typesMap[row.homestay_id].push(row.type_name);
-    });
 
     // 組織價格資料
     const pricingMap = {};
@@ -208,14 +190,8 @@ export default defineEventHandler(async (event) => {
       });
     });
 
-    // 根據類型篩選進行後處理（因為類型在關聯表中）
+    // 初始化篩選後的民宿列表
     let filteredHomestays = homestays;
-    if (filters.type) {
-      filteredHomestays = homestays.filter(homestay => {
-        const types = typesMap[homestay.id] || [];
-        return types.some(type => type.includes(filters.type));
-      });
-    }
 
     // 根據住宿形式篩選
     if (filters.is_package) {
@@ -267,12 +243,10 @@ export default defineEventHandler(async (event) => {
         address: homestay.city,
         description: homestay.capacity_description,
         image_urls: imageUrls,
-        types: typesMap[homestay.id] || [],
         pricing_options: pricingMap[homestay.id] || [],
         // features 欄位，與 fetchBnbDetail API 保持一致
         features: {
           peopleTypes: [homestay.capacity_description].filter(Boolean),
-          environmentTypes: typesMap[homestay.id] || [],
           themeFeatures: homestay.theme_features || [],
           serviceAmenities: homestay.service_amenities || []
         },

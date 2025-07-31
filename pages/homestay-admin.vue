@@ -399,20 +399,7 @@
           <div class="form-section">
             <h2 class="section-title">民宿特色</h2>
             
-            <div class="form-group">
-              <label class="form-label">環境類型</label>
-              <div class="checkbox-group">
-                <label v-for="type in availableTypes" :key="type" class="checkbox-item">
-                  <input
-                    v-model="editData.types"
-                    type="checkbox"
-                    :value="type"
-                    :disabled="saving"
-                  />
-                  <span class="checkbox-label">{{ type }}</span>
-                </label>
-              </div>
-            </div>
+
 
             <!-- 主題特色 -->
             <div class="form-group">
@@ -521,7 +508,7 @@ const editData = ref({
   min_guests: null,
   max_guests: null,
   available: true,
-  types: [],
+
   theme_features: [],
   service_amenities: [],
   pricing: {
@@ -670,12 +657,6 @@ const moveImage = (index, direction) => {
   showMessage(`圖片已${direction === 'up' ? '前移' : '後移'}`, 'info');
 };
 
-// 可選擇的環境類型
-const availableTypes = [
-  '自然景觀型',
-  '都市便利型',
-  '秘境隱居型'
-];
 
 // 主題特色選項
 const themeFeatures = [
@@ -751,7 +732,7 @@ const setupEditDataFromAuth = (homestayData) => {
       min_guests: homestayData.min_guests || null,
       max_guests: homestayData.max_guests || null,
       available: homestayData.available || true,
-      types: homestayData.types || [],
+  
       theme_features: homestayData.theme_features || [],
       service_amenities: homestayData.service_amenities || [],
         pricing: {

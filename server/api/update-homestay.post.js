@@ -111,22 +111,6 @@ export default defineEventHandler(async (event) => {
         });
       }
 
-      // 處理環境類型更新
-      if (updateData.types && Array.isArray(updateData.types)) {
-        // 先刪除現有的類型
-        await client.query('DELETE FROM homestay_types WHERE homestay_id = $1', [homestayId]);
-        
-        // 插入新的類型
-        if (updateData.types.length > 0) {
-          const typeQueries = updateData.types.map(type => 
-            client.query(
-              'INSERT INTO homestay_types (homestay_id, type_name) VALUES ($1, $2)',
-              [homestayId, type]
-            )
-          );
-          await Promise.all(typeQueries);
-        }
-      }
 
       // 提交交易
       await client.query('COMMIT');
@@ -145,8 +129,7 @@ export default defineEventHandler(async (event) => {
           images: finalImages,
           capacity_description: updateData.capacity_description,
           min_guests: updateData.min_guests,
-          max_guests: updateData.max_guests,
-          types: updateData.types || []
+          max_guests: updateData.max_guests
         }
       };
 

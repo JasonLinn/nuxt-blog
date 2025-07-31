@@ -3,6 +3,9 @@
     <div class="admin-header">
       <h1>民宿審核管理</h1>
       <div class="admin-nav">
+        <NuxtLink to="/admin/features" class="admin-nav-link">
+          特色項目管理
+        </NuxtLink>
         <NuxtLink to="/admin/yilan-activities" class="admin-nav-link">
           宜蘭活動管理
         </NuxtLink>

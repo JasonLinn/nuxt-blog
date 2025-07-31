@@ -16,7 +16,6 @@ export default defineEventHandler(async (event) => {
       capacity_description,
       min_guests,
       max_guests,
-      types,
       theme_features,
       service_amenities,
       phone,
@@ -157,16 +156,6 @@ export default defineEventHandler(async (event) => {
       const homestayResult = await client.query(insertHomestayQuery, homestayValues);
       const homestayId = homestayResult.rows[0].id;
 
-      // 插入環境類型（如果有選擇的話）
-      if (types && types.length > 0) {
-        const typeQueries = types.map(type => 
-          client.query(
-            'INSERT INTO homestay_types (homestay_id, type_name) VALUES ($1, $2)',
-            [homestayId, type]
-          )
-        );
-        await Promise.all(typeQueries);
-      }
 
       // 記錄申請日誌
       console.log(`新民宿申請: ID=${homestayId}, 名稱=${name}, 申請人=${email}, 時間=${new Date().toISOString()}`);

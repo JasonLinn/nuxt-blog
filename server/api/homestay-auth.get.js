@@ -67,21 +67,11 @@ export default defineEventHandler(async (event) => {
     console.log('theme_features type:', typeof homestay.theme_features);
     console.log('service_amenities type:', typeof homestay.service_amenities);
 
-    // 獲取民宿類型
-    const typesQuery = `
-      SELECT type_name 
-      FROM homestay_types 
-      WHERE homestay_id = $1
-      ORDER BY type_name
-    `;
-    
-    const typesResult = await pool.query(typesQuery, [homestayId]);
 
     return {
       success: true,
       homestay: {
-        ...homestay,
-        types: typesResult.rows.map(row => row.type_name)
+        ...homestay
       }
     };
 

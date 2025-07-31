@@ -68,13 +68,6 @@ export default defineEventHandler(async (event) => {
     const homestay = homestayResult.rows[0];
     console.log('找到民宿:', homestay.name);
 
-    // 獲取民宿類型
-    const typesQuery = `
-      SELECT type_name 
-      FROM homestay_types 
-      WHERE homestay_id = $1
-      ORDER BY type_name
-    `;
     
     // 獲取價格選項
     const pricingQuery = `
@@ -88,12 +81,9 @@ export default defineEventHandler(async (event) => {
       ORDER BY price_amount
     `;
 
-    const [typesResult, pricingResult] = await Promise.all([
-      pool.query(typesQuery, [homestayId]),
-      pool.query(pricingQuery, [homestayId])
-    ]);
+    const pricingResult = await pool.query(pricingQuery, [homestayId]);
 
-    console.log('類型數量:', typesResult.rows.length, '價格選項數量:', pricingResult.rows.length);
+    console.log('價格選項數量:', pricingResult.rows.length);
 
     // 處理圖片資料 - 優先使用 images 陣列
     let imageUrls = [];
@@ -115,7 +105,6 @@ export default defineEventHandler(async (event) => {
       image_urls: imageUrls,
       features: {
         peopleTypes: [homestay.capacity_description],
-        environmentTypes: typesResult.rows.map(row => row.type_name),
         themeFeatures: homestay.theme_features || [],
         serviceAmenities: homestay.service_amenities || []
       },

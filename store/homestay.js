@@ -99,7 +99,7 @@ const useHomestayStore = defineStore("homestayStore", {
               max_guests: homestay.max_guests || null,
               features: homestay.features || {
                 peopleTypes: [homestay.capacity_description || ''].filter(Boolean),
-                environmentTypes: homestay.types || [],
+
                 themeFeatures: homestay.theme_features || [],
                 serviceAmenities: homestay.service_amenities || []
               },
@@ -178,6 +178,15 @@ const useHomestayStore = defineStore("homestayStore", {
       if (homestay) {
         homestay.view_count = (homestay.view_count || 0) + 1;
       }
+    },
+    
+    // 清除快取
+    clearCache() {
+      console.log('🗑️ 清除 homestay store 快取');
+      this.homestays = [];
+      this.loading = false;
+      this.error = null;
+      this.lastFetchTime = null;
     }
   },
   
@@ -202,18 +211,6 @@ const useHomestayStore = defineStore("homestayStore", {
       return Array.from(areaSet).sort();
     },
     
-    // 獲取所有環境類型
-    getAllEnvironmentTypes: (state) => {
-      const typeSet = new Set();
-      state.homestays.forEach(homestay => {
-        if (homestay.features?.environmentTypes) {
-          homestay.features.environmentTypes.forEach(type => {
-            typeSet.add(type);
-          });
-        }
-      });
-      return Array.from(typeSet);
-    },
     
     // 檢查是否有資料
     hasData: (state) => state.homestays.length > 0,
@@ -225,15 +222,6 @@ const useHomestayStore = defineStore("homestayStore", {
         lastFetchTime: state.lastFetchTime,
         isValid: state.lastFetchTime && (Date.now() - state.lastFetchTime) / (1000 * 60) < state.cacheTimeout
       };
-    },
-    
-    // 清除快取
-    clearCache() {
-      console.log('🗑️ 清除 homestay store 快取');
-      this.homestays = [];
-      this.loading = false;
-      this.error = null;
-      this.lastFetchTime = null;
     }
   }
 });

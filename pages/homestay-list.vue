@@ -65,13 +65,95 @@
         </svg>
         </div>
       </div>
+      
+      <!-- 進階搜尋切換按鈕 -->
+      <div class="advanced-search-toggle">
+        <button 
+          @click="showAdvancedSearch = !showAdvancedSearch" 
+          class="advanced-toggle-btn"
+          type="button"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
+          </svg>
+          進階搜尋
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="14" 
+            height="14" 
+            fill="currentColor" 
+            viewBox="0 0 16 16"
+            :class="['chevron-icon', { 'rotated': showAdvancedSearch }]"
+          >
+            <path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- 進階搜尋面板 -->
+      <transition name="slide-down">
+        <div v-if="showAdvancedSearch" class="advanced-search-panel">
+          <div class="advanced-search-content">
+            <!-- 主題特色 -->
+            <div class="feature-group">
+              <h4 class="feature-group-title">主題特色</h4>
+              <div class="feature-options">
+                <label 
+                  v-for="feature in availableThemeFeatures" 
+                  :key="feature" 
+                  class="feature-checkbox"
+                >
+                  <input 
+                    type="checkbox" 
+                    :value="feature" 
+                    v-model="selectedThemeFeatures"
+                  >
+                  <span class="checkmark"></span>
+                  <span class="feature-text">{{ feature }}</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- 服務設施 -->
+            <div class="feature-group">
+              <h4 class="feature-group-title">服務設施</h4>
+              <div class="feature-options">
+                <label 
+                  v-for="amenity in availableServiceAmenities" 
+                  :key="amenity" 
+                  class="feature-checkbox"
+                >
+                  <input 
+                    type="checkbox" 
+                    :value="amenity" 
+                    v-model="selectedServiceAmenities"
+                  >
+                  <span class="checkmark"></span>
+                  <span class="feature-text">{{ amenity }}</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- 清除篩選按鈕 -->
+            <div class="advanced-search-actions">
+              <button 
+                @click="clearAdvancedFilters" 
+                class="clear-filters-btn"
+                type="button"
+              >
+                清除篩選
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
     <div class="col-12">
       <div class="tag-list">
         <h2 class="tag-title">
-          熱門環境:
+          熱門特色:
         </h2>
-        <span class="hot-tag" v-for="tag in hotEnvironmentTypes" :key="tag" @click="clickTag">
+        <span class="hot-tag" v-for="tag in hotThemeFeatures" :key="tag" @click="clickTag">
           {{ tag }}
         </span>
       </div>
@@ -222,9 +304,9 @@
                   <span v-if="bnb.min_guests || bnb.max_guests" class="bnb-category bnb-people">
                     {{ getGuestRange(bnb) }}
                   </span>
-                  <!-- 環境類型標籤 -->
-                  <span v-for="envType in (bnb.features?.environmentTypes || []).slice(0, 2)" :key="envType" class="bnb-category bnb-environment">
-                    {{ envType }}
+                  <!-- 主題特色標籤 -->
+                  <span v-for="themeFeature in (bnb.features?.themeFeatures || []).slice(0, 3)" :key="themeFeature" class="bnb-category bnb-theme">
+                    {{ themeFeature }}
                   </span>
                 </div>
                 
@@ -307,6 +389,13 @@ const guestCount = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 8;
 
+// 進階搜尋相關變量
+const showAdvancedSearch = ref(false);
+const selectedThemeFeatures = ref([]);
+const selectedServiceAmenities = ref([]);
+const availableThemeFeatures = ref([]);
+const availableServiceAmenities = ref([]);
+
 // 圖片輪播相關狀態
 const currentImageIndex = ref({});
 const hoveredBnb = ref(null);
@@ -316,12 +405,12 @@ const bnbsData = computed(() => homestayStore.getAllHomestays);
 const loading = computed(() => homestayStore.getLoading);
 const error = computed(() => homestayStore.getError);
 
-// 熱門環境標籤 - 更新為與新資料庫匹配
-const hotEnvironmentTypes = [
-  '自然景觀型',
-  '都市便利型', 
-  '秘境隱居型',
-  '包棟'
+// 熱門主題特色標籤
+const hotThemeFeatures = [
+  '包棟民宿',
+  '親子民宿', 
+  '寵物民宿',
+  '海景民宿'
 ];
 
 // 獲取所有區域 - 使用store的getter
@@ -348,12 +437,12 @@ const filteredBnbs = computed(() => {
   }
   
   const result = bnbsData.value.filter(bnb => {
-    // 檢查名稱和描述（支援環境類型搜尋）
+    // 檢查名稱和描述（支援主題特色搜尋）
     const nameMatch = !searchText.value || 
       bnb.name.toLowerCase().includes(searchText.value.toLowerCase()) ||
       bnb.description?.toLowerCase().includes(searchText.value.toLowerCase()) ||
-      (bnb.features?.environmentTypes && bnb.features.environmentTypes.some(type => 
-        type.toLowerCase().includes(searchText.value.toLowerCase())
+      (bnb.features?.themeFeatures && bnb.features.themeFeatures.some(feature => 
+        feature.toLowerCase().includes(searchText.value.toLowerCase())
       ));
     
     // 檢查區域
@@ -368,7 +457,19 @@ const filteredBnbs = computed(() => {
     const packageMatch = searchText.value !== '包棟' || 
       (bnb.prices && (bnb.prices.fullRentWeekday || bnb.prices.fullRentWeekend));
     
-    return nameMatch && areaMatch && guestCountMatch && packageMatch;
+    // 檢查主題特色篩選
+    const themeMatch = selectedThemeFeatures.value.length === 0 || 
+      (bnb.features?.themeFeatures && selectedThemeFeatures.value.some(selected => 
+        bnb.features.themeFeatures.includes(selected)
+      ));
+    
+    // 檢查服務設施篩選
+    const amenityMatch = selectedServiceAmenities.value.length === 0 || 
+      (bnb.features?.serviceAmenities && selectedServiceAmenities.value.some(selected => 
+        bnb.features.serviceAmenities.includes(selected)
+      ));
+    
+    return nameMatch && areaMatch && guestCountMatch && packageMatch && themeMatch && amenityMatch;
   });
   
   console.log('篩選結果:', result.length, '筆');
@@ -409,6 +510,30 @@ const clickTag = (e) => {
 // 清除搜尋文字
 const cleanText = () => {
   searchText.value = '';
+  currentPage.value = 1;
+}
+
+// 載入進階搜尋選項
+const loadAdvancedSearchOptions = async () => {
+  try {
+    const response = await $fetch('/api/features-options');
+    if (response.success) {
+      availableThemeFeatures.value = response.data.themeFeatures || [];
+      availableServiceAmenities.value = response.data.serviceAmenities || [];
+      console.log('載入進階搜尋選項成功:', {
+        themeFeatures: availableThemeFeatures.value.length,
+        serviceAmenities: availableServiceAmenities.value.length
+      });
+    }
+  } catch (error) {
+    console.error('載入進階搜尋選項失敗:', error);
+  }
+}
+
+// 清除進階篩選
+const clearAdvancedFilters = () => {
+  selectedThemeFeatures.value = [];
+  selectedServiceAmenities.value = [];
   currentPage.value = 1;
 }
 
@@ -468,7 +593,7 @@ const fetchBnbsData = async () => {
 }
 
 // 監聽篩選條件變化
-watch([searchText, selectedArea, guestCount], () => {
+watch([searchText, selectedArea, guestCount, selectedThemeFeatures, selectedServiceAmenities], () => {
   currentPage.value = 1;
   debugFilters(); // 除錯輸出
 }, { deep: true, immediate: false });
@@ -476,9 +601,12 @@ watch([searchText, selectedArea, guestCount], () => {
 onMounted(async () => {
   console.log('🚀 onMounted 觸發 - 開始載入民宿資料');
   
-  // 載入民宿資料
+  // 載入民宿資料和進階搜尋選項
   try {
-    await fetchBnbsData();
+    await Promise.all([
+      fetchBnbsData(),
+      loadAdvancedSearchOptions()
+    ]);
     
     // 如果仍然沒有資料，直接調用 API
     if (homestayStore.getAllHomestays.length === 0) {
@@ -904,9 +1032,9 @@ watch(bnbsData, (newData) => {
   margin-bottom: 8px;
 }
 
-.bnb-environment {
-  background-color: #e8f5e8;
-  color: #2d5a2d;
+.bnb-theme {
+  background-color: #e3f2fd;
+  color: #1565c0;
   font-size: 11px;
 }
 
@@ -1210,4 +1338,178 @@ watch(bnbsData, (newData) => {
 }
 
 /* 舊的圖片樣式保持不變 */
+
+/* 進階搜尋樣式 */
+.advanced-search-toggle {
+  margin-top: 12px;
+}
+
+.advanced-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #e9ecef;
+    border-color: #5db0be;
+    color: #5db0be;
+  }
+}
+
+.chevron-icon {
+  transition: transform 0.3s ease;
+  
+  &.rotated {
+    transform: rotate(180deg);
+  }
+}
+
+/* 滑入動畫 */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.advanced-search-panel {
+  margin-top: 12px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.advanced-search-content {
+  padding: 20px;
+}
+
+.feature-group {
+  margin-bottom: 20px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.feature-group-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.feature-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.feature-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #f8f9fa;
+  }
+  
+  input[type="checkbox"] {
+    display: none;
+  }
+}
+
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ddd;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  
+  &::after {
+    content: '✓';
+    font-size: 12px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+}
+
+.feature-checkbox input[type="checkbox"]:checked + .checkmark {
+  background: #5db0be;
+  border-color: #5db0be;
+  
+  &::after {
+    opacity: 1;
+  }
+}
+
+.feature-text {
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.2;
+}
+
+.advanced-search-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.clear-filters-btn {
+  padding: 8px 16px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #5a6268;
+  }
+  
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .feature-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .advanced-search-content {
+    padding: 16px;
+  }
+}
 </style> 
