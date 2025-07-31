@@ -353,7 +353,7 @@ const toggleEdit = () => {
 		position: fixed;
 		top: 0;
 		right: 0;
-    z-index: 2;
+    z-index: 10;
 		// box-shadow: 2px 0 3px$grey-6;
 		// overflow-y: scroll;
 	}
@@ -373,11 +373,10 @@ const toggleEdit = () => {
 			position: fixed;
       right: 0;
       margin: 7px;
-			z-index: 100;
 			appearance: none;
 			cursor: pointer;
 			outline: none;
-      z-index: 3;
+      z-index: 11;
 			span {
 				display: block;
 				width: 20px;
