@@ -345,9 +345,23 @@
                   </div>
                   <!-- 包棟價格 -->
                   <div v-if="bnb.prices && (bnb.prices.fullRentWeekday || bnb.prices.fullRentWeekend)" class="package-price">
-                    <span class="package-label">包棟方案</span>
-                    <span v-if="bnb.prices.fullRentWeekday" class="package-value">平日 {{ bnb.prices.fullRentWeekday }}</span>
-                    <span v-if="bnb.prices.fullRentWeekend" class="package-value">假日 {{ bnb.prices.fullRentWeekend }}</span>
+                    <div class="package-header">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="package-icon">
+                        <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z"/>
+                        <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z"/>
+                      </svg>
+                      <span class="package-label">包棟方案</span>
+                    </div>
+                    <div class="package-prices">
+                      <div v-if="bnb.prices.fullRentWeekday" class="package-item weekday">
+                        <span class="package-day">平日</span>
+                        <span class="package-value">{{ bnb.prices.fullRentWeekday }}</span>
+                      </div>
+                      <div v-if="bnb.prices.fullRentWeekend" class="package-item weekend">
+                        <span class="package-day">假日</span>
+                        <span class="package-value">{{ bnb.prices.fullRentWeekend }}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
@@ -1083,7 +1097,7 @@ watch(bnbsData, (newData) => {
   margin-right: 5px;
 }
 .price-value {
-  color: #ff6b6b;
+  color: #d23333;
   font-weight: 600;
 }
 
@@ -1130,26 +1144,68 @@ watch(bnbsData, (newData) => {
 
 
 .package-price {
-  margin-top: 5px;
-  padding: 8px;
-  background-color: #fff8e1;
-  border-radius: 6px;
-  border-left: 3px solid #ffc107;
+  margin-top: 8px;
+  padding: 10px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.package-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.package-icon {
+  color: #ff8f00;
+  opacity: 0.8;
 }
 
 .package-label {
-  display: block;
+  font-size: 12px;
+  color: #252525;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.package-prices {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.package-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 12px;
   font-size: 11px;
-  color: #333;
   font-weight: 600;
-  margin-bottom: 3px;
+}
+
+.package-item.weekday {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
+}
+
+.package-item.weekend {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #d23333;
+}
+
+.package-day {
+  font-size: 10px;
+  opacity: 0.8;
 }
 
 .package-value {
-  display: block;
-  font-size: 12px;
-  color: #ff8f00;
-  font-weight: 500;
+  font-weight: 700;
+  font-size: 11px;
 }
 
 .view-count {
