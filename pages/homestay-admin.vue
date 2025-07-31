@@ -344,6 +344,8 @@
                   <input
                     v-model.number="editData.pricing.weekdayRoom"
                     type="number"
+                    step="1"
+                    min="0"
                     class="form-input price-input"
                     :disabled="saving"
                     placeholder="0"
@@ -358,6 +360,8 @@
                   <input
                     v-model.number="editData.pricing.weekendRoom"
                     type="number"
+                    step="1"
+                    min="0"
                     class="form-input price-input"
                     :disabled="saving"
                     placeholder="0"
@@ -372,6 +376,8 @@
                   <input
                     v-model.number="editData.pricing.weekdayPackage"
                     type="number"
+                    step="1"
+                    min="0"
                     class="form-input price-input"
                     :disabled="saving"
                     placeholder="0"
@@ -386,6 +392,8 @@
                   <input
                     v-model.number="editData.pricing.weekendPackage"
                     type="number"
+                    step="1"
+                    min="0"
                     class="form-input price-input"
                     :disabled="saving"
                     placeholder="0"
@@ -736,10 +744,10 @@ const setupEditDataFromAuth = (homestayData) => {
       theme_features: homestayData.theme_features || [],
       service_amenities: homestayData.service_amenities || [],
         pricing: {
-        weekdayRoom: null,
-        weekendRoom: null,
-        weekdayPackage: null,
-        weekendPackage: null
+        weekdayRoom: homestayData.pricing?.weekdayRoom || null,
+        weekendRoom: homestayData.pricing?.weekendRoom || null,
+        weekdayPackage: homestayData.pricing?.weekdayPackage || null,
+        weekendPackage: homestayData.pricing?.weekendPackage || null
         }
       };
       

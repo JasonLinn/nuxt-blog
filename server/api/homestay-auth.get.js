@@ -60,18 +60,49 @@ export default defineEventHandler(async (event) => {
 
     const homestay = result.rows[0];
 
-    // 調試：檢查從資料庫讀取的特色資料
-    console.log('從資料庫讀取的民宿資料:');
-    console.log('theme_features:', homestay.theme_features);
-    console.log('service_amenities:', homestay.service_amenities);
-    console.log('theme_features type:', typeof homestay.theme_features);
-    console.log('service_amenities type:', typeof homestay.service_amenities);
+    // 獲取價格資料
+    const pricingQuery = `
+      SELECT 
+        price_description,
+        price_amount,
+        is_weekday,
+        is_package
+      FROM homestay_pricing 
+      WHERE homestay_id = $1
+      ORDER BY price_amount
+    `;
 
+    const pricingResult = await pool.query(pricingQuery, [homestayId]);
+
+    // 處理價格資料
+    const pricing = {
+      weekdayRoom: null,
+      weekendRoom: null,
+      weekdayPackage: null,
+      weekendPackage: null
+    };
+
+    pricingResult.rows.forEach(row => {
+      if (row.is_package) {
+        if (row.is_weekday) {
+          pricing.weekdayPackage = row.price_amount;
+        } else {
+          pricing.weekendPackage = row.price_amount;
+        }
+      } else {
+        if (row.is_weekday) {
+          pricing.weekdayRoom = row.price_amount;
+        } else {
+          pricing.weekendRoom = row.price_amount;
+        }
+      }
+    });
 
     return {
       success: true,
       homestay: {
-        ...homestay
+        ...homestay,
+        pricing: pricing
       }
     };
 

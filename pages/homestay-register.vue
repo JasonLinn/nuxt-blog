@@ -627,13 +627,13 @@ const handleFileUpload = async (event) => {
       }
 
       // 創建 FormData
-      const formData = new FormData();
-      formData.append('file', file);
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
 
       // 上傳到後端 API
       const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData
+        body: uploadFormData
       });
 
       const data = await response.json();

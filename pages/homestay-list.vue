@@ -297,16 +297,36 @@
                 </div>
                 
                 <div class="categories-row">
-                  <span class="bnb-category">
+                  <!-- 位置標籤 -->
+                  <span class="bnb-tag location-tag">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4"/>
+                    </svg>
                     {{ bnb.area }}
                   </span>
+                  
                   <!-- 人數範圍 -->
-                  <span v-if="bnb.min_guests || bnb.max_guests" class="bnb-category bnb-people">
+                  <span v-if="bnb.min_guests || bnb.max_guests" class="bnb-tag people-tag">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M15 14v1H1v-1c0-1 1-4 7-4s7 3 7 4M8 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/>
+                    </svg>
                     {{ getGuestRange(bnb) }}
                   </span>
+                  
                   <!-- 主題特色標籤 -->
-                  <span v-for="themeFeature in (bnb.features?.themeFeatures || []).slice(0, 3)" :key="themeFeature" class="bnb-category bnb-theme">
-                    {{ themeFeature }}
+                  <template v-for="(themeFeature, index) in (bnb.features?.themeFeatures || []).slice(0, 2)" :key="themeFeature">
+                    <span class="bnb-tag theme-tag">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
+                        <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319z"/>
+                      </svg>
+                      {{ themeFeature }}
+                    </span>
+                  </template>
+                  
+                  <!-- 如果有更多特色，顯示省略號 -->
+                  <span v-if="(bnb.features?.themeFeatures || []).length > 2" class="bnb-tag more-features-tag">
+                    +{{ (bnb.features?.themeFeatures || []).length - 2 }}
                   </span>
                 </div>
                 
@@ -799,6 +819,76 @@ watch(bnbsData, (newData) => {
 .bnb-img:hover {
   transform: scale(1.05);
 }
+/* 新的標籤基礎樣式 */
+.bnb-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+/* 位置標籤樣式 */
+.location-tag {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+  }
+}
+
+/* 人數標籤樣式 */
+.people-tag {
+  background: linear-gradient(135deg, #48c78e 0%, #00d4aa 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(72, 199, 142, 0.3);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(72, 199, 142, 0.4);
+  }
+}
+
+/* 主題特色標籤樣式 */
+.theme-tag {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  color: #8b4513;
+  box-shadow: 0 2px 4px rgba(252, 182, 159, 0.3);
+  border: 1px solid rgba(252, 182, 159, 0.4);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(252, 182, 159, 0.4);
+    background: linear-gradient(135deg, #ffd89b 0%, #ff8a80 100%);
+  }
+}
+
+/* 更多特色標籤樣式 */
+.more-features-tag {
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  font-weight: 600;
+  
+  &:hover {
+    background: #e9ecef;
+    transform: translateY(-1px);
+  }
+}
+
+/* 舊樣式保持向後兼容 */
 .bnb-category {
   display: inline-block;
   font-size: 14px;
@@ -1028,15 +1118,16 @@ watch(bnbsData, (newData) => {
 .categories-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 12px;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    gap: 4px;
+    margin-bottom: 10px;
+  }
 }
 
-.bnb-theme {
-  background-color: #e3f2fd;
-  color: #1565c0;
-  font-size: 11px;
-}
 
 .package-price {
   margin-top: 5px;
@@ -1510,6 +1601,22 @@ watch(bnbsData, (newData) => {
   
   .advanced-search-content {
     padding: 16px;
+  }
+  
+  /* 手機版標籤優化 */
+  .bnb-tag {
+    font-size: 11px;
+    padding: 3px 6px;
+    gap: 3px;
+    
+    svg {
+      width: 10px;
+      height: 10px;
+    }
+  }
+  
+  .categories-row {
+    gap: 4px;
   }
 }
 </style> 
