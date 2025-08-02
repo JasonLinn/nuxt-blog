@@ -99,6 +99,25 @@ export default defineEventHandler(async (event) => {
       const saltRounds = 12;
       const passwordHash = await bcrypt.hash(password, saltRounds);
 
+      // 處理價格資料
+      let minPrice = null, maxPrice = null, averagePrice = null;
+      
+      if (pricing) {
+        const prices = [];
+        
+        // 收集所有價格
+        if (pricing.weekdayRoom) prices.push(parseInt(pricing.weekdayRoom));
+        if (pricing.weekendRoom) prices.push(parseInt(pricing.weekendRoom));
+        if (pricing.weekdayPackage) prices.push(parseInt(pricing.weekdayPackage));
+        if (pricing.weekendPackage) prices.push(parseInt(pricing.weekendPackage));
+        
+        if (prices.length > 0) {
+          minPrice = Math.min(...prices);
+          maxPrice = Math.max(...prices);
+          averagePrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+        }
+      }
+
       // 插入民宿基本資訊
       const insertHomestayQuery = `
         INSERT INTO homestays (
@@ -120,6 +139,9 @@ export default defineEventHandler(async (event) => {
           service_amenities,
           email,
           password_hash,
+          min_price,
+          max_price,
+          average_price,
           status,
           available,
           featured,
@@ -127,7 +149,7 @@ export default defineEventHandler(async (event) => {
           updated_at
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 
-          $11, $12, $13, $14, $15, $16, $17, $18, 'pending', false, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+          $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, 'pending', false, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         )
         RETURNING id, name, status
       `;
@@ -150,11 +172,66 @@ export default defineEventHandler(async (event) => {
         JSON.stringify(theme_features || []),
         JSON.stringify(service_amenities || []),
         email,
-        passwordHash
+        passwordHash,
+        minPrice,
+        maxPrice,
+        averagePrice
       ];
 
       const homestayResult = await client.query(insertHomestayQuery, homestayValues);
       const homestayId = homestayResult.rows[0].id;
+
+      // 插入詳細價格資料到 homestay_pricing 表
+      if (pricing) {
+        const pricingInserts = [];
+        
+        if (pricing.weekdayRoom) {
+          pricingInserts.push({
+            amount: parseInt(pricing.weekdayRoom),
+            isWeekday: true,
+            isPackage: false,
+            description: '平日住宿'
+          });
+        }
+        
+        if (pricing.weekendRoom) {
+          pricingInserts.push({
+            amount: parseInt(pricing.weekendRoom),
+            isWeekday: false,
+            isPackage: false,
+            description: '假日住宿'
+          });
+        }
+        
+        if (pricing.weekdayPackage) {
+          pricingInserts.push({
+            amount: parseInt(pricing.weekdayPackage),
+            isWeekday: true,
+            isPackage: true,
+            description: '平日包棟'
+          });
+        }
+        
+        if (pricing.weekendPackage) {
+          pricingInserts.push({
+            amount: parseInt(pricing.weekendPackage),
+            isWeekday: false,
+            isPackage: true,
+            description: '假日包棟'
+          });
+        }
+        
+        // 批量插入價格記錄
+        for (const pricingData of pricingInserts) {
+          await client.query(`
+            INSERT INTO homestay_pricing (
+              homestay_id, price_amount, is_weekday, is_package, price_description
+            ) VALUES ($1, $2, $3, $4, $5)
+          `, [homestayId, pricingData.amount, pricingData.isWeekday, pricingData.isPackage, pricingData.description]);
+        }
+        
+        console.log(`已插入 ${pricingInserts.length} 個價格記錄`);
+      }
 
 
       // 記錄申請日誌

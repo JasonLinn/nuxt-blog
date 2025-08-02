@@ -685,7 +685,6 @@ console.log('民宿ID:', bnbId);
 
 // 民宿標題區
 .homestay-header {
-  display: grid;
   grid-template-columns: 1fr 400px;
   gap: 25px;
   margin-bottom: 32px;

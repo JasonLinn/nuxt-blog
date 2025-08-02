@@ -60,6 +60,25 @@ export default defineEventHandler(async (event) => {
         primaryImageUrl = updateData.image_url;
       }
 
+      // 處理價格資料
+      let minPrice = null, maxPrice = null, averagePrice = null;
+      
+      if (updateData.pricing) {
+        const prices = [];
+        
+        // 收集所有價格
+        if (updateData.pricing.weekdayRoom) prices.push(parseInt(updateData.pricing.weekdayRoom));
+        if (updateData.pricing.weekendRoom) prices.push(parseInt(updateData.pricing.weekendRoom));
+        if (updateData.pricing.weekdayPackage) prices.push(parseInt(updateData.pricing.weekdayPackage));
+        if (updateData.pricing.weekendPackage) prices.push(parseInt(updateData.pricing.weekendPackage));
+        
+        if (prices.length > 0) {
+          minPrice = Math.min(...prices);
+          maxPrice = Math.max(...prices);
+          averagePrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+        }
+      }
+
       // 更新民宿基本資訊
       const updateHomestayQuery = `
         UPDATE homestays 
@@ -79,8 +98,11 @@ export default defineEventHandler(async (event) => {
           max_guests = $13,
           theme_features = $14,
           service_amenities = $15,
+          min_price = $16,
+          max_price = $17,
+          average_price = $18,
           updated_at = CURRENT_TIMESTAMP
-        WHERE id = $16 AND status = 'approved'
+        WHERE id = $19 AND status = 'approved'
       `;
 
       const homestayValues = [
@@ -99,6 +121,9 @@ export default defineEventHandler(async (event) => {
         updateData.max_guests || null,
         JSON.stringify(updateData.theme_features || []),
         JSON.stringify(updateData.service_amenities || []),
+        minPrice,
+        maxPrice,
+        averagePrice,
         homestayId
       ];
 
@@ -109,6 +134,62 @@ export default defineEventHandler(async (event) => {
           statusCode: 404,
           statusMessage: '找不到指定的民宿或無權限修改'
         });
+      }
+
+      // 更新詳細價格資料到 homestay_pricing 表
+      if (updateData.pricing) {
+        // 先刪除舊的價格記錄
+        await client.query('DELETE FROM homestay_pricing WHERE homestay_id = $1', [homestayId]);
+        
+        // 插入新的價格記錄
+        const pricingInserts = [];
+        
+        if (updateData.pricing.weekdayRoom) {
+          pricingInserts.push({
+            amount: parseInt(updateData.pricing.weekdayRoom),
+            isWeekday: true,
+            isPackage: false,
+            description: '平日住宿'
+          });
+        }
+        
+        if (updateData.pricing.weekendRoom) {
+          pricingInserts.push({
+            amount: parseInt(updateData.pricing.weekendRoom),
+            isWeekday: false,
+            isPackage: false,
+            description: '假日住宿'
+          });
+        }
+        
+        if (updateData.pricing.weekdayPackage) {
+          pricingInserts.push({
+            amount: parseInt(updateData.pricing.weekdayPackage),
+            isWeekday: true,
+            isPackage: true,
+            description: '平日包棟'
+          });
+        }
+        
+        if (updateData.pricing.weekendPackage) {
+          pricingInserts.push({
+            amount: parseInt(updateData.pricing.weekendPackage),
+            isWeekday: false,
+            isPackage: true,
+            description: '假日包棟'
+          });
+        }
+        
+        // 批量插入價格記錄
+        for (const pricing of pricingInserts) {
+          await client.query(`
+            INSERT INTO homestay_pricing (
+              homestay_id, price_amount, is_weekday, is_package, price_description
+            ) VALUES ($1, $2, $3, $4, $5)
+          `, [homestayId, pricing.amount, pricing.isWeekday, pricing.isPackage, pricing.description]);
+        }
+        
+        console.log(`已更新 ${pricingInserts.length} 個價格記錄`);
       }
 
 
@@ -129,7 +210,13 @@ export default defineEventHandler(async (event) => {
           images: finalImages,
           capacity_description: updateData.capacity_description,
           min_guests: updateData.min_guests,
-          max_guests: updateData.max_guests
+          max_guests: updateData.max_guests,
+          pricing: updateData.pricing || null,
+          price_summary: {
+            min_price: minPrice,
+            max_price: maxPrice,
+            average_price: averagePrice
+          }
         }
       };
 

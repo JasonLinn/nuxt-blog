@@ -55,13 +55,21 @@ export default defineEventHandler(async (event) => {
         max_guests,
         email,
         status,
+        available,
         created_at,
         approved_at,
         approved_by,
         rejection_reason
       FROM homestays 
       ${whereCondition}
-      ORDER BY created_at DESC
+      ORDER BY 
+        CASE 
+          WHEN status = 'pending' THEN 1
+          WHEN status = 'approved' THEN 2  
+          WHEN status = 'rejected' THEN 3
+          ELSE 4
+        END,
+        created_at DESC
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 

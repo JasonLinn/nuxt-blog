@@ -3,12 +3,18 @@
     <div class="admin-header">
       <h1>民宿審核管理</h1>
       <div class="admin-nav">
+        <NuxtLink to="/admin/homestays" class="admin-nav-link">
+          民宿管理系統
+        </NuxtLink>
         <NuxtLink to="/admin/features" class="admin-nav-link">
           特色項目管理
         </NuxtLink>
         <NuxtLink to="/admin/yilan-activities" class="admin-nav-link">
           宜蘭活動管理
         </NuxtLink>
+        <button @click="quickFix070" class="quick-fix-btn" :disabled="processing">
+          🔧 修復編號070
+        </button>
         <button @click="logout" class="logout-btn">登出</button>
       </div>
     </div>
@@ -22,16 +28,29 @@
     </div>
 
     <div v-else>
-      <div class="summary">
-        <p>待審核民宿: {{ pendingHomestays.length }} 個</p>
+      <!-- 狀態篩選標籤 -->
+      <div class="status-filters">
+        <button 
+          v-for="tab in statusTabs" 
+          :key="tab.key"
+          @click="switchTab(tab.key)"
+          :class="['filter-tab', { active: currentTab === tab.key }]"
+        >
+          {{ tab.label }}
+          <span class="count-badge">{{ getHomestayCount(tab.key) }}</span>
+        </button>
       </div>
 
-      <div v-if="pendingHomestays.length === 0" class="no-data">
-        目前沒有待審核的民宿申請
+      <div class="summary">
+        <p>{{ currentTabLabel }}: {{ filteredHomestays.length }} 個</p>
+      </div>
+
+      <div v-if="filteredHomestays.length === 0" class="no-data">
+        {{ getNoDataMessage() }}
       </div>
 
       <div v-else class="homestays-grid">
-        <div v-for="homestay in pendingHomestays" :key="homestay.id" class="homestay-card">
+        <div v-for="homestay in filteredHomestays" :key="homestay.id" class="homestay-card">
           <div class="homestay-info">
             <h3>{{ homestay.name }}</h3>
             <p><strong>位置:</strong> {{ homestay.location }}</p>
@@ -44,6 +63,19 @@
             <p><strong>最多入住人數:</strong> {{ homestay.max_guests }}</p>
             <p><strong>價格範圍:</strong> ${{ homestay.min_price }} - ${{ homestay.max_price }}</p>
             <p><strong>申請時間:</strong> {{ formatDate(homestay.created_at) }}</p>
+            <p><strong>狀態:</strong> 
+              <span :class="['status-badge', homestay.status]">
+                {{ getStatusText(homestay.status) }}
+              </span>
+            </p>
+            <p><strong>可用性:</strong> 
+              <span :class="['availability-badge', { available: homestay.available }]">
+                {{ homestay.available ? '可用' : '不可用' }}
+              </span>
+            </p>
+            <p v-if="homestay.approved_at"><strong>審核時間:</strong> {{ formatDate(homestay.approved_at) }}</p>
+            <p v-if="homestay.approved_by"><strong>審核人員:</strong> {{ homestay.approved_by }}</p>
+            <p v-if="homestay.rejection_reason"><strong>拒絕原因:</strong> {{ homestay.rejection_reason }}</p>
           </div>
           
           <div class="homestay-image" v-if="homestay.image_url">
@@ -51,20 +83,52 @@
           </div>
 
           <div class="action-buttons">
-            <button 
-              @click="approveHomestay(homestay.id)" 
-              class="approve-btn"
-              :disabled="processing"
-            >
-              通過審核
-            </button>
-            <button 
-              @click="rejectHomestay(homestay.id)" 
-              class="reject-btn"
-              :disabled="processing"
-            >
-              拒絕申請
-            </button>
+            <!-- 待審核狀態的按鈕 -->
+            <template v-if="homestay.status === 'pending'">
+              <button 
+                @click="approveHomestay(homestay.id)" 
+                class="approve-btn"
+                :disabled="processing"
+              >
+                通過審核
+              </button>
+              <button 
+                @click="rejectHomestay(homestay.id)" 
+                class="reject-btn"
+                :disabled="processing"
+              >
+                拒絕申請
+              </button>
+            </template>
+            
+            <!-- 已通過審核的按鈕 -->
+            <template v-else-if="homestay.status === 'approved'">
+              <button 
+                @click="toggleAvailability(homestay.id, !homestay.available)" 
+                :class="['toggle-btn', homestay.available ? 'disable-btn' : 'enable-btn']"
+                :disabled="processing"
+              >
+                {{ homestay.available ? '設為不可用' : '設為可用' }}
+              </button>
+              <button 
+                @click="rejectHomestay(homestay.id)" 
+                class="reject-btn"
+                :disabled="processing"
+              >
+                撤銷審核
+              </button>
+            </template>
+            
+            <!-- 已拒絕的按鈕 -->
+            <template v-else-if="homestay.status === 'rejected'">
+              <button 
+                @click="approveHomestay(homestay.id)" 
+                class="approve-btn"
+                :disabled="processing"
+              >
+                重新審核通過
+              </button>
+            </template>
           </div>
         </div>
       </div>
@@ -79,22 +143,31 @@ definePageMeta({
   middleware: ['admin-auth']
 })
 
-const pendingHomestays = ref([])
+const allHomestays = ref([])
 const loading = ref(true)
 const error = ref('')
 const processing = ref(false)
+const currentTab = ref('pending')
 
-// 載入待審核民宿列表
-const loadPendingHomestays = async () => {
+// 狀態標籤定義
+const statusTabs = [
+  { key: 'pending', label: '待審核' },
+  { key: 'approved', label: '已通過' },
+  { key: 'rejected', label: '已拒絕' },
+  { key: 'all', label: '全部' }
+]
+
+// 載入民宿列表
+const loadHomestays = async (status = 'all') => {
   try {
     loading.value = true
     const response = await $fetch('/api/admin-pending-homestays', {
-      query: { status: 'pending' }
+      query: { status }
     })
-    pendingHomestays.value = response.homestays || []
+    allHomestays.value = response.homestays || []
   } catch (err) {
-    console.error('載入待審核民宿失敗:', err)
-    error.value = '載入待審核民宿失敗，請重新整理頁面'
+    console.error('載入民宿列表失敗:', err)
+    error.value = '載入民宿列表失敗，請重新整理頁面'
   } finally {
     loading.value = false
   }
@@ -114,8 +187,8 @@ const approveHomestay = async (homestayId) => {
       }
     })
     
-    // 從列表中移除已審核的項目
-    pendingHomestays.value = pendingHomestays.value.filter(h => h.id !== homestayId)
+    // 從列表中移除已審核的項目或重新載入
+    await loadHomestays('all')
     alert('審核通過成功！')
   } catch (err) {
     console.error('審核失敗:', err)
@@ -139,8 +212,8 @@ const rejectHomestay = async (homestayId) => {
       }
     })
     
-    // 從列表中移除已處理的項目
-    pendingHomestays.value = pendingHomestays.value.filter(h => h.id !== homestayId)
+    // 從列表中移除已處理的項目或重新載入
+    await loadHomestays('all')
     alert('已拒絕申請')
   } catch (err) {
     console.error('處理失敗:', err)
@@ -173,8 +246,109 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleString('zh-TW')
 }
 
+// 切換標籤
+const switchTab = async (tabKey) => {
+  currentTab.value = tabKey
+  await loadHomestays('all') // 總是載入全部數據，然後用前端篩選
+}
+
+// 切換可用性
+const toggleAvailability = async (homestayId, available) => {
+  if (!confirm(`確定要將此民宿設為${available ? '可用' : '不可用'}嗎？`)) return
+  
+  try {
+    processing.value = true
+    await $fetch('/api/admin-update-availability', {
+      method: 'POST',
+      body: {
+        homestayId,
+        available
+      }
+    })
+    
+    // 更新本地數據
+    const homestay = allHomestays.value.find(h => h.id === homestayId)
+    if (homestay) {
+      homestay.available = available
+    }
+    
+    alert(`民宿可用性已更新！`)
+  } catch (err) {
+    console.error('更新可用性失敗:', err)
+    alert('更新可用性失敗，請稍候再試')
+  } finally {
+    processing.value = false
+  }
+}
+
+// computed 屬性
+const filteredHomestays = computed(() => {
+  if (currentTab.value === 'all') {
+    return allHomestays.value
+  }
+  return allHomestays.value.filter(h => h.status === currentTab.value)
+})
+
+const currentTabLabel = computed(() => {
+  const tab = statusTabs.find(t => t.key === currentTab.value)
+  return tab ? tab.label : '未知'
+})
+
+// 獲取民宿數量
+const getHomestayCount = (status) => {
+  if (status === 'all') return allHomestays.value.length
+  return allHomestays.value.filter(h => h.status === status).length
+}
+
+// 獲取狀態文字
+const getStatusText = (status) => {
+  const statusMap = {
+    pending: '待審核',
+    approved: '已通過',
+    rejected: '已拒絕'
+  }
+  return statusMap[status] || status
+}
+
+// 獲取無數據提示
+const getNoDataMessage = () => {
+  const messages = {
+    pending: '目前沒有待審核的民宿申請',
+    approved: '目前沒有已通過審核的民宿',
+    rejected: '目前沒有被拒絕的民宿申請',
+    all: '目前沒有任何民宿資料'
+  }
+  return messages[currentTab.value] || '無數據'
+}
+
+// 快速修復編號 070
+const quickFix070 = async () => {
+  if (!confirm('確定要修復編號 070 民宿的可用狀態嗎？這將讓它在前台顯示。')) return
+  
+  try {
+    processing.value = true
+    const response = await $fetch('/api/admin-quick-fix', {
+      method: 'POST',
+      body: {
+        action: 'fix-070'
+      }
+    })
+    
+    if (response.success) {
+      alert('編號 070 民宿已修復成功！現在可以在前台顯示了。')
+      // 重新載入資料
+      await loadHomestays('all')
+    }
+  } catch (err) {
+    console.error('修復失敗:', err)
+    alert('修復失敗：' + (err.data?.message || err.message || '未知錯誤'))
+  } finally {
+    processing.value = false
+  }
+}
+
 onMounted(() => {
-  loadPendingHomestays()
+  loadHomestays('all')
 })
 </script>
 
@@ -236,6 +410,30 @@ onMounted(() => {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
   color: white;
+}
+
+.quick-fix-btn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quick-fix-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(237, 137, 54, 0.4);
+}
+
+.quick-fix-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .loading, .error, .no-data {
@@ -344,6 +542,129 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+/* 新增的樣式 */
+.status-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 15px;
+}
+
+.filter-tab {
+  padding: 10px 20px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-tab:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.filter-tab.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+.count-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.filter-tab.active .count-badge {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.filter-tab:not(.active) .count-badge {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.pending {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+.status-badge.approved {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.status-badge.rejected {
+  background: #feb2b2;
+  color: #742a2a;
+}
+
+.availability-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.availability-badge.available {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.availability-badge:not(.available) {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+.toggle-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.enable-btn {
+  background-color: #48bb78;
+  color: white;
+}
+
+.enable-btn:hover:not(:disabled) {
+  background-color: #38a169;
+}
+
+.disable-btn {
+  background-color: #ed8936;
+  color: white;
+}
+
+.disable-btn:hover:not(:disabled) {
+  background-color: #dd6b20;
+}
+
+.toggle-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .admin-header {
     flex-direction: column;
@@ -356,6 +677,16 @@ onMounted(() => {
 
   .homestay-image img {
     max-width: 100%;
+  }
+
+  .status-filters {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-tab {
+    padding: 8px 12px;
+    font-size: 14px;
   }
 }
 </style> 
