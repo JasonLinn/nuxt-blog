@@ -2,10 +2,6 @@
   <div class="admin-review-container">
     <div class="admin-header">
       <h1>民宿審核管理</h1>
-      <!-- TODO: 測試階段提示 - 正式上線後移除 -->
-      <div class="test-notice">
-        ⚠️ 測試階段：新註冊民宿會自動通過審核
-      </div>
       <div class="admin-nav">
         <NuxtLink to="/admin/features" class="admin-nav-link">
           特色項目管理
@@ -201,17 +197,7 @@ onMounted(() => {
 .admin-header h1 {
   color: #2d3748;
   font-size: 28px;
-}
-
-/* TODO: 測試階段樣式 - 正式上線後移除 */
-.test-notice {
-  background-color: #fff3cd;
-  color: #856404;
-  padding: 8px 12px;
-  border-radius: 4px;
-  border: 1px solid #ffeaa7;
-  font-size: 14px;
-  font-weight: 500;
+  font-weight: bold;
 }
 
 .logout-btn {

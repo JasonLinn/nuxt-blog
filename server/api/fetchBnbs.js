@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // 建構主查詢的 WHERE 條件
-    const whereConditions = ['h.available = true', 'h.status = \'approved\''];
+    const whereConditions = ['h.available = true'];
     const params = [];
     let paramIndex = 1;
 
