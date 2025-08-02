@@ -4,7 +4,7 @@
     <div class="search-controls">
       <!-- 地區選擇 -->
       <div class="area-search-group">
-        <label class="search-label">所在地區</label>
+        <!-- <label class="search-label">所在地區</label> -->
         <div class="select-input-group">
           <select class="area-select" v-model="selectedArea" @change="filterByArea">
         <option :value="null">所有地區</option>
@@ -26,7 +26,7 @@
 
       <!-- 人數搜尋 -->
       <div class="people-search-group">
-        <label class="search-label">入住人數</label>
+        <!-- <label class="search-label">入住人數</label> -->
         <div class="people-input-group">
           <input
             v-model.number="guestCount"
@@ -43,7 +43,7 @@
 
     <!-- 主要搜尋欄 -->
     <div class="main-search-group">
-      <label class="search-label">搜尋民宿</label>
+      <!-- <label class="search-label">搜尋民宿</label> -->
       <div class="main-search-wrapper" @keydown.enter.prevent>
         <input 
           type="text" 
@@ -768,7 +768,7 @@ watch(bnbsData, (newData) => {
   flex-wrap: wrap;
   
   @media (max-width: 768px) {
-    flex-direction: column;
+    flex-direction: row;
     gap: 12px;
   }
 }
