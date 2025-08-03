@@ -23,6 +23,8 @@ export default defineNuxtConfig({
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_USERNAME: process.env.GITHUB_USERNAME,
     GITHUB_REPO: process.env.GITHUB_REPO,
+    EMAIL_USER: process.env.EMAIL_USER,
+    EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
     
     // 可以暴露給客戶端的公共鍵
     public: {

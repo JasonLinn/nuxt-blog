@@ -46,6 +46,7 @@
     "formidable": "^3.5.4",
     "jsbarcode": "^3.11.6",
     "jwt-decode": "^4.0.0",
+    "nodemailer": "^7.0.5",
     "pg": "^8.13.3",
     "pinia": "^2.1.7",
     "qs": "^6.13.0",

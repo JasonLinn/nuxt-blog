@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { sendApprovalEmail, sendRejectionEmail } from '../utils/emailService.js';
 import { pool } from '../utils/db.js';
 
 export default defineEventHandler(async (event) => {
@@ -127,8 +128,20 @@ export default defineEventHandler(async (event) => {
       // 提交交易
       await client.query('COMMIT');
 
-      // TODO: 發送審核結果通知信件到 homestay.email
-      // 這裡可以整合郵件服務，發送審核結果通知
+      // 發送審核結果通知信件
+      try {
+        if (action === 'approve') {
+          await sendApprovalEmail(homestay.email, homestay.name, homestayId);
+          console.log(`審核通過郵件已發送至: ${homestay.email}`);
+        } else {
+          await sendRejectionEmail(homestay.email, homestay.name, homestayId, rejectionReason);
+          console.log(`審核拒絕郵件已發送至: ${homestay.email}`);
+        }
+      } catch (emailError) {
+        // 郵件發送失敗不影響審核流程，但要記錄錯誤
+        console.error('郵件發送失敗:', emailError);
+        console.error(`無法發送郵件至 ${homestay.email}，審核結果已保存但通知未發送`);
+      }
 
       return {
         success: true,

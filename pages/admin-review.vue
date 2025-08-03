@@ -15,6 +15,9 @@
         <button @click="quickFix070" class="quick-fix-btn" :disabled="processing">
           🔧 修復編號070
         </button>
+        <button @click="showEmailTest = true" class="email-test-btn" :disabled="processing">
+          📧 測試郵件
+        </button>
         <button @click="logout" class="logout-btn">登出</button>
       </div>
     </div>
@@ -133,6 +136,90 @@
         </div>
       </div>
     </div>
+
+    <!-- 測試郵件彈出視窗 -->
+    <div v-if="showEmailTest" class="modal-overlay" @click="closeEmailTestModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>📧 測試郵件功能</h3>
+          <button @click="showEmailTest = false" class="close-btn">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="test-section">
+            <h4>0. 檢查郵件設定</h4>
+            <p>檢查環境變數和設定是否正確</p>
+            <button 
+              @click="checkEmailConfig" 
+              class="check-config-btn"
+              :disabled="emailTesting"
+            >
+              {{ emailTesting && emailTestType === 'config' ? '檢查中...' : '檢查設定' }}
+            </button>
+            
+            <!-- 設定檢查結果 -->
+            <div v-if="emailConfigResult" class="config-result">
+              <h5>設定檢查結果：</h5>
+              <ul>
+                <li v-for="rec in emailConfigResult.recommendations" :key="rec" 
+                    :class="rec.startsWith('✓') ? 'success' : rec.startsWith('❌') ? 'error' : 'warning'">
+                  {{ rec }}
+                </li>
+              </ul>
+              <div class="config-details">
+                <p><strong>EMAIL_USER:</strong> {{ emailConfigResult.config.emailUserValue }}</p>
+                <p><strong>EMAIL_PASSWORD長度:</strong> {{ emailConfigResult.config.emailPasswordLength }} 字元</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="test-section">
+            <h4>1. 測試郵件服務連接</h4>
+            <p>檢查 Gmail SMTP 設定是否正確</p>
+            <button 
+              @click="testEmailConnection" 
+              class="test-connection-btn"
+              :disabled="emailTesting"
+            >
+              {{ emailTesting && emailTestType === 'connection' ? '測試中...' : '測試連接' }}
+            </button>
+          </div>
+
+          <div class="test-section">
+            <h4>2. 發送測試郵件</h4>
+            <p>發送實際的審核通過郵件到指定信箱</p>
+            <div class="input-group">
+              <label>收件者信箱：</label>
+              <input 
+                v-model="testEmailAddress" 
+                type="email" 
+                placeholder="test@example.com"
+                class="email-input"
+              />
+            </div>
+            <button 
+              @click="sendTestEmail" 
+              class="send-test-btn"
+              :disabled="emailTesting || !testEmailAddress"
+            >
+              {{ emailTesting && emailTestType === 'send' ? '發送中...' : '發送測試郵件' }}
+            </button>
+          </div>
+
+          <div v-if="emailTestResult" class="test-result" :class="emailTestResult.success ? 'success' : 'error'">
+            <h4>{{ emailTestResult.success ? '✅ 測試成功' : '❌ 測試失敗' }}</h4>
+            <p>{{ emailTestResult.message }}</p>
+            <div v-if="emailTestResult.details" class="details">
+              <pre>{{ emailTestResult.details }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button @click="showEmailTest = false" class="cancel-btn">關閉</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -148,6 +235,14 @@ const loading = ref(true)
 const error = ref('')
 const processing = ref(false)
 const currentTab = ref('pending')
+
+// 測試郵件相關狀態
+const showEmailTest = ref(false)
+const emailTesting = ref(false)
+const emailTestType = ref('')
+const testEmailAddress = ref('')
+const emailTestResult = ref(null)
+const emailConfigResult = ref(null)
 
 // 狀態標籤定義
 const statusTabs = [
@@ -345,6 +440,102 @@ const quickFix070 = async () => {
   } finally {
     processing.value = false
   }
+}
+
+// 檢查郵件設定
+const checkEmailConfig = async () => {
+  emailTesting.value = true
+  emailTestType.value = 'config'
+  emailConfigResult.value = null
+  
+  try {
+    const response = await $fetch('/api/admin/debug-email-config')
+    emailConfigResult.value = response
+  } catch (err) {
+    console.error('檢查郵件設定失敗:', err)
+    emailConfigResult.value = {
+      recommendations: ['❌ 無法檢查設定: ' + (err.data?.message || err.message || '未知錯誤')]
+    }
+  } finally {
+    emailTesting.value = false
+    emailTestType.value = ''
+  }
+}
+
+// 測試郵件連接
+const testEmailConnection = async () => {
+  emailTesting.value = true
+  emailTestType.value = 'connection'
+  emailTestResult.value = null
+  
+  try {
+    const response = await $fetch('/api/admin/test-email', {
+      method: 'POST',
+      body: {
+        testType: 'connection'
+      }
+    })
+    
+    emailTestResult.value = {
+      success: true,
+      message: '郵件服務連接成功！SMTP 設定正確。'
+    }
+  } catch (err) {
+    console.error('測試郵件連接失敗:', err)
+    emailTestResult.value = {
+      success: false,
+      message: '郵件服務連接失敗',
+      details: err.data?.message || err.message || '未知錯誤'
+    }
+  } finally {
+    emailTesting.value = false
+    emailTestType.value = ''
+  }
+}
+
+// 發送測試郵件
+const sendTestEmail = async () => {
+  if (!testEmailAddress.value) {
+    alert('請輸入收件者信箱')
+    return
+  }
+  
+  emailTesting.value = true
+  emailTestType.value = 'send'
+  emailTestResult.value = null
+  
+  try {
+    const response = await $fetch('/api/admin/test-email', {
+      method: 'POST',
+      body: {
+        testType: 'send',
+        testEmail: testEmailAddress.value
+      }
+    })
+    
+    emailTestResult.value = {
+      success: true,
+      message: `測試郵件已成功發送至 ${testEmailAddress.value}`
+    }
+  } catch (err) {
+    console.error('發送測試郵件失敗:', err)
+    emailTestResult.value = {
+      success: false,
+      message: '測試郵件發送失敗',
+      details: err.data?.message || err.message || '未知錯誤'
+    }
+  } finally {
+    emailTesting.value = false
+    emailTestType.value = ''
+  }
+}
+
+// 關閉測試郵件視窗
+const closeEmailTestModal = () => {
+  showEmailTest.value = false
+  emailTestResult.value = null
+  emailConfigResult.value = null
+  testEmailAddress.value = ''
 }
 
 onMounted(() => {
@@ -663,6 +854,306 @@ onMounted(() => {
 .toggle-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* 測試郵件功能樣式 */
+.email-test-btn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.email-test-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.email-test-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.modal-footer {
+  padding: 20px 25px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.test-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.test-section h4 {
+  margin: 0 0 10px 0;
+  color: #2d3748;
+  font-size: 16px;
+}
+
+.test-section p {
+  margin: 0 0 15px 0;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.email-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.email-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.check-config-btn, .test-connection-btn, .send-test-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.check-config-btn {
+  background-color: #4299e1;
+  color: white;
+}
+
+.check-config-btn:hover:not(:disabled) {
+  background-color: #3182ce;
+}
+
+.test-connection-btn {
+  background-color: #48bb78;
+  color: white;
+}
+
+.test-connection-btn:hover:not(:disabled) {
+  background-color: #38a169;
+}
+
+.send-test-btn {
+  background-color: #667eea;
+  color: white;
+}
+
+.send-test-btn:hover:not(:disabled) {
+  background-color: #5a67d8;
+}
+
+.check-config-btn:disabled, .test-connection-btn:disabled, .send-test-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.config-result {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f7fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.config-result h5 {
+  margin: 0 0 10px 0;
+  color: #2d3748;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.config-result ul {
+  margin: 0 0 15px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.config-result li {
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.config-result li.success {
+  color: #22543d;
+}
+
+.config-result li.error {
+  color: #742a2a;
+}
+
+.config-result li.warning {
+  color: #d69e2e;
+}
+
+.config-details {
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.config-details p {
+  margin: 5px 0;
+  font-size: 12px;
+  color: #4a5568;
+}
+
+.test-result {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.test-result.success {
+  background: #f0fff4;
+  border-color: #48bb78;
+}
+
+.test-result.error {
+  background: #fff5f5;
+  border-color: #e53e3e;
+}
+
+.test-result h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.test-result.success h4 {
+  color: #22543d;
+}
+
+.test-result.error h4 {
+  color: #742a2a;
+}
+
+.test-result p {
+  margin: 0 0 10px 0;
+  color: #4a5568;
+}
+
+.test-result .details {
+  background: #edf2f7;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.test-result .details pre {
+  margin: 0;
+  font-size: 12px;
+  color: #2d3748;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  background-color: #a0aec0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+  background-color: #718096;
 }
 
 @media (max-width: 768px) {
