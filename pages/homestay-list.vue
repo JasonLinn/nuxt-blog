@@ -326,14 +326,14 @@
                 </p>
                 
                 <div class="price-info">
-                  <div v-if="bnb.prices && bnb.prices.weekday">
+                  <!-- <div v-if="bnb.prices && bnb.prices.weekday">
                     <span class="price-label">平日價格:</span>
                     <span class="price-value">{{ bnb.prices.weekday }}</span>
                   </div>
                   <div v-if="bnb.prices && bnb.prices.weekend">
                     <span class="price-label">假日價格:</span>
                     <span class="price-value">{{ bnb.prices.weekend }}</span>
-                  </div>
+                  </div> -->
                   <!-- 包棟價格 -->
                   <div v-if="bnb.prices && (bnb.prices.fullRentWeekday || bnb.prices.fullRentWeekend)" class="package-price">
                     <div class="package-header">
