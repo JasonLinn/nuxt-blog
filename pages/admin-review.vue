@@ -12,9 +12,6 @@
         <NuxtLink to="/admin/yilan-activities" class="admin-nav-link">
           宜蘭活動管理
         </NuxtLink>
-        <button @click="quickFix070" class="quick-fix-btn" :disabled="processing">
-          🔧 修復編號070
-        </button>
         <button @click="showEmailTest = true" class="email-test-btn" :disabled="processing">
           📧 測試郵件
         </button>
@@ -416,31 +413,6 @@ const getNoDataMessage = () => {
   return messages[currentTab.value] || '無數據'
 }
 
-// 快速修復編號 070
-const quickFix070 = async () => {
-  if (!confirm('確定要修復編號 070 民宿的可用狀態嗎？這將讓它在前台顯示。')) return
-  
-  try {
-    processing.value = true
-    const response = await $fetch('/api/admin-quick-fix', {
-      method: 'POST',
-      body: {
-        action: 'fix-070'
-      }
-    })
-    
-    if (response.success) {
-      alert('編號 070 民宿已修復成功！現在可以在前台顯示了。')
-      // 重新載入資料
-      await loadHomestays('all')
-    }
-  } catch (err) {
-    console.error('修復失敗:', err)
-    alert('修復失敗：' + (err.data?.message || err.message || '未知錯誤'))
-  } finally {
-    processing.value = false
-  }
-}
 
 // 檢查郵件設定
 const checkEmailConfig = async () => {
@@ -603,29 +575,6 @@ onMounted(() => {
   color: white;
 }
 
-.quick-fix-btn {
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.quick-fix-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(237, 137, 54, 0.4);
-}
-
-.quick-fix-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
 
 .loading, .error, .no-data {
   text-align: center;
