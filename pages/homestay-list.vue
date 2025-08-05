@@ -913,8 +913,10 @@ watch(bnbsData, (newData) => {
   color: #272727;
   font-size: 14px;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
   margin-bottom: 10px;
 }
 /* 統一的搜尋標籤樣式 */
