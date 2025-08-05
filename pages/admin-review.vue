@@ -49,86 +49,131 @@
         {{ getNoDataMessage() }}
       </div>
 
-      <div v-else class="homestays-grid">
-        <div v-for="homestay in filteredHomestays" :key="homestay.id" class="homestay-card">
-          <div class="homestay-info">
-            <h3>{{ homestay.name }}</h3>
-            <p><strong>位置:</strong> {{ homestay.location }}</p>
-            <p><strong>城市:</strong> {{ homestay.city }}</p>
-            <p><strong>聯絡信箱:</strong> {{ homestay.email }}</p>
-            <p><strong>電話:</strong> {{ homestay.phone }}</p>
-            <p><strong>網站:</strong> {{ homestay.website }}</p>
-            <p><strong>容量描述:</strong> {{ homestay.capacity_description }}</p>
-            <p><strong>最少入住人數:</strong> {{ homestay.min_guests }}</p>
-            <p><strong>最多入住人數:</strong> {{ homestay.max_guests }}</p>
-            <p><strong>價格範圍:</strong> ${{ homestay.min_price }} - ${{ homestay.max_price }}</p>
-            <p><strong>申請時間:</strong> {{ formatDate(homestay.created_at) }}</p>
-            <p><strong>狀態:</strong> 
+      <div v-else class="homestays-table">
+        <div class="table-header">
+          <div class="col-name">民宿名稱</div>
+          <div class="col-location">位置</div>
+          <div class="col-contact">聯絡方式</div>
+          <div class="col-price">價格範圍</div>
+          <div class="col-status">狀態</div>
+          <div class="col-actions">操作</div>
+        </div>
+        
+        <div v-for="homestay in filteredHomestays" :key="homestay.id" class="homestay-row">
+          <div class="homestay-summary">
+            <div class="col-name">
+              <div class="name-content">
+                <h4>{{ homestay.name }}</h4>
+                <small class="text-muted">申請時間: {{ formatDate(homestay.created_at) }}</small>
+              </div>
+            </div>
+            <div class="col-location">
+              <div>{{ homestay.city }}</div>
+              <small class="text-muted">{{ homestay.location }}</small>
+            </div>
+            <div class="col-contact">
+              <div>{{ homestay.email }}</div>
+              <small class="text-muted">{{ homestay.phone }}</small>
+            </div>
+            <div class="col-price">
+              <div>${{ homestay.min_price }} - ${{ homestay.max_price }}</div>
+              <small class="text-muted">{{ homestay.min_guests }}-{{ homestay.max_guests }}人</small>
+            </div>
+            <div class="col-status">
               <span :class="['status-badge', homestay.status]">
                 {{ getStatusText(homestay.status) }}
               </span>
-            </p>
-            <p><strong>可用性:</strong> 
-              <span :class="['availability-badge', { available: homestay.available }]">
-                {{ homestay.available ? '可用' : '不可用' }}
-              </span>
-            </p>
-            <p v-if="homestay.approved_at"><strong>審核時間:</strong> {{ formatDate(homestay.approved_at) }}</p>
-            <p v-if="homestay.approved_by"><strong>審核人員:</strong> {{ homestay.approved_by }}</p>
-            <p v-if="homestay.rejection_reason"><strong>拒絕原因:</strong> {{ homestay.rejection_reason }}</p>
+              <div v-if="homestay.status === 'approved'">
+                <span :class="['availability-badge', { available: homestay.available }]">
+                  {{ homestay.available ? '可用' : '不可用' }}
+                </span>
+              </div>
+            </div>
+            <div class="col-actions">
+              <button 
+                @click="toggleDetails(homestay.id)" 
+                class="btn btn-sm btn-outline-secondary me-2"
+              >
+                {{ expandedRows.includes(homestay.id) ? '收起' : '詳情' }}
+              </button>
+              
+              <!-- 待審核狀態的按鈕 -->
+              <template v-if="homestay.status === 'pending'">
+                <button 
+                  @click="approveHomestay(homestay.id)" 
+                  class="btn btn-sm btn-success me-1"
+                  :disabled="processing"
+                >
+                  通過
+                </button>
+                <button 
+                  @click="rejectHomestay(homestay.id)" 
+                  class="btn btn-sm btn-danger"
+                  :disabled="processing"
+                >
+                  拒絕
+                </button>
+              </template>
+              
+              <!-- 已通過審核的按鈕 -->
+              <template v-else-if="homestay.status === 'approved'">
+                <button 
+                  @click="toggleAvailability(homestay.id, !homestay.available)" 
+                  :class="['btn', 'btn-sm', 'me-1', homestay.available ? 'btn-warning' : 'btn-info']"
+                  :disabled="processing"
+                >
+                  {{ homestay.available ? '停用' : '啟用' }}
+                </button>
+                <button 
+                  @click="rejectHomestay(homestay.id)" 
+                  class="btn btn-sm btn-outline-danger"
+                  :disabled="processing"
+                >
+                  撤銷
+                </button>
+              </template>
+              
+              <!-- 已拒絕的按鈕 -->
+              <template v-else-if="homestay.status === 'rejected'">
+                <button 
+                  @click="approveHomestay(homestay.id)" 
+                  class="btn btn-sm btn-success"
+                  :disabled="processing"
+                >
+                  重新通過
+                </button>
+              </template>
+            </div>
           </div>
           
-          <div class="homestay-image" v-if="homestay.image_url">
-            <img :src="homestay.image_url" :alt="homestay.name" />
-          </div>
-
-          <div class="action-buttons">
-            <!-- 待審核狀態的按鈕 -->
-            <template v-if="homestay.status === 'pending'">
-              <button 
-                @click="approveHomestay(homestay.id)" 
-                class="approve-btn"
-                :disabled="processing"
-              >
-                通過審核
-              </button>
-              <button 
-                @click="rejectHomestay(homestay.id)" 
-                class="reject-btn"
-                :disabled="processing"
-              >
-                拒絕申請
-              </button>
-            </template>
-            
-            <!-- 已通過審核的按鈕 -->
-            <template v-else-if="homestay.status === 'approved'">
-              <button 
-                @click="toggleAvailability(homestay.id, !homestay.available)" 
-                :class="['toggle-btn', homestay.available ? 'disable-btn' : 'enable-btn']"
-                :disabled="processing"
-              >
-                {{ homestay.available ? '設為不可用' : '設為可用' }}
-              </button>
-              <button 
-                @click="rejectHomestay(homestay.id)" 
-                class="reject-btn"
-                :disabled="processing"
-              >
-                撤銷審核
-              </button>
-            </template>
-            
-            <!-- 已拒絕的按鈕 -->
-            <template v-else-if="homestay.status === 'rejected'">
-              <button 
-                @click="approveHomestay(homestay.id)" 
-                class="approve-btn"
-                :disabled="processing"
-              >
-                重新審核通過
-              </button>
-            </template>
+          <!-- 展開的詳細資訊 -->
+          <div v-if="expandedRows.includes(homestay.id)" class="homestay-details">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="detail-section">
+                  <h6>基本資訊</h6>
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <p><strong>網站:</strong> 
+                        <a v-if="homestay.website" :href="homestay.website" target="_blank" class="text-primary">{{ homestay.website }}</a>
+                        <span v-else class="text-muted">未提供</span>
+                      </p>
+                      <p><strong>容量描述:</strong> {{ homestay.capacity_description }}</p>
+                    </div>
+                    <div class="col-sm-6">
+                      <p v-if="homestay.approved_at"><strong>審核時間:</strong> {{ formatDate(homestay.approved_at) }}</p>
+                      <p v-if="homestay.approved_by"><strong>審核人員:</strong> {{ homestay.approved_by }}</p>
+                      <p v-if="homestay.rejection_reason" class="text-danger"><strong>拒絕原因:</strong> {{ homestay.rejection_reason }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4" v-if="homestay.image_url">
+                <div class="detail-image">
+                  <img :src="homestay.image_url" :alt="homestay.name" class="img-thumbnail" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -232,6 +277,7 @@ const loading = ref(true)
 const error = ref('')
 const processing = ref(false)
 const currentTab = ref('pending')
+const expandedRows = ref([])
 
 // 測試郵件相關狀態
 const showEmailTest = ref(false)
@@ -502,6 +548,16 @@ const sendTestEmail = async () => {
   }
 }
 
+// 切換詳細資訊顯示
+const toggleDetails = (homestayId) => {
+  const index = expandedRows.value.indexOf(homestayId)
+  if (index > -1) {
+    expandedRows.value.splice(index, 1)
+  } else {
+    expandedRows.value.push(homestayId)
+  }
+}
+
 // 關閉測試郵件視窗
 const closeEmailTestModal = () => {
   showEmailTest.value = false
@@ -600,87 +656,106 @@ onMounted(() => {
   color: #4a5568;
 }
 
-.homestays-grid {
-  display: grid;
-  gap: 25px;
-}
-
-.homestay-card {
+/* 表格式佈局 */
+.homestays-table {
   background: white;
-  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 20px;
+  overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s;
 }
 
-.homestay-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 2fr 1fr 1fr 2fr;
+  gap: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px 20px;
+  font-weight: 600;
+  font-size: 14px;
 }
 
-.homestay-info {
+.homestay-row {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s;
+}
+
+.homestay-row:hover {
+  background-color: #f8f9fa;
+}
+
+.homestay-row:last-child {
+  border-bottom: none;
+}
+
+.homestay-summary {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 2fr 1fr 1fr 2fr;
+  gap: 15px;
+  padding: 15px 20px;
+  align-items: center;
+}
+
+.col-name h4 {
+  margin: 0 0 2px 0;
+  font-size: 16px;
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.col-name small,
+.col-location small,
+.col-contact small,
+.col-price small {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+.col-location,
+.col-contact,
+.col-price {
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.col-actions {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+/* 詳細資訊區域 */
+.homestay-details {
+  background: #f8f9fa;
+  padding: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.detail-section {
   margin-bottom: 15px;
 }
 
-.homestay-info h3 {
-  color: #2d3748;
-  font-size: 20px;
+.detail-section h6 {
+  color: #495057;
+  font-weight: 600;
   margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #dee2e6;
 }
 
-.homestay-info p {
-  margin: 5px 0;
-  color: #4a5568;
-  line-height: 1.5;
+.detail-section p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #6c757d;
 }
 
-.homestay-image {
-  margin: 15px 0;
-}
-
-.homestay-image img {
-  max-width: 200px;
+.detail-image img {
+  max-width: 100%;
   height: auto;
   border-radius: 8px;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.approve-btn, .reject-btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.approve-btn {
-  background-color: #48bb78;
-  color: white;
-}
-
-.approve-btn:hover:not(:disabled) {
-  background-color: #38a169;
-}
-
-.reject-btn {
-  background-color: #e53e3e;
-  color: white;
-}
-
-.reject-btn:hover:not(:disabled) {
-  background-color: #c53030;
-}
-
-.approve-btn:disabled, .reject-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+/* 移除舊的按鈕樣式，使用 Bootstrap 按鈕 */
 
 /* 新增的樣式 */
 .status-filters {
@@ -1111,14 +1186,6 @@ onMounted(() => {
     gap: 15px;
   }
 
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .homestay-image img {
-    max-width: 100%;
-  }
-
   .status-filters {
     flex-wrap: wrap;
     gap: 8px;
@@ -1127,6 +1194,57 @@ onMounted(() => {
   .filter-tab {
     padding: 8px 12px;
     font-size: 14px;
+  }
+
+  /* 手機版改為卡片式佈局 */
+  .table-header {
+    display: none;
+  }
+
+  .homestay-summary {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .homestay-row {
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .col-name, .col-location, .col-contact, .col-price, .col-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f3f4;
+  }
+
+  .col-name::before { content: "名稱: "; font-weight: 600; }
+  .col-location::before { content: "位置: "; font-weight: 600; }
+  .col-contact::before { content: "聯絡: "; font-weight: 600; }
+  .col-price::before { content: "價格: "; font-weight: 600; }
+  .col-status::before { content: "狀態: "; font-weight: 600; }
+
+  .col-actions {
+    padding-top: 10px;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .homestay-details {
+    padding: 15px;
+  }
+
+  .detail-section .row {
+    margin: 0;
+  }
+
+  .detail-section .col-sm-6 {
+    padding: 0;
+    margin-bottom: 10px;
   }
 }
 </style> 

@@ -330,7 +330,7 @@
           </div>
           
           <!-- 位置資訊 -->
-          <div class="info-card full-width">
+          <div class="info-card">
             <div class="card-header">
               <div class="card-icon">📍</div>
               <h3 class="card-title">位置資訊</h3>
@@ -350,6 +350,19 @@
                   </svg>
                   <span>{{ bnb.address }}</span>
                 </div>
+                
+                <!-- Google 地圖按鈕 -->
+                <a 
+                  v-if="bnb.name || bnb.address" 
+                  :href="getGoogleMapsUrl(bnb.name, bnb.address)" 
+                  target="_blank" 
+                  class="maps-link-btn"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                  </svg>
+                  <span>開啟 Google 地圖</span>
+                </a>
               </div>
             </div>
           </div>
@@ -522,6 +535,12 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
 });
+
+// Google Maps URL 生成函數
+const getGoogleMapsUrl = (name, address) => {
+  const query = [name, address].filter(Boolean).join(' ');
+  return `https://www.google.com/maps/?q=${encodeURIComponent(query)}`;
+};
 
 // 調試信息
 console.log('路由參數:', route.params);
@@ -1406,6 +1425,34 @@ console.log('民宿ID:', bnbId);
   }
 }
 
+// Google 地圖按鈕樣式
+.maps-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 15px;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+  transition: all 0.3s ease;
+  width: fit-content;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+    text-decoration: none;
+    color: white;
+  }
+  
+  svg {
+    flex-shrink: 0;
+  }
+}
+
 // 業者登入按鈕區域
 .owner-login-section {
   margin-top: 40px;
@@ -1576,6 +1623,17 @@ console.log('民宿ID:', bnbId);
   .location-tag, .address-tag {
     padding: 8px 12px;
     font-size: 13px;
+    
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+  
+  .maps-link-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    gap: 8px;
     
     svg {
       width: 12px;
