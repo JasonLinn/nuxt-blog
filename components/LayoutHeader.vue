@@ -42,7 +42,7 @@
               <NuxtLink
                 to="/launch-schedule"
               >
-                <p class="">上架時間列表</p>
+                <p class="">更新時間列表</p>
               </NuxtLink>
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
