@@ -169,6 +169,20 @@
             </div>
           </div>
 
+          <!-- 可預訂日曆（全寬） -->
+          <div class="info-card full-width">
+            <div class="card-header">
+              <div class="card-icon">📅</div>
+              <h3 class="card-title">空房狀況</h3>
+            </div>
+            <div class="card-content">
+              <AvailabilityCalendar 
+                :homestay-id="bnbId"
+                :view-only="true"
+              />
+            </div>
+          </div>
+
           <!-- 第二行：住宿人數 + 環境特色 -->
           <div class="info-card compact">
             <div class="card-header">
@@ -542,6 +556,8 @@ const getGoogleMapsUrl = (name, address) => {
   return `https://www.google.com/maps/?q=${encodeURIComponent(query)}`;
 };
 
+// 移除預訂相關的處理函數，改為純檢視模式
+
 // 調試信息
 console.log('路由參數:', route.params);
 console.log('民宿ID:', bnbId);
@@ -650,7 +666,7 @@ console.log('民宿ID:', bnbId);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 11;
   
   @media (max-width: 768px) {
     flex-direction: column;

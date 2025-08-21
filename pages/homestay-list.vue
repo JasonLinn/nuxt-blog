@@ -24,6 +24,45 @@
         </div>
       </div>
 
+      <!-- 日期搜尋 -->
+      <div class="date-search-group">
+        <div class="date-input-wrapper">
+          <div class="date-input-group">
+            <input
+              v-model="checkInDate"
+              type="date"
+              class="date-input"
+              :min="todayString"
+              :max="maxDateString"
+              placeholder="入住日期"
+            />
+            <span class="date-label">入住</span>
+          </div>
+          <div class="date-separator">~</div>
+          <div class="date-input-group">
+            <input
+              v-model="checkOutDate"
+              type="date"
+              class="date-input"
+              :min="minCheckOutDate"
+              :max="maxDateString"
+              placeholder="退房日期"
+            />
+            <span class="date-label">退房</span>
+          </div>
+        </div>
+        <button 
+          v-if="checkInDate || checkOutDate" 
+          @click="clearDates" 
+          class="clear-dates-btn"
+          type="button"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+          </svg>
+        </button>
+      </div>
+
       <!-- 人數搜尋 -->
       <div class="people-search-group">
         <!-- <label class="search-label">入住人數</label> -->
@@ -414,6 +453,12 @@ const guestCount = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 8;
 
+// 日期搜尋相關
+const checkInDate = ref('');
+const checkOutDate = ref('');
+const dateSearchMode = ref(false); // 是否啟用日期搜尋模式
+const availableHomestays = ref([]); // 根據日期搜尋的可用民宿
+
 // 進階搜尋相關變量
 const showAdvancedSearch = ref(false);
 const selectedThemeFeatures = ref([]);
@@ -441,6 +486,24 @@ const hotThemeFeatures = [
 // 獲取所有區域 - 使用store的getter
 const areas = computed(() => homestayStore.getAllAreas);
 
+// 日期相關的計算屬性
+const todayString = computed(() => {
+  return new Date().toISOString().split('T')[0];
+});
+
+const maxDateString = computed(() => {
+  const maxDate = new Date();
+  maxDate.setMonth(maxDate.getMonth() + 6);
+  return maxDate.toISOString().split('T')[0];
+});
+
+const minCheckOutDate = computed(() => {
+  if (!checkInDate.value) return todayString.value;
+  const checkIn = new Date(checkInDate.value);
+  checkIn.setDate(checkIn.getDate() + 1);
+  return checkIn.toISOString().split('T')[0];
+});
+
 // 除錯用：監控篩選條件變化
 const debugFilters = () => {
   console.log('篩選條件:', {
@@ -452,10 +515,48 @@ const debugFilters = () => {
   });
 }
 
-// 過濾民宿資料 - 增強篩選邏輯
+// 過濾民宿資料 - 增強篩選邏輯，支援日期搜尋
 const filteredBnbs = computed(() => {
   console.log('filteredBnbs 計算中, bnbsData.length:', bnbsData.value?.length);
+  console.log('日期搜尋模式:', dateSearchMode.value);
   
+  // 如果啟用日期搜尋模式，使用日期搜尋結果
+  if (dateSearchMode.value && availableHomestays.value.length >= 0) {
+    console.log('使用日期搜尋結果:', availableHomestays.value.length, '筆');
+    
+    // 對日期搜尋結果進行進一步篩選
+    const result = availableHomestays.value.filter(bnb => {
+      // 檢查名稱和描述（支援主題特色搜尋）
+      const nameMatch = !searchText.value || 
+        bnb.name.toLowerCase().includes(searchText.value.toLowerCase()) ||
+        bnb.description?.toLowerCase().includes(searchText.value.toLowerCase()) ||
+        (bnb.features?.themeFeatures && bnb.features.themeFeatures.some(feature => 
+          feature.toLowerCase().includes(searchText.value.toLowerCase())
+        ));
+      
+      // 檢查區域
+      const areaMatch = !selectedArea.value || bnb.area === selectedArea.value;
+      
+      // 檢查主題特色篩選
+      const themeMatch = selectedThemeFeatures.value.length === 0 || 
+        (bnb.features?.themeFeatures && selectedThemeFeatures.value.some(selected => 
+          bnb.features.themeFeatures.includes(selected)
+        ));
+      
+      // 檢查服務設施篩選
+      const amenityMatch = selectedServiceAmenities.value.length === 0 || 
+        (bnb.features?.serviceAmenities && selectedServiceAmenities.value.some(selected => 
+          bnb.features.serviceAmenities.includes(selected)
+        ));
+      
+      return nameMatch && areaMatch && themeMatch && amenityMatch;
+    });
+    
+    console.log('日期篩選後結果:', result.length, '筆');
+    return result;
+  }
+  
+  // 一般篩選邏輯
   if (!Array.isArray(bnbsData.value)) {
     console.log('bnbsData 不是陣列:', bnbsData.value);
     return [];
@@ -497,7 +598,7 @@ const filteredBnbs = computed(() => {
     return nameMatch && areaMatch && guestCountMatch && packageMatch && themeMatch && amenityMatch;
   });
   
-  console.log('篩選結果:', result.length, '筆');
+  console.log('一般篩選結果:', result.length, '筆');
   return result;
 });
 
@@ -565,7 +666,58 @@ const clearAdvancedFilters = () => {
 // 根據區域過濾
 const filterByArea = () => {
   currentPage.value = 1;
-}
+};
+
+// 清除日期選擇
+const clearDates = () => {
+  checkInDate.value = '';
+  checkOutDate.value = '';
+  dateSearchMode.value = false;
+  availableHomestays.value = [];
+  currentPage.value = 1;
+};
+
+// 根據日期搜尋可用民宿
+const searchByDates = async () => {
+  if (!checkInDate.value || !checkOutDate.value) {
+    console.log('日期不完整，取消日期搜尋');
+    dateSearchMode.value = false;
+    availableHomestays.value = [];
+    return;
+  }
+
+  console.log('開始根據日期搜尋:', { checkInDate: checkInDate.value, checkOutDate: checkOutDate.value });
+  
+  try {
+    dateSearchMode.value = true;
+    loading.value = true;
+
+    const response = await $fetch('/api/search-available-homestays', {
+      query: {
+        checkIn: checkInDate.value,
+        checkOut: checkOutDate.value,
+        guestCount: guestCount.value || undefined,
+        area: selectedArea.value || undefined,
+        limit: 100 // 獲取更多結果供前端篩選
+      }
+    });
+
+    if (response.success) {
+      availableHomestays.value = response.data.homestays;
+      console.log('日期搜尋成功，找到', availableHomestays.value.length, '個可用民宿');
+    } else {
+      console.error('日期搜尋失敗:', response.error);
+      availableHomestays.value = [];
+      // 可以顯示錯誤訊息給用戶
+    }
+  } catch (error) {
+    console.error('日期搜尋發生錯誤:', error);
+    availableHomestays.value = [];
+  } finally {
+    loading.value = false;
+    currentPage.value = 1;
+  }
+};
 
 // 從 store 獲取民宿資料
 const fetchBnbsData = async () => {
@@ -622,6 +774,20 @@ watch([searchText, selectedArea, guestCount, selectedThemeFeatures, selectedServ
   currentPage.value = 1;
   debugFilters(); // 除錯輸出
 }, { deep: true, immediate: false });
+
+// 監聽日期變化
+watch([checkInDate, checkOutDate], () => {
+  // 使用 debounce 避免過度頻繁的 API 調用
+  if (searchDateTimeout) {
+    clearTimeout(searchDateTimeout);
+  }
+  
+  searchDateTimeout = setTimeout(() => {
+    searchByDates();
+  }, 500); // 500ms 延遲
+}, { immediate: false });
+
+let searchDateTimeout = null;
 
 onMounted(async () => {
   console.log('🚀 onMounted 觸發 - 開始載入民宿資料');
@@ -1221,6 +1387,102 @@ watch(bnbsData, (newData) => {
 }
 
 
+
+/* 日期搜尋樣式 */
+.date-search-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 280px;
+  
+  @media (max-width: 768px) {
+    min-width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.date-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    gap: 12px;
+  }
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.date-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.3s ease;
+  text-align: center;
+  
+  &:focus {
+    outline: none;
+    border-color: #5db0be;
+    box-shadow: 0 0 0 2px rgba(93, 176, 190, 0.1);
+  }
+  
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.date-label {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+  text-align: center;
+}
+
+.date-separator {
+  font-size: 18px;
+  color: #6c757d;
+  font-weight: 600;
+  margin: 0 4px;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.clear-dates-btn {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: #e9ecef;
+    border-color: #dc3545;
+    color: #dc3545;
+  }
+}
 
 /* 人數搜尋樣式 */
 .people-search-group {

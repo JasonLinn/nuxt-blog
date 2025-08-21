@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "cleanup:daily": "node scripts/daily-cleanup.js",
+    "cleanup:manual": "node scripts/manual-cleanup.js",
+    "system:status": "node scripts/system-status.js"
+  },
+  "cron": {
+    "daily-cleanup": "0 1 * * * npm run cleanup:daily",
+    "description": "每天凌晨 1 點執行自動清理"
+  },
+  "documentation": {
+    "cleanup:daily": "執行每日滾動清理，維持六個月預訂期間",
+    "cleanup:manual": "手動觸發指定民宿的清理作業",
+    "system:status": "查看系統狀態和效能指標"
+  }
+}

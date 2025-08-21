@@ -198,8 +198,8 @@ onMounted(() => {
 
 // 頁面元資料
 definePageMeta({
-  title: '優惠券上架時間列表',
-  description: '查看所有優惠券和代訂服務的上架時間'
+  title: '優惠券更新時間列表',
+  description: '查看所有優惠券和代訂服務的更新時間'
 })
 </script>
 

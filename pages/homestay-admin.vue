@@ -455,6 +455,20 @@
             </div>
           </div>
 
+          <!-- 空房狀態管理 -->
+          <div class="form-section">
+            <h2 class="section-title">空房狀態管理</h2>
+            <p class="section-description">管理您的民宿每日空房狀況，點擊日期可切換可用/不可用狀態</p>
+            
+            <div class="availability-calendar-container">
+              <AdminAvailabilityCalendar 
+                v-if="homestay"
+                :homestay-id="homestay.id"
+                @status-changed="handleAvailabilityChange"
+              />
+            </div>
+          </div>
+
           <!-- 提交按鈕 -->
           <div class="form-actions">
             <button
@@ -783,6 +797,16 @@ const resetForm = () => {
     editData.value = JSON.parse(JSON.stringify(originalData.value));
     newImageUrl.value = ''; // 重置新圖片URL輸入
     showMessage('已重置為原始資料', 'info');
+  }
+};
+
+// 處理空房狀態變更
+const handleAvailabilityChange = (result) => {
+  if (result.success) {
+    showMessage(`成功更新 ${result.changes} 筆空房狀態`, 'success');
+  } else {
+    showMessage(`更新空房狀態失敗: ${result.error}`, 'error');
+    console.error('空房狀態更新失敗:', result.error);
   }
 };
 
@@ -1520,5 +1544,20 @@ onMounted(() => {
     flex-shrink: 0;
     font-size: 16px;
   }
+}
+
+// 空房狀態管理樣式
+.section-description {
+  color: #6c757d;
+  font-size: 14px;
+  margin: 8px 0 20px 0;
+  line-height: 1.5;
+}
+
+.availability-calendar-container {
+  margin-top: 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
 }
 </style> 
