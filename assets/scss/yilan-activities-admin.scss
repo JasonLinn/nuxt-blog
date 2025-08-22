@@ -389,6 +389,16 @@
               transform: translateY(-1px);
             }
           }
+
+          &.delete-btn {
+            background: #6f42c1;
+            color: white;
+
+            &:hover {
+              background: #5a2d91;
+              transform: translateY(-1px);
+            }
+          }
         }
       }
     }

@@ -186,6 +186,18 @@
               </svg>
               退回
             </button>
+            <button 
+              @click="deleteActivity(activity)"
+              class="action-btn delete-btn"
+              type="button"
+              title="刪除活動"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+              </svg>
+              刪除
+            </button>
           </div>
         </div>
       </div>
@@ -423,6 +435,19 @@ const confirmReject = async () => {
   } catch (error) {
     console.error('Failed to reject activity:', error)
     alert('操作失敗，請稍後再試')
+  }
+}
+
+const deleteActivity = async (activity) => {
+  if (!confirm(`確定要刪除活動「${activity.title}」嗎？此操作無法復原。`)) return
+  
+  try {
+    await $fetch(`/api/yilan-activities/${activity.id}`, { method: 'DELETE' })
+    await fetchActivities()
+    alert('活動已成功刪除')
+  } catch (error) {
+    console.error('Failed to delete activity:', error)
+    alert('刪除失敗，請稍後再試')
   }
 }
 
