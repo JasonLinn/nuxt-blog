@@ -1,0 +1,451 @@
+<template>
+  <div class="activity-edit-admin">
+    <div class="container">
+      <!-- 簡潔導航 -->
+      <div class="mb-4">
+        <button @click="$router.back()" class="btn btn-outline-primary mb-3">
+          <i class="bi bi-arrow-left me-2"></i>返回詳情
+        </button>
+        <h1 class="h3 mb-0">編輯活動</h1>
+      </div>
+
+      <!-- 載入狀態 -->
+      <div v-if="loading" class="text-center py-5">
+        <div class="spinner-border text-primary"></div>
+        <p class="mt-3">載入中...</p>
+      </div>
+
+      <!-- 找不到活動 -->
+      <div v-else-if="!activity" class="text-center py-5">
+        <p class="text-muted">找不到此活動</p>
+      </div>
+
+      <!-- 編輯表單 -->
+      <form v-else @submit.prevent="updateActivity">
+        <!-- 基本資訊 -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">基本資訊</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">活動標題 <span class="text-danger">*</span></label>
+              <input 
+                v-model="form.title" 
+                type="text" 
+                required 
+                class="form-control"
+                placeholder="請輸入活動標題"
+              />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">活動簡介 <span class="text-danger">*</span></label>
+              <textarea 
+                v-model="form.description" 
+                required 
+                rows="6"
+                class="form-control"
+                placeholder="請輸入活動簡介"
+              ></textarea>
+              <div class="form-text">{{ form.description?.length || 0 }}/1000 字</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 活動詳情 -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">活動詳情</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">活動日期 <span class="text-danger">*</span></label>
+                <input 
+                  v-model="form.event_date" 
+                  type="date" 
+                  required 
+                  class="form-control"
+                />
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label class="form-label">活動時間</label>
+                <input 
+                  v-model="form.event_time" 
+                  type="time" 
+                  class="form-control"
+                />
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label class="form-label">活動地點</label>
+                <input 
+                  v-model="form.location" 
+                  type="text" 
+                  class="form-control"
+                  placeholder="請輸入活動地點"
+                />
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label class="form-label">活動類型</label>
+                <select v-model="form.activity_type" class="form-select">
+                  <option value="">請選擇活動類型</option>
+                  <option value="文化藝術">文化藝術</option>
+                  <option value="體育運動">體育運動</option>
+                  <option value="教育學習">教育學習</option>
+                  <option value="美食饗宴">美食饗宴</option>
+                  <option value="節慶活動">節慶活動</option>
+                  <option value="其他">其他</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 主辦單位資訊 -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">主辦單位資訊</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">主辦單位名稱 <span class="text-danger">*</span></label>
+                <input 
+                  v-model="form.organizer_name" 
+                  type="text" 
+                  required 
+                  class="form-control"
+                  placeholder="請輸入主辦單位名稱"
+                />
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label class="form-label">聯絡信箱 <span class="text-danger">*</span></label>
+                <input 
+                  v-model="form.organizer_email" 
+                  type="email" 
+                  required 
+                  class="form-control"
+                  placeholder="請輸入聯絡信箱"
+                />
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label class="form-label">聯絡電話</label>
+                <input 
+                  v-model="form.organizer_phone" 
+                  type="tel" 
+                  class="form-control"
+                  placeholder="請輸入聯絡電話"
+                />
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">其他聯絡資訊</label>
+              <textarea 
+                v-model="form.contact_info" 
+                rows="3"
+                class="form-control"
+                placeholder="請輸入其他聯絡資訊"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 圖片管理 -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">活動圖片</h5>
+          </div>
+          <div class="card-body">
+            <!-- 現有圖片 -->
+            <div v-if="form.images && form.images.length" class="mb-3">
+              <h6>現有圖片</h6>
+              <div class="row g-3">
+                <div v-for="(image, index) in form.images" :key="index" class="col-md-4">
+                  <div class="position-relative">
+                    <img :src="image" class="img-fluid rounded" />
+                    <button 
+                      @click="removeExistingImage(index)"
+                      type="button"
+                      class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                    >
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 新增圖片預覽 -->
+            <div v-if="newImagePreview.length" class="mb-3">
+              <h6>新增圖片</h6>
+              <div class="row g-3">
+                <div v-for="(preview, index) in newImagePreview" :key="index" class="col-md-4">
+                  <div class="position-relative">
+                    <img :src="preview" class="img-fluid rounded" />
+                    <button 
+                      @click="removeNewImage(index)"
+                      type="button"
+                      class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                    >
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 圖片上傳 -->
+            <div>
+              <label class="form-label">上傳新圖片</label>
+              <input 
+                @change="handleFileChange"
+                type="file" 
+                multiple 
+                accept="image/*"
+                class="form-control"
+              />
+              <div class="form-text">支援 JPG、PNG、GIF 格式，單檔最大 5MB</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 管理員備註 -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">管理員備註</h5>
+          </div>
+          <div class="card-body">
+            <textarea 
+              v-model="form.admin_notes" 
+              rows="4"
+              class="form-control"
+              placeholder="管理員備註（可選）"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- 操作按鈕 -->
+        <div class="d-flex justify-content-between mb-4">
+          <button @click="$router.back()" type="button" class="btn btn-secondary">
+            取消
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            :disabled="submitting"
+          >
+            <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
+            {{ submitting ? '更新中...' : '儲存變更' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup>
+definePageMeta({
+  middleware: 'admin-auth',
+  layout: 'default'
+})
+
+const route = useRoute()
+const router = useRouter()
+
+const activity = ref(null)
+const loading = ref(true)
+const submitting = ref(false)
+const deletedImages = ref([])
+const newImageFiles = ref([])
+const newImagePreview = ref([])
+
+const form = ref({
+  title: '',
+  description: '',
+  event_date: '',
+  event_time: '',
+  location: '',
+  activity_type: '',
+  organizer_name: '',
+  organizer_email: '',
+  organizer_phone: '',
+  contact_info: '',
+  admin_notes: '',
+  images: []
+})
+
+const fetchActivity = async () => {
+  try {
+    loading.value = true
+    const response = await $fetch(`/api/activities/${route.params.id}`)
+    activity.value = response.data
+    
+    // 填入表單數據
+    Object.keys(form.value).forEach(key => {
+      if (activity.value[key] !== undefined) {
+        form.value[key] = activity.value[key]
+      }
+    })
+    
+    // 格式化日期
+    if (activity.value.event_date) {
+      form.value.event_date = new Date(activity.value.event_date).toISOString().split('T')[0]
+    }
+    
+  } catch (error) {
+    console.error('Failed to fetch activity:', error)
+    activity.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleFileChange = (event) => {
+  const files = Array.from(event.target.files)
+  
+  files.forEach(file => {
+    if (file.size > 5 * 1024 * 1024) {
+      alert(`檔案 ${file.name} 超過 5MB 限制`)
+      return
+    }
+    
+    newImageFiles.value.push(file)
+    
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      newImagePreview.value.push(e.target.result)
+    }
+    reader.readAsDataURL(file)
+  })
+  
+  event.target.value = ''
+}
+
+const removeExistingImage = (index) => {
+  const removedImage = form.value.images[index]
+  deletedImages.value.push(removedImage)
+  form.value.images.splice(index, 1)
+}
+
+const removeNewImage = (index) => {
+  newImagePreview.value.splice(index, 1)
+  newImageFiles.value.splice(index, 1)
+}
+
+const updateActivity = async () => {
+  try {
+    submitting.value = true
+    
+    const formData = new FormData()
+    
+    // 添加基本表單數據
+    Object.keys(form.value).forEach(key => {
+      if (form.value[key] !== null && form.value[key] !== undefined && key !== 'images') {
+        formData.append(key, form.value[key])
+      }
+    })
+    
+    // 添加現有圖片（去除已刪除的）
+    const remainingImages = form.value.images || []
+    formData.append('images', JSON.stringify(remainingImages))
+    
+    // 添加要刪除的圖片
+    deletedImages.value.forEach(image => {
+      formData.append('deleteImages', image)
+    })
+    
+    // 添加新圖片文件
+    newImageFiles.value.forEach(file => {
+      formData.append('newImages', file)
+    })
+    
+    await $fetch(`/api/activities/${route.params.id}`, {
+      method: 'PATCH',
+      body: formData
+    })
+    
+    router.push(`/admin/activities/${route.params.id}`)
+    
+  } catch (error) {
+    console.error('Failed to update activity:', error)
+    alert('更新失敗，請稍後再試')
+  } finally {
+    submitting.value = false
+  }
+}
+
+onMounted(() => {
+  fetchActivity()
+})
+</script>
+
+<style scoped lang="scss">
+// 注意：這是 SCSS/Bootstrap 專案，請勿使用 Tailwind CSS 類別
+
+.activity-edit-admin {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding: 2rem 0;
+
+  .card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    
+    .card-header {
+      background-color: #fff;
+      border-bottom: 1px solid #dee2e6;
+      border-radius: 8px 8px 0 0;
+    }
+  }
+
+  .form-control, .form-select {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    
+    &:focus {
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+  }
+
+  .btn {
+    border-radius: 6px;
+    font-weight: 500;
+    
+    i {
+      font-size: 1rem;
+    }
+  }
+
+  .position-relative {
+    img {
+      border-radius: 8px;
+      max-height: 200px;
+      object-fit: cover;
+    }
+    
+    .btn {
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+</style>

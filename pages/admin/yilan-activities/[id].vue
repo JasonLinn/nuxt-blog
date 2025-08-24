@@ -312,7 +312,7 @@ const approveActivity = async () => {
 }
 
 const editActivity = () => {
-  router.push(`/admin/yilan-activities/${route.params.id}/edit`)
+  router.push(`/admin/yilan-activities/edit/${route.params.id}`)
 }
 
 const confirmReject = async () => {

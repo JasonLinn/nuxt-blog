@@ -394,11 +394,11 @@ const fetchActivities = async () => {
 }
 
 const viewActivity = (id) => {
-  navigateTo(`/admin/yilan-activities/${id}`)
+  navigateTo(`/admin/activities/${id}`)
 }
 
 const editActivity = (id) => {
-  navigateTo(`/admin/yilan-activities/${id}/edit`)
+  navigateTo(`/admin/activities/edit/${id}`)
 }
 
 const approveActivity = async (id) => {

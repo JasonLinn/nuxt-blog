@@ -6,7 +6,7 @@
         <NuxtLink to="/admin-review" class="admin-nav-link">
           民宿審核
         </NuxtLink>
-        <NuxtLink to="/admin/yilan-activities" class="admin-nav-link">
+        <NuxtLink to="/admin/activities" class="admin-nav-link">
           宜蘭活動管理
         </NuxtLink>
         <button @click="logout" class="logout-btn">登出</button>
