@@ -183,12 +183,12 @@
             </div>
 
             <!-- 新增圖片預覽 -->
-            <div v-if="newImagePreview.length" class="mb-3">
-              <h6>新增圖片</h6>
+            <div v-if="newImagePreview && newImagePreview.length > 0" class="mb-3">
+              <h6>新增圖片 ({{ newImagePreview.length }})</h6>
               <div class="row g-3">
-                <div v-for="(preview, index) in newImagePreview" :key="index" class="col-md-4">
+                <div v-for="(preview, index) in newImagePreview" :key="`preview-${index}`" class="col-md-4">
                   <div class="position-relative">
-                    <img :src="preview" class="img-fluid rounded" />
+                    <img :src="preview" class="img-fluid rounded" alt="圖片預覽" />
                     <button 
                       @click="removeNewImage(index)"
                       type="button"
@@ -210,8 +210,15 @@
                 multiple 
                 accept="image/*"
                 class="form-control"
+                ref="fileInput"
               />
               <div class="form-text">支援 JPG、PNG、GIF 格式，單檔最大 5MB</div>
+              
+              <!-- 調試資訊 -->
+              <div class="mt-2 small text-muted">
+                <div>新圖片檔案數量: {{ newImageFiles.length }}</div>
+                <div>新圖片預覽數量: {{ newImagePreview.length }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -308,23 +315,35 @@ const fetchActivity = async () => {
 }
 
 const handleFileChange = (event) => {
+  console.log('handleFileChange 被觸發了', event.target.files)
   const files = Array.from(event.target.files)
   
-  files.forEach(file => {
+  console.log('選擇的檔案數量:', files.length)
+  
+  files.forEach((file, fileIndex) => {
+    console.log(`處理檔案 ${fileIndex + 1}:`, file.name, file.size)
+    
     if (file.size > 5 * 1024 * 1024) {
       alert(`檔案 ${file.name} 超過 5MB 限制`)
       return
     }
     
     newImageFiles.value.push(file)
+    console.log('newImageFiles 陣列長度:', newImageFiles.value.length)
     
     const reader = new FileReader()
     reader.onload = (e) => {
+      console.log('圖片讀取完成:', e.target.result.substring(0, 50) + '...')
       newImagePreview.value.push(e.target.result)
+      console.log('newImagePreview 陣列長度:', newImagePreview.value.length)
+    }
+    reader.onerror = (e) => {
+      console.error('圖片讀取錯誤:', e)
     }
     reader.readAsDataURL(file)
   })
   
+  // 清空檔案輸入，允許重複選擇同樣的檔案
   event.target.value = ''
 }
 

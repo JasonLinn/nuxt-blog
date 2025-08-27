@@ -121,13 +121,18 @@
               <!-- 活動圖片 -->
               <div class="activity-image">
                 <img 
-                  v-if="activity.images && activity.images.length" 
+                  v-if="activity.images && activity.images.length > 0" 
                   :src="activity.images[0]" 
                   :alt="activity.title"
                   class="card-img-top"
+                  @error="handleImageError"
                 />
                 <div v-else class="no-image-placeholder">
-                  <span>暫無圖片</span>
+                  <div class="placeholder-content">
+                    <i class="bi bi-image placeholder-icon"></i>
+                    <span class="placeholder-text">{{ getActivityTypeIcon(activity.activity_type) }}</span>
+                    <small class="placeholder-subtitle">{{ activity.activity_type || '活動圖片' }}</small>
+                  </div>
                 </div>
                 
                 <!-- 活動類型標籤 -->
@@ -309,6 +314,26 @@ const formatEventDate = (dateString, timeString) => {
   }
   
   return formatted
+}
+
+const getActivityTypeIcon = (activityType) => {
+  const typeIcons = {
+    '文化藝術': '🎨',
+    '觀光旅遊': '🗺️',
+    '美食餐飲': '🍽️',
+    '戶外運動': '🏃‍♂️',
+    '親子活動': '👨‍👩‍👧‍👦',
+    '節慶慶典': '🎉',
+    '教育講座': '📚',
+    '商業促銷': '🛍️',
+    '其他': '📅'
+  }
+  return typeIcons[activityType] || '📅'
+}
+
+const handleImageError = (event) => {
+  console.log('圖片載入失敗:', event.target.src)
+  // 可以在這裡設置備用圖片或其他處理
 }
 
 const fetchActivities = async () => {
