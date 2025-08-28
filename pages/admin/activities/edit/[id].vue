@@ -362,39 +362,55 @@ const updateActivity = async () => {
   try {
     submitting.value = true
     
+    console.log('=== 開始更新活動 ===')
+    console.log('新圖片檔案數量:', newImageFiles.value.length)
+    console.log('要刪除的圖片:', deletedImages.value)
+    
     const formData = new FormData()
     
     // 添加基本表單數據
     Object.keys(form.value).forEach(key => {
       if (form.value[key] !== null && form.value[key] !== undefined && key !== 'images') {
         formData.append(key, form.value[key])
+        console.log(`添加欄位 ${key}:`, form.value[key])
       }
     })
-    
-    // 添加現有圖片（去除已刪除的）
-    const remainingImages = form.value.images || []
-    formData.append('images', JSON.stringify(remainingImages))
     
     // 添加要刪除的圖片
     deletedImages.value.forEach(image => {
       formData.append('deleteImages', image)
+      console.log('標記刪除圖片:', image)
     })
     
     // 添加新圖片文件
-    newImageFiles.value.forEach(file => {
-      formData.append('newImages', file)
+    newImageFiles.value.forEach((file, index) => {
+      formData.append('images', file)
+      console.log(`添加新圖片檔案 ${index + 1}:`, file.name, file.size, 'bytes')
     })
     
-    await $fetch(`/api/activities/${route.params.id}`, {
+    console.log('FormData 建立完成，發送請求...')
+    
+    const response = await $fetch(`/api/activities/${route.params.id}`, {
       method: 'PATCH',
       body: formData
     })
     
+    console.log('✅ 更新成功:', response)
+    alert('活動更新成功！')
+    
+    // 重新載入活動資料以顯示更新的圖片
+    await fetchActivity()
+    
+    // 清空上傳相關的資料
+    newImageFiles.value = []
+    newImagePreview.value = []
+    deletedImages.value = []
+    
     router.push(`/admin/activities/${route.params.id}`)
     
   } catch (error) {
-    console.error('Failed to update activity:', error)
-    alert('更新失敗，請稍後再試')
+    console.error('❌ 更新失敗:', error)
+    alert('更新失敗：' + (error.message || '未知錯誤'))
   } finally {
     submitting.value = false
   }

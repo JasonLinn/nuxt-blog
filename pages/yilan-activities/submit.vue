@@ -227,9 +227,7 @@
                 </div>
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label for="organizer_email" class="form-label"
-                      >主辦單位信箱 <span class="text-danger">*</span></label
-                    >
+                    <label for="organizer_email" class="form-label">主辦單位信箱</label>
                     <input
                       id="organizer_email"
                       v-model="form.organizer_email"
@@ -238,11 +236,11 @@
                       :class="{ 'is-invalid': errors.organizer_email }"
                       placeholder="請輸入主辦單位信箱"
                       maxlength="100"
-                      required
                     />
                     <div v-if="errors.organizer_email" class="invalid-feedback">
                       {{ errors.organizer_email }}
                     </div>
+                    <div class="form-text">選填，建議填寫以便聯繫</div>
                   </div>
                 </div>
               </div>
@@ -541,7 +539,6 @@ const validateForm = () => {
     event_start_date: form.is_multi_day ? '開始日期' : '活動日期',
     location: '活動地點',
     organizer_name: '主辦單位',
-    organizer_email: '主辦單位信箱',
     submitter_name: '提交者姓名',
     submitter_email: '提交者信箱'
   }
@@ -582,8 +579,8 @@ const validateForm = () => {
   }
 
   // Email 格式驗證
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (form.organizer_email && !emailRegex.test(form.organizer_email)) {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  if (form.organizer_email && form.organizer_email.trim() && !emailRegex.test(form.organizer_email)) {
     errors.organizer_email = '請輸入有效的電子信箱格式'
     isValid = false
   }

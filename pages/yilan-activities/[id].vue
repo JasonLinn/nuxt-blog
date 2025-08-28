@@ -269,6 +269,71 @@
         </div>
       </div>
     </div>
+
+    <!-- 圖片燈箱 -->
+    <div v-if="showLightbox" class="lightbox-overlay" @click="closeLightbox">
+      <div class="lightbox-container" @click.stop>
+        <!-- 關閉按鈕 -->
+        <button class="lightbox-close" @click="closeLightbox">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+          </svg>
+        </button>
+
+        <!-- 主要圖片 -->
+        <div class="lightbox-image-container">
+          <img 
+            v-if="activity?.images?.[lightboxImageIndex]"
+            :src="activity.images[lightboxImageIndex]" 
+            :alt="activity.title + ' - 圖片 ' + (lightboxImageIndex + 1)"
+            class="lightbox-image"
+            @click.stop
+          />
+        </div>
+
+        <!-- 導航按鈕 -->
+        <button 
+          v-if="activity?.images?.length > 1"
+          class="lightbox-nav prev" 
+          @click="prevLightboxImage"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+          </svg>
+        </button>
+
+        <button 
+          v-if="activity?.images?.length > 1"
+          class="lightbox-nav next" 
+          @click="nextLightboxImage"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+          </svg>
+        </button>
+
+        <!-- 圖片資訊 -->
+        <div class="lightbox-info">
+          <div class="lightbox-counter">
+            {{ lightboxImageIndex + 1 }} / {{ activity?.images?.length || 0 }}
+          </div>
+          <div class="lightbox-title">{{ activity?.title }}</div>
+        </div>
+
+        <!-- 縮略圖導航 -->
+        <div v-if="activity?.images?.length > 1" class="lightbox-thumbnails">
+          <button
+            v-for="(image, index) in activity.images"
+            :key="index"
+            class="lightbox-thumbnail"
+            :class="{ active: index === lightboxImageIndex }"
+            @click="lightboxImageIndex = index"
+          >
+            <img :src="image" :alt="'縮圖 ' + (index + 1)" />
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -277,6 +342,8 @@ const route = useRoute()
 const activity = ref(null)
 const loading = ref(true)
 const currentMainImageIndex = ref(0)
+const showLightbox = ref(false)
+const lightboxImageIndex = ref(0)
 
 const fetchActivity = async () => {
   try {
@@ -340,8 +407,51 @@ const setMainImage = (index) => {
 }
 
 const openLightbox = (index) => {
-  // 這裡可以實作 lightbox 功能
-  console.log('打開 lightbox，索引:', index)
+  if (activity.value?.images?.length) {
+    lightboxImageIndex.value = index
+    showLightbox.value = true
+    // 防止背景滾動
+    document.body.style.overflow = 'hidden'
+  }
+}
+
+const closeLightbox = () => {
+  showLightbox.value = false
+  // 恢復背景滾動
+  document.body.style.overflow = ''
+}
+
+const prevLightboxImage = () => {
+  if (!activity.value?.images?.length) return
+  lightboxImageIndex.value = 
+    lightboxImageIndex.value === 0 
+      ? activity.value.images.length - 1 
+      : lightboxImageIndex.value - 1
+}
+
+const nextLightboxImage = () => {
+  if (!activity.value?.images?.length) return
+  lightboxImageIndex.value = 
+    lightboxImageIndex.value === activity.value.images.length - 1 
+      ? 0 
+      : lightboxImageIndex.value + 1
+}
+
+// 鍵盤事件處理
+const handleKeydown = (event) => {
+  if (!showLightbox.value) return
+  
+  switch (event.key) {
+    case 'Escape':
+      closeLightbox()
+      break
+    case 'ArrowLeft':
+      prevLightboxImage()
+      break
+    case 'ArrowRight':
+      nextLightboxImage()
+      break
+  }
 }
 
 // 分享功能
@@ -388,6 +498,14 @@ const copyLink = async () => {
 
 onMounted(() => {
   fetchActivity()
+  // 添加鍵盤事件監聽
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  // 清理事件監聽和樣式
+  document.removeEventListener('keydown', handleKeydown)
+  document.body.style.overflow = ''
 })
 
 // 動態設定頁面 SEO
@@ -1030,6 +1148,205 @@ watchEffect(() => {
   }
 }
 
+// 燈箱樣式
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.lightbox-container {
+  position: relative;
+  width: 90vw;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+  }
+}
+
+.lightbox-image-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 80px 0 120px;
+}
+
+.lightbox-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: zoomIn 0.3s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10001;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  &.prev {
+    left: 30px;
+  }
+
+  &.next {
+    right: 30px;
+  }
+}
+
+.lightbox-info {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: white;
+  z-index: 10001;
+}
+
+.lightbox-counter {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.lightbox-title {
+  font-size: 1rem;
+  opacity: 0.9;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.lightbox-thumbnails {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  max-width: 80vw;
+  overflow-x: auto;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+}
+
+.lightbox-thumbnail {
+  flex-shrink: 0;
+  width: 60px;
+  height: 45px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+
+  &:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+
+  &.active {
+    border-color: white;
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
 // 響應式設計
 @media (max-width: 768px) {
   .activity-detail {
@@ -1116,6 +1433,41 @@ watchEffect(() => {
   .share-buttons {
     grid-template-columns: 1fr;
   }
+
+  // 燈箱移動端優化
+  .lightbox-close {
+    width: 40px;
+    height: 40px;
+    top: 15px;
+    right: 15px;
+  }
+
+  .lightbox-nav {
+    width: 50px;
+    height: 50px;
+
+    &.prev {
+      left: 15px;
+    }
+
+    &.next {
+      right: 15px;
+    }
+  }
+
+  .lightbox-info {
+    bottom: 60px;
+  }
+
+  .lightbox-thumbnails {
+    bottom: 15px;
+    max-width: 95vw;
+  }
+
+  .lightbox-thumbnail {
+    width: 50px;
+    height: 38px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1142,6 +1494,46 @@ watchEffect(() => {
   .image-nav-btn {
     width: 35px;
     height: 35px;
+  }
+
+  // 燈箱超小螢幕優化
+  .lightbox-close {
+    width: 35px;
+    height: 35px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .lightbox-nav {
+    width: 45px;
+    height: 45px;
+
+    &.prev {
+      left: 10px;
+    }
+
+    &.next {
+      right: 10px;
+    }
+  }
+
+  .lightbox-counter {
+    font-size: 1rem;
+    padding: 6px 12px;
+  }
+
+  .lightbox-title {
+    font-size: 0.9rem;
+  }
+
+  .lightbox-thumbnails {
+    bottom: 10px;
+    gap: 6px;
+  }
+
+  .lightbox-thumbnail {
+    width: 45px;
+    height: 34px;
   }
 }
 </style>

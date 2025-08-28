@@ -53,19 +53,28 @@ export default defineEventHandler(async (event) => {
       
       // 處理新上傳的圖片
       if (files.images) {
+        console.log('=== 處理新上傳的圖片 ===')
         const imageFiles = Array.isArray(files.images) ? files.images : [files.images]
+        console.log('圖片檔案數量:', imageFiles.length)
         
         for (const file of imageFiles) {
           if (file.size > 0) {
+            console.log('處理圖片檔案:', file.originalFilename, file.size, 'bytes')
+            
             const timestamp = Date.now()
             const ext = path.extname(file.originalFilename || file.newFilename)
             const newFilename = `${timestamp}-${Math.random().toString(36).substr(2, 9)}${ext}`
             const newPath = path.join('./public/activities', newFilename)
             
             fs.renameSync(file.filepath, newPath)
-            newImageUrls.push(`/activities/${newFilename}`)
+            const imageUrl = `/activities/${newFilename}`
+            newImageUrls.push(imageUrl)
+            
+            console.log('圖片儲存成功:', imageUrl)
           }
         }
+        
+        console.log('所有圖片處理完成，總數:', newImageUrls.length)
       }
       
       // 處理要刪除的圖片
@@ -102,8 +111,13 @@ export default defineEventHandler(async (event) => {
         organizer_phone: getData('organizer_phone') || null,
         contact_info: getData('contact_info') || null,
         admin_notes: getData('admin_notes') || null,
-        images: newImageUrls
+        images: newImageUrls  // 直接使用陣列，不要轉換為 JSON 字串
       }
+      
+      console.log('=== 準備更新的資料 ===')
+      console.log('最終圖片 URLs:', newImageUrls)
+      console.log('圖片陣列類型:', Array.isArray(newImageUrls))
+      console.log('圖片陣列長度:', newImageUrls.length)
     } else {
       // 處理 JSON 請求
       const body = await readBody(event)
@@ -131,10 +145,20 @@ export default defineEventHandler(async (event) => {
     Object.keys(updateData).forEach(key => {
       if (updateData[key] !== undefined && updateData[key] !== null) {
         updateFields.push(`${key} = $${paramIndex}`)
-        params.push(updateData[key])
+        if (key === 'images') {
+          // PostgreSQL ARRAY 類型：直接傳送 JavaScript 陣列
+          // @neondatabase/serverless 會自動處理陣列轉換
+          params.push(updateData[key])
+        } else {
+          params.push(updateData[key])
+        }
         paramIndex++
       }
     })
+    
+    console.log('=== SQL 更新參數 ===')
+    console.log('更新欄位:', updateFields)
+    console.log('參數值:', params)
     
     if (updateFields.length === 0) {
       throw createError({
