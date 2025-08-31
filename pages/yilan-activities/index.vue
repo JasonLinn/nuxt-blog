@@ -158,7 +158,7 @@
                 <div class="activity-meta">
                   <div class="meta-item">
                     <span class="meta-icon">📅</span>
-                    <span>{{ formatEventDate(activity.event_date, activity.event_time) }}</span>
+                    <span>{{ formatEventDate(activity.event_date, activity.event_time, activity.end_date, activity.end_time, activity.is_multi_day) }}</span>
                   </div>
                   <div v-if="activity.location" class="meta-item">
                     <span class="meta-icon">📍</span>
@@ -215,7 +215,7 @@ const activities = ref([])
 const loading = ref(true)
 const searchQuery = ref('')
 const typeFilter = ref('')
-const dateFilter = ref('')
+const dateFilter = ref('upcoming') // 預設顯示即將開始的活動
 const currentPage = ref(1)
 const itemsPerPage = 12
 const showSuccessMessage = ref(false)
@@ -275,7 +275,10 @@ const totalActivities = computed(() => activities.value.length)
 
 const upcomingCount = computed(() => {
   const today = new Date()
-  return activities.value.filter(activity => new Date(activity.event_date) >= today).length
+  return activities.value.filter(activity => {
+    const endDateToCheck = activity.end_date ? new Date(activity.end_date) : new Date(activity.event_date)
+    return endDateToCheck >= today
+  }).length
 })
 
 const thisWeekCount = computed(() => {
@@ -305,12 +308,25 @@ const formatDayMonth = (dateString) => {
   }
 }
 
-const formatEventDate = (dateString, timeString) => {
-  const date = new Date(dateString)
-  let formatted = date.toLocaleDateString('zh-TW')
+const formatEventDate = (eventDate, eventTime, endDate, endTime, isMultiDay) => {
+  const startDate = new Date(eventDate)
+  let formatted = startDate.toLocaleDateString('zh-TW')
   
-  if (timeString) {
-    formatted += ` ${timeString}`
+  if (eventTime) {
+    formatted += ` ${eventTime}`
+  }
+  
+  // 如果有結束日期且不同於開始日期，或者標記為多日活動
+  if (endDate && (endDate !== eventDate || isMultiDay)) {
+    const endDateObj = new Date(endDate)
+    formatted += ` ~ ${endDateObj.toLocaleDateString('zh-TW')}`
+    
+    if (endTime) {
+      formatted += ` ${endTime}`
+    }
+  } else if (endTime && endTime !== eventTime) {
+    // 同一天但有不同的結束時間
+    formatted += ` ~ ${endTime}`
   }
   
   return formatted

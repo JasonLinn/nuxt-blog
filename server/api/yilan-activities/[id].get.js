@@ -13,8 +13,8 @@ export default defineEventHandler(async (event) => {
     
     const sql = `
       SELECT 
-        id, title, description, images, event_date, event_time, location, activity_type,
-        organizer_name, organizer_email, organizer_phone, contact_info,
+        id, title, description, images, event_date, event_time, end_date, end_time, is_multi_day,
+        location, activity_type, organizer_name, organizer_email, organizer_phone, contact_info,
         status, rejection_reason, submitter_name, submitter_email, admin_notes,
         created_at, updated_at, approved_at, approved_by
       FROM yilan_activities 

@@ -175,8 +175,22 @@
                   <div class="info-value">{{ formatDate(activity.event_date) }}</div>
                 </div>
                 <div v-if="activity.event_time" class="info-row">
-                  <div class="info-label">活動時間</div>
+                  <div class="info-label">開始時間</div>
                   <div class="info-value">{{ activity.event_time }}</div>
+                </div>
+                <div v-if="activity.end_date && activity.end_date !== activity.event_date" class="info-row">
+                  <div class="info-label">結束日期</div>
+                  <div class="info-value">{{ formatDate(activity.end_date) }}</div>
+                </div>
+                <div v-if="activity.end_time && (activity.end_time !== activity.event_time || activity.end_date)" class="info-row">
+                  <div class="info-label">結束時間</div>
+                  <div class="info-value">{{ activity.end_time }}</div>
+                </div>
+                <div v-if="activity.is_multi_day" class="info-row">
+                  <div class="info-label">活動類型</div>
+                  <div class="info-value">
+                    <span class="multi-day-badge">多日活動</span>
+                  </div>
                 </div>
                 <div v-if="activity.location" class="info-row">
                   <div class="info-label">活動地點</div>
@@ -1065,6 +1079,18 @@ watchEffect(() => {
     text-align: left;
     max-width: 100%;
   }
+}
+
+.multi-day-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: white;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
 }
 
 .contact-link {
