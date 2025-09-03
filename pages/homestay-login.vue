@@ -26,14 +26,11 @@
             id="password"
             v-model="form.password"
             type="password"
-            placeholder="請輸入密碼 (B + 民宿編號)"
+            placeholder="請輸入密碼"
             class="form-input"
             :disabled="loading"
             required
           />
-          <div class="password-hint">
-            密碼格式：B + 您的民宿編號（例如：B2591）
-          </div>
         </div>
 
         <div v-if="error" class="error-message">
