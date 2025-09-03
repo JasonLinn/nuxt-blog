@@ -385,11 +385,11 @@
                     <div class="package-prices">
                       <div v-if="bnb.prices.fullRentWeekday" class="package-item weekday">
                         <span class="package-day">平日</span>
-                        <span class="package-value">{{ bnb.prices.fullRentWeekday }}</span>
+                        <span class="package-value">{{ bnb.prices.fullRentWeekday }}</span><span class="price-suffix">起</span>
                       </div>
                       <div v-if="bnb.prices.fullRentWeekend" class="package-item weekend">
                         <span class="package-day">假日</span>
-                        <span class="package-value">{{ bnb.prices.fullRentWeekend }}</span>
+                        <span class="package-value">{{ bnb.prices.fullRentWeekend }}</span><span class="price-suffix">起</span>
                       </div>
                     </div>
                   </div>

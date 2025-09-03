@@ -273,19 +273,19 @@
               <div v-if="bnb.prices" class="price-grid">
                 <div v-if="bnb.prices.weekday" class="price-item">
                   <div class="price-label">平日價格</div>
-                  <div class="price-amount">{{ bnb.prices.weekday }}</div>
+                  <div class="price-amount">{{ bnb.prices.weekday }} 起</div>
                 </div>
                 <div v-if="bnb.prices.weekend" class="price-item">
                   <div class="price-label">假日價格</div>
-                  <div class="price-amount">{{ bnb.prices.weekend }}</div>
+                  <div class="price-amount">{{ bnb.prices.weekend }} 起</div>
                 </div>
                 <div v-if="bnb.prices.fullRentWeekday" class="price-item">
                   <div class="price-label">平日包棟</div>
-                  <div class="price-amount">{{ bnb.prices.fullRentWeekday }}</div>
+                  <div class="price-amount">{{ bnb.prices.fullRentWeekday }} 起</div>
                 </div>
                 <div v-if="bnb.prices.fullRentWeekend" class="price-item">
                   <div class="price-label">假日包棟</div>
-                  <div class="price-amount">{{ bnb.prices.fullRentWeekend }}</div>
+                  <div class="price-amount">{{ bnb.prices.fullRentWeekend }} 起</div>
                 </div>
               </div>
               <div v-else class="no-data">
