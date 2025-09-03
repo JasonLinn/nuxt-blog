@@ -1642,7 +1642,7 @@ watch(bnbsData, (newData) => {
 
 .indicator-dot {
   width: 8px;
-  height: 8px;
+  height: 12px;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.5);
@@ -1656,7 +1656,7 @@ watch(bnbsData, (newData) => {
   
   &.active {
     background: white;
-    transform: scale(1.3);
+    transform: scale(1);
   }
 }
 
@@ -1716,7 +1716,7 @@ watch(bnbsData, (newData) => {
   
   .indicator-dot {
     width: 6px;
-    height: 6px;
+    height: 12px;
   }
   
   .image-count-badge {
