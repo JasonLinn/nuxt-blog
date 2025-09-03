@@ -1716,7 +1716,7 @@ watch(bnbsData, (newData) => {
   
   .indicator-dot {
     width: 6px;
-    height: 12px;
+    height: 6px;
   }
   
   .image-count-badge {
