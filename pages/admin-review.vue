@@ -125,7 +125,7 @@
                   {{ homestay.available ? '停用' : '啟用' }}
                 </button>
                 <button 
-                  @click="rejectHomestay(homestay.id)" 
+                  @click="revokeHomestay(homestay.id)" 
                   class="btn btn-sm btn-outline-danger"
                   :disabled="processing"
                 >
@@ -262,11 +262,46 @@
         </div>
       </div>
     </div>
+
+    <!-- 拒絕/撤銷原因輸入對話框 -->
+    <div v-if="showRejectModal" class="modal-overlay" @click="closeRejectModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>{{ currentAction === 'revoke' ? '🔄 撤銷民宿' : '❌ 拒絕申請' }}</h3>
+          <button @click="closeRejectModal" class="close-btn">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <p class="mb-3">請輸入{{ actionText }}此民宿申請的原因：</p>
+          <textarea 
+            v-model="rejectionReason" 
+            class="rejection-textarea"
+            :placeholder="currentAction === 'revoke' ? '例如：違反規定、收到投訴、資料造假等...' : '例如：資料不完整、不符合規定、圖片模糊等...'"
+            rows="4"
+            required
+          ></textarea>
+          <p class="text-muted mt-2">
+            <small>* {{ actionText }}原因將會通過電子郵件發送給申請者</small>
+          </p>
+        </div>
+        
+        <div class="modal-footer">
+          <button @click="closeRejectModal" class="cancel-btn">取消</button>
+          <button 
+            @click="confirmReject" 
+            class="reject-confirm-btn"
+            :disabled="!rejectionReason?.trim() || processing"
+          >
+            {{ processing ? '處理中...' : `確認${actionText}` }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 definePageMeta({
   middleware: ['admin-auth']
@@ -283,6 +318,22 @@ const expandedRows = ref([])
 const showEmailTest = ref(false)
 const emailTesting = ref(false)
 const emailTestType = ref('')
+
+// 拒絕模態框相關狀態
+const showRejectModal = ref(false)
+const rejectionReason = ref('')
+const currentRejectHomestayId = ref(null)
+
+// 計算當前操作類型
+const currentAction = computed(() => {
+  if (!currentRejectHomestayId.value) return null
+  const targetHomestay = allHomestays.value.find(h => h.id === currentRejectHomestayId.value)
+  return targetHomestay?.status === 'approved' ? 'revoke' : 'reject'
+})
+
+const actionText = computed(() => {
+  return currentAction.value === 'revoke' ? '撤銷' : '拒絕'
+})
 const testEmailAddress = ref('')
 const emailTestResult = ref(null)
 const emailConfigResult = ref(null)
@@ -338,21 +389,51 @@ const approveHomestay = async (homestayId) => {
 
 // 拒絕申請
 const rejectHomestay = async (homestayId) => {
-  if (!confirm('確定要拒絕這個民宿申請嗎？此操作不可逆轉。')) return
+  // 儲存要拒絕的民宿 ID 並打開模態框
+  currentRejectHomestayId.value = homestayId
+  rejectionReason.value = ''
+  showRejectModal.value = true
+}
+
+// 撤銷已通過的民宿
+const revokeHomestay = async (homestayId) => {
+  // 儲存要撤銷的民宿 ID 並打開模態框
+  currentRejectHomestayId.value = homestayId
+  rejectionReason.value = ''
+  showRejectModal.value = true
+}
+
+// 關閉拒絕模態框
+const closeRejectModal = () => {
+  showRejectModal.value = false
+  rejectionReason.value = ''
+  currentRejectHomestayId.value = null
+}
+
+// 確認拒絕/撤銷申請
+const confirmReject = async () => {
+  if (!rejectionReason.value?.trim()) {
+    alert('請輸入拒絕原因')
+    return
+  }
+  
+  if (!confirm(`確定要${actionText.value}這個民宿申請嗎？此操作不可逆轉。`)) return
   
   try {
     processing.value = true
     await $fetch('/api/admin-review-homestay', {
       method: 'POST',
       body: {
-        homestayId,
-        action: 'reject'
+        homestayId: currentRejectHomestayId.value,
+        action: currentAction.value,
+        rejectionReason: rejectionReason.value.trim()
       }
     })
     
-    // 從列表中移除已處理的項目或重新載入
+    // 關閉模態框並重新載入資料
+    closeRejectModal()
     await loadHomestays('all')
-    alert('已拒絕申請')
+    alert(`已${actionText.value}申請`)
   } catch (err) {
     console.error('處理失敗:', err)
     alert('處理失敗，請稍候再試')
@@ -974,6 +1055,55 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+/* 拒絕模態框特定樣式 */
+.rejection-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s ease;
+}
+
+.rejection-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.rejection-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.reject-confirm-btn {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.reject-confirm-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.reject-confirm-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .test-section {

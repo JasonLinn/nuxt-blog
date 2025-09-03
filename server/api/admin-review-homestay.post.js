@@ -34,14 +34,14 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    if (!['approve', 'reject'].includes(action)) {
+    if (!['approve', 'reject', 'revoke'].includes(action)) {
       throw createError({
         statusCode: 400,
         statusMessage: '無效的審核動作'
       });
     }
 
-    if (action === 'reject' && !rejectionReason) {
+    if ((action === 'reject' || action === 'revoke') && !rejectionReason) {
       throw createError({
         statusCode: 400,
         statusMessage: '拒絕申請時必須提供拒絕原因'
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
     try {
       await client.query('BEGIN');
 
-      // 檢查民宿是否存在且處於待審核狀態
+      // 檢查民宿是否存在以及狀態是否允許操作
       const checkQuery = 'SELECT id, name, email, status FROM homestays WHERE id = $1';
       const checkResult = await client.query(checkQuery, [homestayId]);
       
@@ -67,11 +67,21 @@ export default defineEventHandler(async (event) => {
 
       const homestay = checkResult.rows[0];
       
-      if (homestay.status !== 'pending') {
-        throw createError({
-          statusCode: 400,
-          statusMessage: `此民宿已被審核，目前狀態為：${homestay.status}`
-        });
+      // 狀態檢查：只有待審核的可以批准/拒絕，只有已通過的可以撤銷
+      if (action === 'approve' || action === 'reject') {
+        if (homestay.status !== 'pending') {
+          throw createError({
+            statusCode: 400,
+            statusMessage: `此民宿已被審核，目前狀態為：${homestay.status}`
+          });
+        }
+      } else if (action === 'revoke') {
+        if (homestay.status !== 'approved') {
+          throw createError({
+            statusCode: 400,
+            statusMessage: `只能撤銷已通過的民宿，目前狀態為：${homestay.status}`
+          });
+        }
       }
 
       // 執行審核動作
@@ -91,7 +101,7 @@ export default defineEventHandler(async (event) => {
           RETURNING id, name, status
         `;
         updateParams = [decoded.data.username, homestayId];
-      } else {
+      } else if (action === 'reject' || action === 'revoke') {
         updateQuery = `
           UPDATE homestays 
           SET 
@@ -118,10 +128,10 @@ export default defineEventHandler(async (event) => {
       const updatedHomestay = updateResult.rows[0];
 
       // 記錄審核日誌
-      const actionText = action === 'approve' ? '批准' : '拒絕';
+      const actionText = action === 'approve' ? '批准' : (action === 'revoke' ? '撤銷' : '拒絕');
       console.log(`民宿審核: ${actionText} ID=${homestayId}, 名稱=${homestay.name}, 審核者=${decoded.data.username}, 時間=${new Date().toISOString()}`);
       
-      if (action === 'reject') {
+      if (action === 'reject' || action === 'revoke') {
         console.log(`拒絕原因: ${rejectionReason}`);
       }
 
@@ -133,7 +143,7 @@ export default defineEventHandler(async (event) => {
         if (action === 'approve') {
           await sendApprovalEmail(homestay.email, homestay.name, homestayId);
           console.log(`審核通過郵件已發送至: ${homestay.email}`);
-        } else {
+        } else if (action === 'reject' || action === 'revoke') {
           await sendRejectionEmail(homestay.email, homestay.name, homestayId, rejectionReason);
           console.log(`審核拒絕郵件已發送至: ${homestay.email}`);
         }
@@ -153,7 +163,7 @@ export default defineEventHandler(async (event) => {
           action: action,
           approved_by: decoded.data.username,
           approved_at: new Date().toISOString(),
-          rejection_reason: action === 'reject' ? rejectionReason : null
+          rejection_reason: (action === 'reject' || action === 'revoke') ? rejectionReason : null
         }
       };
 

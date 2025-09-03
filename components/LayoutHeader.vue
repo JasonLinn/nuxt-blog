@@ -31,13 +31,20 @@
                 <p class="">代訂服務</p>
               </NuxtLink>
             </li>
-            <!-- <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
                 to="/yilan-activities"
               >
                 <p class="">宜蘭活動總匯</p>
               </NuxtLink>
-            </li> -->
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
+                to="/homestay-list"
+              >
+                <p class="">合法民宿推薦</p>
+              </NuxtLink>
+            </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
                 to="/launch-schedule"
@@ -111,9 +118,12 @@
       
       <!-- 主要導航連結 -->
       <div class="nav-links">
-        <!-- <NuxtLink to="/yilan-activities" class="nav-link">
+        <NuxtLink to="/yilan-activities" class="nav-link">
           宜蘭活動總匯
-        </NuxtLink> -->
+        </NuxtLink>
+        <NuxtLink to="/homestay-list" class="nav-link">
+          合法民宿推薦
+        </NuxtLink>
         <NuxtLink to="/homestay-register" class="nav-link">
           民宿註冊申請
         </NuxtLink>
