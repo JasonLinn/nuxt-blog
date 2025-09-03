@@ -489,7 +489,7 @@ onMounted(() => {
 
 .indicator-dot {
   width: 6px;
-  height: 6px;
+  height: 12px;
   border-radius: 50%;
   
   &.available-dot {

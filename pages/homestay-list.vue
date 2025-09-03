@@ -1081,6 +1081,7 @@ watch(bnbsData, (newData) => {
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.4;
   margin-bottom: 10px;
@@ -1397,8 +1398,7 @@ watch(bnbsData, (newData) => {
   
   @media (max-width: 768px) {
     min-width: 100%;
-    flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 }
 
@@ -1410,7 +1410,7 @@ watch(bnbsData, (newData) => {
   
   @media (max-width: 768px) {
     width: 100%;
-    gap: 12px;
+    gap: 6px;
   }
 }
 
@@ -1476,6 +1476,12 @@ watch(bnbsData, (newData) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    padding: 8px;
+    margin-left: 4px;
+  }
   
   &:hover {
     background: #e9ecef;
