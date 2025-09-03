@@ -413,14 +413,14 @@
             <div class="form-group">
               <label class="form-label">🏠 主題特色</label>
               <div class="checkbox-group">
-                <label v-for="feature in themeFeatures" :key="feature" class="checkbox-item">
+                <label v-for="feature in activeThemeFeatures" :key="feature.id || feature" class="checkbox-item">
                   <input
                     v-model="editData.theme_features"
                     type="checkbox"
-                    :value="feature"
+                    :value="typeof feature === 'object' ? feature.name : feature"
                     :disabled="saving"
                   />
-                  <span class="checkbox-label">{{ feature }}</span>
+                  <span class="checkbox-label">{{ typeof feature === 'object' ? feature.name : feature }}</span>
                 </label>
               </div>
             </div>
@@ -431,14 +431,14 @@
             <div class="form-group">
               <label class="form-label">🎯 服務內容</label>
               <div class="checkbox-group">
-                <label v-for="service in serviceAmenities" :key="service" class="checkbox-item">
+                <label v-for="service in activeServiceAmenities" :key="service.id || service" class="checkbox-item">
                   <input
                     v-model="editData.service_amenities"
                     type="checkbox"
-                    :value="service"
+                    :value="typeof service === 'object' ? service.name : service"
                     :disabled="saving"
                   />
-                  <span class="checkbox-label">{{ service }}</span>
+                  <span class="checkbox-label">{{ typeof service === 'object' ? service.name : service }}</span>
                 </label>
               </div>
             </div>
@@ -513,6 +513,10 @@ const homestay = ref(null);
 const originalData = ref(null);
 const newImageUrl = ref(''); // 新增圖片URL輸入
 const fileInputRef = ref(null); // 檔案輸入框引用
+const featuresData = ref({
+  themeFeatures: [],
+  serviceAmenities: []
+});
 const editData = ref({
   name: '',
   location: '',
@@ -679,8 +683,70 @@ const moveImage = (index, direction) => {
   showMessage(`圖片已${direction === 'up' ? '前移' : '後移'}`, 'info');
 };
 
+// 計算屬性：獲取啟用的主題特色
+const activeThemeFeatures = computed(() => {
+  return featuresData.value.themeFeatures.filter(feature => feature.is_active);
+});
 
-// 主題特色選項
+// 計算屬性：獲取啟用的服務設施（作為備用選項，如果需要的話）
+const activeServiceAmenities = computed(() => {
+  return featuresData.value.serviceAmenities.filter(feature => feature.is_active);
+});
+
+// 載入特色項目
+const loadFeatures = async () => {
+  try {
+    const response = await $fetch('/api/admin/features');
+    if (response.success) {
+      featuresData.value = response.data;
+    } else {
+      console.error('載入特色項目失敗:', response.error);
+      // 如果API失敗，使用備用的硬編碼列表
+      setFallbackFeatures();
+    }
+  } catch (error) {
+    console.error('載入特色項目錯誤:', error);
+    // 如果API失敗，使用備用的硬編碼列表
+    setFallbackFeatures();
+  }
+};
+
+// 設置備用的特色項目
+const setFallbackFeatures = () => {
+  featuresData.value.themeFeatures = [
+    { name: '包棟民宿', is_active: true },
+    { name: '電梯/一樓孝親房民宿', is_active: true },
+    { name: '獨棟、莊園民宿', is_active: true },
+    { name: '親子民宿', is_active: true },
+    { name: '寵物民宿', is_active: true },
+    { name: '海景民宿', is_active: true },
+    { name: '市區民宿', is_active: true },
+    { name: '夜市民宿', is_active: true },
+    { name: '車站周邊住宿', is_active: true }
+  ];
+  
+  featuresData.value.serviceAmenities = [
+    { name: '美味早餐', is_active: true },
+    { name: '方便停車', is_active: true },
+    { name: '有停車位(場)', is_active: true },
+    { name: '可停遊覽車', is_active: true },
+    { name: '有陽台房型', is_active: true },
+    { name: '有浴缸房型', is_active: true },
+    { name: '有公用客廳', is_active: true },
+    { name: '一樓孝親房', is_active: true },
+    { name: '戶外戲水池', is_active: true },
+    { name: '有烤肉場地', is_active: true },
+    { name: '歡唱設備', is_active: true },
+    { name: '可借用廚房', is_active: true },
+    { name: '可打麻將', is_active: true },
+    { name: '可帶寵物入住', is_active: true },
+    { name: '可刷國旅卡', is_active: true },
+    { name: '電動麻將桌', is_active: true },
+    { name: '充電樁', is_active: true }
+  ];
+};
+
+// 主題特色選項（保留作為備用）
 const themeFeatures = [
   '包棟民宿',
   '電梯/一樓孝親房民宿',
@@ -853,8 +919,11 @@ const handleLogout = async () => {
   }
 };
 
-onMounted(() => {
-  checkAuth();
+onMounted(async () => {
+  await Promise.all([
+    checkAuth(),
+    loadFeatures()
+  ]);
 });
 </script>
 
