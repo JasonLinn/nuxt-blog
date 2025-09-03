@@ -370,7 +370,7 @@
               </div>
 
               <div class="pricing-item">
-                <label class="form-label">平日包棟價格</label>
+                <label class="form-label">平日包棟最低價</label>
                 <div class="price-input-group">
                   <span class="price-prefix">NT$</span>
                   <input
@@ -386,7 +386,7 @@
               </div>
 
               <div class="pricing-item">
-                <label class="form-label">假日包棟價格</label>
+                <label class="form-label">假日包棟最低價</label>
                 <div class="price-input-group">
                   <span class="price-prefix">NT$</span>
                   <input
@@ -456,7 +456,7 @@
           </div>
 
           <!-- 空房狀態管理 -->
-          <div class="form-section">
+          <!-- <div class="form-section">
             <h2 class="section-title">空房狀態管理</h2>
             <p class="section-description">管理您的民宿每日空房狀況，點擊日期可切換可用/不可用狀態</p>
             
@@ -467,7 +467,7 @@
                 @status-changed="handleAvailabilityChange"
               />
             </div>
-          </div>
+          </div> -->
 
           <!-- 提交按鈕 -->
           <div class="form-actions">

@@ -170,7 +170,7 @@
           </div>
 
           <!-- 可預訂日曆（全寬） -->
-          <div class="info-card full-width">
+          <!-- <div class="info-card full-width">
             <div class="card-header">
               <div class="card-icon">📅</div>
               <h3 class="card-title">空房狀況</h3>
@@ -181,7 +181,7 @@
                 :view-only="true"
               />
             </div>
-          </div>
+          </div> -->
 
           <!-- 第二行：住宿人數 + 環境特色 -->
           <div class="info-card compact">
