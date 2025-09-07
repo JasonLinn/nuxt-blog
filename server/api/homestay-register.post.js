@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { pool } from '../utils/db.js';
+import { sendAdminNotificationEmail } from '../utils/emailService.js';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -240,9 +241,24 @@ export default defineEventHandler(async (event) => {
       // 提交交易
       await client.query('COMMIT');
 
+      // 發送管理員通知郵件（在交易提交後，避免影響註冊流程）
+      try {
+        // 檢查是否有設定郵件服務
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+          await sendAdminNotificationEmail(name, homestayId, email, `${city} ${location}`);
+          console.log(`管理員通知郵件已發送: ${name} (ID: ${homestayId})`);
+        } else {
+          console.log(`郵件服務未設定 - 民宿申請: ${name} (ID: ${homestayId})，請手動檢查新申請`);
+        }
+      } catch (emailError) {
+        // 郵件發送失敗不影響註冊流程，但要記錄錯誤
+        console.error('管理員通知郵件發送失敗:', emailError);
+        console.error(`無法發送管理員通知 - 民宿: ${name} (ID: ${homestayId})，請手動檢查新申請`);
+      }
+
       return {
         success: true,
-        message: '民宿申請已成功提交，等待管理員審核',
+        message: '民宿申請已成功提交！管理員已收到通知，將在 24 小時內完成審核',
         data: {
           id: homestayId,
           name: name,

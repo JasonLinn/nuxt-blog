@@ -488,7 +488,7 @@
         <div v-if="showSuccess" class="success-message">
           <div class="success-icon">✅</div>
           <h3>申請已成功提交！</h3>
-          <p>我們已收到您的民宿註冊申請，管理員將在 1-3 個工作天內完成審核。</p>
+          <p>{{ successMessage || '我們已收到您的民宿註冊申請，管理員將在 1-3 個工作天內完成審核。' }}</p>
           <p>審核結果將發送至您的信箱：<strong>{{ formData.email }}</strong></p>
           <div class="success-actions">
             <button @click="resetForm" class="btn-primary">申請其他民宿</button>
@@ -525,6 +525,7 @@ useHead({
 const currentStep = ref(1);
 const submitting = ref(false);
 const showSuccess = ref(false);
+const successMessage = ref('');
 const errorMessage = ref('');
 
 // 表單資料
@@ -692,6 +693,7 @@ const handleSubmit = async () => {
     });
     
     if (response.success) {
+      successMessage.value = response.message || '我們已收到您的民宿註冊申請，管理員將在 1-3 個工作天內完成審核。';
       showSuccess.value = true;
     } else {
       errorMessage.value = response.message || '申請失敗，請重試';
@@ -749,6 +751,7 @@ const setFallbackOptions = () => {
 const resetForm = () => {
   currentStep.value = 1;
   showSuccess.value = false;
+  successMessage.value = '';
   errorMessage.value = '';
   coverUrl.value = '';
   

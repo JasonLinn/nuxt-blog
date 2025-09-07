@@ -147,6 +147,111 @@ const getRejectionEmailTemplate = (homestayName, homestayId, rejectionReason) =>
   }
 }
 
+// 管理員通知郵件模板
+const getAdminNotificationTemplate = (homestayName, homestayId, applicantEmail, location) => {
+  return {
+    subject: '🏠 新民宿申請通知 - 待審核',
+    html: `
+      <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="margin: 0; color: white; font-size: 28px;">🏠 新民宿申請通知</h1>
+          <p style="margin: 10px 0 0 0; color: #e2e8f0; font-size: 16px;">
+            有新的民宿申請需要審核
+          </p>
+        </div>
+        
+        <div style="background: white; padding: 40px 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+          <div style="background: #f7fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; margin: 20px 0;">
+            <h3 style="color: #2d3748; margin: 0 0 15px 0;">申請資訊</h3>
+            <div style="color: #4a5568; line-height: 1.8;">
+              <p><strong>民宿名稱：</strong>${homestayName}</p>
+              <p><strong>民宿編號：</strong>${homestayId}</p>
+              <p><strong>申請人信箱：</strong>${applicantEmail}</p>
+              <p><strong>民宿地址：</strong>${location}</p>
+              <p><strong>申請時間：</strong>${new Date().toLocaleString('zh-TW')}</p>
+            </div>
+          </div>
+          
+          <h3 style="color: #2d3748; margin-top: 30px;">下一步操作：</h3>
+          <ul style="color: #4a5568; line-height: 1.8;">
+            <li>請登入管理後台審核此申請</li>
+            <li>檢查民宿資訊是否完整且符合標準</li>
+            <li>確認聯絡資訊正確無誤</li>
+            <li>審核通過或拒絕申請</li>
+          </ul>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.BASE_URL || 'https://localhost:3000'}/admin-review" 
+               style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                      color: white; 
+                      padding: 15px 30px; 
+                      border-radius: 8px; 
+                      text-decoration: none; 
+                      font-weight: 600; 
+                      display: inline-block;">
+              🔍 前往審核
+            </a>
+          </div>
+          
+          <div style="background: #edf2f7; padding: 20px; border-radius: 8px; margin-top: 30px;">
+            <p style="color: #4a5568; margin: 0; font-weight: 500; text-align: center;">
+              ⏰ 建議在 24 小時內完成審核，以提供良好的用戶體驗
+            </p>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+          
+          <p style="color: #a0aec0; font-size: 12px; text-align: center;">
+            這是系統自動發送的管理員通知郵件。
+          </p>
+        </div>
+      </div>
+    `
+  }
+}
+
+// 發送管理員通知郵件
+export const sendAdminNotificationEmail = async (homestayName, homestayId, applicantEmail, location) => {
+  try {
+    const transporter = createTransporter()
+    const { subject, html } = getAdminNotificationTemplate(homestayName, homestayId, applicantEmail, location)
+    
+    // 管理員郵箱從環境變數獲取，或使用預設
+    const adminEmails = process.env.ADMIN_EMAILS ? 
+      process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : 
+      [process.env.EMAIL_USER] // 如果沒有設定管理員郵箱，發送給系統郵箱
+    
+    // 發送給所有管理員
+    const sendPromises = adminEmails.map(adminEmail => {
+      const mailOptions = {
+        from: process.env.EMAIL_USER || 'noreply@yourdomain.com',
+        to: adminEmail,
+        subject,
+        html
+      }
+      return transporter.sendMail(mailOptions)
+    })
+    
+    const results = await Promise.all(sendPromises)
+    
+    console.log('管理員通知郵件發送成功:', {
+      messageIds: results.map(r => r.messageId),
+      adminEmails,
+      homestayName,
+      homestayId
+    })
+    
+    return {
+      success: true,
+      messageIds: results.map(r => r.messageId),
+      emailsSent: adminEmails.length
+    }
+  } catch (error) {
+    console.error('發送管理員通知郵件失敗:', error)
+    throw new Error(`管理員通知郵件發送失敗: ${error.message}`)
+  }
+}
+
 // 發送審核通過郵件
 export const sendApprovalEmail = async (toEmail, homestayName, homestayId) => {
   try {
