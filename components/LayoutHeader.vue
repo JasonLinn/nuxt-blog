@@ -21,7 +21,14 @@
               <NuxtLink
                 to="/map"
               >
-                <p class="">優惠券(地圖搜尋)</p>
+                <p class="">優惠券地圖</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
+                to="/homestay-list"
+              >
+                <p class="">合法民宿推薦</p>
               </NuxtLink>
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
@@ -36,13 +43,6 @@
                 to="/yilan-activities"
               >
                 <p class="">宜蘭活動總匯</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/homestay-list"
-              >
-                <p class="">合法民宿推薦</p>
               </NuxtLink>
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">

@@ -88,7 +88,7 @@ bnb: {
   contact: {
     phone: string | null,
     website: string | null,
-    line: string | null,
+    line: string | null
     instagram: string | null,
     facebook: string | null
   }
