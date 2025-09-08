@@ -108,7 +108,7 @@
       <!-- 進階搜尋切換按鈕 -->
       <div class="advanced-search-toggle">
         <button 
-          @click="showAdvancedSearch = !showAdvancedSearch" 
+          @click="openAdvancedSearch" 
           class="advanced-toggle-btn"
           type="button"
         >
@@ -116,26 +116,50 @@
             <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
           </svg>
           進階搜尋
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="14" 
-            height="14" 
-            fill="currentColor" 
-            viewBox="0 0 16 16"
-            :class="['chevron-icon', { 'rotated': showAdvancedSearch }]"
-          >
-            <path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-          </svg>
         </button>
       </div>
       
-      <!-- 進階搜尋面板 -->
-      <transition name="slide-down">
-        <div v-if="showAdvancedSearch" class="advanced-search-panel">
-          <div class="advanced-search-content">
+      <!-- 進階搜尋側邊面板 -->
+      <div class="advanced-search-overlay" :class="{ active: showAdvancedSearch }" @click="closeAdvancedSearch">
+        <div class="advanced-search-panel" @click.stop>
+          <div class="panel-header">
+            <h3 class="panel-title">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
+              </svg>
+              進階搜尋
+            </h3>
+            <button @click="closeAdvancedSearch" class="panel-close-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="panel-body">
+            <!-- 已選擇的篩選條件 -->
+            <div v-if="hasActiveFilters" class="active-filters">
+              <div class="filter-tags">
+                <span v-for="feature in selectedThemeFeatures" :key="'theme-' + feature" class="filter-tag">
+                  主題: {{ feature }}
+                  <button @click="removeThemeFeature(feature)" class="tag-remove">×</button>
+                </span>
+                <span v-for="amenity in selectedServiceAmenities" :key="'amenity-' + amenity" class="filter-tag">
+                  設施: {{ amenity }}
+                  <button @click="removeServiceAmenity(amenity)" class="tag-remove">×</button>
+                </span>
+              </div>
+            </div>
+            
             <!-- 主題特色 -->
             <div class="feature-group">
-              <h4 class="feature-group-title">主題特色</h4>
+              <h4 class="feature-group-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
+                  <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
+                </svg>
+                主題特色 (交集篩選)
+              </h4>
               <div class="feature-options">
                 <label 
                   v-for="feature in availableThemeFeatures" 
@@ -155,7 +179,12 @@
             
             <!-- 服務設施 -->
             <div class="feature-group">
-              <h4 class="feature-group-title">服務設施</h4>
+              <h4 class="feature-group-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
+                </svg>
+                服務設施 (交集篩選)
+              </h4>
               <div class="feature-options">
                 <label 
                   v-for="amenity in availableServiceAmenities" 
@@ -172,20 +201,35 @@
                 </label>
               </div>
             </div>
-            
-            <!-- 清除篩選按鈕 -->
-            <div class="advanced-search-actions">
+          </div>
+          
+          <div class="panel-footer">
+            <div class="panel-actions">
               <button 
                 @click="clearAdvancedFilters" 
                 class="clear-filters-btn"
                 type="button"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                </svg>
                 清除篩選
+              </button>
+              <button 
+                @click="applyAdvancedFilters" 
+                class="apply-filters-btn"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+                </svg>
+                套用篩選 ({{ filteredResultsCount }})
               </button>
             </div>
           </div>
         </div>
-      </transition>
+      </div>
     </div>
     <div class="col-12">
       <div class="tag-list">
@@ -440,7 +484,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { navigateTo } from 'nuxt/app';
 import useHomestayStore from '~/store/homestay.js';
 
@@ -537,15 +581,15 @@ const filteredBnbs = computed(() => {
       // 檢查區域
       const areaMatch = !selectedArea.value || bnb.area === selectedArea.value;
       
-      // 檢查主題特色篩選
+      // 檢查主題特色篩選 (交集邏輯)
       const themeMatch = selectedThemeFeatures.value.length === 0 || 
-        (bnb.features?.themeFeatures && selectedThemeFeatures.value.some(selected => 
+        (bnb.features?.themeFeatures && selectedThemeFeatures.value.every(selected => 
           bnb.features.themeFeatures.includes(selected)
         ));
       
-      // 檢查服務設施篩選
+      // 檢查服務設施篩選 (交集邏輯)
       const amenityMatch = selectedServiceAmenities.value.length === 0 || 
-        (bnb.features?.serviceAmenities && selectedServiceAmenities.value.some(selected => 
+        (bnb.features?.serviceAmenities && selectedServiceAmenities.value.every(selected => 
           bnb.features.serviceAmenities.includes(selected)
         ));
       
@@ -583,15 +627,15 @@ const filteredBnbs = computed(() => {
     const packageMatch = searchText.value !== '包棟' || 
       (bnb.prices && (bnb.prices.fullRentWeekday || bnb.prices.fullRentWeekend));
     
-    // 檢查主題特色篩選
+    // 檢查主題特色篩選 (交集邏輯)
     const themeMatch = selectedThemeFeatures.value.length === 0 || 
-      (bnb.features?.themeFeatures && selectedThemeFeatures.value.some(selected => 
+      (bnb.features?.themeFeatures && selectedThemeFeatures.value.every(selected => 
         bnb.features.themeFeatures.includes(selected)
       ));
     
-    // 檢查服務設施篩選
+    // 檢查服務設施篩選 (交集邏輯)
     const amenityMatch = selectedServiceAmenities.value.length === 0 || 
-      (bnb.features?.serviceAmenities && selectedServiceAmenities.value.some(selected => 
+      (bnb.features?.serviceAmenities && selectedServiceAmenities.value.every(selected => 
         bnb.features.serviceAmenities.includes(selected)
       ));
     
@@ -662,6 +706,48 @@ const clearAdvancedFilters = () => {
   selectedServiceAmenities.value = [];
   currentPage.value = 1;
 }
+
+// 進階搜尋面板相關方法
+const openAdvancedSearch = () => {
+  showAdvancedSearch.value = true;
+  document.body.style.overflow = 'hidden';
+}
+
+const closeAdvancedSearch = () => {
+  showAdvancedSearch.value = false;
+  document.body.style.overflow = 'auto';
+}
+
+const applyAdvancedFilters = () => {
+  closeAdvancedSearch();
+  currentPage.value = 1;
+}
+
+// 移除單個主題特色
+const removeThemeFeature = (feature) => {
+  const index = selectedThemeFeatures.value.indexOf(feature);
+  if (index > -1) {
+    selectedThemeFeatures.value.splice(index, 1);
+  }
+}
+
+// 移除單個服務設施
+const removeServiceAmenity = (amenity) => {
+  const index = selectedServiceAmenities.value.indexOf(amenity);
+  if (index > -1) {
+    selectedServiceAmenities.value.splice(index, 1);
+  }
+}
+
+// 檢查是否有篩選條件
+const hasActiveFilters = computed(() => {
+  return selectedThemeFeatures.value.length > 0 || selectedServiceAmenities.value.length > 0;
+})
+
+// 計算篩選結果數量
+const filteredResultsCount = computed(() => {
+  return filteredBnbs.value.length;
+})
 
 // 根據區域過濾
 const filterByArea = () => {
@@ -814,6 +900,11 @@ onMounted(async () => {
   } catch (error) {
     console.error('❌ 載入失敗:', error);
   }
+});
+
+// 清理函式
+onUnmounted(() => {
+  document.body.style.overflow = 'auto';
 });
 
 // 在資料載入後執行除錯
@@ -1773,44 +1864,160 @@ watch(bnbsData, (newData) => {
   }
 }
 
-.chevron-icon {
-  transition: transform 0.3s ease;
+/* 右側滑入面板覆蓋層 */
+.advanced-search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
   
-  &.rotated {
-    transform: rotate(180deg);
+  &.active {
+    opacity: 1;
+    visibility: visible;
+    background: rgba(0, 0, 0, 0.5);
   }
 }
 
-/* 滑入動畫 */
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-down-enter-from {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
+/* 右側滑入面板主體 */
 .advanced-search-panel {
-  margin-top: 12px;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  transition: right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  flex-direction: column;
+  z-index: 1001;
+  
+  @media (max-width: 768px) {
+    width: 100vw;
+    right: -100vw;
+  }
+  
+  .advanced-search-overlay.active & {
+    right: 0;
+  }
 }
 
-.advanced-search-content {
-  padding: 20px;
+/* 面板標題區域 */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+  
+  @media (max-width: 768px) {
+    padding: 16px 20px;
+  }
 }
 
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  
+  svg {
+    color: #5db0be;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+}
+
+.panel-close-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: #e9ecef;
+    color: #495057;
+  }
+}
+
+/* 面板內容區域 */
+.panel-body {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+}
+
+/* 已選擇的篩選條件 */
+.active-filters {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #5db0be 0%, #4a9eff 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(93, 176, 190, 0.3);
+  
+  .tag-remove {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 4px;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+/* 特色群組樣式 */
 .feature-group {
-  margin-bottom: 20px;
+  margin-bottom: 32px;
   
   &:last-child {
     margin-bottom: 0;
@@ -1818,122 +2025,183 @@ watch(bnbsData, (newData) => {
 }
 
 .feature-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 16px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e9ecef;
+  
+  svg {
+    color: #5db0be;
+  }
 }
 
 .feature-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
 .feature-checkbox {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 6px;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
   cursor: pointer;
+  border: 2px solid transparent;
   transition: all 0.2s ease;
+  background: #f8f9fa;
   
   &:hover {
-    background: #f8f9fa;
+    background: #e9ecef;
+    border-color: #5db0be;
   }
   
   input[type="checkbox"] {
-    display: none;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    appearance: none;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:checked {
+      background: #5db0be;
+      border-color: #5db0be;
+      
+      &::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+      }
+    }
+    
+    &:hover {
+      border-color: #5db0be;
+    }
   }
-}
-
-.checkmark {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #ddd;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  position: relative;
   
-  &::after {
-    content: '✓';
-    font-size: 12px;
-    color: white;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+  .feature-text {
+    flex: 1;
+    font-size: 14px;
+    color: #495057;
+    font-weight: 500;
   }
 }
 
-.feature-checkbox input[type="checkbox"]:checked + .checkmark {
-  background: #5db0be;
-  border-color: #5db0be;
-  
-  &::after {
-    opacity: 1;
-  }
-}
-
-.feature-text {
-  font-size: 14px;
-  color: #495057;
-  line-height: 1.2;
-}
-
-.advanced-search-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 16px;
+/* 面板底部操作區域 */
+.panel-footer {
+  padding: 20px 24px;
   border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  
+  @media (max-width: 768px) {
+    padding: 16px 20px;
+  }
+}
+
+.panel-actions {
+  display: flex;
+  gap: 12px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 .clear-filters-btn {
-  padding: 8px 16px;
-  background: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 6px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  color: #6c757d;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   
   &:hover {
-    background: #5a6268;
+    background: #e9ecef;
+    border-color: #dc3545;
+    color: #dc3545;
   }
   
-  &:active {
-    transform: translateY(1px);
+  @media (max-width: 768px) {
+    padding: 14px 16px;
   }
 }
 
-/* 響應式設計 */
-@media (max-width: 768px) {
-  .feature-options {
-    grid-template-columns: 1fr;
+.apply-filters-btn {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #5db0be 0%, #4a9eff 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(93, 176, 190, 0.3);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(93, 176, 190, 0.4);
+    background: linear-gradient(135deg, #4a9eff 0%, #5db0be 100%);
   }
   
-  .advanced-search-content {
-    padding: 16px;
+  &:active {
+    transform: translateY(0);
   }
   
-  /* 手機版標籤優化 */
-  .bnb-tag {
-    font-size: 11px;
-    padding: 3px 6px;
-    gap: 3px;
-    
-    svg {
-      width: 10px;
-      height: 10px;
-    }
+  @media (max-width: 768px) {
+    padding: 14px 16px;
+  }
+}
+
+/* 響應式調整 */
+@media (max-width: 480px) {
+  .advanced-search-panel {
+    width: 100vw;
   }
   
-  .categories-row {
-    gap: 4px;
+  .panel-header,
+  .panel-body,
+  .panel-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .feature-checkbox {
+    padding: 10px 12px;
+  }
+  
+  .filter-tag {
+    padding: 4px 8px;
+    font-size: 12px;
   }
 }
 </style> 
