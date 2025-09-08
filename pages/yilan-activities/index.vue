@@ -4,21 +4,25 @@
       <!-- 美麗的頁首標題區 -->
       <div class="hero-section">
         <div class="hero-content">
-          <h1>宜蘭活動總匯</h1>
-          <p class="lead">探索宜蘭精彩活動，體驗在地文化之美</p>
-          <NuxtLink 
-            to="/yilan-activities/submit" 
-            class="btn btn-primary btn-lg"
-          >
-            投稿活動
-          </NuxtLink>
+          <div class="hero-text">
+            <h1>宜蘭活動總匯</h1>
+            <p class="lead">探索宜蘭精彩活動，體驗在地文化之美</p>
+          </div>
+          <div class="hero-action">
+            <NuxtLink 
+              to="/yilan-activities/submit" 
+              class="btn btn-primary btn-lg"
+            >
+              投稿活動
+            </NuxtLink>
+          </div>
         </div>
       </div>
 
       <!-- 美麗的搜尋與篩選區 -->
       <div class="filter-section">
-        <div class="row">
-          <div class="col-12 col-md-4 mb-3">
+        <div class="row g-2 g-md-3">
+          <div class="col-12 col-md-5">
             <input 
               v-model="searchQuery" 
               type="text" 
@@ -26,7 +30,7 @@
               class="form-control"
             />
           </div>
-          <div class="col-12 col-md-4 mb-3">
+          <div class="col-12 col-md-3">
             <select v-model="typeFilter" class="form-select">
               <option value="">所有類型</option>
               <option value="文化藝術">文化藝術</option>
@@ -39,7 +43,7 @@
               <option value="其他">其他</option>
             </select>
           </div>
-          <div class="col-12 col-md-4 mb-3">
+          <div class="col-12 col-md-2">
             <select v-model="dateFilter" class="form-select">
               <option value="">所有時間</option>
               <option value="upcoming">即將開始</option>
@@ -48,31 +52,202 @@
               <option value="nextMonth">下個月</option>
             </select>
           </div>
+          <div class="col-12 col-md-2 d-flex gap-1 gap-md-2">
+            <button 
+              @click="openAdvancedSearch" 
+              class="btn btn-outline-primary flex-fill btn-sm-compact"
+              title="進階搜尋"
+            >
+              <i class="bi bi-sliders"></i> 
+              <span class="d-none d-sm-inline">進階</span>
+            </button>
+            <button 
+              @click="clearAllFilters" 
+              class="btn btn-outline-secondary btn-sm-compact"
+              title="清除篩選"
+            >
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 已選擇的篩選條件標籤 -->
+        <div v-if="hasActiveFilters" class="active-filters mt-2">
+          <div class="d-flex flex-wrap gap-2">
+            <span v-if="searchQuery" class="filter-tag">
+              關鍵字: {{ searchQuery }}
+              <button @click="searchQuery = ''" class="tag-close">×</button>
+            </span>
+            <span v-if="typeFilter" class="filter-tag">
+              類型: {{ typeFilter }}
+              <button @click="typeFilter = ''" class="tag-close">×</button>
+            </span>
+            <span v-if="dateFilter" class="filter-tag">
+              時間: {{ getDateFilterText(dateFilter) }}
+              <button @click="dateFilter = ''" class="tag-close">×</button>
+            </span>
+            <span v-if="advancedFilters.location" class="filter-tag">
+              地點: {{ advancedFilters.location }}
+              <button @click="advancedFilters.location = ''" class="tag-close">×</button>
+            </span>
+            <span v-if="advancedFilters.organizer" class="filter-tag">
+              主辦: {{ advancedFilters.organizer }}
+              <button @click="advancedFilters.organizer = ''" class="tag-close">×</button>
+            </span>
+            <span v-if="advancedFilters.priceRange" class="filter-tag">
+              價格: {{ getPriceRangeText(advancedFilters.priceRange) }}
+              <button @click="advancedFilters.priceRange = ''" class="tag-close">×</button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 進階搜尋側邊面板 -->
+      <div class="advanced-search-overlay" :class="{ active: showAdvancedSearch }" @click="closeAdvancedSearch">
+        <div class="advanced-search-panel" @click.stop>
+          <div class="panel-header">
+            <h5 class="panel-title">
+              <i class="bi bi-sliders me-2"></i>進階搜尋
+            </h5>
+            <button @click="closeAdvancedSearch" class="btn-close"></button>
+          </div>
+          
+          <div class="panel-body">
+            <!-- 地點篩選 -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <i class="bi bi-geo-alt me-2"></i>活動地點
+              </label>
+              <input 
+                v-model="advancedFilters.location" 
+                type="text" 
+                placeholder="輸入地點關鍵字..." 
+                class="form-control"
+              />
+            </div>
+
+            <!-- 主辦單位篩選 -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <i class="bi bi-building me-2"></i>主辦單位
+              </label>
+              <input 
+                v-model="advancedFilters.organizer" 
+                type="text" 
+                placeholder="輸入主辦單位..." 
+                class="form-control"
+              />
+            </div>
+
+            <!-- 價格範圍 -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <i class="bi bi-currency-dollar me-2"></i>價格範圍
+              </label>
+              <select v-model="advancedFilters.priceRange" class="form-select">
+                <option value="">不限價格</option>
+                <option value="free">免費活動</option>
+                <option value="under100">100元以下</option>
+                <option value="100to500">100-500元</option>
+                <option value="500to1000">500-1000元</option>
+                <option value="over1000">1000元以上</option>
+              </select>
+            </div>
+
+            <!-- 活動狀態 -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <i class="bi bi-clock me-2"></i>活動狀態
+              </label>
+              <div class="form-check">
+                <input 
+                  v-model="advancedFilters.onlyUpcoming" 
+                  type="checkbox" 
+                  class="form-check-input" 
+                  id="onlyUpcoming"
+                />
+                <label class="form-check-label" for="onlyUpcoming">
+                  只顯示未開始的活動
+                </label>
+              </div>
+              <div class="form-check">
+                <input 
+                  v-model="advancedFilters.hasImages" 
+                  type="checkbox" 
+                  class="form-check-input" 
+                  id="hasImages"
+                />
+                <label class="form-check-label" for="hasImages">
+                  只顯示有圖片的活動
+                </label>
+              </div>
+            </div>
+
+            <!-- 自定義日期範圍 -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <i class="bi bi-calendar-range me-2"></i>自定義日期範圍
+              </label>
+              <div class="row">
+                <div class="col-6">
+                  <input 
+                    v-model="advancedFilters.startDate" 
+                    type="date" 
+                    class="form-control"
+                    placeholder="開始日期"
+                  />
+                </div>
+                <div class="col-6">
+                  <input 
+                    v-model="advancedFilters.endDate" 
+                    type="date" 
+                    class="form-control"
+                    placeholder="結束日期"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="panel-footer">
+            <div class="row">
+              <div class="col-6">
+                <button @click="clearAdvancedFilters" class="btn btn-outline-secondary w-100">
+                  <i class="bi bi-arrow-clockwise me-2"></i>重置
+                </button>
+              </div>
+              <div class="col-6">
+                <button @click="applyAdvancedFilters" class="btn btn-primary w-100">
+                  <i class="bi bi-check-lg me-2"></i>套用篩選
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- 美麗的活動統計 -->
       <div class="stats-section">
-        <div class="row">
-          <div class="col-6 col-md-3 mb-3">
+        <div class="row g-1 g-md-3">
+          <div class="col-3 col-md-3">
             <div class="stat-card">
               <div class="stat-number text-primary">{{ totalActivities }}</div>
               <p class="stat-label">總活動數</p>
             </div>
           </div>
-          <div class="col-6 col-md-3 mb-3">
+          <div class="col-3 col-md-3">
             <div class="stat-card">
               <div class="stat-number text-success">{{ upcomingCount }}</div>
               <p class="stat-label">即將開始</p>
             </div>
           </div>
-          <div class="col-6 col-md-3 mb-3">
+          <div class="col-3 col-md-3">
             <div class="stat-card">
               <div class="stat-number text-info">{{ thisWeekCount }}</div>
               <p class="stat-label">本週活動</p>
             </div>
           </div>
-          <div class="col-6 col-md-3 mb-3">
+          <div class="col-3 col-md-3">
             <div class="stat-card">
               <div class="stat-number text-warning">{{ thisMonthCount }}</div>
               <p class="stat-label">本月活動</p>
@@ -220,9 +395,22 @@ const currentPage = ref(1)
 const itemsPerPage = 12
 const showSuccessMessage = ref(false)
 
+// 進階搜尋相關
+const showAdvancedSearch = ref(false)
+const advancedFilters = ref({
+  location: '',
+  organizer: '',
+  priceRange: '',
+  onlyUpcoming: false,
+  hasImages: false,
+  startDate: '',
+  endDate: ''
+})
+
 const filteredActivities = computed(() => {
   let filtered = activities.value
 
+  // 基本關鍵字搜尋 (交集邏輯)
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(activity => 
@@ -232,10 +420,12 @@ const filteredActivities = computed(() => {
     )
   }
 
+  // 活動類型篩選 (交集)
   if (typeFilter.value) {
     filtered = filtered.filter(activity => activity.activity_type === typeFilter.value)
   }
 
+  // 時間範圍篩選 (交集)
   if (dateFilter.value) {
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -257,6 +447,83 @@ const filteredActivities = computed(() => {
         default:
           return true
       }
+    })
+  }
+
+  // 進階搜尋篩選 (所有條件都是交集)
+  
+  // 地點篩選 (交集)
+  if (advancedFilters.value.location) {
+    const locationQuery = advancedFilters.value.location.toLowerCase()
+    filtered = filtered.filter(activity => 
+      activity.location && activity.location.toLowerCase().includes(locationQuery)
+    )
+  }
+
+  // 主辦單位篩選 (交集)
+  if (advancedFilters.value.organizer) {
+    const organizerQuery = advancedFilters.value.organizer.toLowerCase()
+    filtered = filtered.filter(activity => 
+      activity.organizer_name.toLowerCase().includes(organizerQuery)
+    )
+  }
+
+  // 價格範圍篩選 (交集)
+  if (advancedFilters.value.priceRange) {
+    filtered = filtered.filter(activity => {
+      const price = parseFloat(activity.price || 0)
+      
+      switch (advancedFilters.value.priceRange) {
+        case 'free':
+          return price === 0 || !activity.price
+        case 'under100':
+          return price > 0 && price < 100
+        case '100to500':
+          return price >= 100 && price <= 500
+        case '500to1000':
+          return price >= 500 && price <= 1000
+        case 'over1000':
+          return price > 1000
+        default:
+          return true
+      }
+    })
+  }
+
+  // 只顯示未開始活動 (交集)
+  if (advancedFilters.value.onlyUpcoming) {
+    const today = new Date()
+    filtered = filtered.filter(activity => {
+      const endDateToCheck = activity.end_date ? new Date(activity.end_date) : new Date(activity.event_date)
+      return endDateToCheck >= today
+    })
+  }
+
+  // 只顯示有圖片的活動 (交集)
+  if (advancedFilters.value.hasImages) {
+    filtered = filtered.filter(activity => 
+      activity.images && activity.images.length > 0
+    )
+  }
+
+  // 自定義日期範圍 (交集)
+  if (advancedFilters.value.startDate || advancedFilters.value.endDate) {
+    filtered = filtered.filter(activity => {
+      const eventDate = new Date(activity.event_date)
+      
+      let withinRange = true
+      
+      if (advancedFilters.value.startDate) {
+        const startDate = new Date(advancedFilters.value.startDate)
+        withinRange = withinRange && eventDate >= startDate
+      }
+      
+      if (advancedFilters.value.endDate) {
+        const endDate = new Date(advancedFilters.value.endDate)
+        withinRange = withinRange && eventDate <= endDate
+      }
+      
+      return withinRange
     })
   }
 
@@ -299,6 +566,76 @@ const thisMonthCount = computed(() => {
     return eventDate.getMonth() === now.getMonth() && eventDate.getFullYear() === now.getFullYear()
   }).length
 })
+
+// 檢查是否有任何篩選條件
+const hasActiveFilters = computed(() => {
+  return searchQuery.value || 
+         typeFilter.value || 
+         dateFilter.value || 
+         advancedFilters.value.location ||
+         advancedFilters.value.organizer ||
+         advancedFilters.value.priceRange ||
+         advancedFilters.value.onlyUpcoming ||
+         advancedFilters.value.hasImages ||
+         advancedFilters.value.startDate ||
+         advancedFilters.value.endDate
+})
+
+// 進階搜尋相關函式
+const openAdvancedSearch = () => {
+  showAdvancedSearch.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeAdvancedSearch = () => {
+  showAdvancedSearch.value = false
+  document.body.style.overflow = 'auto'
+}
+
+const clearAllFilters = () => {
+  searchQuery.value = ''
+  typeFilter.value = ''
+  dateFilter.value = ''
+  clearAdvancedFilters()
+}
+
+const clearAdvancedFilters = () => {
+  advancedFilters.value = {
+    location: '',
+    organizer: '',
+    priceRange: '',
+    onlyUpcoming: false,
+    hasImages: false,
+    startDate: '',
+    endDate: ''
+  }
+}
+
+const applyAdvancedFilters = () => {
+  closeAdvancedSearch()
+  currentPage.value = 1
+}
+
+const getDateFilterText = (value) => {
+  const dateTexts = {
+    'upcoming': '即將開始',
+    'thisWeek': '本週',
+    'thisMonth': '本月',
+    'nextMonth': '下個月'
+  }
+  return dateTexts[value] || value
+}
+
+const getPriceRangeText = (value) => {
+  const priceTexts = {
+    'free': '免費',
+    'under100': '100元以下',
+    '100to500': '100-500元',
+    '500to1000': '500-1000元',
+    'over1000': '1000元以上'
+  }
+  return priceTexts[value] || value
+}
 
 const formatDayMonth = (dateString) => {
   const date = new Date(dateString)
@@ -371,9 +708,9 @@ const viewActivity = (id) => {
   navigateTo(`/yilan-activities/${id}`)
 }
 
-watch([typeFilter, dateFilter, searchQuery], () => {
+watch([typeFilter, dateFilter, searchQuery, advancedFilters], () => {
   currentPage.value = 1
-})
+}, { deep: true })
 
 const hideSuccessMessage = () => {
   showSuccessMessage.value = false
@@ -391,6 +728,11 @@ onMounted(() => {
   }
   
   fetchActivities()
+})
+
+// 清理函式 - 確保離開頁面時恢復 body 的 overflow
+onUnmounted(() => {
+  document.body.style.overflow = 'auto'
 })
 
 // 設定頁面 SEO
