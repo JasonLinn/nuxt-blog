@@ -1026,7 +1026,13 @@ watch(bnbsData, (newData) => {
   
   @media (max-width: 768px) {
     flex-direction: row;
-    gap: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 6px;
   }
 }
 .next-page {
@@ -1193,7 +1199,13 @@ watch(bnbsData, (newData) => {
   width: 160px;
   
   @media (max-width: 768px) {
-    width: 100%;
+    width: calc(50% - 4px);
+    min-width: 120px;
+  }
+  
+  @media (max-width: 480px) {
+    width: calc(50% - 4px);
+    min-width: 100px;
   }
 }
 
@@ -1227,6 +1239,16 @@ watch(bnbsData, (newData) => {
   &:focus {
     box-shadow: none !important;
   }
+  
+  @media (max-width: 768px) {
+    padding: 5px 8px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 4px 6px;
+    font-size: 13px;
+  }
 }
 
 .select-suffix {
@@ -1240,6 +1262,24 @@ watch(bnbsData, (newData) => {
   justify-content: center;
   pointer-events: none;
   height: 100%;
+  
+  @media (max-width: 768px) {
+    padding: 5px 6px;
+    
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 4px 5px;
+    
+    svg {
+      width: 10px;
+      height: 10px;
+    }
+  }
 }
 
 /* 主要搜尋欄樣式 */
@@ -1252,6 +1292,7 @@ watch(bnbsData, (newData) => {
   @media (max-width: 768px) {
     min-width: unset;
     width: 100%;
+    order: 3; /* 讓主搜尋欄在手機版時排到最後，獨佔一行 */
   }
 }
 
@@ -1287,6 +1328,24 @@ watch(bnbsData, (newData) => {
   &::placeholder {
     color: #adb5bd;
     font-size: 14px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 5px 10px;
+    font-size: 14px;
+    
+    &::placeholder {
+      font-size: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 4px 8px;
+    font-size: 13px;
+    
+    &::placeholder {
+      font-size: 11px;
+    }
   }
 }
 
@@ -1588,7 +1647,13 @@ watch(bnbsData, (newData) => {
   width: 140px;
   
   @media (max-width: 768px) {
-    width: 100%;
+    width: calc(50% - 4px);
+    min-width: 120px;
+  }
+  
+  @media (max-width: 480px) {
+    width: calc(50% - 4px);
+    min-width: 100px;
   }
 }
 
@@ -1624,6 +1689,24 @@ watch(bnbsData, (newData) => {
     color: #adb5bd;
     font-size: 14px;
   }
+  
+  @media (max-width: 768px) {
+    padding: 5px 8px;
+    font-size: 14px;
+    
+    &::placeholder {
+      font-size: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 4px 6px;
+    font-size: 13px;
+    
+    &::placeholder {
+      font-size: 11px;
+    }
+  }
 }
 
 /* 統一的輸入後綴樣式 */
@@ -1639,6 +1722,16 @@ watch(bnbsData, (newData) => {
   align-items: center;
   justify-content: center;
   height: 100%;
+  
+  @media (max-width: 768px) {
+    padding: 5px 6px;
+    font-size: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 4px 5px;
+    font-size: 11px;
+  }
 }
 
 /* 新增多圖輪播樣式 */
@@ -1841,6 +1934,11 @@ watch(bnbsData, (newData) => {
 /* 進階搜尋樣式 */
 .advanced-search-toggle {
   margin-top: 12px;
+  
+  @media (max-width: 768px) {
+    margin-top: 8px;
+    width: 100%;
+  }
 }
 
 .advanced-toggle-btn {
@@ -1861,6 +1959,13 @@ watch(bnbsData, (newData) => {
     background: #e9ecef;
     border-color: #5db0be;
     color: #5db0be;
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    padding: 5px 16px;
+    font-size: 13px;
   }
 }
 
