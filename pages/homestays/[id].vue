@@ -406,7 +406,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue';
+import { ref, onMounted, computed, onUnmounted, watchEffect } from 'vue';
 import { useRoute } from 'nuxt/app';
 import useHomestayStore from '~/store/homestay.js';
 
@@ -416,6 +416,71 @@ const bnbId = route.params.id;
 const bnb = ref(null);
 const loading = ref(true);
 const error = ref(null);
+
+// 動態 SEO 設定
+watchEffect(() => {
+  if (bnb.value) {
+    const homestay = bnb.value
+    
+    // 設定頁面 SEO
+    useSeoMeta({
+      title: `${homestay.name} | 宜蘭合法民宿 - 宜蘭旅遊通-宜蘭觀光民宿行銷協會`,
+      ogTitle: `${homestay.name} | 宜蘭旅遊通-宜蘭觀光民宿行銷協會`,
+      description: homestay.description || `位於宜蘭${homestay.area || homestay.location}的合法民宿${homestay.name}，提供優質住宿體驗。可能設有戲水池、KTV、烤肉設施等休閒娛樂設備，查看詳細房型、價格與預訂資訊。`,
+      ogDescription: homestay.description || `宜蘭${homestay.area}優質民宿${homestay.name}，提供多樣化休閒設施`,
+      keywords: `${homestay.name},宜蘭民宿,${homestay.area || homestay.location}民宿,合法民宿,戲水池民宿,KTV民宿,烤肉民宿,游泳池民宿,唱歌民宿,BBQ民宿${homestay.features?.themeFeatures ? ',' + homestay.features.themeFeatures.join(',') : ''}${homestay.features?.serviceAmenities ? ',' + homestay.features.serviceAmenities.join(',') : ''}`,
+      ogImage: homestay.image_urls?.[0] || 'https://yilanpass.com/logo.png',
+      ogUrl: `https://yilanpass.com/homestays/${homestay.id}`,
+      robots: 'index, follow'
+    })
+
+    // 結構化資料
+    useHead({
+      script: [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LodgingBusiness",
+            "name": homestay.name,
+            "description": homestay.description,
+            "url": `https://yilanpass.com/homestays/${homestay.id}`,
+            "image": homestay.image_urls || [],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": homestay.address,
+              "addressLocality": homestay.area || homestay.location,
+              "addressRegion": "宜蘭縣",
+              "addressCountry": "TW"
+            },
+            "telephone": homestay.phone,
+            "priceRange": homestay.prices?.fullRentWeekday ? 
+              `NT$${homestay.prices.fullRentWeekday} - NT$${homestay.prices.fullRentWeekend || homestay.prices.fullRentWeekday}` : 
+              undefined,
+            "aggregateRating": homestay.rating ? {
+              "@type": "AggregateRating",
+              "ratingValue": homestay.rating,
+              "bestRating": 5,
+              "ratingCount": homestay.total_reviews || 1
+            } : undefined,
+            "amenityFeature": homestay.features?.serviceAmenities?.map(amenity => ({
+              "@type": "LocationFeatureSpecification",
+              "name": amenity
+            })) || [],
+            "hasOfferCatalog": {
+              "@type": "OfferCatalog",
+              "name": "住宿方案",
+              "itemListElement": homestay.features?.themeFeatures?.map(feature => ({
+                "@type": "Offer",
+                "name": feature
+              })) || []
+            }
+          })
+        }
+      ]
+    })
+  }
+})
 
 // 圖片畫廊相關狀態
 const currentMainImageIndex = ref(0);

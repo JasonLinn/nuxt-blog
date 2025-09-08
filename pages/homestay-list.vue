@@ -488,6 +488,19 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { navigateTo } from 'nuxt/app';
 import useHomestayStore from '~/store/homestay.js';
 
+// SEO 設定
+useSeoMeta({
+  title: '宜蘭合法民宿推薦 | 精選優質民宿住宿 - 宜蘭旅遊通-宜蘭觀光民宿行銷協會',
+  ogTitle: '宜蘭合法民宿推薦 | 宜蘭旅遊通-宜蘭觀光民宿行銷協會',
+  description: '宜蘭旅遊通-宜蘭觀光民宿行銷協會提供宜蘭地區合法民宿，包含親子民宿、寵物民宿、海景民宿、包棟民宿、戲水池民宿、KTV民宿、烤肉民宿等多種主題特色民宿。透過進階搜尋功能，讓您輕鬆找到理想的住宿選擇，規劃完美的宜蘭之旅。',
+  ogDescription: '精選宜蘭地區合法民宿，提供親子、寵物、海景、包棟、戲水池、KTV、烤肉等多種主題住宿選擇',
+  keywords: '宜蘭民宿推薦,合法民宿,親子民宿,寵物民宿,海景民宿,包棟民宿,戲水池民宿,KTV民宿,烤肉民宿,游泳池民宿,唱歌民宿,BBQ民宿,宜蘭住宿,民宿搜尋,宜蘭旅遊',
+  ogImage: 'https://yilanpass.com/logo.png',
+  ogUrl: 'https://yilanpass.com/homestay-list',
+  twitterCard: 'summary_large_image',
+  robots: 'index, follow'
+})
+
 // 使用 homestay store
 const homestayStore = useHomestayStore();
 
@@ -650,6 +663,49 @@ const filteredBnbs = computed(() => {
 const totalPages = computed(() => {
   return Math.ceil(filteredBnbs.value.length / itemsPerPage);
 });
+
+// 結構化資料 (JSON-LD) - 民宿列表
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      children: computed(() => JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "宜蘭合法民宿推薦",
+        "description": "精選宜蘭地區合法民宿列表，包含親子、寵物、海景、包棟等主題民宿",
+        "url": "https://yilanpass.com/homestay-list",
+        "numberOfItems": filteredBnbs.value?.length || 0,
+        "itemListElement": (filteredBnbs.value || []).slice(0, 20).map((bnb, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "item": {
+            "@type": "LodgingBusiness",
+            "name": bnb.name,
+            "description": bnb.description,
+            "url": `https://yilanpass.com/homestays/${bnb.id}`,
+            "image": bnb.image_urls?.[0],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": bnb.area || bnb.location,
+              "addressRegion": "宜蘭縣",
+              "addressCountry": "TW"
+            },
+            "priceRange": bnb.prices?.fullRentWeekday ? 
+              `NT$${bnb.prices.fullRentWeekday} - NT$${bnb.prices.fullRentWeekend || bnb.prices.fullRentWeekday}` : 
+              undefined,
+            "aggregateRating": bnb.rating ? {
+              "@type": "AggregateRating",
+              "ratingValue": bnb.rating,
+              "bestRating": 5,
+              "ratingCount": bnb.total_reviews || 1
+            } : undefined
+          }
+        }))
+      }))
+    }
+  ]
+})
 
 // 當前頁的資料
 const paginatedBnbs = computed(() => {
@@ -2147,40 +2203,78 @@ watch(bnbsData, (newData) => {
 
 .feature-options {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 8px;
+  align-items: flex-start;
+  
+  @media (max-width: 768px) {
+    gap: 6px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 4px;
+  }
 }
 
 .feature-checkbox {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 8px;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 20px;
   cursor: pointer;
   border: 2px solid transparent;
   transition: all 0.2s ease;
   background: #f8f9fa;
+  white-space: nowrap;
+  flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    padding: 6px 10px;
+    gap: 6px;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 5px 8px;
+    gap: 5px;
+    border-radius: 14px;
+  }
   
   &:hover {
     background: #e9ecef;
     border-color: #5db0be;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(93, 176, 190, 0.2);
+  }
+  
+  /* 選中狀態的樣式 */
+  &:has(input[type="checkbox"]:checked) {
+    background: linear-gradient(135deg, #5db0be 0%, #4a9eff 100%);
+    border-color: #5db0be;
+    color: white;
+    box-shadow: 0 2px 8px rgba(93, 176, 190, 0.3);
+    
+    .feature-text {
+      color: white;
+    }
   }
   
   input[type="checkbox"] {
     position: relative;
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     appearance: none;
     border: 2px solid #dee2e6;
-    border-radius: 4px;
+    border-radius: 3px;
     background: white;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex-shrink: 0;
     
     &:checked {
-      background: #5db0be;
-      border-color: #5db0be;
+      background: white;
+      border-color: white;
       
       &::after {
         content: '✓';
@@ -2188,8 +2282,8 @@ watch(bnbsData, (newData) => {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        color: white;
-        font-size: 14px;
+        color: #5db0be;
+        font-size: 12px;
         font-weight: bold;
       }
     }
@@ -2201,9 +2295,18 @@ watch(bnbsData, (newData) => {
   
   .feature-text {
     flex: 1;
-    font-size: 14px;
+    font-size: 13px;
     color: #495057;
     font-weight: 500;
+    line-height: 1.2;
+    
+    @media (max-width: 768px) {
+      font-size: 12px;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 11px;
+    }
   }
 }
 
@@ -2298,10 +2401,6 @@ watch(bnbsData, (newData) => {
   .panel-footer {
     padding-left: 16px;
     padding-right: 16px;
-  }
-  
-  .feature-checkbox {
-    padding: 10px 12px;
   }
   
   .filter-tag {

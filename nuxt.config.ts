@@ -14,7 +14,8 @@ export default defineNuxtConfig({
     'radix-vue/nuxt',
     'nuxt-file-storage',
     '@nuxt/image',
-    "nuxt-easy-lightbox"
+    "nuxt-easy-lightbox",
+    '@nuxtjs/sitemap'
   ],
   runtimeConfig: {
     // 只在服務器端可用的私有鍵
@@ -68,8 +69,36 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'zh-TW'
+      },
       charset: 'utf-8',
       viewport: 'width=device-width, initial-scale=1',
+      title: '宜蘭旅遊通-宜蘭觀光民宿行銷協會 | 宜蘭合法民宿推薦與旅遊資訊',
+      meta: [
+        { name: 'description', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會提供宜蘭地區合法民宿推薦、親子民宿、寵物民宿、海景民宿、包棟民宿等多種主題特色民宿。設有戲水池、KTV、烤肉設施的民宿應有盡有，讓您輕鬆規劃完美的宜蘭之旅' },
+        { name: 'keywords', content: '宜蘭民宿,合法民宿,親子民宿,寵物民宿,海景民宿,包棟民宿,戲水池民宿,KTV民宿,烤肉民宿,宜蘭住宿,宜蘭旅遊,民宿推薦,游泳池民宿,唱歌民宿,BBQ民宿' },
+        { name: 'author', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會' },
+        { name: 'robots', content: 'index, follow' },
+        
+        // Open Graph
+        { property: 'og:site_name', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會 | 宜蘭合法民宿推薦與旅遊資訊' },
+        { property: 'og:description', content: '提供宜蘭地區合法民宿推薦，包含親子民宿、寵物民宿、海景民宿、戲水池民宿、KTV民宿、烤肉民宿等多樣化住宿選擇' },
+        { property: 'og:url', content: 'https://yilanpass.com' },
+        { property: 'og:image', content: 'https://yilanpass.com/logo.png' },
+        
+        // Twitter Card
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會 | 宜蘭合法民宿推薦' },
+        { name: 'twitter:description', content: '提供宜蘭地區合法民宿推薦，包含戲水池、KTV、烤肉設施等多樣化住宿選擇，讓您輕鬆規劃完美的宜蘭之旅' },
+        { name: 'twitter:image', content: 'https://yilanpass.com/logo.png' }
+      ],
+      link: [
+        { rel: 'canonical', href: 'https://yilanpass.com' },
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }
+      ]
     }
   },
   components: [
@@ -90,9 +119,6 @@ export default defineNuxtConfig({
   build: {
     transpile: ['utils/hashDatabase.cjs']
   },
-  ssr: {
-    noExternal: ['axios', 'form-data']
-  },
   nitro: {
     experimental: {
       wasm: true
@@ -100,5 +126,24 @@ export default defineNuxtConfig({
   },
   alias: {
     '@': resolve(__dirname, './')
+  },
+  
+  // Sitemap 設定
+  sitemap: {
+    hostname: 'https://yilanpass.com',
+    gzip: true,
+    routes: [
+      '/',
+      '/homestay-list',
+      '/about',
+      '/rule',
+      '/relative',
+      '/findRoom'
+    ],
+    defaults: {
+      changefreq: 'daily',
+      priority: 1,
+      lastmod: new Date().toISOString()
+    }
   }
 });

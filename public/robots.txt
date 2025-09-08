@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# 允許搜尋引擎索引主要頁面
+Allow: /homestay-list
+Allow: /homestays/
+
+# 阻止索引管理和API路由
+Disallow: /admin
+Disallow: /api/
+Disallow: /_nuxt/
+
+# Sitemap 位置
+Sitemap: https://yilanpass.com/sitemap.xml
+
+# 爬取延遲（毫秒）
+Crawl-delay: 1
