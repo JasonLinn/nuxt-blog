@@ -40,10 +40,43 @@
         </div>
       </header>
 
-      <!-- 成功/錯誤訊息 -->
-      <div v-if="message.text" :class="['message', message.type]">
-        {{ message.text }}
-      </div>
+      <!-- Toast 提示訊息 -->
+      <Transition name="toast" appear>
+        <div 
+          v-if="message.text" 
+          :class="['toast-notification', `toast-${message.type}`]"
+        >
+          <div class="toast-content">
+            <div class="toast-icon">
+              <Icon 
+                v-if="message.type === 'success'" 
+                name="mdi:check-circle" 
+                class="icon-success"
+              />
+              <Icon 
+                v-else-if="message.type === 'error'" 
+                name="mdi:alert-circle" 
+                class="icon-error"
+              />
+              <Icon 
+                v-else 
+                name="mdi:information" 
+                class="icon-info"
+              />
+            </div>
+            <div class="toast-message">
+              {{ message.text }}
+            </div>
+            <button 
+              @click="closeToast" 
+              class="toast-close"
+              aria-label="關閉提示"
+            >
+              <Icon name="mdi:close" />
+            </button>
+          </div>
+        </div>
+      </Transition>
 
       <!-- 編輯表單 -->
       <div class="admin-content">
@@ -852,9 +885,15 @@ const extractPrice = (priceString) => {
 // 顯示訊息
 const showMessage = (text, type = 'success') => {
   message.value = { text, type };
+  // 延長顯示時間到8秒，讓使用者有足夠時間看到
   setTimeout(() => {
     message.value = { text: '', type: '' };
-  }, 5000);
+  }, 8000);
+};
+
+// 手動關閉 Toast
+const closeToast = () => {
+  message.value = { text: '', type: '' };
 };
 
 // 重置表單
@@ -1067,6 +1106,110 @@ onMounted(async () => {
     color: #2a4365;
     border-left: 4px solid #3182ce;
   }
+}
+
+// Toast 提示樣式
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  min-width: 320px;
+  max-width: 450px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+  font-size: 15px;
+  
+  &.toast-success {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  &.toast-error {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  &.toast-info {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 12px;
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  font-size: 24px;
+  
+  .icon-success,
+  .icon-error,
+  .icon-info {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+}
+
+.toast-message {
+  flex: 1;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.toast-close {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  color: white;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+}
+
+// Toast 動畫
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.4s ease;
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateX(100%) scale(0.8);
+}
+
+.toast-enter-to {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.toast-leave-from {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(100%) scale(0.8);
 }
 
 .admin-content {
@@ -1313,6 +1456,34 @@ onMounted(async () => {
   
   .form-actions {
     flex-direction: column;
+  }
+  
+  // Toast 在手機上的調整
+  .toast-notification {
+    left: 10px;
+    right: 10px;
+    top: 10px;
+    min-width: auto;
+    max-width: none;
+  }
+  
+  .toast-content {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+  
+  .toast-icon {
+    font-size: 20px;
+  }
+  
+  .toast-message {
+    font-size: 14px;
+  }
+  
+  .toast-close {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
   }
 }
 
