@@ -128,22 +128,20 @@ export default defineNuxtConfig({
     '@': resolve(__dirname, './')
   },
   
-  // Sitemap 設定
+  // SEO 設定
+  site: {
+    url: 'https://yilanpass.com'
+  },
+  
+  // Sitemap 設定 - 使用 v7 語法
   sitemap: {
-    hostname: 'https://yilanpass.com',
-    gzip: true,
-    routes: [
+    urls: [
       '/',
       '/homestay-list',
       '/about',
       '/rule',
       '/relative',
       '/findRoom'
-    ],
-    defaults: {
-      changefreq: 'daily',
-      priority: 1,
-      lastmod: new Date().toISOString()
-    }
+    ]
   }
 });
