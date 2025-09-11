@@ -199,7 +199,7 @@ export default defineEventHandler(async (event) => {
       }
 
       baseQuery += `
-          GROUP BY h.id, h.name, h.location, h.city, h.image_url, h.images, h.min_guests, 
+          GROUP BY h.id, h.name, h.location, h.city, h.image_url, h.min_guests, 
                    h.max_guests, h.theme_features, h.service_amenities, h.rating, 
                    h.total_reviews, h.view_count, h.featured
           HAVING COUNT(CASE WHEN ha.is_available = true THEN 1 END) = $${paramIndex + 1}
