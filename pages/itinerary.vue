@@ -24,10 +24,10 @@
             </h3>
             <button
               @click="showSubmissionModal = true"
-              class="add-place-btn"
-              title="推薦新地點"
+              class="btn-recommend-place"
+              title="推薦新地點給其他旅客，需經管理員審核"
             >
-              <Icon name="mdi:plus" />
+              <Icon name="mdi:heart-plus" />
               推薦地點
             </button>
           </div>
@@ -57,14 +57,6 @@
                 class="search-input"
               />
             </div>
-          </div>
-
-          <!-- 新增地點按鈕 -->
-          <div class="add-place-section">
-            <button @click="showAddPlaceModal = true" class="btn-add-place">
-              <Icon name="mdi:plus-circle" />
-              新增地點
-            </button>
           </div>
 
           <!-- 其他篩選選項 -->
@@ -410,13 +402,226 @@
       </div>
     </div>
 
-    <!-- 新增地點對話框 -->
-    <PlaceSubmissionModal 
-      :is-open="showSubmissionModal"
-      @close="showSubmissionModal = false"
-      @submitted="onPlaceSubmitted"
-      @select-location="onSelectLocation"
-    />
+    <!-- 推薦地點模態框 -->
+    <div v-if="showSubmissionModal" class="modal-overlay" @click.self="showSubmissionModal = false">
+      <div class="place-submission-modal">
+        <!-- 模態框標題 -->
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <Icon name="mdi:heart-plus" />
+            推薦新地點
+          </h2>
+          <button @click="showSubmissionModal = false" class="modal-close">
+            <Icon name="mdi:close" />
+          </button>
+        </div>
+
+        <!-- 模態框內容 -->
+        <div class="modal-content">
+          <div class="submission-notice">
+            <Icon name="mdi:information" />
+            <p>感謝您推薦新地點！您的推薦將經過管理員審核後公開。</p>
+          </div>
+
+          <form @submit.prevent="handlePlaceSubmission" class="submission-form">
+            <!-- Google Maps 搜尋區域 -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <Icon name="mdi:google-maps" />
+                Google Maps 搜尋
+              </h3>
+              <div class="google-search-container">
+                <div class="search-input-group">
+                  <Icon name="mdi:magnify" class="search-icon" />
+                  <input
+                    v-model="googleSearchQuery"
+                    type="text"
+                    placeholder="搜尋地點名稱或地址..."
+                    class="search-input"
+                    @input="handleGoogleSearch"
+                  />
+                  <button 
+                    v-if="googleSearchQuery" 
+                    @click="clearGoogleSearch" 
+                    type="button"
+                    class="clear-search"
+                  >
+                    <Icon name="mdi:close" />
+                  </button>
+                </div>
+                
+                <!-- 搜尋結果 -->
+                <div v-if="googleSearchResults.length > 0" class="search-results">
+                  <div 
+                    v-for="result in googleSearchResults" 
+                    :key="result.place_id"
+                    @click="selectGooglePlaceForSubmission(result)"
+                    class="search-result-item"
+                  >
+                    <div class="result-content">
+                      <div class="result-name">{{ result.name }}</div>
+                      <div class="result-address">{{ result.formatted_address }}</div>
+                      <div class="result-meta">
+                        <span v-if="result.rating" class="result-rating">
+                          <Icon name="mdi:star" />
+                          {{ result.rating }}
+                        </span>
+                      </div>
+                    </div>
+                    <Icon name="mdi:chevron-right" class="result-arrow" />
+                  </div>
+                </div>
+                
+                <!-- 載入中 -->
+                <div v-if="isGoogleSearching" class="search-loading">
+                  <Icon name="eos-icons:loading" />
+                  <span>搜尋中...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 基本資訊 -->
+            <div class="form-section">
+              <h3 class="section-title">基本資訊</h3>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label required">地點名稱</label>
+                  <input
+                    v-model="submissionForm.name"
+                    type="text"
+                    class="form-input"
+                    required
+                    placeholder="請輸入地點名稱"
+                  />
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">地點描述</label>
+                  <textarea
+                    v-model="submissionForm.description"
+                    class="form-textarea"
+                    rows="3"
+                    placeholder="請簡述這個地點的特色和推薦理由..."
+                  ></textarea>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">詳細地址</label>
+                  <input
+                    v-model="submissionForm.formatted_address"
+                    type="text"
+                    class="form-input"
+                    placeholder="請輸入完整地址"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- 位置資訊 -->
+            <div class="form-section">
+              <h3 class="section-title">位置資訊</h3>
+              
+              <div class="form-row">
+                <div class="form-group half">
+                  <label class="form-label required">緯度</label>
+                  <input
+                    v-model.number="submissionForm.latitude"
+                    type="number"
+                    step="any"
+                    class="form-input"
+                    required
+                    placeholder="例: 24.7736"
+                  />
+                </div>
+                <div class="form-group half">
+                  <label class="form-label required">經度</label>
+                  <input
+                    v-model.number="submissionForm.longitude"
+                    type="number"
+                    step="any"
+                    class="form-input"
+                    required
+                    placeholder="例: 121.7741"
+                  />
+                </div>
+              </div>
+              
+              <button
+                type="button"
+                @click="selectLocationOnMap"
+                class="btn-map-select"
+              >
+                <Icon name="mdi:map-marker-radius" />
+                從地圖選擇位置
+              </button>
+            </div>
+
+            <!-- 分類和聯絡資訊 -->
+            <div class="form-section">
+              <h3 class="section-title">其他資訊</h3>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label required">地點分類</label>
+                  <select v-model="submissionForm.category_id" class="form-select" required>
+                    <option value="">請選擇分類</option>
+                    <option v-for="category in categories" :key="category.id" :value="category.id">
+                      {{ category.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group half">
+                  <label class="form-label">官方網站</label>
+                  <input
+                    v-model="submissionForm.website"
+                    type="url"
+                    class="form-input"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div class="form-group half">
+                  <label class="form-label">聯絡電話</label>
+                  <input
+                    v-model="submissionForm.phone_number"
+                    type="tel"
+                    class="form-input"
+                    placeholder="03-123-4567"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- 提交按鈕 -->
+            <div class="form-actions">
+              <button 
+                type="button" 
+                @click="showSubmissionModal = false"
+                class="btn-cancel"
+              >
+                取消
+              </button>
+              <button 
+                type="submit"
+                :disabled="isSubmitting"
+                class="btn-submit"
+              >
+                <Icon name="eos-icons:loading" v-if="isSubmitting" />
+                <Icon name="mdi:heart-plus" v-else />
+                {{ isSubmitting ? '提交中...' : '推薦地點' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -477,6 +682,26 @@ const loadingPlaceDetails = ref(false);
 
 // 新增地點相關
 const showSubmissionModal = ref(false);
+
+// 推薦地點表單資料
+const submissionForm = reactive({
+  name: '',
+  description: '',
+  formatted_address: '',
+  latitude: null,
+  longitude: null,
+  category_id: '',
+  website: '',
+  phone_number: '',
+  google_place_id: '',
+  photos: []
+});
+
+// Google 搜尋相關
+const googleSearchQuery = ref('');
+const googleSearchResults = ref([]);
+const isGoogleSearching = ref(false);
+const isSubmitting = ref(false);
 
 // 地圖相關
 let map = null;
@@ -852,6 +1077,145 @@ const reorderDay = (dayNumber) => {
 const addDay = () => {
   totalDays.value++;
   currentDay.value = totalDays.value;
+};
+
+// 推薦地點處理函數
+const handleGoogleSearch = async () => {
+  if (!googleSearchQuery.value || googleSearchQuery.value.length < 3) {
+    googleSearchResults.value = [];
+    return;
+  }
+  
+  isGoogleSearching.value = true;
+  try {
+    const response = await $fetch('/api/google/places/search', {
+      method: 'POST',
+      body: {
+        query: googleSearchQuery.value,
+        region: 'tw',
+        language: 'zh-TW'
+      }
+    });
+    
+    if (response.success) {
+      googleSearchResults.value = response.data?.results || [];
+    } else {
+      googleSearchResults.value = [];
+    }
+  } catch (error) {
+    console.error('Google 搜尋失敗:', error);
+    googleSearchResults.value = [];
+  } finally {
+    isGoogleSearching.value = false;
+  }
+};
+
+const clearGoogleSearch = () => {
+  googleSearchQuery.value = '';
+  googleSearchResults.value = [];
+};
+
+const selectGooglePlaceForSubmission = async (place) => {
+  try {
+    // 填入基本資訊
+    submissionForm.name = place.name;
+    submissionForm.formatted_address = place.formatted_address;
+    submissionForm.google_place_id = place.place_id;
+    
+    if (place.geometry?.location) {
+      submissionForm.latitude = place.geometry.location.lat;
+      submissionForm.longitude = place.geometry.location.lng;
+    }
+    
+    // 獲取詳細資訊
+    const detailsResponse = await $fetch('/api/google/places/details', {
+      method: 'POST',
+      body: {
+        place_id: place.place_id,
+        language: 'zh-TW'
+      }
+    });
+    
+    if (detailsResponse.success && detailsResponse.data) {
+      const details = detailsResponse.data;
+      
+      // 填入更多詳細資訊
+      if (details.website) submissionForm.website = details.website;
+      if (details.formatted_phone_number) submissionForm.phone_number = details.formatted_phone_number;
+      
+      // 獲取照片
+      if (details.photos && details.photos.length > 0) {
+        try {
+          const photoResponse = await $fetch('/api/google/places/photo', {
+            method: 'POST',
+            body: {
+              photo_reference: details.photos[0].photo_reference,
+              maxwidth: 800
+            }
+          });
+          
+          if (photoResponse.success) {
+            submissionForm.photos = [photoResponse.data];
+          }
+        } catch (photoError) {
+          console.log('獲取照片失敗:', photoError);
+        }
+      }
+    }
+    
+    // 清除搜尋結果
+    googleSearchResults.value = [];
+    googleSearchQuery.value = '';
+    
+  } catch (error) {
+    console.error('選擇 Google 地點失敗:', error);
+    alert('獲取地點詳細資訊失敗，請手動填入資料');
+  }
+};
+
+const selectLocationOnMap = () => {
+  alert('地圖選點功能開發中，請暫時手動輸入經緯度座標');
+  // TODO: 實現地圖選點功能
+};
+
+const handlePlaceSubmission = async () => {
+  if (isSubmitting.value) return;
+  
+  isSubmitting.value = true;
+  try {
+    const response = await $fetch('/api/places/submit', {
+      method: 'POST',
+      body: {
+        ...submissionForm,
+        submitted_by: 'user', // 可以後續加入用戶認證
+        status: 'pending' // 需要審核
+      }
+    });
+    
+    if (response.success) {
+      alert('感謝您的推薦！地點已成功提交，待管理員審核通過後將會顯示在地圖上。');
+      
+      // 重置表單
+      Object.keys(submissionForm).forEach(key => {
+        if (typeof submissionForm[key] === 'string') {
+          submissionForm[key] = '';
+        } else if (typeof submissionForm[key] === 'number') {
+          submissionForm[key] = null;
+        } else if (Array.isArray(submissionForm[key])) {
+          submissionForm[key] = [];
+        }
+      });
+      
+      showSubmissionModal.value = false;
+    } else {
+      alert('提交失敗：' + (response.message || '未知錯誤'));
+    }
+  } catch (error) {
+    console.error('提交地點失敗:', error);
+    alert('提交失敗，請檢查網路連線後重試');
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 // 新增地點處理函數
@@ -1558,23 +1922,25 @@ onMounted(async () => {
       color: #1f2937;
     }
     
-    .add-place-btn {
+    .btn-recommend-place {
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 12px;
-      background: #10b981;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
       
       &:hover {
-        background: #059669;
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
         transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
       }
       
       &:active {
@@ -2146,6 +2512,429 @@ onMounted(async () => {
   }
 }
 
+// 推薦地點模態框樣式
+.place-submission-modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  margin: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+
+    .modal-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      margin: 0;
+
+      svg {
+        font-size: 24px;
+      }
+    }
+
+    .modal-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+      }
+
+      svg {
+        font-size: 18px;
+      }
+    }
+  }
+
+  .modal-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+
+    .submission-notice {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 24px;
+      color: #92400e;
+
+      svg {
+        font-size: 20px;
+        color: #f59e0b;
+        flex-shrink: 0;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    }
+
+    .submission-form {
+      padding: 0 24px 24px;
+
+      .form-section {
+        margin-bottom: 32px;
+
+        .section-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          color: #1f2937;
+          margin: 0 0 16px 0;
+          padding-bottom: 8px;
+          border-bottom: 2px solid #f3f4f6;
+
+          svg {
+            font-size: 18px;
+            color: #f59e0b;
+          }
+        }
+
+        .google-search-container {
+          .search-input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+
+            .search-icon {
+              position: absolute;
+              left: 12px;
+              color: #6b7280;
+              font-size: 16px;
+            }
+
+            .search-input {
+              width: 100%;
+              padding: 12px 16px 12px 40px;
+              border: 2px solid #e5e7eb;
+              border-radius: 8px;
+              font-size: 14px;
+              transition: all 0.2s ease;
+
+              &:focus {
+                outline: none;
+                border-color: #f59e0b;
+                box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+              }
+            }
+
+            .clear-search {
+              position: absolute;
+              right: 8px;
+              background: none;
+              border: none;
+              color: #6b7280;
+              padding: 4px;
+              border-radius: 4px;
+              cursor: pointer;
+
+              &:hover {
+                background: #f3f4f6;
+                color: #374151;
+              }
+            }
+          }
+
+          .search-results {
+            max-height: 240px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+
+            .search-result-item {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 12px 16px;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              border-bottom: 1px solid #f3f4f6;
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              &:hover {
+                background: #fef3c7;
+              }
+
+              .result-content {
+                flex: 1;
+
+                .result-name {
+                  font-weight: 600;
+                  color: #1f2937;
+                  margin-bottom: 4px;
+                }
+
+                .result-address {
+                  font-size: 13px;
+                  color: #6b7280;
+                  margin-bottom: 4px;
+                }
+
+                .result-meta {
+                  display: flex;
+                  gap: 12px;
+
+                  .result-rating {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-size: 12px;
+                    color: #f59e0b;
+
+                    svg {
+                      font-size: 12px;
+                    }
+                  }
+
+                  .result-types {
+                    font-size: 12px;
+                    color: #6b7280;
+                  }
+                }
+              }
+
+              .result-arrow {
+                color: #9ca3af;
+                font-size: 16px;
+              }
+            }
+          }
+
+          .search-loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            color: #6b7280;
+            justify-content: center;
+
+            svg {
+              font-size: 16px;
+              animation: spin 1s linear infinite;
+            }
+          }
+        }
+
+        .form-row {
+          display: flex;
+          gap: 16px;
+          margin-bottom: 16px;
+
+          .form-group {
+            flex: 1;
+
+            &.half {
+              flex: 0.5;
+            }
+
+            .form-label {
+              display: block;
+              font-size: 14px;
+              font-weight: 600;
+              color: #374151;
+              margin-bottom: 6px;
+
+              &.required::after {
+                content: ' *';
+                color: #ef4444;
+              }
+            }
+
+            .form-input,
+            .form-textarea,
+            .form-select {
+              width: 100%;
+              padding: 12px;
+              border: 2px solid #e5e7eb;
+              border-radius: 8px;
+              font-size: 14px;
+              transition: all 0.2s ease;
+
+              &:focus {
+                outline: none;
+                border-color: #f59e0b;
+                box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+              }
+            }
+
+            .form-textarea {
+              resize: vertical;
+              min-height: 80px;
+            }
+          }
+        }
+
+        .btn-map-select {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          padding: 12px;
+          background: #f3f4f6;
+          border: 2px dashed #d1d5db;
+          border-radius: 8px;
+          color: #6b7280;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+            color: #374151;
+          }
+
+          svg {
+            font-size: 18px;
+          }
+        }
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding-top: 24px;
+        border-top: 1px solid #e5e7eb;
+
+        .btn-cancel,
+        .btn-submit {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .btn-cancel {
+          background: #f3f4f6;
+          color: #374151;
+          border: 2px solid #e5e7eb;
+
+          &:hover {
+            background: #e5e7eb;
+            border-color: #d1d5db;
+          }
+        }
+
+        .btn-submit {
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          color: white;
+          border: 2px solid transparent;
+
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+          }
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+
+          svg {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .place-submission-modal {
+    margin: 10px;
+    max-height: 95vh;
+
+    .modal-header {
+      padding: 16px;
+
+      .modal-title {
+        font-size: 18px;
+      }
+    }
+
+    .modal-content {
+      .submission-notice {
+        margin: 16px;
+        padding: 12px;
+      }
+
+      .submission-form {
+        padding: 0 16px 16px;
+
+        .form-section {
+          margin-bottom: 24px;
+
+          .form-row {
+            flex-direction: column;
+            gap: 12px;
+
+            .form-group.half {
+              flex: 1;
+            }
+          }
+        }
+
+        .form-actions {
+          flex-direction: column;
+
+          .btn-cancel,
+          .btn-submit {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+    }
+  }
+}
+
 // 模態框樣式
 .modal-overlay {
   position: fixed;
@@ -2158,6 +2947,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  backdrop-filter: blur(4px);
 }
 
 .save-modal {
