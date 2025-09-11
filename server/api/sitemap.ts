@@ -1,64 +1,75 @@
 import { pool } from '../utils/db.js'
 
 export default defineEventHandler(async (event) => {
+  // 設定正確的響應標頭
+  setHeader(event, 'Content-Type', 'application/xml; charset=utf-8')
+  setHeader(event, 'Cache-Control', 'max-age=3600') // 緩存1小時
+  
+  let sitemapContent = ''
+  let homestayCount = 0
+  let placeCount = 0
+  
   try {
-    // 設定正確的 XML Content-Type
-    setHeader(event, 'Content-Type', 'application/xml; charset=utf-8')
-    
-    const urls: string[] = []
+    // XML 開頭
+    sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
     
     // 主要頁面
     const mainPages = [
-      { loc: '/', priority: '1.0', changefreq: 'daily' },
-      { loc: '/homestay-list', priority: '0.9', changefreq: 'daily' },
-      { loc: '/about', priority: '0.7', changefreq: 'weekly' },
-      { loc: '/rule', priority: '0.6', changefreq: 'monthly' },
-      { loc: '/relative', priority: '0.7', changefreq: 'weekly' },
-      { loc: '/findRoom', priority: '0.8', changefreq: 'daily' },
-      { loc: '/itinerary', priority: '0.8', changefreq: 'daily' }
+      { loc: '/', priority: 1.0, changefreq: 'daily' },
+      { loc: '/homestay-list', priority: 0.9, changefreq: 'daily' },
+      { loc: '/about', priority: 0.7, changefreq: 'weekly' },
+      { loc: '/rule', priority: 0.6, changefreq: 'monthly' },
+      { loc: '/relative', priority: 0.7, changefreq: 'weekly' },
+      { loc: '/findRoom', priority: 0.8, changefreq: 'daily' },
+      { loc: '/itinerary', priority: 0.8, changefreq: 'daily' }
     ]
     
     mainPages.forEach(page => {
-      urls.push(`
+      sitemapContent += `
   <url>
     <loc>https://yilanpass.com${page.loc}</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`)
+  </url>`
     })
     
+    // 獲取民宿頁面
     try {
-      // 取得民宿資料
       const client = await pool.connect()
       try {
         const homestaysResult = await client.query(`
-          SELECT id, location, city, updated_at 
+          SELECT id, updated_at 
           FROM homestays 
           WHERE status = 'approved'
           ORDER BY updated_at DESC
         `)
         
-        console.log(`✅ Sitemap: 已加入 ${homestaysResult.rows.length} 個民宿頁面`)
+        homestayCount = homestaysResult.rows.length
         
         homestaysResult.rows.forEach((homestay: any) => {
-          urls.push(`
+          const lastmod = homestay.updated_at 
+            ? new Date(homestay.updated_at).toISOString()
+            : new Date().toISOString()
+            
+          sitemapContent += `
   <url>
     <loc>https://yilanpass.com/homestays/${homestay.id}</loc>
-    <lastmod>${homestay.updated_at ? new Date(homestay.updated_at).toISOString() : new Date().toISOString()}</lastmod>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>`)
+  </url>`
         })
       } finally {
         client.release()
       }
     } catch (dbError) {
-      console.error('❌ 資料庫連接錯誤:', dbError)
+      console.error('❌ 民宿資料庫錯誤:', dbError)
     }
     
+    // 獲取地點頁面
     try {
-      // 取得地點資料
       const client = await pool.connect()
       try {
         const placesResult = await client.query(`
@@ -68,40 +79,42 @@ export default defineEventHandler(async (event) => {
           ORDER BY updated_at DESC
         `)
         
-        console.log(`✅ Sitemap: 已加入 ${placesResult.rows.length} 個地點頁面`)
+        placeCount = placesResult.rows.length
         
         placesResult.rows.forEach((place: any) => {
-          urls.push(`
+          const lastmod = place.updated_at 
+            ? new Date(place.updated_at).toISOString()
+            : new Date().toISOString()
+            
+          sitemapContent += `
   <url>
     <loc>https://yilanpass.com/relative/${place.id}</loc>
-    <lastmod>${place.updated_at ? new Date(place.updated_at).toISOString() : new Date().toISOString()}</lastmod>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>`)
+  </url>`
         })
       } finally {
         client.release()
       }
     } catch (dbError) {
-      console.error('❌ 地點資料庫連接錯誤:', dbError)
+      console.error('❌ 地點資料庫錯誤:', dbError)
     }
     
-    const totalUrls = mainPages.length + urls.filter(url => url.includes('/homestays/')).length + urls.filter(url => url.includes('/relative/')).length
-    console.log(`📄 Sitemap 總共包含 ${totalUrls} 個 URL`)
-    
-    // 生成 XML sitemap
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.join('')}
+    // XML 結尾
+    sitemapContent += `
 </urlset>`
     
-    return sitemap
+    const totalPages = mainPages.length + homestayCount + placeCount
+    console.log(`📄 Sitemap 生成成功: ${totalPages} 個頁面 (${homestayCount} 個民宿, ${placeCount} 個地點)`)
+    
+    return sitemapContent
     
   } catch (error) {
-    console.error('❌ 生成 sitemap 時發生錯誤:', error)
+    console.error('❌ Sitemap 生成錯誤:', error)
     
-    // 返回基本的 sitemap
-    const basicSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+    // 錯誤時返回最基本的 sitemap
+    return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://yilanpass.com/</loc>
@@ -116,7 +129,5 @@ ${urls.join('')}
     <priority>0.9</priority>
   </url>
 </urlset>`
-    
-    return basicSitemap
   }
 })

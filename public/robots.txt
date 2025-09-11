@@ -13,7 +13,8 @@ Allow: /api/sitemap
 Allow: /api/sitemap.xml
 Disallow: /_nuxt/
 
-# Sitemap 位置
+# Sitemap 位置（建議優先使用靜態 sitemap.xml）
+Sitemap: https://yilanpass.com/sitemap.xml
 Sitemap: https://yilanpass.com/api/sitemap.xml
 Sitemap: https://yilanpass.com/api/sitemap
 

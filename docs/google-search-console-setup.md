@@ -213,3 +213,32 @@ A:
 - [Google Search Console](https://search.google.com/search-console/)
 - [Rich Results Test](https://search.google.com/test/rich-results)
 - [PageSpeed Insights](https://pagespeed.web.dev/)
+
+## 🔧 Sitemap 測試與驗證
+
+### 線上 XML Sitemap 驗證工具
+- [XML Sitemap Validator](https://www.xml-sitemaps.com/validate-xml-sitemap.html)
+- [Screaming Frog SEO Spider](https://www.screamingfrog.co.uk/seo-spider/)
+
+### 確認 Sitemap 可訪問性
+```bash
+# 檢查動態 sitemap (包含即時民宿資料)
+curl -I https://yilanpass.com/api/sitemap
+
+# 檢查靜態 sitemap (核心頁面)
+curl -I https://yilanpass.com/sitemap.xml
+
+# 正確的 Content-Type 標頭應為:
+# Content-Type: application/xml; charset=utf-8
+```
+
+### Sitemap 提交策略
+1. **主要 sitemap**: `/api/sitemap` (動態，包含所有民宿)
+2. **備用 sitemap**: `/sitemap.xml` (靜態，核心頁面)
+3. **robots.txt** 中已同時列出兩個 sitemap
+
+如果 Google Search Console 顯示「無法擷取」，建議：
+- 先提交靜態的 `/sitemap.xml`
+- 確認網站可正常訪問
+- 檢查 Content-Type 標頭是否正確
+- 等待 24-48 小時後重新嘗試
