@@ -233,7 +233,7 @@
 
   /* 美麗的統計卡片 */
   .stats-section {
-    margin-bottom: 0;
+    margin-bottom: 20px;
 
     .stat-card {
       background: rgba(255,255,255,0.95);
@@ -272,6 +272,7 @@
       @media (max-width: 768px) {
         padding: 1rem 0.75rem;
         border-radius: 12px;
+        margin-bottom: 0;
 
         .stat-number {
           font-size: 1.5rem;
