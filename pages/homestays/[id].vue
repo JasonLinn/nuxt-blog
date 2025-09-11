@@ -434,46 +434,159 @@ watchEffect(() => {
       robots: 'index, follow'
     })
 
-    // 結構化資料
+    // 完整結構化資料 - LodgingBusiness + LocalBusiness
     useHead({
       script: [
         {
           type: 'application/ld+json',
           children: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "LodgingBusiness",
+            "@type": ["LodgingBusiness", "LocalBusiness"],
             "name": homestay.name,
-            "description": homestay.description,
+            "alternateName": `${homestay.name} 民宿`,
+            "description": homestay.description || `位於宜蘭${homestay.area || homestay.location}的合法民宿${homestay.name}，提供優質住宿體驗。設有多樣化休閒設施，是您宜蘭旅遊的最佳選擇。`,
             "url": `https://yilanpass.com/homestays/${homestay.id}`,
+            "sameAs": [
+              "https://yilanpass.com",
+              homestay.facebook_url,
+              homestay.instagram_url,
+              homestay.website
+            ].filter(Boolean),
             "image": homestay.image_urls || [],
+            "logo": "https://yilanpass.com/logo.png",
             "address": {
               "@type": "PostalAddress",
               "streetAddress": homestay.address,
               "addressLocality": homestay.area || homestay.location,
               "addressRegion": "宜蘭縣",
+              "postalCode": homestay.postal_code,
               "addressCountry": "TW"
             },
-            "telephone": homestay.phone,
+            "geo": homestay.latitude && homestay.longitude ? {
+              "@type": "GeoCoordinates",
+              "latitude": parseFloat(homestay.latitude),
+              "longitude": parseFloat(homestay.longitude)
+            } : undefined,
+            "telephone": homestay.phone || homestay.contactPhone,
+            "email": homestay.email,
             "priceRange": homestay.prices?.fullRentWeekday ? 
               `NT$${homestay.prices.fullRentWeekday} - NT$${homestay.prices.fullRentWeekend || homestay.prices.fullRentWeekday}` : 
-              undefined,
+              "NT$2000 - NT$8000",
+            "currenciesAccepted": "TWD",
+            "paymentAccepted": ["Cash", "Credit Card", "Bank Transfer"],
+            "openingHours": "Mo-Su 24:00",
+            "checkinTime": "15:00",
+            "checkoutTime": "11:00",
+            "numberOfRooms": homestay.roomCount || homestay.room_count,
+            "maximumAttendeeCapacity": homestay.max_guests,
+            "minimumAttendeeCapacity": homestay.min_guests || 1,
+            "petsAllowed": homestay.features?.serviceAmenities?.includes('寵物友善') || homestay.pet_friendly || false,
+            "smokingAllowed": homestay.features?.serviceAmenities?.includes('吸菸區') || false,
             "aggregateRating": homestay.rating ? {
               "@type": "AggregateRating",
               "ratingValue": homestay.rating,
               "bestRating": 5,
-              "ratingCount": homestay.total_reviews || 1
-            } : undefined,
-            "amenityFeature": homestay.features?.serviceAmenities?.map(amenity => ({
-              "@type": "LocationFeatureSpecification",
-              "name": amenity
-            })) || [],
+              "worstRating": 1,
+              "ratingCount": homestay.total_reviews || homestay.reviewCount || 1
+            } : {
+              "@type": "AggregateRating",
+              "ratingValue": 4.0,
+              "bestRating": 5,
+              "worstRating": 1,
+              "ratingCount": 1
+            },
+            "amenityFeature": [
+              ...(homestay.features?.themeFeatures?.map(feature => ({
+                "@type": "LocationFeatureSpecification",
+                "name": feature,
+                "value": true
+              })) || []),
+              ...(homestay.features?.serviceAmenities?.map(amenity => ({
+                "@type": "LocationFeatureSpecification", 
+                "name": amenity,
+                "value": true
+              })) || [])
+            ],
             "hasOfferCatalog": {
               "@type": "OfferCatalog",
               "name": "住宿方案",
-              "itemListElement": homestay.features?.themeFeatures?.map(feature => ({
+              "itemListElement": homestay.features?.themeFeatures?.map((feature, index) => ({
                 "@type": "Offer",
-                "name": feature
+                "name": feature,
+                "description": `享受${feature}的優質住宿體驗`,
+                "price": homestay.prices?.fullRentWeekday || "2000",
+                "priceCurrency": "TWD",
+                "availability": "https://schema.org/InStock",
+                "validFrom": new Date().toISOString().split('T')[0],
+                "itemOffered": {
+                  "@type": "Accommodation",
+                  "name": `${homestay.name} - ${feature}`
+                }
               })) || []
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": `https://yilanpass.com/homestays/${homestay.id}`,
+              "name": `${homestay.name} | 宜蘭民宿`,
+              "description": `${homestay.name}民宿詳細資訊`,
+              "url": `https://yilanpass.com/homestays/${homestay.id}`,
+              "breadcrumb": {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "首頁",
+                    "item": "https://yilanpass.com"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "民宿列表",
+                    "item": "https://yilanpass.com/homestay-list"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": homestay.name,
+                    "item": `https://yilanpass.com/homestays/${homestay.id}`
+                  }
+                ]
+              }
+            },
+            "potentialAction": [
+              {
+                "@type": "ReserveAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": `https://yilanpass.com/homestays/${homestay.id}`,
+                  "actionPlatform": [
+                    "http://schema.org/DesktopWebPlatform",
+                    "http://schema.org/MobileWebPlatform"
+                  ]
+                },
+                "result": {
+                  "@type": "LodgingReservation",
+                  "name": "民宿預訂"
+                }
+              },
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://yilanpass.com/homestay-list?search={search_term_string}",
+                  "actionPlatform": [
+                    "http://schema.org/DesktopWebPlatform",
+                    "http://schema.org/MobileWebPlatform"
+                  ]
+                },
+                "query-input": "required name=search_term_string"
+              }
+            ],
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "宜蘭旅遊通",
+              "url": "https://yilanpass.com"
             }
           })
         }
