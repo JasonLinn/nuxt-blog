@@ -2,7 +2,7 @@ import { pool } from '../utils/db.js'
 
 export default defineEventHandler(async (event) => {
   try {
-    // 設定正確的 XML Content-Type
+    // 設定正確的 Content-Type
     setHeader(event, 'Content-Type', 'application/xml; charset=utf-8')
     
     const urls: string[] = []
@@ -31,28 +31,25 @@ export default defineEventHandler(async (event) => {
     try {
       // 取得民宿資料
       const client = await pool.connect()
-      try {
-        const homestaysResult = await client.query(`
-          SELECT id, location, city, updated_at 
-          FROM homestays 
-          WHERE status = 'approved'
-          ORDER BY updated_at DESC
-        `)
-        
-        console.log(`✅ Sitemap: 已加入 ${homestaysResult.rows.length} 個民宿頁面`)
-        
-        homestaysResult.rows.forEach((homestay: any) => {
-          urls.push(`
+      const homestaysResult = await client.query(`
+        SELECT id, location, city, updated_at 
+        FROM homestays 
+        WHERE status = 'approved'
+        ORDER BY updated_at DESC
+      `)
+      client.release()
+      
+      console.log(`✅ Sitemap: 已加入 ${homestaysResult.rows.length} 個民宿頁面`)
+      
+      homestaysResult.rows.forEach((homestay: any) => {
+        urls.push(`
   <url>
     <loc>https://yilanpass.com/homestays/${homestay.id}</loc>
     <lastmod>${homestay.updated_at ? new Date(homestay.updated_at).toISOString() : new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`)
-        })
-      } finally {
-        client.release()
-      }
+      })
     } catch (dbError) {
       console.error('❌ 資料庫連接錯誤:', dbError)
     }
@@ -60,28 +57,25 @@ export default defineEventHandler(async (event) => {
     try {
       // 取得地點資料
       const client = await pool.connect()
-      try {
-        const placesResult = await client.query(`
-          SELECT id, updated_at 
-          FROM places 
-          WHERE status = 'active'
-          ORDER BY updated_at DESC
-        `)
-        
-        console.log(`✅ Sitemap: 已加入 ${placesResult.rows.length} 個地點頁面`)
-        
-        placesResult.rows.forEach((place: any) => {
-          urls.push(`
+      const placesResult = await client.query(`
+        SELECT id, updated_at 
+        FROM places 
+        WHERE status = 'active'
+        ORDER BY updated_at DESC
+      `)
+      client.release()
+      
+      console.log(`✅ Sitemap: 已加入 ${placesResult.rows.length} 個地點頁面`)
+      
+      placesResult.rows.forEach((place: any) => {
+        urls.push(`
   <url>
     <loc>https://yilanpass.com/relative/${place.id}</loc>
     <lastmod>${place.updated_at ? new Date(place.updated_at).toISOString() : new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`)
-        })
-      } finally {
-        client.release()
-      }
+      })
     } catch (dbError) {
       console.error('❌ 地點資料庫連接錯誤:', dbError)
     }

@@ -51,8 +51,11 @@
 
 1. 在 Search Console 左側選單點擊「Sitemap」
 2. 點擊「新增 Sitemap」
-3. 輸入：`api/sitemap`
-4. 點擊「提交」
+3. **推薦方式 1：** 輸入：`sitemap.xml`
+4. **備用方式 2：** 輸入：`api/sitemap`
+5. 點擊「提交」
+
+> **重要提醒：** 如果 `api/sitemap` 無法擷取，請使用 `sitemap.xml`。兩個端點都會提供相同的內容，但 `sitemap.xml` 更符合搜尋引擎標準。
 
 ### 步驟 3：請求快速收錄
 
@@ -114,6 +117,23 @@ https://yilanpass.com/homestays/[熱門民宿ID]
    - 確保 Core Web Vitals 指標良好
 
 ### 常見問題排除
+
+**Q: 為什麼 `api/sitemap` 在 Search Console 顯示「無法擷取」？**
+A: 這通常是由於以下原因：
+- API 端點的 Content-Type 標頭設定問題
+- 動態路由可能需要更多時間載入
+- 搜尋引擎偏好標準的 `.xml` 檔案路徑
+
+**解決方案：**
+1. 使用 `sitemap.xml` 代替 `api/sitemap`
+2. 在 Search Console 中移除無法擷取的 sitemap
+3. 重新提交 `sitemap.xml`
+
+**Q: 如何檢查 sitemap 是否正常工作？**
+A:
+- 直接訪問：`https://yilanpass.com/api/sitemap.xml`
+- 使用工具：[XML Sitemap Validator](https://www.xml-sitemaps.com/validate-xml-sitemap.html)
+- 檢查格式是否符合標準
 
 **Q: 為什麼民宿頁面沒有被收錄？**
 A: 
