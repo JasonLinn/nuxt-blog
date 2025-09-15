@@ -1,7 +1,6 @@
 import { query } from '~/server/utils/db.js'
 import formidable from 'formidable'
-import fs from 'fs'
-import path from 'path'
+import { readFile } from 'fs/promises'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -37,18 +36,13 @@ export default defineEventHandler(async (event) => {
     const contentType = getHeader(event, 'content-type')
     const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV
     
-    if (contentType && contentType.includes('multipart/form-data') && !isVercel) {
-      // 處理包含文件上傳的請求（僅本地環境）
+    if (contentType && contentType.includes('multipart/form-data')) {
+      // 處理包含文件上傳的請求
       const form = formidable({
-        uploadDir: './public/yilan-activities',
         keepExtensions: true,
         maxFileSize: 5 * 1024 * 1024,
         maxFiles: 5
       })
-      
-      if (!fs.existsSync('./public/yilan-activities')) {
-        fs.mkdirSync('./public/yilan-activities', { recursive: true })
-      }
       
       const [fields, files] = await form.parse(event.node.req)
       
@@ -58,13 +52,16 @@ export default defineEventHandler(async (event) => {
         
         for (const file of imageFiles) {
           if (file.size > 0) {
-            const timestamp = Date.now()
-            const ext = path.extname(file.originalFilename || file.newFilename)
-            const newFilename = `${timestamp}-${Math.random().toString(36).substr(2, 9)}${ext}`
-            const newPath = path.join('./public/yilan-activities', newFilename)
-            
-            fs.renameSync(file.filepath, newPath)
-            newImageUrls.push(`/yilan-activities/${newFilename}`)
+            try {
+              // 使用統一的上傳函式
+              const uploadResult = await uploadFile(file)
+              if (uploadResult.success) {
+                newImageUrls.push(uploadResult.url)
+              }
+            } catch (uploadError) {
+              console.error('圖片上傳失敗:', uploadError)
+              // 繼續處理其他圖片
+            }
           }
         }
       }
@@ -75,14 +72,18 @@ export default defineEventHandler(async (event) => {
       
       imagesToDelete.forEach(imageUrl => {
         newImageUrls = newImageUrls.filter(url => url !== imageUrl)
-        // 刪除物理文件
-        try {
-          const imagePath = path.join('./public', imageUrl)
-          if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath)
+        // 注意：GitHub 存儲的圖片無法直接刪除，本地圖片可以刪除
+        if (imageUrl.startsWith('/yilan-activities/')) {
+          try {
+            const { join } = require('path')
+            const { unlinkSync, existsSync } = require('fs')
+            const imagePath = join('./public', imageUrl)
+            if (existsSync(imagePath)) {
+              unlinkSync(imagePath)
+            }
+          } catch (error) {
+            console.error('Error deleting local image file:', error)
           }
-        } catch (error) {
-          console.error('Error deleting image file:', error)
         }
       })
       
@@ -177,3 +178,118 @@ export default defineEventHandler(async (event) => {
     })
   }
 })
+
+// 圖片上傳函式 - 與 POST API 相同邏輯
+async function uploadFile(file) {
+  try {
+    const config = useRuntimeConfig()
+    const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
+
+    // 驗證文件類型
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+    if (!file.mimetype || !allowedTypes.includes(file.mimetype)) {
+      throw new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.')
+    }
+
+    // 驗證文件大小 (5MB)
+    const maxSize = 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      throw new Error('File too large. Maximum size is 5MB.')
+    }
+
+    // 檢查 GitHub 配置是否完整
+    const hasGitHubConfig = GITHUB_USERNAME && GITHUB_REPO && GITHUB_TOKEN
+    
+    if (hasGitHubConfig) {
+      // 使用 GitHub 上傳
+      return await uploadToGitHub(file, config)
+    } else {
+      // 使用本地上傳作為備用方案
+      console.warn('GitHub 配置不完整，使用本地上傳')
+      return await uploadToLocal(file)
+    }
+
+  } catch (error) {
+    console.error('Upload error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    }
+  }
+}
+
+// GitHub 上傳函數
+async function uploadToGitHub(file, config) {
+  const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
+  
+  // 生成唯一的檔案名稱
+  const timestamp = new Date().getTime()
+  const fileName = `${timestamp}-${file.originalFilename || file.newFilename}`
+
+  // 讀取檔案並轉換為 base64
+  const fileData = await readFile(file.filepath)
+  const base64Data = Buffer.from(fileData).toString('base64')
+
+  // 上傳到 GitHub
+  const response = await fetch(
+    `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/public/yilan-activities/${fileName}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify({
+        message: `Upload yilan-activity image ${fileName}`,
+        content: base64Data
+      })
+    }
+  )
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(`GitHub upload failed: ${errorData.message || 'Unknown error'}`)
+  }
+
+  const data = await response.json()
+  return {
+    success: true,
+    url: data.content.download_url,
+    provider: 'github'
+  }
+}
+
+// 本地上傳函數
+async function uploadToLocal(file) {
+  const { writeFile, mkdir } = await import('fs/promises')
+  const { join } = await import('path')
+  const { existsSync } = await import('fs')
+  
+  // 生成唯一的檔案名稱
+  const timestamp = new Date().getTime()
+  const extension = file.originalFilename?.split('.').pop() || 'jpg'
+  const fileName = `${timestamp}-${Math.random().toString(36).substr(2, 9)}.${extension}`
+
+  // 設定上傳目錄
+  const uploadDir = join(process.cwd(), 'public', 'yilan-activities')
+  
+  // 確保上傳目錄存在
+  if (!existsSync(uploadDir)) {
+    await mkdir(uploadDir, { recursive: true })
+  }
+
+  // 讀取並儲存文件
+  const fileData = await readFile(file.filepath)
+  const filePath = join(uploadDir, fileName)
+  await writeFile(filePath, fileData)
+
+  // 返回可訪問的 URL
+  const fileUrl = `/yilan-activities/${fileName}`
+
+  return {
+    success: true,
+    url: fileUrl,
+    provider: 'local'
+  }
+}
