@@ -5,6 +5,16 @@ export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
     
+    // 調試：記錄接收到的資料
+    console.log('🔍 後端接收到的地點提交資料:', {
+      name: body.name,
+      photos: body.photos,
+      photosType: typeof body.photos,
+      photosIsArray: Array.isArray(body.photos),
+      photosLength: body.photos?.length,
+      photosStringified: body.photos ? JSON.stringify(body.photos) : null
+    });
+    
     // 驗證必填欄位
     if (!body.name || !body.latitude || !body.longitude || !body.category_id) {
       return {

@@ -1,10 +1,13 @@
 // 管理員建立/更新推薦行程
-import { createPool } from '@vercel/postgres'
+import pg from 'pg';
+const { Pool } = pg;
 import jwt from 'jsonwebtoken'
 
-const pool = createPool({
-  connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL
-})
+// 獲取 Neon 資料庫連接字串
+const getConnectionString = () => {
+  const config = useRuntimeConfig();
+  return config.DATABASE_URL || process.env.DATABASE_URL;
+};
 
 export default defineEventHandler(async (event) => {
   try {
@@ -54,37 +57,47 @@ export default defineEventHandler(async (event) => {
       })
     }
     
-    const client = await pool.connect()
-    let result
+    const connectionString = getConnectionString();
+    const pool = new Pool({
+      connectionString,
+      ssl: { rejectUnauthorized: false }
+    });
     
-    if (id) {
-      // 更新現有行程
-      result = await client.query(`
-        UPDATE recommended_itineraries 
-        SET title = $1, description = $2, days = $3, image_url = $4,
-            difficulty_level = $5, price_range = $6, tags = $7, places = $8,
-            is_active = $9, updated_at = CURRENT_TIMESTAMP
-        WHERE id = $10
-        RETURNING *
-      `, [title, description, days, image_url, difficulty_level, price_range, 
-          JSON.stringify(tags), JSON.stringify(places), is_active, id])
-    } else {
-      // 建立新行程
-      result = await client.query(`
-        INSERT INTO recommended_itineraries 
-        (title, description, days, image_url, difficulty_level, price_range, tags, places, is_active)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING *
-      `, [title, description, days, image_url, difficulty_level, price_range,
-          JSON.stringify(tags), JSON.stringify(places), is_active])
-    }
-    
-    client.release()
-    
-    return {
-      success: true,
-      data: result.rows[0],
-      message: id ? '行程更新成功' : '行程建立成功'
+    try {
+      const client = await pool.connect()
+      let result
+      
+      if (id) {
+        // 更新現有行程
+        result = await client.query(`
+          UPDATE recommended_itineraries 
+          SET title = $1, description = $2, days = $3, image_url = $4,
+              difficulty_level = $5, price_range = $6, tags = $7, places = $8,
+              is_active = $9, updated_at = CURRENT_TIMESTAMP
+          WHERE id = $10
+          RETURNING *
+        `, [title, description, days, image_url, difficulty_level, price_range, 
+            JSON.stringify(tags), JSON.stringify(places), is_active, id])
+      } else {
+        // 建立新行程
+        result = await client.query(`
+          INSERT INTO recommended_itineraries 
+          (title, description, days, image_url, difficulty_level, price_range, tags, places, is_active)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          RETURNING *
+        `, [title, description, days, image_url, difficulty_level, price_range,
+            JSON.stringify(tags), JSON.stringify(places), is_active])
+      }
+      
+      client.release()
+      
+      return {
+        success: true,
+        data: result.rows[0],
+        message: id ? '行程更新成功' : '行程建立成功'
+      }
+    } finally {
+      await pool.end()
     }
   } catch (error) {
     console.error('儲存推薦行程失敗:', error)

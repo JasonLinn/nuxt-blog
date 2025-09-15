@@ -24,14 +24,26 @@ export default defineEventHandler(async (event) => {
       
       // 處理 JSON 欄位
       const processedData = result.rows.map(place => {
-        // 解析 JSON 欄位
-        if (place.photos && typeof place.photos === 'string') {
-          try {
-            place.photos = JSON.parse(place.photos);
-          } catch (e) {
-            console.error('解析 photos JSON 失敗:', e);
-            place.photos = [];
+        // 解析 photos 欄位，處理多種格式
+        if (place.photos) {
+          if (typeof place.photos === 'string') {
+            try {
+              // 嘗試解析為 JSON 陣列
+              place.photos = JSON.parse(place.photos);
+            } catch (e) {
+              // 如果 JSON 解析失敗，檢查是否為直接的 URL
+              if (place.photos.startsWith('http')) {
+                // 處理逗號分隔的多個 URL
+                const urls = place.photos.split(',').map(url => url.trim()).filter(url => url.startsWith('http'));
+                place.photos = urls;
+              } else {
+                console.error('解析 photos 失敗:', e, '原始資料:', place.photos);
+                place.photos = [];
+              }
+            }
           }
+        } else {
+          place.photos = [];
         }
         
         if (place.images && typeof place.images === 'string') {

@@ -404,21 +404,37 @@ const getPlaceImage = (place) => {
     firstPhoto: place.photos?.[0]
   });
   
-  // 使用 Google Photos（目前資料庫中主要的圖片來源）
   if (place.photos && place.photos.length > 0) {
     const photo = place.photos[0];
+    
+    // 新格式：直接的圖片 URL（用戶推薦時自動載入的照片）
+    if (typeof photo === 'string' && photo.startsWith('http')) {
+      console.log('Using direct photo URL:', photo);
+      return photo;
+    }
+    
+    // 舊格式：包含 photo_reference 的物件（Google Places API 原始格式）
     if (photo && photo.photo_reference) {
-      // 檢查是否有 API key
       const apiKey = config.public.GOOGLE_MAPS_API_KEY;
       if (apiKey) {
         const googleImageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${apiKey}`;
-        console.log('Using Google photo URL:', googleImageUrl);
+        console.log('Using Google photo URL with reference:', googleImageUrl);
         return googleImageUrl;
       } else {
         console.warn('Google Maps API Key not found');
       }
-    } else {
-      console.warn('No valid photo object or photo_reference found:', photo);
+    }
+    
+    console.warn('Invalid photo format:', photo);
+  }
+  
+  // 檢查原始 photos 字串，處理可能的直接 URL 格式
+  if (typeof place.photos === 'string' && place.photos.startsWith('http')) {
+    // 處理多個 URL 以逗號分隔的情況
+    const urls = place.photos.split(',').map(url => url.trim()).filter(url => url.startsWith('http'));
+    if (urls.length > 0) {
+      console.log('Using first URL from comma-separated string:', urls[0]);
+      return urls[0];
     }
   }
   

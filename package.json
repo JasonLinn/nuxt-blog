@@ -41,7 +41,6 @@
     "@nuxtjs/ngrok": "^3.0.1",
     "@nuxtjs/sitemap": "^7.4.3",
     "@pinia/nuxt": "^0.5.1",
-    "@vercel/postgres": "^0.10.0",
     "axios": "^1.7.2",
     "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.3",

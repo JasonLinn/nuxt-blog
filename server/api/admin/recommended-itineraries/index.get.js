@@ -1,10 +1,13 @@
 // 管理員取得推薦行程 (包含未啟用的)
-import { createPool } from '@vercel/postgres'
+import pg from 'pg';
+const { Pool } = pg;
 import jwt from 'jsonwebtoken'
 
-const pool = createPool({
-  connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL
-})
+// 獲取 Neon 資料庫連接字串
+const getConnectionString = () => {
+  const config = useRuntimeConfig();
+  return config.DATABASE_URL || process.env.DATABASE_URL;
+};
 
 export default defineEventHandler(async (event) => {
   try {
@@ -59,19 +62,29 @@ export default defineEventHandler(async (event) => {
     
     sql += ` GROUP BY ri.id ORDER BY ri.created_at DESC`
     
-    const client = await pool.connect()
-    const result = await client.query(sql, params)
-    client.release()
+    const connectionString = getConnectionString();
+    const pool = new Pool({
+      connectionString,
+      ssl: { rejectUnauthorized: false }
+    });
     
-    return {
-      success: true,
-      data: result.rows.map(row => ({
-        ...row,
-        average_rating: parseFloat(row.average_rating) || 0,
-        rating_count: parseInt(row.rating_count) || 0,
-        places: typeof row.places === 'string' ? JSON.parse(row.places) : row.places,
-        tags: typeof row.tags === 'string' ? JSON.parse(row.tags) : row.tags
-      }))
+    try {
+      const client = await pool.connect()
+      const result = await client.query(sql, params)
+      client.release()
+      
+      return {
+        success: true,
+        data: result.rows.map(row => ({
+          ...row,
+          average_rating: parseFloat(row.average_rating) || 0,
+          rating_count: parseInt(row.rating_count) || 0,
+          places: typeof row.places === 'string' ? JSON.parse(row.places) : row.places,
+          tags: typeof row.tags === 'string' ? JSON.parse(row.tags) : row.tags
+        }))
+      }
+    } finally {
+      await pool.end()
     }
   } catch (error) {
     console.error('取得推薦行程失敗:', error)
