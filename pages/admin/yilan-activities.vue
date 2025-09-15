@@ -1,6 +1,8 @@
 <template>
   <div class="admin-panel">
     <div class="container">
+      <AdminHeader />
+
       <!-- 美麗的標題區 -->
       <div class="hero-header">
         <div class="hero-content">

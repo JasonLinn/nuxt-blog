@@ -10,6 +10,8 @@
 
     <!-- 主要內容 -->
     <div v-else class="admin-content">
+      <AdminHeader />
+
       <!-- 頁面標題 -->
       <header class="page-header">
         <div class="header-content">

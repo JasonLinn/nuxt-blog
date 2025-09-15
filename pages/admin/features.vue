@@ -1,16 +1,10 @@
 <template>
   <div class="admin-features-container">
-    <div class="admin-header">
+    <AdminHeader />
+    
+    <!-- 頁面標題 -->
+    <div class="page-header">
       <h1>特色項目管理</h1>
-      <div class="admin-nav">
-        <NuxtLink to="/admin-review" class="admin-nav-link">
-          民宿審核
-        </NuxtLink>
-        <NuxtLink to="/admin/activities" class="admin-nav-link">
-          宜蘭活動管理
-        </NuxtLink>
-        <button @click="logout" class="logout-btn">登出</button>
-      </div>
     </div>
 
     <div class="features-section">
@@ -328,20 +322,6 @@ const closeModal = () => {
   featureForm.value = { name: '', is_active: true }
 }
 
-// 登出
-const logout = async () => {
-  if (!confirm('確定要登出嗎？')) return
-  
-  try {
-    const accessTokenCookie = useCookie('admin_access_token')
-    accessTokenCookie.value = null
-    await navigateTo('/admin-login')
-  } catch (err) {
-    console.error('登出失敗:', err)
-    await navigateTo('/admin-login')
-  }
-}
-
 onMounted(() => {
   loadFeatures()
 })
@@ -354,7 +334,7 @@ onMounted(() => {
   padding: 20px;
 }
 
-.admin-header {
+.page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -367,44 +347,6 @@ onMounted(() => {
     font-size: 28px;
     font-weight: bold;
     margin: 0;
-  }
-}
-
-.admin-nav {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.admin-nav-link {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    color: white;
-  }
-}
-
-.logout-btn {
-  padding: 10px 20px;
-  background-color: #e53e3e;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #c53030;
   }
 }
 

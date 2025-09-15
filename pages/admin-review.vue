@@ -1,24 +1,17 @@
 <template>
   <div class="admin-review-container">
-    <div class="admin-header">
+    <AdminHeader />
+    
+    <!-- 頁面標題 -->
+    <div class="page-header">
       <h1>民宿審核管理</h1>
-      <div class="admin-nav">
-        <NuxtLink to="/admin/homestays" class="admin-nav-link">
-          民宿管理系統
-        </NuxtLink>
-        <NuxtLink to="/admin/features" class="admin-nav-link">
-          特色項目管理
-        </NuxtLink>
-        <NuxtLink to="/admin/yilan-activities" class="admin-nav-link">
-          宜蘭活動管理
-        </NuxtLink>
+      <div class="header-actions">
         <button @click="showEmailTest = true" class="email-test-btn" :disabled="processing">
           📧 測試郵件
         </button>
-        <button @click="logout" class="logout-btn">登出</button>
       </div>
     </div>
-
+    
     <div v-if="loading" class="loading">
       載入中...
     </div>
@@ -439,23 +432,6 @@ const confirmReject = async () => {
     alert('處理失敗，請稍候再試')
   } finally {
     processing.value = false
-  }
-}
-
-// 登出
-const logout = async () => {
-  if (!confirm('確定要登出嗎？')) return
-  
-  try {
-    // 清除 admin_access_token cookie
-    const accessTokenCookie = useCookie('admin_access_token')
-    accessTokenCookie.value = null
-    
-    await navigateTo('/admin-login')
-  } catch (err) {
-    console.error('登出失敗:', err)
-    // 即使失敗也強制跳轉到登入頁
-    await navigateTo('/admin-login')
   }
 }
 
@@ -1375,6 +1351,50 @@ onMounted(() => {
   .detail-section .col-sm-6 {
     padding: 0;
     margin-bottom: 10px;
+  }
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 0 20px;
+  
+  h1 {
+    color: #2d3748;
+    font-size: 28px;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .email-test-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
   }
 }
 </style> 
