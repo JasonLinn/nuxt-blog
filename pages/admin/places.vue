@@ -23,6 +23,10 @@
         </div>
         
         <div class="header-actions">
+          <button @click="showBatchAddModal = true" class="btn-secondary">
+            <Icon name="mdi:playlist-plus" />
+            批次新增
+          </button>
           <button @click="showAddModal = true" class="btn-primary">
             <Icon name="mdi:plus" />
             新增地點
@@ -225,9 +229,16 @@
           <Icon name="mdi:map-marker-off" class="empty-icon" />
           <h3>沒有找到地點</h3>
           <p>嘗試調整篩選條件或新增第一個地點</p>
-          <button @click="showAddModal = true" class="btn-primary">
-            新增地點
-          </button>
+          <div class="empty-actions">
+            <button @click="showBatchAddModal = true" class="btn-secondary">
+              <Icon name="mdi:playlist-plus" />
+              批次新增
+            </button>
+            <button @click="showAddModal = true" class="btn-primary">
+              <Icon name="mdi:plus" />
+              新增地點
+            </button>
+          </div>
         </div>
 
         <!-- 分頁 -->
@@ -265,6 +276,101 @@
       @close="closeModal"
       @saved="handlePlaceSaved"
     />
+
+    <!-- 批次新增地點模態框 -->
+    <div v-if="showBatchAddModal" class="modal-overlay" @click.self="closeBatchModal">
+      <div class="batch-modal">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <Icon name="mdi:playlist-plus" />
+            批次新增地點
+          </h2>
+          <button @click="closeBatchModal" class="modal-close">
+            <Icon name="mdi:close" />
+          </button>
+        </div>
+
+        <div class="modal-content">
+          <div class="batch-instructions">
+            <p class="instruction-text">
+              <Icon name="mdi:information" />
+              每行輸入一個地點名稱，系統將自動搜尋並新增這些地點
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">地點列表 (每行一個地點)</label>
+            <textarea
+              v-model="batchPlaceNames"
+              placeholder="請輸入地點名稱，每行一個，例如：&#10;台北101&#10;西門町&#10;淡水老街"
+              class="batch-textarea"
+              rows="10"
+            ></textarea>
+            <div class="form-hint">
+              共 {{ batchPlaceCount }} 個地點
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">預設分類</label>
+            <select v-model="batchDefaultCategory" class="form-select">
+              <option value="">請選擇分類</option>
+              <option v-for="category in categories" :key="category.id" :value="category.id">
+                {{ category.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="batch-actions">
+            <button @click="closeBatchModal" type="button" class="btn-secondary">
+              取消
+            </button>
+            <button 
+              @click="processBatchAdd" 
+              :disabled="!batchPlaceNames.trim() || batchProcessing"
+              class="btn-primary"
+            >
+              <Icon v-if="batchProcessing" name="eos-icons:loading" />
+              <Icon v-else name="mdi:plus" />
+              {{ batchProcessing ? '處理中...' : `新增 ${batchPlaceCount} 個地點` }}
+            </button>
+          </div>
+
+          <!-- 處理進度 -->
+          <div v-if="batchProcessing" class="batch-progress">
+            <div class="progress-header">
+              <span>處理進度: {{ batchProcessedCount }} / {{ batchTotalCount }}</span>
+              <span>{{ Math.round((batchProcessedCount / batchTotalCount) * 100) }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div 
+                class="progress-fill" 
+                :style="{ width: `${(batchProcessedCount / batchTotalCount) * 100}%` }"
+              ></div>
+            </div>
+            <div v-if="currentProcessingPlace" class="current-processing">
+              正在處理: {{ currentProcessingPlace }}
+            </div>
+          </div>
+
+          <!-- 處理結果 -->
+          <div v-if="batchResults.length > 0" class="batch-results">
+            <h4 class="results-title">處理結果</h4>
+            <div class="results-list">
+              <div 
+                v-for="result in batchResults" 
+                :key="result.name"
+                :class="['result-item', result.success ? 'success' : 'error']"
+              >
+                <Icon :name="result.success ? 'mdi:check-circle' : 'mdi:alert-circle'" />
+                <span class="result-name">{{ result.name }}</span>
+                <span class="result-message">{{ result.message }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Toast 提示 -->
     <Transition name="toast">
@@ -310,6 +416,16 @@ const showAddModal = ref(false);
 const showEditModal = ref(false);
 const editingPlace = ref(null);
 
+// 批次新增相關狀態
+const showBatchAddModal = ref(false);
+const batchPlaceNames = ref('');
+const batchDefaultCategory = ref('');
+const batchProcessing = ref(false);
+const batchProcessedCount = ref(0);
+const batchTotalCount = ref(0);
+const currentProcessingPlace = ref('');
+const batchResults = ref([]);
+
 // 篩選器
 const filters = ref({
   category: '',
@@ -333,6 +449,12 @@ const totalPlaces = computed(() => places.value.length);
 const approvedPlaces = computed(() => places.value.filter(p => p.status === 'approved').length);
 const pendingPlaces = computed(() => places.value.filter(p => p.status === 'pending').length);
 const featuredPlaces = computed(() => places.value.filter(p => p.is_featured).length);
+
+// 批次新增計算屬性
+const batchPlaceCount = computed(() => {
+  if (!batchPlaceNames.value.trim()) return 0;
+  return batchPlaceNames.value.trim().split('\n').filter(name => name.trim()).length;
+});
 
 const filteredPlaces = computed(() => {
   let filtered = places.value;
@@ -541,6 +663,150 @@ const closeModal = () => {
   showAddModal.value = false;
   showEditModal.value = false;
   editingPlace.value = null;
+};
+
+const closeBatchModal = () => {
+  showBatchAddModal.value = false;
+  batchPlaceNames.value = '';
+  batchDefaultCategory.value = '';
+  batchProcessing.value = false;
+  batchProcessedCount.value = 0;
+  batchTotalCount.value = 0;
+  currentProcessingPlace.value = '';
+  batchResults.value = [];
+};
+
+const processBatchAdd = async () => {
+  const placeNames = batchPlaceNames.value
+    .trim()
+    .split('\n')
+    .map(name => name.trim())
+    .filter(name => name);
+
+  if (placeNames.length === 0) {
+    showToast('請輸入至少一個地點名稱', 'error');
+    return;
+  }
+
+  batchProcessing.value = true;
+  batchProcessedCount.value = 0;
+  batchTotalCount.value = placeNames.length;
+  batchResults.value = [];
+
+  try {
+    for (let i = 0; i < placeNames.length; i++) {
+      const placeName = placeNames[i];
+      currentProcessingPlace.value = placeName;
+
+      try {
+        // 先搜尋 Google Places
+        const searchResponse = await $fetch('/api/google/places/search', {
+          method: 'POST',
+          body: { query: placeName }
+        });
+
+        if (searchResponse.success && searchResponse.data.length > 0) {
+          const googlePlace = searchResponse.data[0];
+          
+          // 取得地點詳細資訊
+          const detailsResponse = await $fetch('/api/google/places/details', {
+            method: 'POST',
+            body: { place_id: googlePlace.place_id }
+          });
+
+          if (detailsResponse.success) {
+            const placeDetails = detailsResponse.data;
+            
+            // 建立地點資料
+            const placeData = {
+              name: placeDetails.name || placeName,
+              formatted_address: placeDetails.formatted_address || '',
+              google_place_id: placeDetails.place_id || '',
+              latitude: placeDetails.geometry?.location?.lat || null,
+              longitude: placeDetails.geometry?.location?.lng || null,
+              rating: placeDetails.rating || null,
+              user_ratings_total: placeDetails.user_ratings_total || null,
+              phone_number: placeDetails.formatted_phone_number || null,
+              website: placeDetails.website || null,
+              opening_hours: placeDetails.opening_hours?.weekday_text ? 
+                JSON.stringify(placeDetails.opening_hours.weekday_text) : null,
+              photos: placeDetails.photos ? JSON.stringify(placeDetails.photos) : null,
+              types: placeDetails.types ? JSON.stringify(placeDetails.types) : null,
+              category_id: batchDefaultCategory.value || null,
+              status: 'pending',
+              is_featured: false,
+              is_private: false
+            };
+
+            // 新增地點到資料庫
+            const createResponse = await $fetch('/api/admin/places', {
+              method: 'POST',
+              body: placeData
+            });
+
+            if (createResponse.success) {
+              batchResults.value.push({
+                name: placeName,
+                success: true,
+                message: '成功新增'
+              });
+            } else {
+              batchResults.value.push({
+                name: placeName,
+                success: false,
+                message: createResponse.error || '新增失敗'
+              });
+            }
+          } else {
+            batchResults.value.push({
+              name: placeName,
+              success: false,
+              message: '無法取得地點詳細資訊'
+            });
+          }
+        } else {
+          batchResults.value.push({
+            name: placeName,
+            success: false,
+            message: '找不到該地點'
+          });
+        }
+      } catch (error) {
+        console.error(`處理地點 ${placeName} 時發生錯誤:`, error);
+        batchResults.value.push({
+          name: placeName,
+          success: false,
+          message: '處理時發生錯誤'
+        });
+      }
+
+      batchProcessedCount.value++;
+      
+      // 避免 API 請求過於頻繁，加入延遲
+      if (i < placeNames.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    // 處理完成後重新載入地點列表
+    await loadPlaces();
+    
+    const successCount = batchResults.value.filter(r => r.success).length;
+    const failCount = batchResults.value.filter(r => !r.success).length;
+    
+    if (successCount > 0) {
+      showToast(`批次新增完成！成功: ${successCount}，失敗: ${failCount}`, 'success');
+    } else {
+      showToast('批次新增失敗，沒有成功新增任何地點', 'error');
+    }
+
+  } catch (error) {
+    console.error('批次新增過程中發生錯誤:', error);
+    showToast('批次新增過程中發生錯誤', 'error');
+  } finally {
+    batchProcessing.value = false;
+    currentProcessingPlace.value = '';
+  }
 };
 
 const handlePlaceSaved = () => {
@@ -1210,6 +1476,326 @@ onMounted(async () => {
     left: 16px;
     right: 16px;
     min-width: auto;
+  }
+}
+
+// 批次新增模態視窗樣式
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.batch-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+
+    .modal-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #f3f4f6;
+        color: #374151;
+      }
+    }
+  }
+
+  .modal-content {
+    padding: 0 24px 24px;
+  }
+}
+
+.batch-instructions {
+  background: #f0f9ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+
+  .instruction-text {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: #1e40af;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.form-group {
+  margin-bottom: 20px;
+
+  .form-label {
+    display: block;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .batch-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+
+  .form-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  .form-hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+}
+
+.batch-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+
+  .btn-secondary {
+    background: #f9fafb;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+  }
+
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &:hover:not(:disabled) {
+      background: #2563eb;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.batch-progress {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+
+    .progress-fill {
+      height: 100%;
+      background: #3b82f6;
+      transition: width 0.3s ease;
+    }
+  }
+
+  .current-processing {
+    font-size: 12px;
+    color: #6b7280;
+    font-style: italic;
+  }
+}
+
+.batch-results {
+  margin-top: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .results-title {
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .results-list {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .result-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 13px;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.success {
+      color: #059669;
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    &.error {
+      color: #dc2626;
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .result-name {
+      font-weight: 500;
+      min-width: 120px;
+    }
+
+    .result-message {
+      opacity: 0.8;
+      font-size: 12px;
+    }
+  }
+}
+
+.empty-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+
+  .btn-secondary, .btn-primary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-secondary {
+    background: #f9fafb;
+    color: #374151;
+    border: 1px solid #d1d5db;
+
+    &:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+  }
+
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+
+    &:hover {
+      background: #2563eb;
+    }
   }
 }
 </style>

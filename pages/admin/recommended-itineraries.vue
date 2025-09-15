@@ -228,14 +228,25 @@
                       <Icon name="mdi:close" />
                     </button>
                   </div>
-                  <button 
-                    @click="addPlace(dayIndex)"
-                    type="button"
-                    class="btn-add-place"
-                  >
-                    <Icon name="mdi:plus" />
-                    新增地點
-                  </button>
+                  <div class="place-actions">
+                    <button 
+                      @click="addPlace(dayIndex)"
+                      type="button"
+                      class="btn-add-place"
+                    >
+                      <Icon name="mdi:plus" />
+                      新增地點
+                    </button>
+                    
+                    <button 
+                      @click="showBatchAddModal(dayIndex)"
+                      type="button"
+                      class="btn-batch-add"
+                    >
+                      <Icon name="mdi:plus-multiple" />
+                      批次新增
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
