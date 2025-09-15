@@ -32,113 +32,223 @@
             </button>
           </div>
           
-          <!-- 分類篩選 -->
-          <div class="category-filters">
+          <!-- 分頁選項卡 -->
+          <div class="tab-selector">
             <button 
-              v-for="category in categories" 
-              :key="category.id"
-              @click="toggleCategory(category.id)"
-              :class="['category-btn', { active: selectedCategories.includes(category.id) }]"
+              @click="activeTab = 'places'"
+              :class="['tab-btn', { active: activeTab === 'places' }]"
             >
-              <Icon :name="category.icon" />
-              <span>{{ category.name }}</span>
-              <span class="count">({{ getCategoryCount(category.id) }})</span>
+              <Icon name="mdi:map-marker-multiple" />
+              <span>景點地點</span>
+            </button>
+            <button 
+              @click="activeTab = 'recommended'"
+              :class="['tab-btn', { active: activeTab === 'recommended' }]"
+            >
+              <Icon name="mdi:star-outline" />
+              <span>推薦行程</span>
+              <span v-if="recommendedItinerariesFromDB.length > 0" class="count">
+                ({{ recommendedItinerariesFromDB.length }})
+              </span>
             </button>
           </div>
-
-          <!-- 搜尋框 -->
-          <div class="search-section">
-            <div class="search-input-group">
-              <Icon name="mdi:magnify" class="search-icon" />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="搜尋地點名稱..."
-                class="search-input"
-              />
+          
+          <!-- 地點篩選選項 (只在景點分頁顯示) -->
+          <div v-if="activeTab === 'places'">
+            <!-- 分類篩選 -->
+            <div class="category-filters">
+              <button 
+                v-for="category in categories" 
+                :key="category.id"
+                @click="toggleCategory(category.id)"
+                :class="['category-btn', { active: selectedCategories.includes(category.id) }]"
+              >
+                <Icon :name="category.icon" />
+                <span>{{ category.name }}</span>
+                <span class="count">({{ getCategoryCount(category.id) }})</span>
+              </button>
             </div>
-          </div>
 
-          <!-- 其他篩選選項 -->
-          <div class="additional-filters">
-            <label class="filter-option">
-              <input v-model="showFeaturedOnly" type="checkbox" />
-              <span>只顯示精選地點</span>
-            </label>
-            
-            <label class="filter-option">
-              <input v-model="showPrivateOnly" type="checkbox" />
-              <span>只顯示私房景點</span>
-            </label>
+            <!-- 搜尋框 -->
+            <div class="search-section">
+              <div class="search-input-group">
+                <Icon name="mdi:magnify" class="search-icon" />
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="搜尋地點名稱..."
+                  class="search-input"
+                />
+              </div>
+            </div>
+
+            <!-- 其他篩選選項 -->
+            <div class="additional-filters">
+              <label class="filter-option">
+                <input v-model="showFeaturedOnly" type="checkbox" />
+                <span>只顯示精選地點</span>
+              </label>
+              
+              <label class="filter-option">
+                <input v-model="showPrivateOnly" type="checkbox" />
+                <span>只顯示私房景點</span>
+              </label>
+            </div>
           </div>
         </div>
 
-        <!-- 地點列表 -->
-        <div class="places-list">
-          <h3 class="list-title">
-            地點列表
-            <span class="count">({{ filteredPlaces.length }})</span>
-          </h3>
-          
-          <div v-if="loading" class="loading-state">
-            <Icon name="eos-icons:loading" />
-            <span>載入中...</span>
-          </div>
-          
-          <div v-else-if="filteredPlaces.length === 0" class="empty-state">
-            <Icon name="mdi:map-marker-off" />
-            <p>沒有找到符合條件的地點</p>
-          </div>
-          
-          <div v-else class="places-grid">
-            <div 
-              v-for="place in filteredPlaces" 
-              :key="place.id"
-              @click="selectPlace(place)"
-              :class="['place-card', { selected: selectedPlace?.id === place.id }]"
-            >
-              <!-- 地點圖片 -->
-              <div class="place-image">
-                <img :src="getPlaceImage(place)" :alt="place.name" />
-                <div class="place-badges">
-                  <span v-if="place.is_featured" class="featured-badge">
+        <!-- 內容列表 (根據分頁顯示) -->
+        <div class="content-list">
+          <!-- 景點地點分頁 -->
+          <div v-if="activeTab === 'places'">
+            <h3 class="list-title">
+              地點列表
+              <span class="count">({{ filteredPlaces.length }})</span>
+            </h3>
+            
+            <div v-if="loading" class="loading-state">
+              <Icon name="eos-icons:loading" />
+              <span>載入中...</span>
+            </div>
+            
+            <div v-else-if="filteredPlaces.length === 0" class="empty-state">
+              <Icon name="mdi:map-marker-off" />
+              <p>沒有找到符合條件的地點</p>
+            </div>
+            
+            <div v-else class="places-grid">
+              <div 
+                v-for="place in filteredPlaces" 
+                :key="place.id"
+                @click="selectPlace(place)"
+                :class="['place-card', { selected: selectedPlace?.id === place.id }]"
+              >
+                <!-- 地點圖片 -->
+                <div class="place-image">
+                  <img :src="getPlaceImage(place)" :alt="place.name" />
+                  <div class="place-badges">
+                    <span v-if="place.is_featured" class="featured-badge">
+                      <Icon name="mdi:star" />
+                    </span>
+                    <span v-if="place.is_private" class="private-badge">
+                      <Icon name="mdi:lock" />
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 地點資訊 -->
+                <div class="place-info">
+                  <h4 class="place-name">{{ place.name }}</h4>
+                  <div class="place-category">
+                    <Icon :name="getCategoryIcon(place.category_id)" />
+                    {{ getCategoryName(place.category_id) }}
+                  </div>
+                  
+                  <div v-if="place.rating" class="place-rating">
                     <Icon name="mdi:star" />
-                  </span>
-                  <span v-if="place.is_private" class="private-badge">
-                    <Icon name="mdi:lock" />
-                  </span>
+                    {{ place.rating }}
+                    <span class="rating-count">({{ place.user_ratings_total || 0 }})</span>
+                  </div>
+                  
+                  <div class="place-address">
+                    <Icon name="mdi:map-marker" />
+                    {{ place.formatted_address }}
+                  </div>
+
+                  <!-- 行程操作按鈕 -->
+                  <div class="place-actions">
+                    <button 
+                      @click.stop="addToItinerary(place)"
+                      :disabled="isInItinerary(place.id)"
+                      class="btn-add"
+                    >
+                      <Icon :name="isInItinerary(place.id) ? 'mdi:check' : 'mdi:plus'" />
+                      {{ isInItinerary(place.id) ? '已加入' : '加入行程' }}
+                    </button>
+                  </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- 地點資訊 -->
-              <div class="place-info">
-                <h4 class="place-name">{{ place.name }}</h4>
-                <div class="place-category">
-                  <Icon :name="getCategoryIcon(place.category_id)" />
-                  {{ getCategoryName(place.category_id) }}
-                </div>
-                
-                <div v-if="place.rating" class="place-rating">
-                  <Icon name="mdi:star" />
-                  {{ place.rating }}
-                  <span class="rating-count">({{ place.user_ratings_total || 0 }})</span>
-                </div>
-                
-                <div class="place-address">
-                  <Icon name="mdi:map-marker" />
-                  {{ place.formatted_address }}
+          <!-- 推薦行程分頁 -->
+          <div v-else-if="activeTab === 'recommended'">
+            <h3 class="list-title">
+              推薦行程
+              <span class="count">({{ recommendedItinerariesFromDB.length }})</span>
+            </h3>
+            
+            <div v-if="loadingRecommended" class="loading-state">
+              <Icon name="eos-icons:loading" />
+              <span>載入推薦行程中...</span>
+            </div>
+            
+            <div v-else-if="recommendedError" class="empty-state error-state">
+              <Icon name="mdi:alert-circle" />
+              <p>載入推薦行程失敗</p>
+              <span>{{ recommendedError.message }}</span>
+            </div>
+            
+            <div v-else-if="recommendedItinerariesFromDB.length === 0" class="empty-state">
+              <Icon name="mdi:map-search" />
+              <p>目前沒有推薦行程</p>
+              <span>敬請期待更多精彩行程</span>
+            </div>
+            
+            <div v-else class="recommended-grid">
+              <div 
+                v-for="itinerary in recommendedItinerariesFromDB" 
+                :key="itinerary.id"
+                class="recommended-card"
+              >
+                <!-- 行程圖片 -->
+                <div class="recommended-image">
+                  <img :src="itinerary.image_url || '/placeholder-place.jpg'" :alt="itinerary.title" />
+                  <div class="recommended-badges">
+                    <span class="days-badge">
+                      <Icon name="mdi:calendar" />
+                      {{ itinerary.days }} 天
+                    </span>
+                    <span v-if="itinerary.difficulty_level" class="difficulty-badge" :class="itinerary.difficulty_level">
+                      {{ getDifficultyText(itinerary.difficulty_level) }}
+                    </span>
+                  </div>
                 </div>
 
-                <!-- 行程操作按鈕 -->
-                <div class="place-actions">
-                  <button 
-                    @click.stop="addToItinerary(place)"
-                    :disabled="isInItinerary(place.id)"
-                    class="btn-add"
-                  >
-                    <Icon :name="isInItinerary(place.id) ? 'mdi:check' : 'mdi:plus'" />
-                    {{ isInItinerary(place.id) ? '已加入' : '加入行程' }}
-                  </button>
+                <!-- 行程資訊 -->
+                <div class="recommended-info">
+                  <h4 class="recommended-title">{{ itinerary.title }}</h4>
+                  <p class="recommended-description">{{ itinerary.description }}</p>
+                  
+                  <div v-if="itinerary.average_rating > 0" class="recommended-rating">
+                    <Icon name="mdi:star" />
+                    {{ itinerary.average_rating.toFixed(1) }}
+                    <span class="rating-count">({{ itinerary.rating_count }} 評分)</span>
+                  </div>
+                  
+                  <div v-if="itinerary.tags && itinerary.tags.length > 0" class="recommended-tags">
+                    <span v-for="tag in itinerary.tags.slice(0, 3)" :key="tag" class="tag">
+                      {{ tag }}
+                    </span>
+                  </div>
+
+                  <!-- 行程操作按鈕 -->
+                  <div class="recommended-actions">
+                    <button 
+                      @click="loadItineraryTemplate(itinerary)"
+                      class="btn-load-template"
+                    >
+                      <Icon name="mdi:download" />
+                      套用行程
+                    </button>
+                    <button 
+                      @click="viewItineraryDetails(itinerary)"
+                      class="btn-view-details"
+                    >
+                      <Icon name="mdi:eye" />
+                      查看詳情
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -723,6 +833,9 @@ const searchQuery = ref('');
 const showFeaturedOnly = ref(false);
 const showPrivateOnly = ref(false);
 
+// 分頁相關
+const activeTab = ref('places'); // 'places' 或 'recommended'
+
 // 行程相關
 const itinerary = ref([]);
 const currentDay = ref(1);
@@ -764,6 +877,43 @@ let map = null;
 let markers = [];
 let directionsService = null;
 let directionsRenderer = null;
+
+// 推薦行程相關 - 使用 useFetch 在頂層載入
+const { data: recommendedItinerariesData, pending: loadingRecommended, error: recommendedError } = await useFetch('/api/recommended-itineraries')
+
+const recommendedItinerariesFromDB = computed(() => {
+  if (recommendedError.value) {
+    console.log('載入推薦行程錯誤:', recommendedError.value.message)
+    return []
+  }
+  
+  if (recommendedItinerariesData.value?.success && recommendedItinerariesData.value.data) {
+    const itineraries = recommendedItinerariesData.value.data.map(itinerary => {
+      // 轉換 places 資料結構為前端期望的格式
+      let places_data = [];
+      if (itinerary.places && Array.isArray(itinerary.places)) {
+        places_data = itinerary.places.map(dayData => {
+          if (dayData.places && Array.isArray(dayData.places)) {
+            return dayData.places.map(place => place.name || place);
+          }
+          return [];
+        });
+      }
+      
+      return {
+        ...itinerary,
+        places_data: places_data
+      };
+    });
+    console.log('載入推薦行程成功！共', itineraries.length, '筆行程')
+    return itineraries
+  } else {
+    console.log('推薦行程 API 回應格式錯誤')
+    return []
+  }
+})
+
+const userRatings = ref({});
 
 // 計算屬性
 const filteredPlaces = computed(() => {
@@ -1133,6 +1283,73 @@ const reorderDay = (dayNumber) => {
 const addDay = () => {
   totalDays.value++;
   currentDay.value = totalDays.value;
+};
+
+// 推薦行程相關函式
+const getDifficultyText = (level) => {
+  switch (level) {
+    case 'easy': return '輕鬆';
+    case 'medium': return '適中';
+    case 'hard': return '挑戰';
+    default: return '未分級';
+  }
+};
+
+const loadItineraryTemplate = async (template) => {
+  try {
+    // 確認是否要覆蓋目前的行程
+    if (itinerary.value.length > 0) {
+      const confirmed = confirm(`套用此推薦行程將清除目前的行程安排，確定要繼續嗎？`);
+      if (!confirmed) return;
+    }
+
+    // 清空目前行程
+    itinerary.value = [];
+    totalDays.value = template.days;
+    currentDay.value = 1;
+
+    // 載入推薦行程的地點
+    if (template.places_data && Array.isArray(template.places_data)) {
+      for (let dayIndex = 0; dayIndex < template.places_data.length; dayIndex++) {
+        const dayPlaces = template.places_data[dayIndex];
+        
+        if (Array.isArray(dayPlaces)) {
+          for (let placeIndex = 0; placeIndex < dayPlaces.length; placeIndex++) {
+            const placeName = dayPlaces[placeIndex];
+            
+            // 嘗試在現有地點中找到匹配的地點
+            const matchedPlace = places.value.find(p => 
+              p.name === placeName || 
+              p.name.includes(placeName) || 
+              placeName.includes(p.name)
+            );
+            
+            if (matchedPlace) {
+              itinerary.value.push({
+                id: Date.now() + dayIndex * 1000 + placeIndex,
+                place: matchedPlace,
+                day_number: dayIndex + 1,
+                order_in_day: placeIndex + 1,
+                duration_minutes: matchedPlace.recommended_duration || 60
+              });
+            }
+          }
+        }
+      }
+    }
+
+    alert(`已套用「${template.title}」行程模板！`);
+    updateMap();
+    
+  } catch (error) {
+    console.error('載入行程模板失敗:', error);
+    alert('載入行程模板失敗，請稍後重試。');
+  }
+};
+
+const viewItineraryDetails = (itinerary) => {
+  // 顯示行程詳細資訊 - 這裡可以開啟一個 modal 或跳轉到詳細頁面
+  alert(`行程詳情：\n\n標題：${itinerary.title}\n天數：${itinerary.days}天\n描述：${itinerary.description}\n\n功能開發中...`);
 };
 
 // 推薦地點處理函數
@@ -2114,6 +2331,58 @@ onMounted(async () => {
     color: #1f2937;
   }
   
+  // 分頁選項卡樣式
+  .tab-selector {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 20px;
+    
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: #64748b;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        color: #334155;
+        background: rgba(255, 255, 255, 0.5);
+      }
+      
+      &.active {
+        background: white;
+        color: #3b82f6;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      svg {
+        font-size: 16px;
+      }
+      
+      .count {
+        font-size: 12px;
+        color: #6b7280;
+        margin-left: 4px;
+      }
+      
+      &.active .count {
+        color: #3b82f6;
+      }
+    }
+  }
+  
   .category-filters {
     display: flex;
     flex-direction: column;
@@ -2207,7 +2476,7 @@ onMounted(async () => {
   }
 }
 
-.places-list {
+.content-list {
   flex: 1;
   overflow-y: auto;
   
@@ -2243,6 +2512,14 @@ onMounted(async () => {
     svg {
       font-size: 48px;
       margin-bottom: 12px;
+    }
+    
+    &.error-state {
+      color: #dc2626;
+      
+      svg {
+        color: #fca5a5;
+      }
     }
   }
   
@@ -2380,6 +2657,189 @@ onMounted(async () => {
             &:disabled {
               background: #10b981;
               cursor: not-allowed;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // 推薦行程網格樣式
+  .recommended-grid {
+    padding: 0 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    
+    .recommended-card {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        transform: translateY(-2px);
+      }
+      
+      .recommended-image {
+        position: relative;
+        height: 150px;
+        overflow: hidden;
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.3s ease;
+        }
+        
+        &:hover img {
+          transform: scale(1.05);
+        }
+        
+        .recommended-badges {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          display: flex;
+          gap: 8px;
+          
+          .days-badge,
+          .difficulty-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(8px);
+          }
+          
+          .days-badge {
+            background: rgba(59, 130, 246, 0.9);
+            color: white;
+          }
+          
+          .difficulty-badge {
+            &.easy {
+              background: rgba(34, 197, 94, 0.9);
+              color: white;
+            }
+            
+            &.medium {
+              background: rgba(251, 191, 36, 0.9);
+              color: white;
+            }
+            
+            &.hard {
+              background: rgba(239, 68, 68, 0.9);
+              color: white;
+            }
+          }
+        }
+      }
+      
+      .recommended-info {
+        padding: 16px;
+        
+        .recommended-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1f2937;
+          margin: 0 0 8px;
+          line-height: 1.4;
+        }
+        
+        .recommended-description {
+          font-size: 14px;
+          color: #6b7280;
+          line-height: 1.5;
+          margin: 0 0 12px;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        
+        .recommended-rating {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 14px;
+          color: #f59e0b;
+          margin-bottom: 12px;
+          
+          svg {
+            color: #f59e0b;
+          }
+          
+          .rating-count {
+            color: #6b7280;
+            margin-left: 4px;
+          }
+        }
+        
+        .recommended-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 16px;
+          
+          .tag {
+            padding: 4px 8px;
+            background: #f1f5f9;
+            color: #475569;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+          }
+        }
+        
+        .recommended-actions {
+          display: flex;
+          gap: 8px;
+          
+          .btn-load-template,
+          .btn-view-details {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+          
+          .btn-load-template {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            
+            &:hover {
+              background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+              transform: translateY(-1px);
+              box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+            }
+          }
+          
+          .btn-view-details {
+            background: #f8fafc;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            
+            &:hover {
+              background: #f1f5f9;
+              border-color: #cbd5e1;
             }
           }
         }
@@ -3312,7 +3772,7 @@ onMounted(async () => {
     height: auto;
   }
   
-  .places-list {
+  .content-list {
     max-height: 400px;
   }
 }
