@@ -1653,17 +1653,47 @@ const initMap = async () => {
   await updateMap();
 };
 
+// 創建基本地點資訊的 InfoWindow 內容 - 不載入詳細資料
+const createBasicPlaceInfoWindowContent = (place) => {
+  console.log('創建基本地點資訊:', place.name);
+
+  // 基本照片
+  const basicImageHtml = `<img src="${getPlaceImage(place)}" alt="${place.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
+
+  return `
+    <div style="max-width: 300px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      <div style="display: flex; gap: 12px; align-items: flex-start;">
+        ${basicImageHtml}
+        <div style="flex: 1; min-width: 0;">
+          <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937; line-height: 1.3;">${place.name}</h4>
+          <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 13px; line-height: 1.4;">${place.address || '地址資訊不詳'}</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button
+              onclick="window.addPlaceToItinerary('${place.id}')"
+              style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s;"
+              onmouseover="this.style.background='#059669'"
+              onmouseout="this.style.background='#10b981'"
+            >
+              加入行程
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
 // 創建地點詳細資訊的 InfoWindow 內容 - 支援點擊時重新載入最新 Google 資料
 const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
   let placeDetails = place;
   let hasGoogleData = false;
-  
+
   console.log('正在載入地點詳細資訊:', place.name, {
     hasGooglePlaceId: !!place.google_place_id,
     googlePlaceId: place.google_place_id,
     forceRefresh: forceRefresh
   });
-  
+
   // 嘗試使用多種方式獲取最新的 Google 資料
   if (place.google_place_id) {
     try {
@@ -1702,8 +1732,8 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
     } catch (error) {
       console.error('使用 google_place_id 獲取詳細資訊失敗:', error);
     }
-  } 
-  
+  }
+
   // 如果沒有 google_place_id 或者獲取失敗，嘗試使用地點名稱搜尋
   if (!hasGoogleData && place.name) {
     try {
@@ -1723,7 +1753,7 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
       if (searchResponse.success && searchResponse.data && searchResponse.data.length > 0) {
         const foundPlace = searchResponse.data[0];
         console.log('找到匹配的 Google Place:', foundPlace.name);
-        
+
         // 獲取詳細資訊
         const detailsResponse = await $fetch('/api/google/places/details', {
           method: 'POST',
@@ -1981,6 +2011,9 @@ const updateMap = async () => {
       }
     });
 
+    // 保存地點引用到 marker
+    marker.place = place;
+
     // 創建地名標籤 overlay
     const labelDiv = document.createElement('div');
     labelDiv.className = 'map-place-label';
@@ -2046,21 +2079,73 @@ const updateMap = async () => {
     // 將覆蓋物引用保存到 marker，以便後續清理
     marker.labelOverlay = labelOverlay;
 
-    // 創建詳細的 InfoWindow
-    const content = await createPlaceInfoWindowContent(place);
+    // 創建基本的 InfoWindow（不載入詳細資料）
+    const content = createBasicPlaceInfoWindowContent(place);
     const infoWindow = new google.maps.InfoWindow({
       content: content,
       maxWidth: 320
     });
 
-    marker.addListener('click', () => {
+    marker.addListener('click', async () => {
       // 關閉其他 InfoWindow
       markers.forEach(m => {
         if (m.infoWindow) {
           m.infoWindow.close();
         }
       });
+
+      // 先顯示載入狀態
+      const loadingContent = `
+        <div style="max-width: 300px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+            <div style="width: 20px; height: 20px; border: 2px solid #e5e7eb; border-top: 2px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <span style="color: #6b7280; font-size: 14px;">正在載入詳細資料...</span>
+          </div>
+          <p style="margin: 0; color: #9ca3af; font-size: 12px;">請稍候片刻</p>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      infoWindow.setContent(loadingContent);
       infoWindow.open(map, marker);
+
+      try {
+        // 載入詳細資訊
+        const detailedContent = await createPlaceInfoWindowContent(place, true);
+        infoWindow.setContent(detailedContent);
+      } catch (error) {
+        console.error('載入地點詳細資訊失敗:', error);
+        // 顯示錯誤訊息，但仍保留基本功能
+        const errorContent = `
+          <div style="max-width: 300px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <img src="${getPlaceImage(place)}" alt="${place.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+              <div style="flex: 1; min-width: 0;">
+                <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937; line-height: 1.3;">${place.name}</h4>
+                <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 13px; line-height: 1.4;">${place.address || '地址資訊不詳'}</p>
+                <div style="margin: 8px 0; padding: 8px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; color: #dc2626; font-size: 12px;">
+                  ⚠️ 無法載入最新資料，顯示基本資訊
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button
+                    onclick="window.addPlaceToItinerary('${place.id}')"
+                    style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s;"
+                    onmouseover="this.style.background='#059669'"
+                    onmouseout="this.style.background='#10b981'"
+                  >
+                    加入行程
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        infoWindow.setContent(errorContent);
+      }
     });
 
     // 保存 infoWindow 引用以便關閉
@@ -2219,10 +2304,11 @@ watch(places, (newPlaces) => {
   }
 }, { immediate: false });
 
+
 // 初始化
 onMounted(async () => {
   console.log('Itinerary component mounted');
-  
+
   // 添加全域函數供 InfoWindow 使用
   window.selectPlaceFromMap = (placeId) => {
     const place = places.value.find(p => p.id == placeId);
@@ -2232,11 +2318,16 @@ onMounted(async () => {
   };
 
   window.addPlaceToItinerary = (placeId) => {
-    const place = places.value.find(p => p.id == placeId);
+    console.log('Adding place to itinerary:', placeId);
+    const place = places.value.find(p => p.id == parseInt(placeId));
     if (place) {
+      console.log('Found place:', place.name);
       addToItinerary(place);
+    } else {
+      console.error('找不到地點:', placeId);
     }
   };
+
 
   // 重新整理地點 Google 資訊的全域函數
 
