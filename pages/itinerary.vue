@@ -1906,8 +1906,14 @@ const updateMap = async () => {
     return;
   }
 
-  // 清除現有標記
-  markers.forEach(marker => marker.setMap(null));
+  // 清除現有標記和標籤覆蓋物
+  markers.forEach(marker => {
+    marker.setMap(null);
+    // 清除地名標籤覆蓋物
+    if (marker.labelOverlay) {
+      marker.labelOverlay.setMap(null);
+    }
+  });
   markers = [];
 
   console.log('清除舊標記完成');
@@ -1974,6 +1980,71 @@ const updateMap = async () => {
         anchor: new google.maps.Point(16, 16)
       }
     });
+
+    // 創建地名標籤 overlay
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'map-place-label';
+    labelDiv.textContent = place.name;
+    labelDiv.style.cssText = `
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #1f2937;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      white-space: nowrap;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+      z-index: 1000;
+      transform: translateX(-50%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    `;
+
+    // 創建自定義 overlay 來顯示地名標籤
+    class PlaceLabelOverlay extends google.maps.OverlayView {
+      constructor(position, content, map) {
+        super();
+        this.position = position;
+        this.content = content;
+        this.setMap(map);
+      }
+
+      onAdd() {
+        const panes = this.getPanes();
+        panes.overlayLayer.appendChild(this.content);
+      }
+
+      onRemove() {
+        if (this.content.parentNode) {
+          this.content.parentNode.removeChild(this.content);
+        }
+      }
+
+      draw() {
+        const projection = this.getProjection();
+        const position = projection.fromLatLngToDivPixel(this.position);
+        
+        if (position) {
+          this.content.style.left = position.x + 'px';
+          this.content.style.top = (position.y - 45) + 'px'; // 在地標上方顯示
+        }
+      }
+    }
+
+    // 創建地名標籤覆蓋物
+    const labelOverlay = new PlaceLabelOverlay(
+      new google.maps.LatLng(lat, lng),
+      labelDiv,
+      map
+    );
+
+    // 將覆蓋物引用保存到 marker，以便後續清理
+    marker.labelOverlay = labelOverlay;
 
     // 創建詳細的 InfoWindow
     const content = await createPlaceInfoWindowContent(place);
