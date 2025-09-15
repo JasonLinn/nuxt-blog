@@ -405,7 +405,7 @@ const getPlaceImage = (place) => {
   // 使用 Google Photos（目前資料庫中主要的圖片來源）
   if (place.photos && place.photos.length > 0) {
     const photo = place.photos[0];
-    if (photo.photo_reference) {
+    if (photo && photo.photo_reference) {
       // 檢查是否有 API key
       const apiKey = config.public.GOOGLE_MAPS_API_KEY;
       if (apiKey) {
@@ -415,6 +415,8 @@ const getPlaceImage = (place) => {
       } else {
         console.warn('Google Maps API Key not found');
       }
+    } else {
+      console.warn('No valid photo object or photo_reference found:', photo);
     }
   }
   

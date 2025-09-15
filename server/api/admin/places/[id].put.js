@@ -2,12 +2,20 @@
 import { pool } from '../../../utils/db.js';
 
 export default defineEventHandler(async (event) => {
+  let requestBody = null;
+  
   try {
     // 這裡應該加入管理員權限驗證
     // const user = await validateAdminToken(event);
     
     const placeId = getRouterParam(event, 'id');
-    const body = await readBody(event);
+    requestBody = await readBody(event);
+    
+    console.log('更新地點 API 被呼叫:', {
+      placeId: placeId,
+      method: getMethod(event),
+      hasBody: !!requestBody
+    });
     
     if (!placeId) {
       throw createError({
@@ -23,21 +31,18 @@ export default defineEventHandler(async (event) => {
       formatted_address,
       latitude,
       longitude,
-      locality,
-      administrative_area_level_1,
       phone_number,
       website,
       rating,
       price_level,
       recommended_duration,
       tips,
-      images,
       is_featured,
       is_private,
       status,
       google_place_id,
       photos
-    } = body;
+    } = requestBody;
 
     const client = await pool.connect();
     
@@ -62,20 +67,17 @@ export default defineEventHandler(async (event) => {
           formatted_address = $5,
           latitude = $6,
           longitude = $7,
-          locality = $8,
-          administrative_area_level_1 = $9,
-          phone_number = $10,
-          website = $11,
-          rating = $12,
-          price_level = $13,
-          recommended_duration = $14,
-          tips = $15,
-          images = $16,
-          is_featured = $17,
-          is_private = $18,
-          status = $19,
-          google_place_id = $20,
-          photos = $21,
+          phone_number = $8,
+          website = $9,
+          rating = $10,
+          price_level = $11,
+          recommended_duration = $12,
+          tips = $13,
+          is_featured = $14,
+          is_private = $15,
+          status = $16,
+          google_place_id = $17,
+          photos = $18,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = $1
         RETURNING *
@@ -84,25 +86,22 @@ export default defineEventHandler(async (event) => {
       const values = [
         placeId,
         name,
-        category_id,
-        description,
-        formatted_address,
-        latitude,
-        longitude,
-        locality,
-        administrative_area_level_1,
-        phone_number,
-        website,
-        rating,
-        price_level,
-        recommended_duration,
-        tips,
-        JSON.stringify(images || []),
-        is_featured || false,
-        is_private || false,
+        category_id ? parseInt(category_id) : null,
+        description || null,
+        formatted_address || null,
+        latitude ? parseFloat(latitude) : null,
+        longitude ? parseFloat(longitude) : null,
+        phone_number || null,
+        website || null,
+        rating ? parseFloat(rating) : null,
+        price_level && price_level !== "" ? parseInt(price_level) : null,
+        recommended_duration ? parseInt(recommended_duration) : null,
+        tips || null,
+        Boolean(is_featured),
+        Boolean(is_private),
         status || 'pending',
-        google_place_id,
-        JSON.stringify(photos || [])
+        google_place_id || null,
+        photos && Array.isArray(photos) ? JSON.stringify(photos) : null
       ];
 
       const result = await client.query(updateSql, values);
@@ -118,7 +117,12 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error) {
-    console.error('更新地點失敗:', error);
+    console.error('更新地點失敗:', {
+      placeId: getRouterParam(event, 'id'),
+      error: error.message,
+      stack: error.stack,
+      requestBody: requestBody
+    });
     
     if (error.statusCode) {
       throw error;
@@ -126,7 +130,7 @@ export default defineEventHandler(async (event) => {
     
     throw createError({
       statusCode: 500,
-      statusMessage: '更新地點失敗'
+      statusMessage: '更新地點失敗: ' + error.message
     });
   }
 });

@@ -452,6 +452,9 @@
                 
                 <!-- 搜尋結果 -->
                 <div v-if="googleSearchResults.length > 0" class="search-results">
+                  <div class="search-results-header">
+                    <span class="results-count">找到 {{ googleSearchResults.length }} 個地點</span>
+                  </div>
                   <div 
                     v-for="result in googleSearchResults" 
                     :key="result.place_id"
@@ -460,11 +463,14 @@
                   >
                     <div class="result-content">
                       <div class="result-name">{{ result.name }}</div>
-                      <div class="result-address">{{ result.formatted_address }}</div>
+                      <div class="result-address">{{ result.formatted_address || result.vicinity || '地址資訊不完整' }}</div>
                       <div class="result-meta">
                         <span v-if="result.rating" class="result-rating">
                           <Icon name="mdi:star" />
                           {{ result.rating }}
+                        </span>
+                        <span v-if="result.types && result.types.length > 0" class="result-types">
+                          {{ result.types[0].replace(/_/g, ' ') }}
                         </span>
                       </div>
                     </div>
@@ -476,6 +482,17 @@
                 <div v-if="isGoogleSearching" class="search-loading">
                   <Icon name="eos-icons:loading" />
                   <span>搜尋中...</span>
+                </div>
+
+                <!-- 沒有結果時的提示 -->
+                <div v-if="!isGoogleSearching && googleSearchQuery.length >= 3 && googleSearchResults.length === 0" class="search-no-results">
+                  <Icon name="mdi:map-marker-off" />
+                  <span>找不到相關地點，請嘗試其他關鍵字</span>
+                </div>
+
+                <!-- 除錯資訊 (開發時使用) -->
+                <div v-if="googleSearchQuery.length >= 3" class="search-debug" style="margin-top: 8px; font-size: 10px; color: #9ca3af; padding: 4px; background: #f9fafb; border-radius: 4px;">
+                  除錯: 查詢="{{googleSearchQuery}}" | 結果={{googleSearchResults.length}}個 | 搜尋中={{isGoogleSearching}}
                 </div>
               </div>
             </div>
@@ -519,6 +536,45 @@
                     placeholder="請輸入完整地址"
                   />
                 </div>
+              </div>
+            </div>
+
+            <!-- 圖片預覽區域 -->
+            <div v-if="submissionForm.photos && submissionForm.photos.length > 0" class="form-section">
+              <h3 class="section-title">
+                <Icon name="mdi:image-multiple" />
+                自動載入的地點圖片
+              </h3>
+              
+              <div class="photo-preview-grid">
+                <div 
+                  v-for="(photo, index) in submissionForm.photos" 
+                  :key="index"
+                  class="photo-preview-item"
+                >
+                  <img 
+                    :src="photo" 
+                    :alt="`地點圖片 ${index + 1}`"
+                    class="photo-preview-image"
+                    @error="handleImageError(index)"
+                  />
+                  <button
+                    type="button"
+                    @click="removePhoto(index)"
+                    class="photo-remove-btn"
+                    title="移除此圖片"
+                  >
+                    <Icon name="mdi:close" />
+                  </button>
+                  <div class="photo-preview-overlay">
+                    <span class="photo-number">{{ index + 1 }}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="photo-info">
+                <Icon name="mdi:information" />
+                <span>已自動從 Google Maps 載入 {{ submissionForm.photos.length }} 張圖片</span>
               </div>
             </div>
 
@@ -1080,39 +1136,85 @@ const addDay = () => {
 };
 
 // 推薦地點處理函數
+let searchTimeout = null;
+
 const handleGoogleSearch = async () => {
+  // 清除之前的延遲執行
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  
   if (!googleSearchQuery.value || googleSearchQuery.value.length < 3) {
     googleSearchResults.value = [];
     return;
   }
   
-  isGoogleSearching.value = true;
-  try {
-    const response = await $fetch('/api/google/places/search', {
-      method: 'POST',
-      body: {
-        query: googleSearchQuery.value,
-        region: 'tw',
-        language: 'zh-TW'
-      }
-    });
+  // 延遲 500ms 執行搜尋，避免過於頻繁的 API 呼叫
+  searchTimeout = setTimeout(async () => {
+    isGoogleSearching.value = true;
+    console.log('🔍 開始 Google 搜尋:', googleSearchQuery.value);
     
-    if (response.success) {
-      googleSearchResults.value = response.data?.results || [];
-    } else {
+    try {
+      const response = await $fetch('/api/google/places/search', {
+        method: 'POST',
+        body: {
+          query: googleSearchQuery.value + ' 宜蘭', // 加上地區限制
+          region: 'tw',
+          language: 'zh-TW',
+          location: {
+            lat: 24.7021,
+            lng: 121.7378
+          },
+          radius: 50000 // 50公里範圍
+        }
+      });
+      
+      console.log('📡 Google API 完整回應:', response);
+      
+      if (response.success && response.data) {
+        const results = response.data.results || response.data || [];
+        googleSearchResults.value = results;
+        
+        console.log('✅ 處理後的搜尋結果:', {
+          數量: results.length,
+          前三個: results.slice(0, 3).map(r => ({
+            名稱: r.name,
+            地址: r.formatted_address || r.vicinity,
+            place_id: r.place_id,
+            評分: r.rating
+          }))
+        });
+        
+        // 檢查響應式資料是否正確更新
+        console.log('📊 響應式資料狀態:', {
+          googleSearchResults數量: googleSearchResults.value.length,
+          isGoogleSearching: isGoogleSearching.value,
+          googleSearchQuery: googleSearchQuery.value
+        });
+        
+      } else {
+        console.warn('⚠️ Google 搜尋無結果或失敗:', response);
+        googleSearchResults.value = [];
+      }
+    } catch (error) {
+      console.error('❌ Google 搜尋錯誤:', error);
       googleSearchResults.value = [];
+    } finally {
+      isGoogleSearching.value = false;
+      console.log('🏁 搜尋完成，結果數量:', googleSearchResults.value.length);
     }
-  } catch (error) {
-    console.error('Google 搜尋失敗:', error);
-    googleSearchResults.value = [];
-  } finally {
-    isGoogleSearching.value = false;
-  }
+  }, 500);
 };
 
 const clearGoogleSearch = () => {
   googleSearchQuery.value = '';
   googleSearchResults.value = [];
+  // 清除延遲執行的搜尋
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+    searchTimeout = null;
+  }
+  console.log('🧹 已清除 Google 搜尋');
 };
 
 const selectGooglePlaceForSubmission = async (place) => {
@@ -1132,7 +1234,18 @@ const selectGooglePlaceForSubmission = async (place) => {
       method: 'POST',
       body: {
         place_id: place.place_id,
-        language: 'zh-TW'
+        language: 'zh-TW',
+        fields: [
+          'name',
+          'formatted_address',
+          'geometry',
+          'photos',
+          'formatted_phone_number',
+          'website',
+          'rating',
+          'price_level',
+          'business_status'
+        ]
       }
     });
     
@@ -1143,22 +1256,47 @@ const selectGooglePlaceForSubmission = async (place) => {
       if (details.website) submissionForm.website = details.website;
       if (details.formatted_phone_number) submissionForm.phone_number = details.formatted_phone_number;
       
-      // 獲取照片
+      // 處理 Google Photos - 取前三張圖片並轉換為實際 URL
       if (details.photos && details.photos.length > 0) {
-        try {
-          const photoResponse = await $fetch('/api/google/places/photo', {
-            method: 'POST',
-            body: {
-              photo_reference: details.photos[0].photo_reference,
-              maxwidth: 800
+        console.log(`開始載入 ${Math.min(3, details.photos.length)} 張 Google 圖片...`);
+        
+        const photoUrls = await Promise.all(
+          details.photos.slice(0, 3).map(async (photo, index) => {
+            try {
+              console.log(`載入第 ${index + 1} 張圖片，photo_reference:`, photo.photo_reference);
+              
+              // 使用 Google Places Photo API 取得圖片 URL
+              const photoResponse = await $fetch('/api/google/places/photo', {
+                method: 'POST',
+                body: {
+                  photo_reference: photo.photo_reference,
+                  maxwidth: 800 // 設定適中的圖片寬度
+                }
+              });
+              
+              if (photoResponse.success && photoResponse.url) {
+                console.log(`第 ${index + 1} 張圖片載入成功:`, photoResponse.url);
+                return photoResponse.url;
+              } else {
+                console.warn(`第 ${index + 1} 張圖片載入失敗:`, photoResponse);
+              }
+            } catch (error) {
+              console.error(`載入第 ${index + 1} 張圖片時發生錯誤:`, error);
             }
-          });
-          
-          if (photoResponse.success) {
-            submissionForm.photos = [photoResponse.data];
-          }
-        } catch (photoError) {
-          console.log('獲取照片失敗:', photoError);
+            return null;
+          })
+        );
+        
+        // 過濾掉失敗的請求，只保留成功的圖片 URL
+        const validPhotoUrls = photoUrls.filter(url => url !== null);
+        
+        if (validPhotoUrls.length > 0) {
+          // 將 Google 圖片 URL 添加到表單的 photos 陣列中
+          submissionForm.photos = [...(submissionForm.photos || []), ...validPhotoUrls];
+          console.log(`✅ 成功載入 ${validPhotoUrls.length} 張 Google 圖片到表單中`);
+          console.log('所有圖片 URLs:', submissionForm.photos);
+        } else {
+          console.warn('⚠️ 沒有成功載入任何 Google 圖片');
         }
       }
     }
@@ -1166,6 +1304,8 @@ const selectGooglePlaceForSubmission = async (place) => {
     // 清除搜尋結果
     googleSearchResults.value = [];
     googleSearchQuery.value = '';
+    
+    console.log('✅ Google 地點選擇完成，表單資料:', submissionForm);
     
   } catch (error) {
     console.error('選擇 Google 地點失敗:', error);
@@ -1216,6 +1356,17 @@ const handlePlaceSubmission = async () => {
   } finally {
     isSubmitting.value = false;
   }
+};
+
+// 圖片處理函式
+const removePhoto = (index) => {
+  submissionForm.photos.splice(index, 1);
+  console.log(`已移除第 ${index + 1} 張圖片，剩餘 ${submissionForm.photos.length} 張`);
+};
+
+const handleImageError = (index) => {
+  console.error(`第 ${index + 1} 張圖片載入失敗，將從列表中移除`);
+  removePhoto(index);
 };
 
 // 新增地點處理函數
@@ -2512,6 +2663,91 @@ onMounted(async () => {
   }
 }
 
+// Google 搜尋結果樣式
+.search-container {
+  position: relative;
+  margin-bottom: 20px;
+
+  .search-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
+
+    .search-result-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: #f9fafb;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .place-name {
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 4px;
+      }
+
+      .place-address {
+        font-size: 14px;
+        color: #6b7280;
+      }
+    }
+
+    .search-loading {
+      padding: 20px;
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .search-no-results {
+      padding: 20px;
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .search-debug {
+      padding: 12px;
+      background: #f3f4f6;
+      border-top: 1px solid #e5e7eb;
+      font-size: 12px;
+      color: #374151;
+      font-family: monospace;
+    }
+  }
+}
+
 // 推薦地點模態框樣式
 .place-submission-modal {
   background: white;
@@ -3452,6 +3688,114 @@ onMounted(async () => {
     .btn-close-modal {
       flex: none;
     }
+  }
+}
+
+// 圖片預覽區域樣式
+.photo-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.photo-preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    
+    .photo-remove-btn {
+      opacity: 1;
+    }
+  }
+}
+
+.photo-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s;
+  
+  .photo-preview-item:hover & {
+    transform: scale(1.05);
+  }
+}
+
+.photo-remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: rgba(220, 38, 38, 1);
+    transform: scale(1.1);
+  }
+  
+  .icon {
+    font-size: 12px;
+  }
+}
+
+.photo-preview-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  padding: 8px 6px 4px;
+  
+  .photo-number {
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.photo-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #059669;
+  font-size: 13px;
+  background: #f0fdf4;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+  
+  .icon {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .photo-preview-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .photo-remove-btn {
+    opacity: 1; // 在手機上總是顯示移除按鈕
   }
 }
 </style>
