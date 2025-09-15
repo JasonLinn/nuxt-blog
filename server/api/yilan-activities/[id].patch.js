@@ -35,9 +35,10 @@ export default defineEventHandler(async (event) => {
     let newImageUrls = existingActivity.images || []
     
     const contentType = getHeader(event, 'content-type')
+    const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV
     
-    if (contentType && contentType.includes('multipart/form-data')) {
-      // 處理包含文件上傳的請求
+    if (contentType && contentType.includes('multipart/form-data') && !isVercel) {
+      // 處理包含文件上傳的請求（僅本地環境）
       const form = formidable({
         uploadDir: './public/yilan-activities',
         keepExtensions: true,

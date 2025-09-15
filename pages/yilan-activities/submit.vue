@@ -383,7 +383,11 @@
                   multiple
                   @change="handleImageUpload"
                 />
-                <div class="form-text">可上傳多張圖片，建議大小不超過 2MB</div>
+                <div class="form-text">
+                  可上傳多張圖片，建議大小不超過 2MB
+                  <br>
+                  <small class="text-warning">⚠️ 目前線上環境暫時無法上傳圖片，如需添加圖片請聯繫管理員</small>
+                </div>
                 <div v-if="errors.images" class="invalid-feedback">{{ errors.images }}</div>
 
                 <!-- 圖片預覽 -->
@@ -611,27 +615,53 @@ const submitActivity = async () => {
   isSubmitting.value = true
 
   try {
-    // 準備 FormData
-    const formData = new FormData()
-
-    // 添加文字欄位
-    Object.entries(form).forEach(([key, value]) => {
-      if (key !== 'images' && value !== null && value !== '') {
-        formData.append(key, value)
-      }
-    })
-
-    // 添加圖片檔案
-    if (form.images && form.images.length > 0) {
-      form.images.forEach((file, index) => {
-        formData.append('images', file)
+    // 檢測是否在線上環境（暫時處理圖片上傳問題）
+    const isProduction = process.client && window.location.hostname !== 'localhost'
+    
+    let requestBody, requestHeaders = {}
+    
+    if (isProduction) {
+      // 線上環境：使用 JSON（暫時跳過圖片上傳）
+      const formDataObj = {}
+      Object.entries(form).forEach(([key, value]) => {
+        if (key !== 'images' && value !== null && value !== '') {
+          formDataObj[key] = value
+        }
       })
+      
+      // 如果有圖片，暫時跳過並提示用戶
+      if (form.images && form.images.length > 0) {
+        console.log('暫時跳過圖片上傳，請聯繫管理員添加圖片')
+      }
+      
+      requestBody = formDataObj
+      requestHeaders['Content-Type'] = 'application/json'
+    } else {
+      // 本地環境：使用 FormData
+      const formData = new FormData()
+
+      // 添加文字欄位
+      Object.entries(form).forEach(([key, value]) => {
+        if (key !== 'images' && value !== null && value !== '') {
+          formData.append(key, value)
+        }
+      })
+
+      // 添加圖片檔案
+      if (form.images && form.images.length > 0) {
+        form.images.forEach((file, index) => {
+          formData.append('images', file)
+        })
+      }
+      
+      requestBody = formData
     }
 
     // 提交到 API
     const response = await $fetch('/api/yilan-activities', {
       method: 'POST',
-      body: formData
+      headers: requestHeaders,
+      body: requestBody
     })
 
     if (response.success) {

@@ -5,36 +5,49 @@ import path from 'path'
 
 export default defineEventHandler(async (event) => {
   try {
-    // 解析 multipart/form-data
-    const form = formidable({
-      uploadDir: './public/yilan-activities',
-      keepExtensions: true,
-      maxFileSize: 5 * 1024 * 1024, // 5MB
-      maxFiles: 5
-    })
+    // 檢測是否在 Vercel 環境中
+    const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV
     
-    // 確保上傳目錄存在
-    if (!fs.existsSync('./public/yilan-activities')) {
-      fs.mkdirSync('./public/yilan-activities', { recursive: true })
-    }
+    let fields, files, imageUrls = []
     
-    const [fields, files] = await form.parse(event.node.req)
-    
-    // 處理圖片上傳
-    const imageUrls = []
-    if (files.images) {
-      const imageFiles = Array.isArray(files.images) ? files.images : [files.images]
+    if (isVercel) {
+      // 在 Vercel 環境中，暫時跳過檔案上傳，只處理 JSON 資料
+      const body = await readBody(event)
+      fields = body
+      console.log('Vercel environment detected, skipping file upload')
+    } else {
+      // 本地開發環境，正常處理檔案上傳
+      const form = formidable({
+        uploadDir: './public/yilan-activities',
+        keepExtensions: true,
+        maxFileSize: 5 * 1024 * 1024, // 5MB
+        maxFiles: 5
+      })
       
-      for (const file of imageFiles) {
-        if (file.size > 0) {
-          const timestamp = Date.now()
-          const ext = path.extname(file.originalFilename || file.newFilename)
-          const newFilename = `${timestamp}-${Math.random().toString(36).substr(2, 9)}${ext}`
-          const newPath = path.join('./public/yilan-activities', newFilename)
-          
-          // 移動文件到目標位置
-          fs.renameSync(file.filepath, newPath)
-          imageUrls.push(`/yilan-activities/${newFilename}`)
+      // 確保上傳目錄存在
+      if (!fs.existsSync('./public/yilan-activities')) {
+        fs.mkdirSync('./public/yilan-activities', { recursive: true })
+      }
+      
+      const [formFields, formFiles] = await form.parse(event.node.req)
+      fields = formFields
+      files = formFiles
+      
+      // 處理圖片上傳
+      if (files && files.images) {
+        const imageFiles = Array.isArray(files.images) ? files.images : [files.images]
+        
+        for (const file of imageFiles) {
+          if (file.size > 0) {
+            const timestamp = Date.now()
+            const ext = path.extname(file.originalFilename || file.newFilename)
+            const newFilename = `${timestamp}-${Math.random().toString(36).substr(2, 9)}${ext}`
+            const newPath = path.join('./public/yilan-activities', newFilename)
+            
+            // 移動文件到目標位置
+            fs.renameSync(file.filepath, newPath)
+            imageUrls.push(`/yilan-activities/${newFilename}`)
+          }
         }
       }
     }
