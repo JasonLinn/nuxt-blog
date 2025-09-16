@@ -892,12 +892,40 @@ const recommendedItinerariesFromDB = computed(() => {
       // 轉換 places 資料結構為前端期望的格式
       let places_data = [];
       if (itinerary.places && Array.isArray(itinerary.places)) {
-        places_data = itinerary.places.map(dayData => {
-          if (dayData.places && Array.isArray(dayData.places)) {
+        console.log('轉換推薦行程 places 資料:', itinerary.title, itinerary.places);
+
+        places_data = itinerary.places.map((dayData, dayIndex) => {
+          console.log(`第 ${dayIndex + 1} 天資料:`, dayData);
+
+          // 如果 dayData 本身就是地點陣列 (新格式: [[{name: "地點1"}, {name: "地點2"}]])
+          if (Array.isArray(dayData)) {
+            return dayData.map(place => {
+              if (typeof place === 'string') {
+                return place;
+              } else if (place && place.name) {
+                return place.name;
+              } else {
+                return String(place);
+              }
+            });
+          }
+          // 如果 dayData 包含 places 屬性 (舊格式: [{day: 1, places: [...]}])
+          else if (dayData && dayData.places && Array.isArray(dayData.places)) {
             return dayData.places.map(place => place.name || place);
           }
+          // 如果 dayData 本身就是一個地點物件
+          else if (dayData && dayData.name) {
+            return [dayData.name];
+          }
+          // 如果 dayData 是字串
+          else if (typeof dayData === 'string') {
+            return [dayData];
+          }
+
           return [];
         });
+
+        console.log('轉換後的 places_data:', places_data);
       }
       
       return {
@@ -1297,6 +1325,9 @@ const getDifficultyText = (level) => {
 
 const loadItineraryTemplate = async (template) => {
   try {
+    console.log('開始套用行程模板:', template.title);
+    console.log('模板資料:', template);
+
     // 確認是否要覆蓋目前的行程
     if (itinerary.value.length > 0) {
       const confirmed = confirm(`套用此推薦行程將清除目前的行程安排，確定要繼續嗎？`);
@@ -1308,23 +1339,91 @@ const loadItineraryTemplate = async (template) => {
     totalDays.value = template.days;
     currentDay.value = 1;
 
-    // 載入推薦行程的地點
+    let addedPlacesCount = 0;
+    let missingPlaces = [];
+
+    // 載入推薦行程的地點 - 處理多種可能的資料格式
+    let placesData = [];
+
+    // 檢查是否有 places_data（前端轉換後的格式）
     if (template.places_data && Array.isArray(template.places_data)) {
-      for (let dayIndex = 0; dayIndex < template.places_data.length; dayIndex++) {
-        const dayPlaces = template.places_data[dayIndex];
-        
+      placesData = template.places_data;
+      console.log('使用 places_data 格式:', placesData);
+    }
+    // 檢查原始的 places 格式（資料庫中的格式）
+    else if (template.places && Array.isArray(template.places)) {
+      console.log('使用原始 places 格式，進行轉換...');
+      console.log('原始 places 資料:', template.places);
+
+      // 處理不同的 places 資料結構
+      placesData = template.places.map((dayData, dayIndex) => {
+        console.log(`處理第 ${dayIndex + 1} 天資料:`, dayData);
+
+        // 如果 dayData 本身就是地點陣列 (新格式)
+        if (Array.isArray(dayData)) {
+          return dayData.map(place => {
+            if (typeof place === 'string') {
+              return place;
+            } else if (place && place.name) {
+              return place.name;
+            } else {
+              return String(place);
+            }
+          });
+        }
+        // 如果 dayData 包含 places 屬性 (舊格式)
+        else if (dayData && dayData.places && Array.isArray(dayData.places)) {
+          return dayData.places.map(place => {
+            if (typeof place === 'string') {
+              return place;
+            } else if (place && place.name) {
+              return place.name;
+            } else {
+              return String(place);
+            }
+          });
+        }
+        // 如果 dayData 本身就是一個地點物件
+        else if (dayData && dayData.name) {
+          return [dayData.name];
+        }
+        // 如果 dayData 是字串
+        else if (typeof dayData === 'string') {
+          return [dayData];
+        }
+
+        return [];
+      });
+      console.log('轉換後的 placesData:', placesData);
+    }
+
+    if (placesData.length > 0) {
+      for (let dayIndex = 0; dayIndex < placesData.length; dayIndex++) {
+        const dayPlaces = placesData[dayIndex];
+
         if (Array.isArray(dayPlaces)) {
           for (let placeIndex = 0; placeIndex < dayPlaces.length; placeIndex++) {
             const placeName = dayPlaces[placeIndex];
-            
-            // 嘗試在現有地點中找到匹配的地點
-            const matchedPlace = places.value.find(p => 
-              p.name === placeName || 
-              p.name.includes(placeName) || 
-              placeName.includes(p.name)
-            );
-            
+            console.log(`嘗試匹配地點: "${placeName}"`);
+
+            // 嘗試在現有地點中找到匹配的地點 - 使用更寬鬆的匹配邏輯
+            const matchedPlace = places.value.find(p => {
+              const pName = p.name.trim().toLowerCase();
+              const searchName = placeName.trim().toLowerCase();
+
+              return (
+                pName === searchName ||
+                pName.includes(searchName) ||
+                searchName.includes(pName) ||
+                // 移除括號後再比較
+                pName.replace(/[()（）]/g, '') === searchName.replace(/[()（）]/g, '') ||
+                // 移除空格後再比較
+                pName.replace(/\s/g, '') === searchName.replace(/\s/g, '')
+              );
+            });
+
             if (matchedPlace) {
+              console.log(`成功匹配地點: "${placeName}" -> "${matchedPlace.name}"`);
               itinerary.value.push({
                 id: Date.now() + dayIndex * 1000 + placeIndex,
                 place: matchedPlace,
@@ -1332,15 +1431,36 @@ const loadItineraryTemplate = async (template) => {
                 order_in_day: placeIndex + 1,
                 duration_minutes: matchedPlace.recommended_duration || 60
               });
+              addedPlacesCount++;
+            } else {
+              console.warn(`找不到匹配的地點: "${placeName}"`);
+              missingPlaces.push(placeName);
             }
           }
         }
       }
     }
 
-    alert(`已套用「${template.title}」行程模板！`);
+    console.log('套用結果:', {
+      totalDays: totalDays.value,
+      addedPlaces: addedPlacesCount,
+      missingPlaces: missingPlaces,
+      finalItinerary: itinerary.value
+    });
+
+    // 提供更詳細的結果回饋
+    if (addedPlacesCount > 0) {
+      let message = `已套用「${template.title}」行程模板！\n成功添加 ${addedPlacesCount} 個地點`;
+      if (missingPlaces.length > 0) {
+        message += `\n\n無法找到以下地點，請手動添加：\n${missingPlaces.join(', ')}`;
+      }
+      alert(message);
+    } else {
+      alert(`套用「${template.title}」行程模板失敗\n找不到任何匹配的地點。\n\n可能原因：\n1. 地點名稱不匹配\n2. 地點資料尚未載入\n\n請稍後重試或手動添加地點。`);
+    }
+
     updateMap();
-    
+
   } catch (error) {
     console.error('載入行程模板失敗:', error);
     alert('載入行程模板失敗，請稍後重試。');

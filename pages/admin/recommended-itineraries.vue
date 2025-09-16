@@ -1,5 +1,7 @@
 <template>
   <div class="admin-recommended-itineraries">
+    <AdminHeader />
+
     <div class="admin-header">
       <h1>推薦行程管理</h1>
       <button @click="handleCreateClick" class="btn-create">

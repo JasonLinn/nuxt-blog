@@ -25,11 +25,17 @@
       >
         特色項目管理
       </NuxtLink>
-      <NuxtLink 
-        to="/admin/yilan-activities" 
+      <NuxtLink
+        to="/admin/yilan-activities"
         :class="['admin-nav-link', { active: isActive('/admin/yilan-activities') }]"
       >
         宜蘭活動管理
+      </NuxtLink>
+      <NuxtLink
+        to="/admin/recommended-itineraries"
+        :class="['admin-nav-link', { active: isActive('/admin/recommended-itineraries') }]"
+      >
+        推薦行程管理
       </NuxtLink>
       <button @click="logout" class="logout-btn">登出</button>
     </div>
