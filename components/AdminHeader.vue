@@ -37,6 +37,12 @@
       >
         推薦行程管理
       </NuxtLink>
+      <NuxtLink
+        to="/admin/coupon-review"
+        :class="['admin-nav-link', { active: isActive('/admin/coupon-review') }]"
+      >
+        優惠券審核
+      </NuxtLink>
       <button @click="logout" class="logout-btn">登出</button>
     </div>
   </div>
