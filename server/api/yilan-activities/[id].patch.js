@@ -103,6 +103,8 @@ export default defineEventHandler(async (event) => {
         organizer_email: getData('organizer_email'),
         organizer_phone: getData('organizer_phone') || null,
         contact_info: getData('contact_info') || null,
+        submitter_name: getData('submitter_name'),
+        submitter_email: getData('submitter_email'),
         admin_notes: getData('admin_notes') || null,
         images: newImageUrls
       }

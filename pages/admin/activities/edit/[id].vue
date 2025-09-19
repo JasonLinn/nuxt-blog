@@ -124,14 +124,14 @@
               </div>
               
               <div class="col-md-6 mb-3">
-                <label class="form-label">聯絡信箱 <span class="text-danger">*</span></label>
+                <label class="form-label">主辦單位信箱</label>
                 <input 
                   v-model="form.organizer_email" 
                   type="email" 
-                  required 
                   class="form-control"
-                  placeholder="請輸入聯絡信箱"
+                  placeholder="請輸入主辦單位信箱"
                 />
+                <div class="form-text">選填，用於活動相關聯繫</div>
               </div>
               
               <div class="col-md-6 mb-3">
@@ -145,14 +145,47 @@
               </div>
             </div>
             
-            <div class="mb-3">
+            <div class="mb-0">
               <label class="form-label">其他聯絡資訊</label>
               <textarea 
                 v-model="form.contact_info" 
                 rows="3"
                 class="form-control"
-                placeholder="請輸入其他聯絡資訊"
+                placeholder="其他聯絡方式，如 LINE ID、Facebook 等"
               ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 提交者資訊 -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">提交者資訊</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">提交者姓名 <span class="text-danger">*</span></label>
+                <input 
+                  v-model="form.submitter_name" 
+                  type="text" 
+                  required 
+                  class="form-control"
+                  placeholder="提交者姓名"
+                />
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label class="form-label">提交者信箱 <span class="text-danger">*</span></label>
+                <input 
+                  v-model="form.submitter_email" 
+                  type="email" 
+                  required 
+                  class="form-control"
+                  placeholder="提交者信箱"
+                />
+                <div class="form-text">用於接收審核結果通知</div>
+              </div>
             </div>
           </div>
         </div>
@@ -284,6 +317,8 @@ const form = ref({
   organizer_email: '',
   organizer_phone: '',
   contact_info: '',
+  submitter_name: '',
+  submitter_email: '',
   admin_notes: '',
   images: []
 })
@@ -291,7 +326,7 @@ const form = ref({
 const fetchActivity = async () => {
   try {
     loading.value = true
-    const response = await $fetch(`/api/activities/${route.params.id}`)
+    const response = await $fetch(`/api/yilan-activities/${route.params.id}`)
     activity.value = response.data
     
     // 填入表單數據
@@ -390,7 +425,7 @@ const updateActivity = async () => {
     
     console.log('FormData 建立完成，發送請求...')
     
-    const response = await $fetch(`/api/activities/${route.params.id}`, {
+    const response = await $fetch(`/api/yilan-activities/${route.params.id}`, {
       method: 'PATCH',
       body: formData
     })
@@ -429,21 +464,37 @@ onMounted(() => {
   min-height: 100vh;
   padding: 2rem 0;
 
+  .container {
+    max-width: 1200px;
+  }
+
   .card {
     border: none;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     border-radius: 8px;
+    margin-bottom: 1.5rem;
     
     .card-header {
       background-color: #fff;
       border-bottom: 1px solid #dee2e6;
       border-radius: 8px 8px 0 0;
+      padding: 1rem 1.25rem;
+      
+      .card-title {
+        color: #495057;
+        font-weight: 600;
+      }
+    }
+    
+    .card-body {
+      padding: 1.5rem;
     }
   }
 
   .form-control, .form-select {
     border-radius: 6px;
     border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     
     &:focus {
       border-color: #86b7fe;
@@ -451,12 +502,40 @@ onMounted(() => {
     }
   }
 
+  .form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
   .btn {
     border-radius: 6px;
     font-weight: 500;
+    padding: 0.5rem 1rem;
     
     i {
       font-size: 1rem;
+    }
+    
+    &.btn-primary {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      
+      &:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+      }
+    }
+    
+    &.btn-outline-primary {
+      color: #0d6efd;
+      border-color: #0d6efd;
+      
+      &:hover {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: #fff;
+      }
     }
   }
 
@@ -465,6 +544,7 @@ onMounted(() => {
       border-radius: 8px;
       max-height: 200px;
       object-fit: cover;
+      width: 100%;
     }
     
     .btn {
@@ -475,12 +555,52 @@ onMounted(() => {
       display: flex;
       align-items: center;
       justify-content: center;
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background-color: rgba(220, 53, 69, 0.9);
+      border-color: transparent;
+      color: white;
+      
+      &:hover {
+        background-color: #dc3545;
+      }
     }
   }
 
   .spinner-border {
     width: 1.5rem;
     height: 1.5rem;
+  }
+
+  .text-danger {
+    color: #dc3545 !important;
+  }
+
+  // 響應式設計
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .d-flex.justify-content-between {
+      flex-direction: column;
+      
+      .btn {
+        margin-bottom: 0.5rem;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
   }
 }
 </style>
