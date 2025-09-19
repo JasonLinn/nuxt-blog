@@ -351,18 +351,13 @@
             </div>
             <div class="card-content">
               <div class="location-info">
-                <div class="location-tag">
+                <div class="location-address-tag">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
                   </svg>
-                  <span>{{ bnb.area }}</span>
-                </div>
-                <div v-if="bnb.address" class="address-tag">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4z"/>
-                    <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
-                  </svg>
-                  <span>{{ bnb.address }}</span>
+                  <span v-if="bnb.area && bnb.address">{{ bnb.area }} - {{ bnb.address }}</span>
+                  <span v-else-if="bnb.area">{{ bnb.area }}</span>
+                  <span v-else-if="bnb.address">{{ bnb.address }}</span>
                 </div>
                 
                 <!-- Google 地圖按鈕 -->
@@ -1587,35 +1582,26 @@ console.log('民宿ID:', bnbId);
   gap: 15px;
 }
 
-.location-tag, .address-tag {
+.location-address-tag {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
   border-radius: 12px;
   font-weight: 500;
   font-size: 15px;
-  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
   transition: all 0.3s ease;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
   }
   
   svg {
     flex-shrink: 0;
-  }
-}
-
-.address-tag {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
-  
-  &:hover {
-    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
   }
 }
 
