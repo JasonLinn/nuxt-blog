@@ -9,6 +9,14 @@
         </div>
       </div>
       
+      <!-- 民宿資料載入狀態 -->
+      <div v-else-if="isLoadingHomestay && activeCategoriesMap.housing" class="loading-overlay-partial">
+        <div class="loading-content">
+          <Icon class="h-6 w-6 text-green-500 animate-spin" name="eos-icons:loading" />
+          <span class="ml-2 text-gray-600">載入民宿資料中...</span>
+        </div>
+      </div>
+      
       <!-- 錯誤狀態 -->
       <div v-else-if="mapError" class="error-overlay">
         <div class="error-content">
@@ -25,10 +33,17 @@
             v-for="(category, index) in categories" 
             :key="index" 
             @click="toggleCategory(category.key)"
-            :class="{ active: activeCategoriesMap[category.key] }"
+            :class="{ 
+              active: activeCategoriesMap[category.key],
+              loading: category.key === 'housing' && isLoadingHomestay
+            }"
+            :disabled="category.key === 'housing' && isLoadingHomestay"
             class="category-btn"
           >
-            {{ category.name }}
+            <span v-if="category.key === 'housing' && isLoadingHomestay" class="loading-spinner">
+              <Icon class="h-4 w-4 animate-spin" name="eos-icons:loading" />
+            </span>
+            <span v-else>{{ category.name }}</span>
           </button>
         </div>
         
@@ -42,7 +57,7 @@
             autocomplete="off"
             spellcheck="false"
           />
-          <div v-if="searchResults.length > 0" class="search-results">
+          <div v-if="searchResults && searchResults.length > 0" class="search-results">
             <div 
               v-for="(result, index) in searchResults" 
               :key="result.id || index" 
@@ -75,7 +90,62 @@
           <Icon name="ri:arrow-up-s-line" class="map-toggle" :class="{ 'arrow-upside': isInfoPanelOpen }" />
         </div>
         <div class="map-info-wrapper" v-if="selectedCoupon && selectedCoupon.id">
-          <CouponInfo :couponId="selectedCoupon.id" :key="selectedCoupon.id"></CouponInfo>
+          <!-- 民宿資訊顯示 -->
+          <div v-if="selectedCoupon.detailUrl && selectedCoupon.detailUrl.includes('/homestays/')" class="homestay-info">
+            <div class="homestay-header">
+              <h3 class="homestay-title">{{ selectedCoupon.title }}</h3>
+            </div>
+            
+            <div class="homestay-image" v-if="selectedCoupon.image_url">
+              <img :src="selectedCoupon.image_url" :alt="selectedCoupon.title" />
+            </div>
+            
+            <div class="homestay-details">
+              <div class="detail-item" v-if="selectedCoupon.description">
+                <span class="detail-label">📍 位置：</span>
+                <span class="detail-value">{{ selectedCoupon.description }}</span>
+              </div>
+              
+              <div class="detail-item" v-if="selectedCoupon.price">
+                <span class="detail-label">💰 價格：</span>
+                <span class="detail-value">{{ selectedCoupon.price }}</span>
+              </div>
+              
+              <div class="detail-item" v-if="selectedCoupon.min_guests || selectedCoupon.max_guests">
+                <span class="detail-label">👥 人數：</span>
+                <span class="detail-value">
+                  {{ selectedCoupon.min_guests || 1 }} - {{ selectedCoupon.max_guests || '不限' }} 人
+                </span>
+              </div>
+              
+              <div class="detail-item" v-if="selectedCoupon.content">
+                <span class="detail-label">📝 描述：</span>
+                <span class="detail-value">{{ selectedCoupon.content }}</span>
+              </div>
+              
+              <div class="homestay-contact" v-if="selectedCoupon.phone || selectedCoupon.website">
+                <div class="contact-item" v-if="selectedCoupon.phone">
+                  <a :href="`tel:${selectedCoupon.phone}`" class="contact-link">
+                    📞 {{ selectedCoupon.phone }}
+                  </a>
+                </div>
+                <div class="contact-item" v-if="selectedCoupon.website">
+                  <a :href="selectedCoupon.website" target="_blank" class="contact-link">
+                    🌐 官方網站
+                  </a>
+                </div>
+              </div>
+              
+              <div class="homestay-actions">
+                <nuxt-link :to="selectedCoupon.detailUrl" class="view-detail-btn">
+                  查看詳細資訊
+                </nuxt-link>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 原有的優惠券資訊 -->
+          <CouponInfo v-else :couponId="selectedCoupon.id" :key="selectedCoupon.id"></CouponInfo>
         </div>
         <div class="map-info-wrapper" v-else-if="selectedCoupon && !selectedCoupon.id">
           <div class="debug-info">
@@ -111,20 +181,63 @@
   const couponObject = computed(() => store.getCouponData);
   const selectedCategory = ref(null);
   
+  // 民宿資料狀態
+  const homestayData = ref([]);
+  const isLoadingHomestay = ref(false);
+  
+  // 活躍類別狀態 - 預設只顯示「食」類別
+  const activeCategoriesMap = reactive({
+    eat: true,
+    play: false,
+    housing: false,
+    traffic: false
+  });
+  
   // 效能優化：使用快取的計算屬性
   const couponDataCache = new Map();
-  const couponData = computed(() => {
-    if (!couponObject.value?.data?.items) return [];
+  const homestayDataCache = new Map();
+  
+  // 整合資料來源
+  const mapData = computed(() => {
+    // 確保在客戶端運行
+    if (process.server) return [];
     
-    const cacheKey = `${selectedCategory.value || 'all'}_${couponObject.value.data.items.length}`;
+    // 檢查是否只選擇了 housing 類別
+    const isHousingOnly = activeCategoriesMap.housing && 
+                         !activeCategoriesMap.eat && 
+                         !activeCategoriesMap.play && 
+                         !activeCategoriesMap.traffic;
+    
+    // 如果只選擇住宿類別，使用民宿資料
+    if (isHousingOnly) {
+      return homestayData.value || [];
+    }
+    
+    // 否則使用原有的優惠券資料，但過濾掉住宿類別（避免重複）
+    const couponItems = couponObject.value?.data?.items || [];
+    const filteredItems = couponItems.filter(item => item.category !== 'housing');
+    
+    // 如果選擇了住宿類別，合併民宿資料
+    if (activeCategoriesMap.housing) {
+      return [...filteredItems, ...(homestayData.value || [])];
+    }
+    
+    return filteredItems;
+  });
+  
+  const couponData = computed(() => {
+    if (!mapData.value || !Array.isArray(mapData.value)) return [];
+    
+    const cacheKey = `${Object.entries(activeCategoriesMap).filter(([k, v]) => v).map(([k]) => k).join('_')}_${mapData.value?.length || 0}`;
     
     if (couponDataCache.has(cacheKey)) {
       return couponDataCache.get(cacheKey);
     }
     
-    const result = selectedCategory.value 
-      ? couponObject.value.data.items.filter((i) => i.category === selectedCategory.value) 
-      : couponObject.value.data.items;
+    const result = mapData.value.filter(item => {
+      const categoryKey = item.category || '';
+      return activeCategoriesMap[categoryKey];
+    });
     
     couponDataCache.set(cacheKey, result);
     
@@ -145,6 +258,32 @@
   if (!couponData.value?.length) {
     store.fetchAndSetCoupon({pageSize: 150});
   }
+  
+  // 民宿資料獲取函數
+  const fetchHomestayData = async () => {
+    if (isLoadingHomestay.value) return;
+    
+    try {
+      isLoadingHomestay.value = true;
+      console.log('📡 獲取民宿地圖資料...');
+      
+      const response = await fetch('/api/homestay-map-data');
+      const data = await response.json();
+      
+      if (data.success && data.data?.items) {
+        homestayData.value = data.data.items;
+        console.log('✅ 民宿資料載入成功，數量:', data.data.items.length);
+      } else {
+        console.error('❌ 民宿資料載入失敗:', data.error);
+        homestayData.value = [];
+      }
+    } catch (error) {
+      console.error('❌ 民宿資料獲取錯誤:', error);
+      homestayData.value = [];
+    } finally {
+      isLoadingHomestay.value = false;
+    }
+  };
 
   // 地標資訊面板控制
   const isInfoPanelOpen = ref(false);
@@ -197,13 +336,13 @@
       return;
     }
     
-    if (!couponData.value || !Array.isArray(couponData.value)) {
+    if (!mapData.value || !Array.isArray(mapData.value)) {
       return;
     }
     
     // 過濾符合搜尋條件的地點
     const queryLower = query.toLowerCase();
-    const results = couponData.value
+    const results = mapData.value
       .filter(item => {
         // 優先匹配標題，然後是內容和描述
         const titleMatch = item.title && item.title.toLowerCase().includes(queryLower);
@@ -367,16 +506,13 @@
     { key: 'traffic', name: '行', icon: '🚗', color: '#FFC107' }
   ];
   
-  // 活躍類別狀態 - 預設只顯示「食」類別
-  const activeCategoriesMap = reactive({
-    eat: true,
-    play: false,
-    housing: false,
-    traffic: false
-  });
-  
   // 切換類別顯示/隱藏
-  const toggleCategory = (category) => {
+  const toggleCategory = async (category) => {
+    // 如果是切換到住宿類別且還沒有民宿資料，則載入資料
+    if (category === 'housing' && !activeCategoriesMap[category] && homestayData.value.length === 0) {
+      await fetchHomestayData();
+    }
+    
     activeCategoriesMap[category] = !activeCategoriesMap[category];
     // 使用 nextTick 確保響應式更新完成後再更新標記
     nextTick(() => {
@@ -1201,5 +1337,150 @@
     border-radius: 4px;
     font-size: 12px;
     overflow-x: auto;
+  }
+  
+  /* 民宿資訊樣式 */
+  .homestay-info {
+    padding: 15px;
+  }
+  
+  .homestay-header {
+    margin-bottom: 15px;
+  }
+  
+  .homestay-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  .homestay-image {
+    margin-bottom: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .homestay-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .homestay-details {
+    margin-bottom: 15px;
+  }
+  
+  .detail-item {
+    display: flex;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .detail-label {
+    font-weight: bold;
+    color: #555;
+    min-width: 60px;
+    flex-shrink: 0;
+  }
+  
+  .detail-value {
+    color: #666;
+    flex: 1;
+  }
+  
+  .homestay-contact {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+  }
+  
+  .contact-item {
+    margin-bottom: 5px;
+  }
+  
+  .contact-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .contact-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+    display: inline-block;
+    transition: color 0.2s;
+  }
+  
+  .contact-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+  
+  .homestay-actions {
+    text-align: center;
+  }
+  
+  .view-detail-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+  }
+  
+  .view-detail-btn:hover {
+    background-color: #45a049;
+  }
+
+  /* 載入狀態樣式 */
+  .loading-overlay-partial {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .loading-spinner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .loading-spinner svg {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* 按鈕載入狀態 */
+  .category-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .category-btn:disabled .loading-spinner {
+    color: #666;
   }
   </style>
