@@ -39,6 +39,9 @@ const setCache = (key, data) => {
 
 export default defineEventHandler(async (event) => {
   try {
+    // 設定客戶端編碼為 UTF-8
+    await pool.query('SET CLIENT_ENCODING TO UTF8');
+    
     const query = getQuery(event);
     
     // 設置篩選參數 - 只保留有效參數

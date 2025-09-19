@@ -2,6 +2,9 @@ import { pool } from '../utils/db.js';
 
 export default defineEventHandler(async (event) => {
   try {
+    // 設定客戶端編碼為 UTF-8
+    await pool.query('SET CLIENT_ENCODING TO UTF8');
+    
     const query = getQuery(event);
     const { id } = query;
 

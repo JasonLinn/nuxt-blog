@@ -33,6 +33,9 @@ export default defineEventHandler(async (event) => {
 
     const client = await pool.connect()
     try {
+      // 設定客戶端編碼為 UTF-8
+      await client.query('SET CLIENT_ENCODING TO UTF8');
+      
       // 取得民宿資料
       const homestaysResult = await client.query(`
         SELECT id, updated_at 

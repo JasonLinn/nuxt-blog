@@ -76,6 +76,7 @@ export default defineNuxtConfig({
       viewport: 'width=device-width, initial-scale=1',
       title: '宜蘭旅遊通-宜蘭觀光民宿行銷協會 | 宜蘭合法民宿推薦與旅遊資訊',
       meta: [
+        { 'http-equiv': 'Content-Type', content: 'text/html; charset=utf-8' },
         { name: 'description', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會提供宜蘭地區合法民宿推薦、親子民宿、寵物民宿、海景民宿、包棟民宿等多種主題特色民宿。設有戲水池、KTV、烤肉設施的民宿應有盡有，讓您輕鬆規劃完美的宜蘭之旅' },
         { name: 'keywords', content: '宜蘭民宿,合法民宿,親子民宿,寵物民宿,海景民宿,包棟民宿,戲水池民宿,KTV民宿,烤肉民宿,宜蘭住宿,宜蘭旅遊,民宿推薦,游泳池民宿,唱歌民宿,BBQ民宿' },
         { name: 'author', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會' },
