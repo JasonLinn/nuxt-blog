@@ -71,12 +71,12 @@ export default defineEventHandler(async (event) => {
       organizer_phone: getData('organizer_phone'),
       contact_info: getData('organizer_contact'),
       submitter_name: getData('submitter_name') || getData('organizer_name'),
-      submitter_email: getData('submitter_email') || getData('organizer_email'),
+      submitter_email: getData('submitter_email'),
       status: 'pending'
     }
     
     // 驗證必填欄位
-    const requiredFields = ['title', 'description', 'event_date', 'organizer_name', 'organizer_email', 'submitter_name', 'submitter_email']
+    const requiredFields = ['title', 'description', 'event_date', 'organizer_name', 'submitter_name', 'submitter_email']
     for (const field of requiredFields) {
       if (!activityData[field] || activityData[field].toString().trim() === '') {
         throw createError({
