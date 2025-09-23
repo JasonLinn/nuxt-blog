@@ -532,6 +532,16 @@ const bnbsData = computed(() => homestayStore.getAllHomestays);
 const loading = computed(() => homestayStore.getLoading);
 const error = computed(() => homestayStore.getError);
 
+// 隨機排序函式
+const shuffleArray = (array) => {
+  const shuffled = [...array]; // 創建副本以避免修改原陣列
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 // 熱門主題特色標籤
 const hotThemeFeatures = [
   '包棟民宿',
@@ -610,7 +620,8 @@ const filteredBnbs = computed(() => {
     });
     
     console.log('日期篩選後結果:', result.length, '筆');
-    return result;
+    // 對結果進行隨機排序
+    return shuffleArray(result);
   }
   
   // 一般篩選邏輯
@@ -656,7 +667,8 @@ const filteredBnbs = computed(() => {
   });
   
   console.log('一般篩選結果:', result.length, '筆');
-  return result;
+  // 對結果進行隨機排序
+  return shuffleArray(result);
 });
 
 // 計算總頁數
