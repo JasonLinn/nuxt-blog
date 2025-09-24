@@ -407,11 +407,19 @@ const approveActivity = async (id) => {
   if (!confirm('確定要通過這個活動投稿嗎？')) return
   
   try {
-    await $fetch(`/api/yilan-activities/${id}/approve`, { method: 'POST' })
+    const response = await $fetch(`/api/yilan-activities/${id}/approve`, { method: 'POST' })
+    
+    // 根據郵件發送狀態顯示不同的訊息
+    if (response.emailSent) {
+      alert('✅ 活動已通過審核，通知郵件已發送給提交者')
+    } else {
+      alert('✅ 活動已通過審核，但無法發送通知郵件（提交者未提供郵件地址）')
+    }
+    
     await fetchActivities()
   } catch (error) {
     console.error('Failed to approve activity:', error)
-    alert('操作失敗，請稍後再試')
+    alert('❌ 操作失敗，請稍後再試')
   }
 }
 

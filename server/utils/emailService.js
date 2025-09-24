@@ -93,6 +93,64 @@ const getApprovalEmailTemplate = (homestayName, homestayId) => {
   }
 }
 
+// 活動審核通過郵件模板
+const getActivityApprovalEmailTemplate = (activityTitle, activityId, eventDate) => {
+  return {
+    subject: '🎉 恭喜！您的活動投稿已通過審核',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="margin: 0; font-size: 28px;">🎉 活動審核通過通知</h1>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef;">
+          <h2 style="color: #2d3748; margin-bottom: 20px;">親愛的活動提交者，您好！</h2>
+          
+          <p style="font-size: 16px; line-height: 1.6; color: #4a5568; margin-bottom: 20px;">
+            非常高興通知您，您提交的活動已經通過我們的審核，現在已經在宜蘭活動總匯中上架！
+          </p>
+          
+          <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #48bb78; margin: 20px 0;">
+            <h3 style="color: #48bb78; margin: 0 0 10px 0;">活動資訊</h3>
+            <p style="margin: 5px 0; color: #4a5568;"><strong>活動名稱：</strong>${activityTitle}</p>
+            <p style="margin: 5px 0; color: #4a5568;"><strong>活動編號：</strong>${activityId}</p>
+            <p style="margin: 5px 0; color: #4a5568;"><strong>活動日期：</strong>${eventDate}</p>
+            <p style="margin: 5px 0; color: #4a5568;"><strong>狀態：</strong><span style="color: #48bb78; font-weight: bold;">已通過審核</span></p>
+          </div>
+          
+          <h3 style="color: #2d3748; margin-top: 30px;">您的活動現在：</h3>
+          <ul style="color: #4a5568; line-height: 1.8;">
+            <li>已在宜蘭活動總匯中公開顯示</li>
+            <li>民眾可以搜尋並查看您的活動資訊</li>
+            <li>活動將在相關的推廣管道中露出</li>
+            <li>如需修改活動資訊，請聯繫我們的客服團隊</li>
+          </ul>
+          
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="https://yilanpass.com/yilan-activities" 
+               style="background: #48bb78; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block; font-weight: bold;">
+              查看已上架的活動
+            </a>
+          </div>
+          
+          <div style="text-align: center; margin-top: 20px;">
+            <p style="color: #718096; font-size: 14px;">
+              感謝您提交優質的活動資訊，讓宜蘭的旅遊更加豐富精彩！
+            </p>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+          
+          <p style="color: #a0aec0; font-size: 12px; text-align: center;">
+            這是系統自動發送的郵件，請勿直接回覆。如有疑問請聯繫客服團隊。<br>
+            宜蘭旅遊通 - 宜蘭觀光民宿行銷協會
+          </p>
+        </div>
+      </div>
+    `
+  }
+}
+
 // 審核拒絕郵件模板
 const getRejectionEmailTemplate = (homestayName, homestayId, rejectionReason) => {
   return {
@@ -312,6 +370,38 @@ export const sendRejectionEmail = async (toEmail, homestayName, homestayId, reje
   } catch (error) {
     console.error('發送審核拒絕郵件失敗:', error)
     throw new Error(`郵件發送失敗: ${error.message}`)
+  }
+}
+
+// 發送活動審核通過郵件
+export const sendActivityApprovalEmail = async (toEmail, activityTitle, activityId, eventDate) => {
+  try {
+    const transporter = createTransporter()
+    const { subject, html } = getActivityApprovalEmailTemplate(activityTitle, activityId, eventDate)
+    
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@yourdomain.com',
+      to: toEmail,
+      subject,
+      html
+    }
+    
+    const result = await transporter.sendMail(mailOptions)
+    console.log('活動審核通過郵件發送成功:', {
+      messageId: result.messageId,
+      to: toEmail,
+      activityTitle,
+      activityId,
+      eventDate
+    })
+    
+    return {
+      success: true,
+      messageId: result.messageId
+    }
+  } catch (error) {
+    console.error('發送活動審核通過郵件失敗:', error)
+    throw new Error(`活動審核通過郵件發送失敗: ${error.message}`)
   }
 }
 
