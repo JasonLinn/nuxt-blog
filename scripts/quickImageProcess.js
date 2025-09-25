@@ -106,8 +106,19 @@ async function quickProcess(target = 'shop') {
 // 從命令行參數獲取目標
 const target = process.argv[2] || 'shop'
 
-// 執行處理
-if (import.meta.url === `file://${process.argv[1]}`) {
+// 執行處理 - 修復 Windows 路徑問題
+const isMainModule = () => {
+  try {
+    const currentFileUrl = import.meta.url
+    const runningFileUrl = `file:///${process.argv[1].replace(/\\/g, '/')}`
+    return currentFileUrl === runningFileUrl || 
+           currentFileUrl.endsWith(process.argv[1].replace(/\\/g, '/'))
+  } catch {
+    return true // 如果判斷失敗，預設執行
+  }
+}
+
+if (isMainModule()) {
   console.log('🖼️  快速圖片處理工具')
   console.log('===================')
   console.log(`用法: node quickImageProcess.js [${Object.keys(QUICK_CONFIGS).join('|')}]`)
