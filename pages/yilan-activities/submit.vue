@@ -17,6 +17,52 @@
           </div>
           <div class="card-body">
             <form novalidate @submit.prevent="submitActivity">
+              
+              <!-- AI 自動填入區塊（僅管理員可見） -->
+              <div v-if="isAdmin" class="alert alert-info mb-4">
+                <h5 class="alert-heading">
+                  <i class="bi bi-robot"></i> AI 智能填表助手
+                </h5>
+                <p class="mb-3">上傳活動海報，讓 AI 自動幫您填寫表單內容</p>
+                
+                <div class="mb-3">
+                  <input
+                    id="ai-image"
+                    ref="aiImageInput"
+                    type="file"
+                    class="form-control"
+                    accept="image/*"
+                    :disabled="aiProcessing"
+                    @change="handleAIImageUpload"
+                  />
+                  <div class="form-text">
+                    支援 JPG、PNG、WebP 格式，建議大小不超過 5MB
+                  </div>
+                </div>
+
+                <div v-if="aiProcessing" class="text-center py-3">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">分析中...</span>
+                  </div>
+                  <p class="mt-2 mb-0">🤖 Gemini AI 正在分析圖片，請稍候...</p>
+                </div>
+
+                <div v-if="aiResult" class="mt-3">
+                  <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i> AI 分析完成！已自動填入以下欄位
+                  </div>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <span v-for="field in filledFields" :key="field" class="badge bg-success">
+                      {{ field }}
+                    </span>
+                  </div>
+                </div>
+
+                <div v-if="aiError" class="alert alert-danger mt-3">
+                  <i class="bi bi-exclamation-triangle"></i> {{ aiError }}
+                </div>
+              </div>
+
               <!-- 基本信息 -->
               <div class="row">
                 <div class="col-md-8">
@@ -29,7 +75,7 @@
                       v-model="form.title"
                       type="text"
                       class="form-control"
-                      :class="{ 'is-invalid': errors.title }"
+                      :class="{ 'is-invalid': errors.title, 'ai-filled': aiFilledFields.includes('title') }"
                       placeholder="請輸入活動標題"
                       maxlength="100"
                       required
@@ -46,7 +92,7 @@
                       id="activity_type"
                       v-model="form.activity_type"
                       class="form-select"
-                      :class="{ 'is-invalid': errors.activity_type }"
+                      :class="{ 'is-invalid': errors.activity_type, 'ai-filled': aiFilledFields.includes('activity_type') }"
                       required
                     >
                       <option value="">選擇活動類型</option>
@@ -74,7 +120,7 @@
                   id="description"
                   v-model="form.description"
                   class="form-control"
-                  :class="{ 'is-invalid': errors.description }"
+                  :class="{ 'is-invalid': errors.description, 'ai-filled': aiFilledFields.includes('description') }"
                   rows="4"
                   placeholder="請描述您的活動內容、特色等..."
                   maxlength="500"
@@ -114,8 +160,7 @@
                       v-model="form.event_start_date"
                       type="date"
                       class="form-control"
-                      :class="{ 'is-invalid': errors.event_start_date }"
-                      :min="today"
+                      :class="{ 'is-invalid': errors.event_start_date, 'ai-filled': aiFilledFields.includes('event_start_date') }"
                       required
                       @change="handleStartDateChange"
                     />
@@ -134,8 +179,8 @@
                       v-model="form.event_end_date"
                       type="date"
                       class="form-control"
-                      :class="{ 'is-invalid': errors.event_end_date }"
-                      :min="form.event_start_date || today"
+                      :class="{ 'is-invalid': errors.event_end_date, 'ai-filled': aiFilledFields.includes('event_end_date') }"
+                      :min="form.event_start_date"
                       :required="form.is_multi_day"
                     />
                     <div v-if="errors.event_end_date" class="invalid-feedback">
@@ -157,7 +202,7 @@
                       v-model="form.event_start_time"
                       type="time"
                       class="form-control"
-                      :class="{ 'is-invalid': errors.event_start_time }"
+                      :class="{ 'is-invalid': errors.event_start_time, 'ai-filled': aiFilledFields.includes('event_start_time') }"
                     />
                     <div v-if="errors.event_start_time" class="invalid-feedback">
                       {{ errors.event_start_time }}
@@ -173,7 +218,7 @@
                       v-model="form.event_end_time"
                       type="time"
                       class="form-control"
-                      :class="{ 'is-invalid': errors.event_end_time }"
+                      :class="{ 'is-invalid': errors.event_end_time, 'ai-filled': aiFilledFields.includes('event_end_time') }"
                       :disabled="!form.event_start_time && !form.is_multi_day"
                     />
                     <div v-if="errors.event_end_time" class="invalid-feedback">
@@ -195,7 +240,7 @@
                   v-model="form.location"
                   type="text"
                   class="form-control"
-                  :class="{ 'is-invalid': errors.location }"
+                  :class="{ 'is-invalid': errors.location, 'ai-filled': aiFilledFields.includes('location') }"
                   placeholder="請輸入詳細地址或地標"
                   maxlength="200"
                   required
@@ -215,7 +260,7 @@
                       v-model="form.organizer_name"
                       type="text"
                       class="form-control"
-                      :class="{ 'is-invalid': errors.organizer_name }"
+                      :class="{ 'is-invalid': errors.organizer_name, 'ai-filled': aiFilledFields.includes('organizer_name') }"
                       placeholder="請輸入主辦單位名稱"
                       maxlength="100"
                       required
@@ -233,7 +278,7 @@
                       v-model="form.organizer_email"
                       type="email"
                       class="form-control"
-                      :class="{ 'is-invalid': errors.organizer_email }"
+                      :class="{ 'is-invalid': errors.organizer_email, 'ai-filled': aiFilledFields.includes('organizer_email') }"
                       placeholder="請輸入主辦單位信箱"
                       maxlength="100"
                     />
@@ -254,6 +299,7 @@
                       v-model="form.organizer_phone"
                       type="tel"
                       class="form-control"
+                      :class="{ 'ai-filled': aiFilledFields.includes('organizer_phone') }"
                       placeholder="請輸入聯絡電話"
                       maxlength="20"
                     />
@@ -333,6 +379,7 @@
                         v-model="form.price"
                         type="number"
                         class="form-control"
+                        :class="{ 'ai-filled': aiFilledFields.includes('price') }"
                         placeholder="0"
                         min="0"
                         step="1"
@@ -349,6 +396,7 @@
                       v-model="form.capacity"
                       type="number"
                       class="form-control"
+                      :class="{ 'ai-filled': aiFilledFields.includes('capacity') }"
                       placeholder="不限制請留空"
                       min="1"
                       step="1"
@@ -365,6 +413,7 @@
                   v-model="form.website"
                   type="url"
                   class="form-control"
+                  :class="{ 'ai-filled': aiFilledFields.includes('website') }"
                   placeholder="https://example.com"
                   maxlength="200"
                 />
@@ -440,6 +489,16 @@
 
 <script setup>
 
+// 檢查是否為管理員
+const isAdmin = ref(false)
+
+// AI 相關狀態
+const aiProcessing = ref(false)
+const aiResult = ref(null)
+const aiError = ref('')
+const aiFilledFields = ref([])
+const aiImageInput = ref(null)
+
 // 表單資料
 const form = reactive({
   title: '',
@@ -477,6 +536,150 @@ const today = computed(() => {
   const date = new Date()
   return date.toISOString().split('T')[0]
 })
+
+// 已填入欄位的中文名稱
+const filledFields = computed(() => {
+  const fieldNames = {
+    title: '活動標題',
+    description: '活動描述',
+    activity_type: '活動類型',
+    event_start_date: '開始日期',
+    event_end_date: '結束日期',
+    event_start_time: '開始時間',
+    event_end_time: '結束時間',
+    location: '活動地點',
+    organizer_name: '主辦單位',
+    organizer_email: '主辦信箱',
+    organizer_phone: '主辦電話',
+    price: '活動費用',
+    capacity: '人數限制',
+    website: '活動網站'
+  }
+  
+  return aiFilledFields.value.map(field => fieldNames[field] || field)
+})
+
+// 檢查管理員權限
+onMounted(async () => {
+  try {
+    const response = await $fetch('/api/auth/check-admin')
+    isAdmin.value = response.isAdmin
+  } catch (error) {
+    isAdmin.value = false
+  }
+})
+
+// 處理 AI 圖片上傳
+const handleAIImageUpload = async (event) => {
+  const file = event.target.files?.[0]
+  
+  if (!file) return
+
+  // 檢查檔案大小（5MB）
+  if (file.size > 5 * 1024 * 1024) {
+    aiError.value = '圖片大小不能超過 5MB'
+    return
+  }
+
+  aiProcessing.value = true
+  aiError.value = ''
+  aiResult.value = null
+  aiFilledFields.value = []
+
+  try {
+    const formData = new FormData()
+    formData.append('image', file)
+
+    const response = await $fetch('/api/ai/extract-activity-info', {
+      method: 'POST',
+      body: formData
+    })
+
+    if (response.success && response.data) {
+      aiResult.value = response.data
+      
+      // 自動填入表單
+      const data = response.data
+      const filled = []
+
+      if (data.title) {
+        form.title = data.title
+        filled.push('title')
+      }
+      if (data.description) {
+        form.description = data.description
+        filled.push('description')
+      }
+      if (data.activity_type) {
+        form.activity_type = data.activity_type
+        filled.push('activity_type')
+      }
+      if (data.event_start_date) {
+        form.event_start_date = data.event_start_date
+        filled.push('event_start_date')
+      }
+      if (data.event_end_date) {
+        form.event_end_date = data.event_end_date
+        filled.push('event_end_date')
+      }
+      if (data.event_start_time) {
+        form.event_start_time = data.event_start_time
+        filled.push('event_start_time')
+      }
+      if (data.event_end_time) {
+        form.event_end_time = data.event_end_time
+        filled.push('event_end_time')
+      }
+      if (data.is_multi_day !== null) {
+        form.is_multi_day = data.is_multi_day
+      }
+      if (data.location) {
+        form.location = data.location
+        filled.push('location')
+      }
+      if (data.organizer_name) {
+        form.organizer_name = data.organizer_name
+        filled.push('organizer_name')
+      }
+      if (data.organizer_email) {
+        form.organizer_email = data.organizer_email
+        filled.push('organizer_email')
+      }
+      if (data.organizer_phone) {
+        form.organizer_phone = data.organizer_phone
+        filled.push('organizer_phone')
+      }
+      if (data.price !== null) {
+        form.price = data.price
+        filled.push('price')
+      }
+      if (data.capacity !== null) {
+        form.capacity = data.capacity
+        filled.push('capacity')
+      }
+      if (data.website) {
+        form.website = data.website
+        filled.push('website')
+      }
+
+      aiFilledFields.value = filled
+
+      // 清空檔案輸入
+      if (aiImageInput.value) {
+        aiImageInput.value.value = ''
+      }
+
+    } else {
+      throw new Error('AI 分析失敗')
+    }
+
+  } catch (error) {
+    console.error('AI 分析錯誤:', error)
+    aiError.value = error.data?.message || error.message || 'AI 分析失敗，請稍後再試'
+  } finally {
+    aiProcessing.value = false
+  }
+}
 
 // 處理多天活動切換
 const handleMultiDayChange = () => {
@@ -556,12 +759,6 @@ const validateForm = () => {
       isValid = false
     }
   })
-
-  // 日期驗證
-  if (form.event_start_date && new Date(form.event_start_date) < new Date()) {
-    errors.event_start_date = '活動日期不能早於今天'
-    isValid = false
-  }
 
   // 多天活動日期範圍驗證
   if (form.is_multi_day && form.event_start_date && form.event_end_date) {
@@ -665,3 +862,32 @@ useHead({
   meta: [{ name: 'description', content: '投稿您的精彩宜蘭活動，與大家分享宜蘭的美好體驗' }]
 })
 </script>
+
+<style scoped>
+/* AI 填入的欄位高亮 */
+.ai-filled {
+  border-color: #28a745 !important;
+  background-color: #f0fff4 !important;
+}
+
+.ai-filled:focus {
+  border-color: #28a745 !important;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+/* AI 分析區域樣式 */
+.alert-info {
+  border-left: 4px solid #17a2b8;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* 成功徽章樣式 */
+.badge.bg-success {
+  font-size: 0.75rem;
+  margin: 0.2rem;
+}
+</style>

@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
     const activityData = {
       title: getData('title'),
       description: getData('description'),
-      images: imageUrls.length > 0 ? imageUrls : null,
+      images: imageUrls.length > 0 ? imageUrls : null, // 保持為陣列
       event_date: getData('event_start_date'),
       end_date: getData('event_end_date'),
       event_time: getData('event_start_time'),
@@ -67,18 +67,22 @@ export default defineEventHandler(async (event) => {
       location: getData('location'),
       activity_type: getData('activity_type'),
       organizer_name: getData('organizer_name'),
-      organizer_email: getData('organizer_email'),
+      organizer_email: getData('organizer_email') || getData('submitter_email'), // 如果沒有主辦信箱，使用提交者信箱
       organizer_phone: getData('organizer_phone'),
-      contact_info: getData('organizer_contact'),
+      organizer_contact: getData('organizer_contact'), // 使用正確的欄位名稱
       submitter_name: getData('submitter_name') || getData('organizer_name'),
       submitter_email: getData('submitter_email'),
       status: 'pending'
     }
     
+    console.log('收到的表單資料:', fields)
+    console.log('處理後的活動資料:', activityData)
+    
     // 驗證必填欄位
-    const requiredFields = ['title', 'description', 'event_date', 'organizer_name', 'submitter_name', 'submitter_email']
+    const requiredFields = ['title', 'event_date', 'organizer_name', 'organizer_email', 'submitter_name', 'submitter_email']
     for (const field of requiredFields) {
       if (!activityData[field] || activityData[field].toString().trim() === '') {
+        console.error(`缺少必填欄位: ${field}, 值為:`, activityData[field])
         throw createError({
           statusCode: 400,
           statusMessage: `Missing required field: ${field}`
@@ -100,9 +104,9 @@ export default defineEventHandler(async (event) => {
       INSERT INTO yilan_activities (
         title, description, images, event_date, end_date, event_time, end_time, is_multi_day,
         location, activity_type, organizer_name, organizer_email, organizer_phone,
-        contact_info, submitter_name, submitter_email, status, created_at, updated_at
+        organizer_contact, contact_info, submitter_name, submitter_email, status, created_at, updated_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
       ) RETURNING id
     `
@@ -110,7 +114,7 @@ export default defineEventHandler(async (event) => {
     const params = [
       activityData.title,
       activityData.description,
-      activityData.images,
+      activityData.images, // JavaScript 陣列會自動轉為 PostgreSQL ARRAY
       activityData.event_date,
       activityData.end_date,
       activityData.event_time,
@@ -119,15 +123,17 @@ export default defineEventHandler(async (event) => {
       activityData.location,
       activityData.activity_type,
       activityData.organizer_name,
-      activityData.organizer_email,
-      activityData.organizer_phone,
-      activityData.contact_info,
+      activityData.organizer_email, // 必填欄位，已有預設值處理
+      activityData.organizer_phone || null,
+      activityData.organizer_contact || null, // organizer_contact 欄位
+      null, // contact_info 欄位 (暫時設為 null)
       activityData.submitter_name,
       activityData.submitter_email,
       activityData.status
     ]
     
-    console.log('Attempting to insert activity with params:', params)
+    console.log('準備插入的 SQL:', sql)
+    console.log('SQL 參數:', params)
     
     const result = await query(sql, params)
     const newActivity = result.rows[0]
