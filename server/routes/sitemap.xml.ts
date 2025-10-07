@@ -1,5 +1,16 @@
 import { pool } from '../utils/db.js'
 
+// XML 轉義函數
+function escapeXml(unsafe: string): string {
+  if (!unsafe) return ''
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
 export default defineEventHandler(async (event) => {
   try {
     // 設定正確的 Content-Type
@@ -36,26 +47,51 @@ export default defineEventHandler(async (event) => {
       // 設定客戶端編碼為 UTF-8
       await client.query('SET CLIENT_ENCODING TO UTF8');
       
-      // 取得民宿資料
+      // 取得民宿資料（包含圖片和詳細資訊）
       const homestaysResult = await client.query(`
-        SELECT id, updated_at 
+        SELECT 
+          id, 
+          name,
+          image_url,
+          updated_at 
         FROM homestays 
         WHERE status = 'approved' AND available = true
         ORDER BY updated_at DESC
       `)
       console.log(`✅ Sitemap: 已加入 ${homestaysResult.rows.length} 個民宿頁面`)
-      homestaysResult.rows.forEach((homestay: any) => {
+      
+      for (const homestay of homestaysResult.rows) {
         const lastmod = homestay.updated_at 
           ? new Date(homestay.updated_at).toISOString() 
           : now
-        urls.push(`
+        
+        // 基本 URL
+        let urlEntry = `
   <url>
     <loc>${baseUrl}/homestays/${homestay.id}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`)
-      })
+    <priority>0.8</priority>`
+        
+        // 如果有圖片，加入圖片資訊（Google Image Search）
+        if (homestay.image_url) {
+          const imageUrl = homestay.image_url.startsWith('http') 
+            ? homestay.image_url 
+            : `${baseUrl}${homestay.image_url}`
+          
+          urlEntry += `
+    <image:image>
+      <image:loc>${imageUrl}</image:loc>
+      <image:title>${escapeXml(homestay.name || '宜蘭民宿')}</image:title>
+      <image:caption>${escapeXml(homestay.name || '宜蘭民宿')} - 宜蘭旅遊通推薦民宿</image:caption>
+    </image:image>`
+        }
+        
+        urlEntry += `
+  </url>`
+        
+        urls.push(urlEntry)
+      }
 
       // 取得地點資料
       const placesResult = await client.query(`
@@ -117,6 +153,7 @@ export default defineEventHandler(async (event) => {
     // 生成 XML sitemap
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
                            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
