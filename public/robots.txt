@@ -4,19 +4,16 @@ Allow: /
 # 允許搜尋引擎索引主要頁面
 Allow: /homestay-list
 Allow: /homestays/
+Allow: /relative/
+Allow: /articles/
 
 # 阻止索引管理和API路由
 Disallow: /admin
 Disallow: /api/
-# 但允許 sitemap
-Allow: /api/sitemap
-Allow: /api/sitemap.xml
 Disallow: /_nuxt/
 
-# Sitemap 位置（建議優先使用靜態 sitemap.xml）
+# Sitemap 位置（使用動態生成的 sitemap.xml）
 Sitemap: https://yilanpass.com/sitemap.xml
-Sitemap: https://yilanpass.com/api/sitemap.xml
-Sitemap: https://yilanpass.com/api/sitemap
 
 # 爬取延遲（毫秒）
 Crawl-delay: 1
