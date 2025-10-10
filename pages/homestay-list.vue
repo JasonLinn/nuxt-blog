@@ -2050,6 +2050,11 @@ watch(bnbsData, (newData) => {
   visibility: hidden;
   transition: all 0.3s ease;
   
+  @media (max-width: 768px) {
+    height: 100dvh; /* 使用動態視口高度 */
+    max-height: -webkit-fill-available; /* iOS Safari 兼容 */
+  }
+  
   &.active {
     opacity: 1;
     visibility: visible;
@@ -2074,6 +2079,8 @@ watch(bnbsData, (newData) => {
   @media (max-width: 768px) {
     width: 100vw;
     right: -100vw;
+    height: 100dvh; /* 使用動態視口高度，適應手機瀏覽器地址欄 */
+    max-height: -webkit-fill-available; /* iOS Safari 兼容 */
   }
   
   .advanced-search-overlay.active & {
@@ -2136,6 +2143,8 @@ watch(bnbsData, (newData) => {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+  overscroll-behavior: contain; /* 防止滾動穿透 */
   
   @media (max-width: 768px) {
     padding: 20px;
