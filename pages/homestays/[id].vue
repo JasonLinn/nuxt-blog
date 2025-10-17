@@ -416,6 +416,7 @@ const error = ref(null);
 watchEffect(() => {
   if (bnb.value) {
     const homestay = bnb.value
+    const canonicalUrl = `https://yilanpass.com/homestays/${homestay.id}`
     
     // 設定頁面 SEO
     useSeoMeta({
@@ -425,18 +426,42 @@ watchEffect(() => {
       ogDescription: homestay.description || `宜蘭${homestay.area}優質民宿${homestay.name}，提供多樣化休閒設施`,
       keywords: `${homestay.name},宜蘭民宿,${homestay.area || homestay.location}民宿,合法民宿,戲水池民宿,KTV民宿,烤肉民宿,游泳池民宿,唱歌民宿,BBQ民宿${homestay.features?.themeFeatures ? ',' + homestay.features.themeFeatures.join(',') : ''}${homestay.features?.serviceAmenities ? ',' + homestay.features.serviceAmenities.join(',') : ''}`,
       ogImage: homestay.image_urls?.[0] || 'https://yilanpass.com/logo.png',
-      ogUrl: `https://yilanpass.com/homestays/${homestay.id}`,
-      robots: 'index, follow'
+      ogUrl: canonicalUrl,
+      ogType: 'website',
+      twitterCard: 'summary_large_image',
+      twitterTitle: `${homestay.name} | 宜蘭民宿`,
+      twitterDescription: homestay.description || `宜蘭${homestay.area}優質民宿${homestay.name}`,
+      twitterImage: homestay.image_urls?.[0] || 'https://yilanpass.com/logo.png',
+      robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+      // 設定 canonical URL
+      canonical: canonicalUrl
+    })
+    
+    // 額外設定 head link (雙重保險)
+    useHead({
+      link: [
+        {
+          rel: 'canonical',
+          href: canonicalUrl
+        }
+      ]
     })
 
     // 完整結構化資料 - LodgingBusiness + LocalBusiness
     useHead({
+      link: [
+        {
+          rel: 'canonical',
+          href: canonicalUrl
+        }
+      ],
       script: [
         {
           type: 'application/ld+json',
           children: JSON.stringify({
             "@context": "https://schema.org",
             "@type": ["LodgingBusiness", "LocalBusiness"],
+            "@id": canonicalUrl,
             "name": homestay.name,
             "alternateName": `${homestay.name} 民宿`,
             "description": homestay.description || `位於宜蘭${homestay.area || homestay.location}的合法民宿${homestay.name}，提供優質住宿體驗。設有多樣化休閒設施，是您宜蘭旅遊的最佳選擇。`,
@@ -521,10 +546,10 @@ watchEffect(() => {
             },
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": `https://yilanpass.com/homestays/${homestay.id}`,
+              "@id": canonicalUrl,
               "name": `${homestay.name} | 宜蘭民宿`,
               "description": `${homestay.name}民宿詳細資訊`,
-              "url": `https://yilanpass.com/homestays/${homestay.id}`,
+              "url": canonicalUrl,
               "breadcrumb": {
                 "@type": "BreadcrumbList",
                 "itemListElement": [
