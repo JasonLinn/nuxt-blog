@@ -214,7 +214,7 @@
                   <div class="info-label">單位名稱</div>
                   <div class="info-value">{{ activity.organizer_name }}</div>
                 </div>
-                <div v-if="activity.organizer_email" class="info-row">
+                <div v-if="activity.organizer_email && activity.organizer_email !== activity.submitter_email" class="info-row">
                   <div class="info-label">聯絡信箱</div>
                   <div class="info-value">
                     <a :href="'mailto:' + activity.organizer_email" class="contact-link">

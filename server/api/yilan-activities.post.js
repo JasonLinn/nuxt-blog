@@ -67,7 +67,7 @@ export default defineEventHandler(async (event) => {
       location: getData('location'),
       activity_type: getData('activity_type'),
       organizer_name: getData('organizer_name'),
-      organizer_email: getData('organizer_email') || getData('submitter_email'), // 如果沒有主辦信箱，使用提交者信箱
+      organizer_email: getData('organizer_email'), // 不自動填入提交者信箱,允許為 null
       organizer_phone: getData('organizer_phone'),
       organizer_contact: getData('organizer_contact'), // 使用正確的欄位名稱
       submitter_name: getData('submitter_name') || getData('organizer_name'),
@@ -78,8 +78,8 @@ export default defineEventHandler(async (event) => {
     console.log('收到的表單資料:', fields)
     console.log('處理後的活動資料:', activityData)
     
-    // 驗證必填欄位
-    const requiredFields = ['title', 'event_date', 'organizer_name', 'organizer_email', 'submitter_name', 'submitter_email']
+    // 驗證必填欄位 (organizer_email 為選填)
+    const requiredFields = ['title', 'event_date', 'organizer_name', 'submitter_name', 'submitter_email']
     for (const field of requiredFields) {
       if (!activityData[field] || activityData[field].toString().trim() === '') {
         console.error(`缺少必填欄位: ${field}, 值為:`, activityData[field])
@@ -123,7 +123,7 @@ export default defineEventHandler(async (event) => {
       activityData.location,
       activityData.activity_type,
       activityData.organizer_name,
-      activityData.organizer_email, // 必填欄位，已有預設值處理
+      activityData.organizer_email || null, // 允許為 null,不強制填入
       activityData.organizer_phone || null,
       activityData.organizer_contact || null, // organizer_contact 欄位
       null, // contact_info 欄位 (暫時設為 null)
