@@ -26,6 +26,13 @@
             </li>
             <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
               <NuxtLink
+                to="/coupons/submit"
+              >
+                <p class="">提交優惠券</p>
+              </NuxtLink>
+            </li>
+            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
+              <NuxtLink
                 to="/homestay-list"
               >
                 <p class="">合法民宿推薦</p>

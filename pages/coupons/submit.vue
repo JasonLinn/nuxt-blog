@@ -5,11 +5,18 @@
         <div class="space-y-8 divide-y divide-gray-200">
           <div>
             <div class="mt-6">
-              <h3 class="submit-title text-xl font-medium leading-6 text-gray-900">提交優惠券</h3>
-              <p class="submit-subtitle mt-2 text-sm text-gray-600">
-                <Icon name="mdi:information-outline" class="inline-block" />
-                分享您的優惠券給其他使用者，提交後需經過管理員審核（預計 1-3 個工作天）
+              <h3 class="submit-title text-xl font-medium leading-6 text-gray-900">填寫優惠券</h3>
+              <!-- 說明區塊 -->
+            <div class="info-banner">
+              <div class="info-header">
+                <Icon name="mdi:information-outline" />
+                <h4>填寫說明</h4>
+              </div>
+              <p class="info-description">
+                填寫以下資料並上傳圖片，填寫後經過審核（約 3–7 個工作天）即可在「宜蘭旅遊通」平台上架。
+                一起分享好康、推廣在地好店 💚
               </p>
+            </div>
             </div>
 
             <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
@@ -66,7 +73,7 @@
                   <input
                     id="position"
                     v-model="form.position"
-                    placeholder="請輸入經緯度"
+                    placeholder="請輸入經緯度(google 地圖使用)"
                     name="position"
                     type="text"
                     class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
@@ -78,7 +85,7 @@
               <!-- 鄉鎮 -->
               <section class="col-md-12 submit-part">
                 <label for="township" class="submit-name block text-sm font-medium text-gray-700">
-                  <TipIcon/>鄉鎮(用逗點分隔)：
+                  <TipIcon/>鄉鎮：
                 </label>
                 <textarea
                   id="township"
@@ -111,7 +118,7 @@
               <!-- 是否顯示推薦店家 -->
               <section class="col-md-12 submit-part">
                 <label class="submit-name block text-sm font-medium text-gray-700">
-                  <TipIcon/>是否顯示推薦店家：
+                  <TipIcon/>是否需顯示推薦店家：
                 </label>
                 <div class="mt-2 flex gap-4">
                   <label class="inline-flex items-center">
@@ -261,35 +268,38 @@
                 </div>
               </section>
 
-              <!-- 提交者資訊 -->
-              <section class="col-span-full submit-part border-t pt-6">
-                <h4 class="text-lg font-medium text-gray-900 mb-4">提交者資訊</h4>
+              <!-- 填寫者資訊 -->
+              <section class="col-span-full submit-part submitter-section">
+                <div class="submitter-header">
+                  <Icon name="mdi:account-circle-outline" />
+                  <h4>填寫者資訊</h4>
+                </div>
                 
-                <div class="grid grid-cols-1 gap-4">
-                  <div>
-                    <label for="submitter_name" class="block text-sm font-medium text-gray-700">
-                      您的姓名/暱稱 <span class="text-red-500">*</span>
+                <div class="submitter-fields">
+                  <div class="field-group">
+                    <label for="submitter_name" class="submit-name">
+                      <TipIcon />您的姓名/暱稱：
                     </label>
                     <input 
                       id="submitter_name"
                       v-model="form.submitter_name" 
                       type="text" 
-                      placeholder="請輸入您的真實姓名"
+                      placeholder="請輸入您的姓名或暱稱"
                       required 
-                      class="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                      class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                     />
                   </div>
 
-                  <div>
-                    <label for="submitter_email" class="block text-sm font-medium text-gray-700">
-                      電子郵件
+                  <div class="field-group">
+                    <label for="submitter_email" class="submit-name">
+                      <TipIcon />電子郵件：
                     </label>
                     <input 
                       id="submitter_email"
                       v-model="form.submitter_email" 
                       type="email" 
-                      placeholder="您的電子郵件地址"
-                      class="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                      placeholder="您的電子郵件地址（選填）"
+                      class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                     />
                   </div>
                 </div>
@@ -311,22 +321,22 @@
             >
               <Icon v-if="submitting" name="eos-icons:loading" />
               <Icon v-else name="mdi:send" />
-              {{ submitting ? '提交中...' : '提交審核' }}
+              {{ submitting ? '填寫中...' : '填寫審核' }}
             </button>
           </div>
         </div>
       </form>
     </div>
 
-    <!-- 成功提交的模態框 -->
+    <!-- 成功填寫的模態框 -->
     <div v-if="showSuccessModal" class="modal-overlay" @click="closeSuccessModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
           <Icon name="mdi:check-circle" class="success-icon" />
-          <h3>提交成功！</h3>
+          <h3>填寫成功！</h3>
         </div>
         <div class="modal-body">
-          <p>您的優惠券已成功提交，我們會在 1-3 個工作天內進行審核。</p>
+          <p>您的優惠券已成功填寫，我們會在 1-3 個工作天內進行審核。</p>
           <p>審核結果將透過您提供的聯絡方式通知。</p>
         </div>
         <div class="modal-actions">
@@ -345,7 +355,7 @@ import { category } from '~/utils/category'
 
 // 設定頁面標題
 useHead({
-  title: '提交優惠券 - 宜蘭旅遊網',
+  title: '填寫優惠券 - 宜蘭旅遊網',
   meta: [
     { name: 'description', content: '分享您的優惠券給其他旅客，豐富宜蘭旅遊體驗' }
   ]
@@ -466,7 +476,7 @@ const resetForm = () => {
   }
 }
 
-// 提交優惠券
+// 填寫優惠券
 const submitCoupon = async () => {
   try {
     submitting.value = true
@@ -482,7 +492,7 @@ const submitCoupon = async () => {
       }
     }
 
-    // 提交資料到 API
+    // 填寫資料到 API
     const response = await $fetch('/api/coupons/submit', {
       method: 'POST',
       body: {
@@ -509,12 +519,12 @@ const submitCoupon = async () => {
       showSuccessModal.value = true
       resetForm()
     } else {
-      throw new Error(response.message || '提交失敗')
+      throw new Error(response.message || '填寫失敗')
     }
 
   } catch (error) {
-    console.error('提交優惠券失敗:', error)
-    alert('提交失敗：' + (error.data?.message || error.message || '請稍後再試'))
+    console.error('填寫優惠券失敗:', error)
+    alert('填寫失敗：' + (error.data?.message || error.message || '請稍後再試'))
   } finally {
     submitting.value = false
   }
@@ -541,6 +551,159 @@ const closeSuccessModal = () => {
 .coupon-submit {
   display: flex;
   justify-content: center;
+}
+
+// 新增說明區塊樣式
+.info-banner {
+  background: #f0fdfa;
+  border-left: 4px solid #0f766e;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    svg {
+      font-size: 20px;
+      color: #0f766e;
+    }
+
+    h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f766e;
+      margin: 0;
+    }
+  }
+
+  .info-description {
+    color: #374151;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+// 響應式設計
+@media (max-width: 768px) {
+  .info-banner {
+    padding: 14px 16px;
+
+    .info-header {
+      h4 {
+        font-size: 15px;
+      }
+
+      svg {
+        font-size: 18px;
+      }
+    }
+
+    .info-description {
+      font-size: 13px;
+    }
+  }
+}
+
+// 填寫者資訊區塊樣式
+.submitter-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #e5e7eb;
+  
+  .submitter-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-left: 4px;
+    
+    svg {
+      color: #0f766e;
+      font-size: 24px;
+    }
+    
+    h4 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0;
+    }
+  }
+  
+  .submitter-fields {
+    display: grid;
+    gap: 16px;
+    
+    .field-group {
+      label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+      }
+      
+      input {
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        transition: all 0.15s ease-in-out;
+        
+        &::placeholder {
+          color: #9ca3af;
+        }
+        
+        &:focus {
+          outline: none;
+          border-color: #0f766e;
+          box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .submitter-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    
+    .submitter-header {
+      margin-bottom: 16px;
+      
+      svg {
+        font-size: 22px;
+      }
+      
+      h4 {
+        font-size: 16px;
+      }
+    }
+    
+    .submitter-fields {
+      gap: 14px;
+      
+      .field-group {
+        label {
+          font-size: 13px;
+        }
+        
+        input {
+          padding: 9px 12px;
+          font-size: 13px;
+        }
+      }
+    }
+  }
 }
 
 .submit-title {
@@ -793,7 +956,7 @@ const closeSuccessModal = () => {
   row-gap: 26px !important;
 }
 
-// 提交者資訊區塊
+// 填寫者資訊區塊
 .border-t {
   border-color: #e5e7eb !important;
   background: #f8fafc;
