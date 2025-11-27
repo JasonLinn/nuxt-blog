@@ -1,62 +1,25 @@
 // 使用者提交優惠券
 import { couponPool } from '../../utils/coupon-db.js'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { randomUUID } from 'crypto'
 
 export default defineEventHandler(async (event) => {
   try {
-    const formData = await readMultipartFormData(event)
+    const data = await readBody(event)
     
-    if (!formData || formData.length === 0) {
+    if (!data) {
       throw createError({
         statusCode: 400,
         statusMessage: '無效的表單資料'
       })
     }
 
-    // 解析表單資料
-    const data = {}
-    let imageFile = null
-
-    formData.forEach(item => {
-      if (item.name === 'cover_image' && item.filename) {
-        imageFile = item
-      } else if (item.name && item.data) {
-        data[item.name] = item.data.toString()
-      }
-    })
-
     // 必填欄位驗證
-    const requiredFields = ['title', 'content', 'business_name', 'submitter_name', 'submitter_phone']
+    const requiredFields = ['title', 'content', 'business_name', 'submitter_name']
     for (const field of requiredFields) {
-      if (!data[field] || data[field].trim() === '') {
+      if (!data[field] || data[field].toString().trim() === '') {
         throw createError({
           statusCode: 400,
           statusMessage: `缺少必填欄位: ${field}`
         })
-      }
-    }
-
-    let coverImageUrl = null
-
-    // 處理圖片上傳
-    if (imageFile) {
-      try {
-        const fileExtension = imageFile.filename.split('.').pop()
-        const fileName = `${randomUUID()}.${fileExtension}`
-        const uploadDir = join(process.cwd(), 'public', 'uploads', 'coupons')
-        
-        // 確保上傳目錄存在
-        await mkdir(uploadDir, { recursive: true })
-        
-        const filePath = join(uploadDir, fileName)
-        await writeFile(filePath, imageFile.data)
-        
-        coverImageUrl = `/uploads/coupons/${fileName}`
-      } catch (uploadError) {
-        console.error('圖片上傳失敗:', uploadError)
-        // 不阻止提交，但記錄錯誤
       }
     }
 
@@ -89,19 +52,19 @@ export default defineEventHandler(async (event) => {
       data.address || null,
       data.phone || null,
       data.website || null,
-      coverImageUrl,
+      data.cover_url || null,
       data.valid_from || null,
       data.valid_until || null,
       data.min_purchase ? parseFloat(data.min_purchase) : 0,
       data.max_usage ? parseInt(data.max_usage) : null,
       data.usage_notes || null,
       data.submitter_name,
-      data.submitter_phone,
+      null, // submitter_phone
       data.submitter_email || null,
       data.amount ? parseInt(data.amount) : 1000,
       data.category_id ? parseInt(data.category_id) : 1,
-      data.isonce === 'true' || data.isonce === true,
-      data.isReferral === 'true' || data.isReferral === true,
+      data.isonce === true,
+      data.isReferral === true,
       data.tags || null,
       data.position || null
     ])

@@ -38,6 +38,24 @@
                 </div>
               </section>
 
+              <!-- 商家名稱 -->
+              <section class="col-md-12 submit-part">
+                <label for="business_name" class="submit-name block text-sm font-medium text-gray-700">
+                  <TipIcon/>商家名稱：
+                </label>
+                <div class="mt-1">
+                  <input
+                    id="business_name"
+                    v-model="form.business_name"
+                    placeholder="請輸入商家或店家名稱"
+                    name="business_name"
+                    type="text"
+                    required
+                    class="w-100 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                  />
+                </div>
+              </section>
+
               <!-- 分類 -->
               <section class="col-md-12 submit-part">
                 <label for="category" class="submit-name block text-sm font-medium text-gray-700">
@@ -370,6 +388,7 @@ const coverUrl = ref('')
 const form = reactive({
   title: '',
   content: '',
+  business_name: '',
   category_id: '',
   adress: '',
   township: '',
@@ -481,37 +500,30 @@ const submitCoupon = async () => {
   try {
     submitting.value = true
 
-    let position = null
-    if (form.position) {
-      const posMatch = form.position.match(/\d+\.\d+/g)
-      if (posMatch && posMatch.length >= 2) {
-        position = {
-          lat: Number(posMatch[0]),
-          lng: Number(posMatch[1])
-        }
-      }
+    // 處理圖片 - 取得第一張圖片 URL
+    let coverUrl = null
+    if (form.cover && form.cover.length > 0) {
+      coverUrl = form.cover[0]
     }
 
-    // 填寫資料到 API
+    // 使用 $fetch 發送 JSON
     const response = await $fetch('/api/coupons/submit', {
       method: 'POST',
       body: {
         title: form.title,
         content: form.content,
-        category_id: form.category_id,
-        adress: form.adress ? [form.adress] : [],
-        township: form.township ? [form.township] : [],
-        position: position,
-        amount: form.amount,
-        usedTimes: form.usedTimes,
-        cover: form.cover,
-        isReferral: form.isReferral === 'true',
-        isonce: form.isonce === 'true',
-        hash: form.hash === 'true',
-        tags: form.tags,
+        business_name: form.business_name,
         submitter_name: form.submitter_name,
         submitter_email: form.submitter_email,
-        status: 'pending' // 待審核狀態
+        category_id: form.category_id,
+        address: form.adress,
+        township: form.township,
+        tags: form.tags,
+        position: form.position,
+        amount: form.amount,
+        isonce: form.isonce === 'true',
+        isReferral: form.isReferral === 'true',
+        cover_url: coverUrl
       }
     })
 
