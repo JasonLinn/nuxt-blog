@@ -60,6 +60,7 @@ export default defineNuxtConfig({
     authtoken: process.env.NGROK_AUTHTOKEN
   },
   routeRules : {
+    '/api/sitemap.xml': { redirect: '/sitemap.xml' },
     '/api/notify' : {
         proxy : { to : "https://notify-api.line.me/api/notify" , },
     },

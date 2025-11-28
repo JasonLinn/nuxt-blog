@@ -113,6 +113,31 @@ export default defineEventHandler(async (event) => {
     <priority>0.7</priority>
   </url>`)
       })
+
+      // 取得宜蘭活動資料
+      try {
+        const activitiesResult = await client.query(`
+          SELECT id, updated_at 
+          FROM yilan_activities 
+          WHERE status = 'approved'
+          ORDER BY updated_at DESC
+        `)
+        console.log(`✅ Sitemap: 已加入 ${activitiesResult.rows.length} 個活動頁面`)
+        activitiesResult.rows.forEach((activity: any) => {
+          const lastmod = activity.updated_at 
+            ? new Date(activity.updated_at).toISOString() 
+            : now
+          urls.push(`
+  <url>
+    <loc>${baseUrl}/yilan-activities/${activity.id}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`)
+        })
+      } catch (activitiesError) {
+        console.log('ℹ️ Sitemap: 沒有活動資料或表不存在')
+      }
       
       // 取得文章資料（如果有的話）
       try {
