@@ -97,6 +97,7 @@ export default defineNuxtConfig({
         { name: 'twitter:image', content: 'https://yilanpass.com/logo.png' }
       ],
       link: [
+        { rel: 'canonical', href: 'https://yilanpass.com' },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
@@ -115,14 +116,6 @@ export default defineNuxtConfig({
           gtag('config', 'G-45PDMJHNT9');`,
         },
       ],
-    }
-  }
-})
-      ],
-      link: [
-        { rel: 'canonical', href: 'https://yilanpass.com' },
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }
-      ]
     }
   },
   components: [
