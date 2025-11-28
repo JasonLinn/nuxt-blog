@@ -452,11 +452,21 @@ import useRelativeStore from "~~/store/relative"
 
 // SEO 優化
 useSeoMeta({
-  title: '特色店家 - 探索精選商家',
-  ogTitle: '特色店家 - 探索精選商家',
+  title: '特色店家 - 宜蘭旅遊通',
+  ogTitle: '特色店家 - 宜蘭旅遊通',
   description: '探索宜蘭特色店家，包含魔術表演、派對策劃等精彩服務',
   ogDescription: '探索宜蘭特色店家，包含魔術表演、派對策劃等精彩服務',
-  keywords: '特色店家,宜蘭,魔術,派對,服務,商家'
+  keywords: '特色店家,宜蘭,魔術,派對,服務,商家',
+  canonical: 'https://yilanpass.com/relative'
+})
+
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/relative'
+    }
+  ]
 })
 
 const route = useRoute()

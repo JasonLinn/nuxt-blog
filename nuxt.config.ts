@@ -93,8 +93,31 @@ export default defineNuxtConfig({
         // Twitter Card
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:title', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會 | 宜蘭合法民宿推薦' },
-        { name: 'twitter:description', content: '提供宜蘭地區合法民宿推薦，包含戲水池、KTV、烤肉設施等多樣化住宿選擇，讓您輕鬆規劃完美的宜蘭之旅' },
+                { name: 'twitter:description', content: '提供宜蘭地區合法民宿推薦，包含戲水池、KTV、烤肉設施等多樣化住宿選擇，讓您輕鬆規劃完美的宜蘭之旅' },
         { name: 'twitter:image', content: 'https://yilanpass.com/logo.png' }
+      ],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
+        { rel: 'manifest', href: '/site.webmanifest' }
+      ],
+      script: [
+        {
+          src: "https://www.googletagmanager.com/gtag/js?id=G-45PDMJHNT9",
+          async: true,
+        },
+        {
+          children: `window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-45PDMJHNT9');`,
+        },
+      ],
+    }
+  }
+})
       ],
       link: [
         { rel: 'canonical', href: 'https://yilanpass.com' },

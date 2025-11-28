@@ -174,7 +174,18 @@
     ogTitle: '優惠券地圖 - 探索周邊優惠',
     description: '在地圖上探索宜蘭各地的優惠券和特色商家位置',
     ogDescription: '在地圖上探索宜蘭各地的優惠券和特色商家位置',
-    keywords: '優惠券,地圖,宜蘭,位置,商家,導航'
+    keywords: '優惠券,地圖,宜蘭,位置,商家,導航',
+    canonical: 'https://yilanpass.com/map'
+  })
+
+  // 額外設定 head link (雙重保險)
+  useHead({
+    link: [
+      {
+        rel: 'canonical',
+        href: 'https://yilanpass.com/map'
+      }
+    ]
   })
 
   const store = useCouponMapStore();

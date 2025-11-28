@@ -385,6 +385,27 @@
 </template>
 
 <script setup>
+// SEO 設定
+useSeoMeta({
+  title: '宜蘭活動總匯 | 探索宜蘭精彩活動',
+  ogTitle: '宜蘭活動總匯 | 探索宜蘭精彩活動',
+  description: '探索宜蘭最新的活動資訊，包含文化藝術、觀光旅遊、美食餐飲、戶外運動、親子活動等各類精彩活動',
+  ogDescription: '探索宜蘭最新的活動資訊，包含文化藝術、觀光旅遊、美食餐飲、戶外運動、親子活動等各類精彩活動',
+  keywords: '宜蘭活動,宜蘭旅遊,宜蘭景點,親子活動,戶外運動,文化藝術,美食餐飲',
+  ogUrl: 'https://yilanpass.com/yilan-activities',
+  canonical: 'https://yilanpass.com/yilan-activities'
+})
+
+// 額外設定 head link (雙重保險)
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/yilan-activities'
+    }
+  ]
+})
+
 const route = useRoute()
 const activities = ref([])
 const loading = ref(true)

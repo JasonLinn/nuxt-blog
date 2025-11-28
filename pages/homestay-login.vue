@@ -60,10 +60,18 @@ import { ref, watch } from 'vue';
 import { navigateTo } from 'nuxt/app';
 
 // SEO設定
+useSeoMeta({
+  title: '民宿會員登入 - 宜蘭旅遊通',
+  description: '民宿業者專用登入頁面，管理您的民宿資訊',
+  canonical: 'https://yilanpass.com/homestay-login'
+})
+
 useHead({
-  title: '民宿會員登入 - 管理後台',
-  meta: [
-    { name: 'description', content: '民宿業者專用登入頁面，管理您的民宿資訊' }
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/homestay-login'
+    }
   ]
 });
 

@@ -40,13 +40,22 @@
     </footer>
     </template>
     
-    <script>
-    export default {
-      name: 'AboutPage'
+<script setup>
+useSeoMeta({
+  title: '關於我們 - 宜蘭旅遊通',
+  description: '宜蘭旅遊通是由「宜蘭觀光民宿行銷協會」發起，致力於打造一個創新的數位平台，讓旅遊更便利、更環保，全面取代傳統的紙本優惠券系統。',
+  canonical: 'https://yilanpass.com/about'
+})
+
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/about'
     }
-    </script>
-    
-    <style scoped>
+  ]
+})
+</script>    <style scoped>
         .about-header {
             background-color: #2a90b6a6;
             color: #fff;

@@ -513,11 +513,19 @@ import { ref, computed, onMounted } from 'vue';
 import { township } from '~/utils/category.js';
 
 // SEO 設定
+useSeoMeta({
+  title: '民宿註冊申請 - 宜蘭旅遊通',
+  description: '註冊您的民宿，加入我們的優質住宿平台，讓更多旅客發現您的特色住宿。',
+  keywords: '民宿註冊, 民宿申請, 加入平台, 住宿業者',
+  canonical: 'https://yilanpass.com/homestay-register'
+})
+
 useHead({
-  title: '民宿註冊申請 - 加入我們的民宿平台',
-  meta: [
-    { name: 'description', content: '註冊您的民宿，加入我們的優質住宿平台，讓更多旅客發現您的特色住宿。' },
-    { name: 'keywords', content: '民宿註冊, 民宿申請, 加入平台, 住宿業者' }
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/homestay-register'
+    }
   ]
 });
 

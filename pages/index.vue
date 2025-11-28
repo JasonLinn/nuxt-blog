@@ -195,7 +195,18 @@ useSeoMeta({
   ogTitle: '優惠券列表 - 探索最新優惠',
   description: '探索宜蘭最新的優惠券和特價活動，包含伴手禮、租車、湯屋等各類優惠',
   ogDescription: '探索宜蘭最新的優惠券和特價活動，包含伴手禮、租車、湯屋等各類優惠',
-  keywords: '優惠券,宜蘭,伴手禮,租車,湯屋,特價,活動'
+  keywords: '優惠券,宜蘭,伴手禮,租車,湯屋,特價,活動',
+  canonical: 'https://yilanpass.com'
+})
+
+// 額外設定 head link (雙重保險)
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com'
+    }
+  ]
 })
 
 const route = useRoute()

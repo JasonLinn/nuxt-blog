@@ -97,6 +97,21 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import useCouponStore from '~/store/coupon';
 
+useSeoMeta({
+  title: '優惠券/代訂服務列表 - 宜蘭旅遊通',
+  description: '宜蘭旅遊通提供多樣化的優惠券與代訂服務，讓您的宜蘭之旅更加豐富與便利。',
+  canonical: 'https://yilanpass.com/coupon-services'
+})
+
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/coupon-services'
+    }
+  ]
+})
+
 const router = useRouter();
 const couponStore = useCouponStore();
 

@@ -10,6 +10,22 @@
 
 <script setup>
     import liff from "@line/liff";
+
+    useSeoMeta({
+      title: '找房需求 - 宜蘭旅遊通',
+      description: '填寫您的找房需求，我們將協助您找到合適的民宿。',
+      canonical: 'https://yilanpass.com/findRoom'
+    })
+
+    useHead({
+      link: [
+        {
+          rel: 'canonical',
+          href: 'https://yilanpass.com/findRoom'
+        }
+      ]
+    })
+
     let userId = ref('xxxxxx');
     let text =
             '聯絡人：林小明\n' +

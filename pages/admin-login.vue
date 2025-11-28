@@ -68,11 +68,19 @@ import { ref, computed } from 'vue';
 import { navigateTo } from 'nuxt/app';
 
 // SEO 設定
+useSeoMeta({
+  title: '管理員登入 - 宜蘭旅遊通',
+  description: '民宿平台管理員登入頁面',
+  robots: 'noindex, nofollow',
+  canonical: 'https://yilanpass.com/admin-login'
+})
+
 useHead({
-  title: '管理員登入 - 民宿平台管理系統',
-  meta: [
-    { name: 'robots', content: 'noindex, nofollow' },
-    { name: 'description', content: '民宿平台管理員登入頁面' }
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/admin-login'
+    }
   ]
 });
 

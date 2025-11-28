@@ -29,13 +29,22 @@
     </footer>
     </template>
     
-    <script>
-    export default {
-      name: 'RulePage'
+<script setup>
+useSeoMeta({
+  title: '推薦代碼使用規範 - 宜蘭旅遊通',
+  description: '宜蘭旅遊通推薦代碼使用規範，保障會員權益，維護公平使用。',
+  canonical: 'https://yilanpass.com/rule'
+})
+
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/rule'
     }
-    </script>
-    
-    <style scoped>
+  ]
+})
+</script>    <style scoped>
         .rule-header {
             background-color: #2a90b6a6;
             color: #fff;

@@ -498,7 +498,18 @@ useSeoMeta({
   ogImage: 'https://yilanpass.com/logo.png',
   ogUrl: 'https://yilanpass.com/homestay-list',
   twitterCard: 'summary_large_image',
-  robots: 'index, follow'
+  robots: 'index, follow',
+  canonical: 'https://yilanpass.com/homestay-list'
+})
+
+// 額外設定 head link (雙重保險)
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/homestay-list'
+    }
+  ]
 })
 
 // 使用 homestay store

@@ -525,6 +525,8 @@ onUnmounted(() => {
 // 動態設定頁面 SEO
 watchEffect(() => {
   if (activity.value) {
+    const canonicalUrl = `https://yilanpass.com/yilan-activities/${activity.value.id}`
+    
     useHead({
       title: `${activity.value.title} | 宜蘭活動總匯`,
       meta: [
@@ -537,6 +539,13 @@ watchEffect(() => {
         {
           property: 'og:image',
           content: activity.value.images && activity.value.images.length ? activity.value.images[0] : ''
+        },
+        { property: 'og:url', content: canonicalUrl }
+      ],
+      link: [
+        {
+          rel: 'canonical',
+          href: canonicalUrl
         }
       ]
     })

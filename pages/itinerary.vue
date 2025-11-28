@@ -814,13 +814,23 @@ useHead({
 
 // SEO 設定
 useSeoMeta({
-  title: '宜蘭行程規劃 - 探索在地美景與美食',
+  title: '宜蘭行程規劃 - 宜蘭旅遊通',
   description: '規劃您的宜蘭之旅！探索私房景點、在地美食、特色住宿，打造專屬的宜蘭旅遊行程。',
   keywords: '宜蘭旅遊,行程規劃,宜蘭景點,宜蘭美食,宜蘭住宿,旅遊規劃,宜蘭私房景點',
-  ogTitle: '宜蘭行程規劃 - 探索在地美景與美食',
+  ogTitle: '宜蘭行程規劃 - 宜蘭旅遊通',
   ogDescription: '規劃您的宜蘭之旅！探索私房景點、在地美食、特色住宿，打造專屬的宜蘭旅遊行程。',
   ogImage: '/yilan-travel.jpg',
-  twitterCard: 'summary_large_image'
+  twitterCard: 'summary_large_image',
+  canonical: 'https://yilanpass.com/itinerary'
+});
+
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/itinerary'
+    }
+  ]
 });
 
 // 狀態管理

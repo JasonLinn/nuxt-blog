@@ -67,6 +67,21 @@ definePageMeta({
   layout: false
 })
 
+useSeoMeta({
+  title: '管理員登入 - 宜蘭旅遊通',
+  description: '宜蘭旅遊通管理員登入頁面。',
+  canonical: 'https://yilanpass.com/login'
+})
+
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/login'
+    }
+  ]
+})
+
 const loginData = reactive({
   account: '',
   password: ''
