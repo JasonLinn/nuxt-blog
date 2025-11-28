@@ -14,8 +14,7 @@ export default defineNuxtConfig({
     'radix-vue/nuxt',
     'nuxt-file-storage',
     '@nuxt/image',
-    "nuxt-easy-lightbox",
-    '@nuxtjs/sitemap'
+    "nuxt-easy-lightbox"
   ],
   runtimeConfig: {
     // 只在服務器端可用的私有鍵
@@ -149,17 +148,5 @@ export default defineNuxtConfig({
   // SEO 設定
   site: {
     url: 'https://yilanpass.com'
-  },
-  
-  // Sitemap 設定 - 使用 v7 語法
-  sitemap: {
-    urls: [
-      '/',
-      '/homestay-list',
-      '/about',
-      '/rule',
-      '/relative',
-      '/findRoom'
-    ]
   }
 });
