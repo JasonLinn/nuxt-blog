@@ -500,10 +500,23 @@ const submitCoupon = async () => {
   try {
     submitting.value = true
 
-    // 處理圖片 - 取得第一張圖片 URL
-    let coverUrl = null
-    if (form.cover && form.cover.length > 0) {
-      coverUrl = form.cover[0]
+    // 處理地址和鄉鎮轉為陣列
+    const adressArray = form.adress ? [form.adress] : []
+    const townshipArray = form.township ? [form.township] : []
+
+    // 處理座標轉為 JSON
+    let positionJson = null
+    if (form.position) {
+      const parts = form.position.split(',').map(p => p.trim())
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        positionJson = { lat: parseFloat(parts[0]), lng: parseFloat(parts[1]) }
+      } else {
+        try {
+          positionJson = JSON.parse(form.position)
+        } catch (e) {
+          positionJson = { raw: form.position }
+        }
+      }
     }
 
     // 使用 $fetch 發送 JSON
@@ -515,15 +528,17 @@ const submitCoupon = async () => {
         business_name: form.business_name,
         submitter_name: form.submitter_name,
         submitter_email: form.submitter_email,
+        category: form.category_id,
         category_id: form.category_id,
-        address: form.adress,
-        township: form.township,
+        adress: adressArray,
+        township: townshipArray,
         tags: form.tags,
-        position: form.position,
+        position: positionJson,
         amount: form.amount,
         isonce: form.isonce === 'true',
         isReferral: form.isReferral === 'true',
-        cover_url: coverUrl
+        hash: form.hash === 'true',
+        cover: form.cover
       }
     })
 

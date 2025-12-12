@@ -30,15 +30,15 @@ export default defineEventHandler(async (event) => {
     const result = await client.query(`
       INSERT INTO pending_coupons (
         title, content, discount_type, discount_value,
-        business_name, category, township, address, phone, website,
-        cover_image, valid_from, valid_until, min_purchase, max_usage,
+        business_name, category, township, adress, phone, website,
+        cover, valid_from, valid_until, min_purchase, max_usage,
         usage_notes, submitter_name, submitter_phone, submitter_email,
-        amount, category_id, isonce, isReferral, tags, position,
+        amount, category_id, isonce, isReferral, tags, position, hash,
         status, created_at, updated_at
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15, $16, $17, $18, $19,
-        $20, $21, $22, $23, $24, $25,
+        $20, $21, $22, $23, $24, $25, $26,
         'pending', NOW(), NOW()
       ) RETURNING id
     `, [
@@ -48,11 +48,11 @@ export default defineEventHandler(async (event) => {
       data.discount_value ? parseFloat(data.discount_value) : null,
       data.business_name,
       data.category || null,
-      data.township || null,
-      data.address || null,
+      data.township, // Expecting array
+      data.adress,   // Expecting array
       data.phone || null,
       data.website || null,
-      data.cover_url || null,
+      data.cover,    // Expecting array
       data.valid_from || null,
       data.valid_until || null,
       data.min_purchase ? parseFloat(data.min_purchase) : 0,
@@ -63,10 +63,11 @@ export default defineEventHandler(async (event) => {
       data.submitter_email || null,
       data.amount ? parseInt(data.amount) : 1000,
       data.category_id ? parseInt(data.category_id) : 1,
-      data.isonce === true,
-      data.isReferral === true,
+      data.isonce,
+      data.isReferral,
       data.tags || null,
-      data.position || null
+      data.position, // Expecting json
+      data.hash // Expecting boolean
     ])
       
       const couponId = result.rows[0].id

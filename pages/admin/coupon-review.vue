@@ -46,7 +46,12 @@
           <!-- 封面圖片 -->
           <div class="image-section">
             <img 
-              v-if="coupon.cover_image" 
+              v-if="coupon.cover && coupon.cover.length > 0" 
+              :src="coupon.cover[0]" 
+              :alt="coupon.title"
+            >
+            <img 
+              v-else-if="coupon.cover_image" 
               :src="coupon.cover_image" 
               :alt="coupon.title"
             >
@@ -128,7 +133,12 @@
           <div class="modal-grid">
             <div class="modal-image">
               <img 
-                v-if="selectedCoupon.cover_image" 
+                v-if="selectedCoupon.cover && selectedCoupon.cover.length > 0" 
+                :src="selectedCoupon.cover[0]" 
+                :alt="selectedCoupon.title"
+              >
+              <img 
+                v-else-if="selectedCoupon.cover_image" 
                 :src="selectedCoupon.cover_image" 
                 :alt="selectedCoupon.title"
               >
@@ -160,8 +170,13 @@
                 <strong>商家資訊：</strong>
                 <div class="info-list">
                   <div v-if="selectedCoupon.category">類別：{{ selectedCoupon.category }}</div>
-                  <div v-if="selectedCoupon.township">鄉鎮：{{ selectedCoupon.township }}</div>
-                  <div v-if="selectedCoupon.address">地址：{{ selectedCoupon.address }}</div>
+                  <div v-if="selectedCoupon.township">
+                    鄉鎮：{{ Array.isArray(selectedCoupon.township) ? selectedCoupon.township.join(', ') : selectedCoupon.township }}
+                  </div>
+                  <div v-if="selectedCoupon.adress">
+                    地址：{{ Array.isArray(selectedCoupon.adress) ? selectedCoupon.adress.join(', ') : selectedCoupon.adress || selectedCoupon.address }}
+                  </div>
+                  <div v-else-if="selectedCoupon.address">地址：{{ selectedCoupon.address }}</div>
                   <div v-if="selectedCoupon.phone">電話：{{ selectedCoupon.phone }}</div>
                   <div v-if="selectedCoupon.website">網站：<a :href="selectedCoupon.website" target="_blank">{{ selectedCoupon.website }}</a></div>
                 </div>
