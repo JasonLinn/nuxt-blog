@@ -472,8 +472,8 @@ const removeImage = (index) => {
 }
 
 // 重設表單
-const resetForm = () => {
-  if (confirm('確定要重設表單？所有資料將會清除。')) {
+const resetForm = (force) => {
+  if (force === true || confirm('確定要重設表單？所有資料將會清除。')) {
     Object.keys(form).forEach(key => {
       if (key === 'amount') {
         form[key] = 1000
@@ -544,7 +544,7 @@ const submitCoupon = async () => {
 
     if (response.success) {
       showSuccessModal.value = true
-      resetForm()
+      resetForm(true)
     } else {
       throw new Error(response.message || '填寫失敗')
     }
