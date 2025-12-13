@@ -87,7 +87,7 @@ export default defineEventHandler(async (event) => {
           
           const articleData = {
             title: coupon.title,
-            category: coupon.category_id || 1, // 使用提交時的分類ID
+            category: coupon.category || coupon.category_id || 1, // 優先使用 category (字串)，若無則嘗試 category_id
             adress: coupon.adress || (coupon.address ? [coupon.address] : []), // 優先使用 adress 陣列
             township: coupon.township || (typeof coupon.township === 'string' ? [coupon.township] : []), // 優先使用 township 陣列
             content: coupon.content,

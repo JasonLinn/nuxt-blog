@@ -62,7 +62,7 @@ export default defineEventHandler(async (event) => {
       null, // submitter_phone
       data.submitter_email || null,
       data.amount ? parseInt(data.amount) : 1000,
-      data.category_id ? parseInt(data.category_id) : 1,
+      (data.category_id && !isNaN(parseInt(data.category_id))) ? parseInt(data.category_id) : null,
       data.isonce,
       data.isReferral,
       data.tags || null,
@@ -84,6 +84,7 @@ export default defineEventHandler(async (event) => {
 
   } catch (error) {
     console.error('提交優惠券失敗:', error)
+    console.error('Error details:', error.message, error.detail, error.hint)
     
     if (error.statusCode) {
       throw error
@@ -91,7 +92,7 @@ export default defineEventHandler(async (event) => {
     
     throw createError({
       statusCode: 500,
-      statusMessage: '提交優惠券失敗，請稍後再試'
+      statusMessage: `提交優惠券失敗: ${error.message}`
     })
   }
 })
