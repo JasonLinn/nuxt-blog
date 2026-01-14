@@ -38,6 +38,12 @@
         推薦行程管理
       </NuxtLink>
       <NuxtLink
+        to="/admin/referral"
+        :class="['admin-nav-link', { active: isActive('/admin/referral') }]"
+      >
+        推薦碼與店家
+      </NuxtLink>
+      <NuxtLink
         to="/admin/coupon-review"
         :class="['admin-nav-link', { active: isActive('/admin/coupon-review') }]"
       >

@@ -1,10 +1,10 @@
 import { readBody, createError } from '#imports'
+import { referral } from '~/utils/referral.js'
 
 // 直接在处理函数中导入 referral 数据
 export default defineEventHandler(async (event) => {
   try {
-    // 动态导入 referral 数据
-    const { referral } = await import('../../utils/referral.js')
+    // 使用静态导入的 referral 数据
     
     // 读取请求体
     const body = await readBody(event);
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
     const { code } = body;
 
-    // 使用 referral.js 中的数据
+    // 使用靜態導入的 referral 數據
     const referralData = referral.find(ref => ref.code === code && ref.name); // 只匹配有名字的推荐码
 
     if (!referralData) {
