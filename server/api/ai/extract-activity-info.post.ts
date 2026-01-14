@@ -94,8 +94,9 @@ export default defineEventHandler(async (event) => {
     console.log('✅ Gemini AI 初始化成功')
     
     console.log('📋 準備獲取模型...')
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
-    console.log('✅ 成功獲取模型: gemini-2.0-flash-exp')
+    // 改用 gemini-2.5-flash，這是更新且支援多模態（圖片讀取）的模型
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    console.log('✅ 成功獲取模型: gemini-2.5-flash')
 
     console.log('🔄 準備轉換圖片格式...')
     // 將圖片轉換為 Gemini 支援的格式
