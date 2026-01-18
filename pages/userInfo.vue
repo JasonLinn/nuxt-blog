@@ -82,7 +82,7 @@
                             </tr>
                             <tr class="coupon-info-tr">
                               <td class="coupon-info-title">使用期限：</td>
-                              <td>2025/12/31</td>
+                              <td>2026/12/31</td>
                             </tr>
                           </tbody>
                         </table>
