@@ -82,7 +82,7 @@
                             </tr>
                             <tr class="coupon-info-tr">
                               <td class="coupon-info-title">使用期限：</td>
-                              <td>2026/12/31</td>
+                              <td>{{ new Date().getFullYear() }}/12/31</td>
                             </tr>
                           </tbody>
                         </table>
