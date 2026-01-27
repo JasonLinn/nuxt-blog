@@ -9,7 +9,7 @@ export const referral = [
   },
   {
     code: '2026KYD',
-    name: '水荺間'
+    name: '水筠間'
   },
   {
     code: '2026KYU',
