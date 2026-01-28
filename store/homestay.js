@@ -5,11 +5,18 @@ const useHomestayStore = defineStore("homestayStore", {
     homestays: [],
     loading: false,
     error: null,
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalCount: 0,
+      limit: 12
+    },
+    lastFetchParams: null, // 記錄最後一次請求的參數，用於判斷是否需要重新請求
     lastFetchTime: null,
     // 緩存時間（分鐘）
-    cacheTimeout: 30
+    cacheTimeout: 5
   }),
-  
+
   actions: {
     // 設置民宿資料
     setHomestays(homestays) {
@@ -17,129 +24,106 @@ const useHomestayStore = defineStore("homestayStore", {
       this.lastFetchTime = Date.now();
       this.error = null;
     },
-    
+
+    // 設置分頁資訊
+    setPagination(pagination) {
+      this.pagination = { ...this.pagination, ...pagination };
+    },
+
     // 設置載入狀態
     setLoading(loading) {
       this.loading = loading;
     },
-    
+
     // 設置錯誤狀態
     setError(error) {
       this.error = error;
     },
-    
+
     // 清除資料
     clearData() {
       this.homestays = [];
       this.error = null;
       this.lastFetchTime = null;
+      this.lastFetchParams = null;
+      this.pagination = {
+        currentPage: 1,
+        totalPages: 1,
+        totalCount: 0,
+        limit: 12
+      };
     },
-    
-    // 檢查快取是否有效
-    isCacheValid() {
-      if (!this.lastFetchTime) return false;
-      const now = Date.now();
-      const cacheAge = (now - this.lastFetchTime) / (1000 * 60); // 分鐘
-      return cacheAge < this.cacheTimeout;
-    },
-    
-    // 獲取民宿資料
-    async fetchHomestays(forceRefresh = false) {
-      console.log('=== homestayStore fetchHomestays 開始 ===');
-      
-      // 如果有快取且未過期，直接返回
-      if (!forceRefresh && this.homestays.length > 0 && this.isCacheValid()) {
-        console.log('使用快取資料，民宿數量:', this.homestays.length);
+
+    // 獲取民宿資料 (支援分頁與篩選)
+    async fetchHomestays(params = {}) {
+      console.log('=== homestayStore fetchHomestays 開始 ===', params);
+
+      const {
+        page = 1,
+        limit = 12,
+        search = '',
+        location = '',
+        themes = [],
+        amenities = [],
+        guest_count = null,
+        sort_by = 'rating',
+        forceRefresh = false
+      } = params;
+
+      // 檢查是否是相同的請求且快取有效 (如果不是強制刷新)
+      // 注意：如果有篩選條件變更，則視為不同請求
+      const currentParams = JSON.stringify({ page, limit, search, location, themes, amenities, guest_count, sort_by });
+
+      if (!forceRefresh &&
+        this.homestays.length > 0 &&
+        this.lastFetchParams === currentParams &&
+        this.lastFetchTime &&
+        (Date.now() - this.lastFetchTime) / (1000 * 60) < this.cacheTimeout) {
+        console.log('使用 store 快取資料');
         return this.homestays;
       }
-      
+
       this.setLoading(true);
       this.setError(null);
-      
+      this.lastFetchParams = currentParams;
+
       try {
         console.log('從API獲取民宿資料...');
-        
+
         // 使用 Nuxt 的 $fetch 工具獲取資料
         const data = await $fetch('/api/fetchBnbs', {
           query: {
-            limit: 100
+            page,
+            limit,
+            search,
+            location,
+            themes,
+            amenities,
+            guest_count,
+            sort_by
           }
         });
-        
-        console.log('🔍 API回傳資料詳細檢查:', {
-          success: data.success,
-          hasHomestays: !!data.homestays,
-          homestaysLength: data.homestays?.length,
-          firstHomestay: data.homestays?.[0]?.name
-        });
-        
-        if (data.success && data.homestays && Array.isArray(data.homestays)) {
-          console.log('✅ 開始處理民宿資料，總數:', data.homestays.length);
-          
-          // 處理資料格式
-          const processedHomestays = data.homestays.map((homestay, index) => {
-            console.log(`📝 處理第${index + 1}個民宿:`, homestay.name, 'ID:', homestay.id);
-            
-            // 處理價格
-            const prices = {
-              weekday: homestay.min_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.min_price)}` : '請洽詢',
-              weekend: homestay.max_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.max_price)}` : '請洽詢',
-              fullRentWeekday: null,
-              fullRentWeekend: null
-            };
-            
-            return {
-              id: homestay.id,
-              name: homestay.name || '未命名民宿',
-              area: homestay.area || homestay.location || '未知地區',
-              address: homestay.address || homestay.city || '',
-              description: homestay.description || homestay.capacity_description || '暫無描述',
-              image_urls: homestay.image_urls && homestay.image_urls.length > 0 ? homestay.image_urls : (homestay.image_url ? [homestay.image_url] : []),
-              min_guests: homestay.min_guests || null,
-              max_guests: homestay.max_guests || null,
-              features: homestay.features || {
-                peopleTypes: [homestay.capacity_description || ''].filter(Boolean),
 
-                themeFeatures: homestay.theme_features || [],
-                serviceAmenities: homestay.service_amenities || []
-              },
-              prices: homestay.prices || {
-                weekday: homestay.min_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.min_price)}` : '請洽詢',
-                weekend: homestay.max_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.max_price)}` : '請洽詢',
-                fullRentWeekday: null,
-                fullRentWeekend: null
-              },
-              contact: homestay.contact || {
-                phone: homestay.phone,
-                website: homestay.website,
-                line: homestay.social_line || homestay.line_id || null,
-                instagram: homestay.social_instagram || null,
-                facebook: homestay.social_facebook || null
-              },
-              featured: homestay.featured || false,
-              view_count: homestay.view_count || 0,
-              rating: homestay.rating || null,
-              total_reviews: homestay.total_reviews || 0,
-              // 保留原始欄位以匹配fetchBnbDetail API的結構
-              min_price: homestay.min_price,
-              max_price: homestay.max_price,
-              average_price: homestay.average_price
-            };
+        if (data.success) {
+          console.log(`✅ 獲取成功，本頁資料: ${data.homestays.length} 筆，總數: ${data.total_count} 筆`);
+
+          this.setHomestays(data.homestays);
+          this.setPagination({
+            currentPage: data.current_page || page,
+            totalPages: data.total_pages || Math.ceil(data.total_count / limit),
+            totalCount: data.total_count || 0,
+            limit
           });
-          
-          // 存儲資料到store
-          this.setHomestays(processedHomestays);
-          
-          console.log('民宿資料存儲完成，總數:', processedHomestays.length);
-          return processedHomestays;
-          
+
+          return data.homestays;
+
         } else {
           console.error('API回傳格式錯誤:', data);
           const errorMsg = data.error || '獲取資料失敗';
           this.setError(errorMsg);
           throw new Error(errorMsg);
         }
-        
+
       } catch (err) {
         console.error('載入民宿資料失敗:', err);
         const errorMsg = `載入失敗: ${err.message}`;
@@ -150,57 +134,46 @@ const useHomestayStore = defineStore("homestayStore", {
         console.log('=== homestayStore fetchHomestays 完成 ===');
       }
     },
-    
-    // 根據ID獲取單一民宿資料
+
+    // 根據ID獲取單一民宿資料 (從當前列表中查找，如果沒找到可能需要另外 fetch)
+    // 注意：因為現在列表只有部分資料，從這裡獲取可能失敗，建議詳細頁面使用自己的 useFetch
     getHomestayById(id) {
-      console.log('從store查找民宿 ID:', id, '類型:', typeof id);
-      console.log('store中的民宿數量:', this.homestays.length);
-      
-      if (this.homestays.length > 0) {
-        console.log('前3個民宿ID示例:', this.homestays.slice(0, 3).map(h => ({ id: h.id, name: h.name, type: typeof h.id })));
-      }
-      
-      const homestay = this.homestays.find(h => {
-        const match = h.id === id || h.id === parseInt(id) || h.id.toString() === id.toString();
-        if (match) {
-          console.log('找到匹配的民宿:', h.id, h.name);
-        }
-        return match;
-      });
-      
-      console.log('從store獲取民宿結果:', id, homestay ? `找到: ${homestay.name}` : '未找到');
+      const homestay = this.homestays.find(h =>
+        h.id === id || h.id === parseInt(id) || h.id.toString() === id.toString()
+      );
       return homestay;
     },
-    
+
     // 更新民宿查看次數
     updateViewCount(id) {
+      // 僅更新本地狀態
       const homestay = this.getHomestayById(id);
       if (homestay) {
         homestay.view_count = (homestay.view_count || 0) + 1;
       }
     },
-    
+
     // 清除快取
     clearCache() {
-      console.log('🗑️ 清除 homestay store 快取');
-      this.homestays = [];
-      this.loading = false;
-      this.error = null;
-      this.lastFetchTime = null;
+      this.clearData();
     }
   },
-  
+
   getters: {
-    // 獲取所有民宿
+    // 獲取當前頁民宿列表
     getAllHomestays: (state) => state.homestays,
-    
+
     // 獲取載入狀態
     getLoading: (state) => state.loading,
-    
+
     // 獲取錯誤狀態
     getError: (state) => state.error,
-    
-    // 獲取所有區域
+
+    // 獲取分頁資訊
+    getPagination: (state) => state.pagination,
+
+    // 獲取所有區域 (注意：現在只能獲取當前頁面的區域，如果需要全部區域列表可能需要另外的 API)
+    // 為了保持兼容性，這裡還是返回當前頁面的區域列表
     getAllAreas: (state) => {
       const areaSet = new Set();
       state.homestays.forEach(homestay => {
@@ -210,19 +183,9 @@ const useHomestayStore = defineStore("homestayStore", {
       });
       return Array.from(areaSet).sort();
     },
-    
-    
+
     // 檢查是否有資料
     hasData: (state) => state.homestays.length > 0,
-    
-    // 獲取快取狀態
-    getCacheStatus: (state) => {
-      return {
-        hasCache: state.homestays.length > 0,
-        lastFetchTime: state.lastFetchTime,
-        isValid: state.lastFetchTime && (Date.now() - state.lastFetchTime) / (1000 * 60) < state.cacheTimeout
-      };
-    }
   }
 });
 

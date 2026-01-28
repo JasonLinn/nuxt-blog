@@ -519,7 +519,7 @@ const searchText = ref('');
 const selectedArea = ref(null);
 const guestCount = ref(null);
 const currentPage = ref(1);
-const itemsPerPage = 8;
+const itemsPerPage = 12; // 與後端預設一致
 
 // 日期搜尋相關
 const checkInDate = ref('');
@@ -542,16 +542,59 @@ const hoveredBnb = ref(null);
 const bnbsData = computed(() => homestayStore.getAllHomestays);
 const loading = computed(() => homestayStore.getLoading);
 const error = computed(() => homestayStore.getError);
+const pagination = computed(() => homestayStore.getPagination);
 
-// 隨機排序函式
-const shuffleArray = (array) => {
-  const shuffled = [...array]; // 創建副本以避免修改原陣列
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+// 過濾民宿資料 - 增強篩選邏輯，支援日期搜尋
+const filteredBnbs = computed(() => {
+  // 如果啟用日期搜尋模式，使用日期搜尋結果 (Client-side filtering)
+  if (dateSearchMode.value && availableHomestays.value.length >= 0) {
+    // 對日期搜尋結果進行進一步篩選
+    const result = availableHomestays.value.filter(bnb => {
+      const nameMatch = !searchText.value || 
+        bnb.name.toLowerCase().includes(searchText.value.toLowerCase()) ||
+        bnb.description?.toLowerCase().includes(searchText.value.toLowerCase()) ||
+        (bnb.features?.themeFeatures && bnb.features.themeFeatures.some(feature => 
+          feature.toLowerCase().includes(searchText.value.toLowerCase())
+        ));
+      const areaMatch = !selectedArea.value || bnb.area === selectedArea.value;
+      const themeMatch = selectedThemeFeatures.value.length === 0 || 
+        (bnb.features?.themeFeatures && selectedThemeFeatures.value.every(selected => 
+          bnb.features.themeFeatures.includes(selected)
+        ));
+      const amenityMatch = selectedServiceAmenities.value.length === 0 || 
+        (bnb.features?.serviceAmenities && selectedServiceAmenities.value.every(selected => 
+          bnb.features.serviceAmenities.includes(selected)
+        ));
+      return nameMatch && areaMatch && themeMatch && amenityMatch;
+    });
+    return shuffleArray(result);
   }
-  return shuffled;
-};
+  
+  // 一般模式 (Server-side filtering) - 直接回傳 store 資料
+  // 過濾邏輯已在後端完成
+  return bnbsData.value || [];
+});
+
+// 計算總頁數
+const totalPages = computed(() => {
+  if (dateSearchMode.value) {
+    return Math.ceil(filteredBnbs.value.length / itemsPerPage);
+  }
+  // Server-side
+  return pagination.value.totalPages;
+});
+
+// 當前頁的資料
+const paginatedBnbs = computed(() => {
+  if (dateSearchMode.value) {
+    // Client-side pagination
+    const startIndex = (currentPage.value - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredBnbs.value.slice(startIndex, endIndex);
+  }
+  // Server-side: store data is already the current page
+  return filteredBnbs.value;
+});
 
 // 熱門主題特色標籤
 const hotThemeFeatures = [
@@ -561,8 +604,13 @@ const hotThemeFeatures = [
   '海景民宿'
 ];
 
-// 獲取所有區域 - 使用store的getter
-const areas = computed(() => homestayStore.getAllAreas);
+// 獲取所有區域 - 使用store的getter (注意：這可能只包含當前頁面的區域，如果需要完整列表可能需要優化)
+// 獲取所有區域 - 改為靜態列表以確保分頁模式下能選擇所有區域
+const areas = computed(() => [
+  '頭城鎮', '礁溪鄉', '宜蘭市', '壯圍鄉', '員山鄉', 
+  '羅東鎮', '五結鄉', '三星鄉', '冬山鄉', '蘇澳鎮', 
+  '南澳鄉', '大同鄉'
+]);
 
 // 日期相關的計算屬性
 const todayString = computed(() => {
@@ -588,104 +636,12 @@ const debugFilters = () => {
     searchText: searchText.value,
     selectedArea: selectedArea.value,
     guestCount: guestCount.value,
-    totalItems: bnbsData.value.length,
-    filteredItems: filteredBnbs.value.length
+    themes: selectedThemeFeatures.value,
+    amenities: selectedServiceAmenities.value,
+    page: currentPage.value,
+    totalCount: pagination.value.totalCount
   });
 }
-
-// 過濾民宿資料 - 增強篩選邏輯，支援日期搜尋
-const filteredBnbs = computed(() => {
-  console.log('filteredBnbs 計算中, bnbsData.length:', bnbsData.value?.length);
-  console.log('日期搜尋模式:', dateSearchMode.value);
-  
-  // 如果啟用日期搜尋模式，使用日期搜尋結果
-  if (dateSearchMode.value && availableHomestays.value.length >= 0) {
-    console.log('使用日期搜尋結果:', availableHomestays.value.length, '筆');
-    
-    // 對日期搜尋結果進行進一步篩選
-    const result = availableHomestays.value.filter(bnb => {
-      // 檢查名稱和描述（支援主題特色搜尋）
-      const nameMatch = !searchText.value || 
-        bnb.name.toLowerCase().includes(searchText.value.toLowerCase()) ||
-        bnb.description?.toLowerCase().includes(searchText.value.toLowerCase()) ||
-        (bnb.features?.themeFeatures && bnb.features.themeFeatures.some(feature => 
-          feature.toLowerCase().includes(searchText.value.toLowerCase())
-        ));
-      
-      // 檢查區域
-      const areaMatch = !selectedArea.value || bnb.area === selectedArea.value;
-      
-      // 檢查主題特色篩選 (交集邏輯)
-      const themeMatch = selectedThemeFeatures.value.length === 0 || 
-        (bnb.features?.themeFeatures && selectedThemeFeatures.value.every(selected => 
-          bnb.features.themeFeatures.includes(selected)
-        ));
-      
-      // 檢查服務設施篩選 (交集邏輯)
-      const amenityMatch = selectedServiceAmenities.value.length === 0 || 
-        (bnb.features?.serviceAmenities && selectedServiceAmenities.value.every(selected => 
-          bnb.features.serviceAmenities.includes(selected)
-        ));
-      
-      return nameMatch && areaMatch && themeMatch && amenityMatch;
-    });
-    
-    console.log('日期篩選後結果:', result.length, '筆');
-    // 對結果進行隨機排序
-    return shuffleArray(result);
-  }
-  
-  // 一般篩選邏輯
-  if (!Array.isArray(bnbsData.value)) {
-    console.log('bnbsData 不是陣列:', bnbsData.value);
-    return [];
-  }
-  
-  const result = bnbsData.value.filter(bnb => {
-    // 檢查名稱和描述（支援主題特色搜尋）
-    const nameMatch = !searchText.value || 
-      bnb.name.toLowerCase().includes(searchText.value.toLowerCase()) ||
-      bnb.description?.toLowerCase().includes(searchText.value.toLowerCase()) ||
-      (bnb.features?.themeFeatures && bnb.features.themeFeatures.some(feature => 
-        feature.toLowerCase().includes(searchText.value.toLowerCase())
-      ));
-    
-    // 檢查區域
-    const areaMatch = !selectedArea.value || bnb.area === selectedArea.value;
-    
-    // 檢查人數範圍
-    const guestCountMatch = !guestCount.value || guestCount.value === 0 || 
-      ((!bnb.min_guests || guestCount.value >= bnb.min_guests) &&
-       (!bnb.max_guests || guestCount.value <= bnb.max_guests));
-    
-    // 特殊處理：如果搜尋「包棟」，顯示有包棟價格的民宿
-    const packageMatch = searchText.value !== '包棟' || 
-      (bnb.prices && (bnb.prices.fullRentWeekday || bnb.prices.fullRentWeekend));
-    
-    // 檢查主題特色篩選 (交集邏輯)
-    const themeMatch = selectedThemeFeatures.value.length === 0 || 
-      (bnb.features?.themeFeatures && selectedThemeFeatures.value.every(selected => 
-        bnb.features.themeFeatures.includes(selected)
-      ));
-    
-    // 檢查服務設施篩選 (交集邏輯)
-    const amenityMatch = selectedServiceAmenities.value.length === 0 || 
-      (bnb.features?.serviceAmenities && selectedServiceAmenities.value.every(selected => 
-        bnb.features.serviceAmenities.includes(selected)
-      ));
-    
-    return nameMatch && areaMatch && guestCountMatch && packageMatch && themeMatch && amenityMatch;
-  });
-  
-  console.log('一般篩選結果:', result.length, '筆');
-  // 對結果進行隨機排序
-  return shuffleArray(result);
-});
-
-// 計算總頁數
-const totalPages = computed(() => {
-  return Math.ceil(filteredBnbs.value.length / itemsPerPage);
-});
 
 // 結構化資料 (JSON-LD) - 民宿列表
 useHead({
@@ -698,8 +654,8 @@ useHead({
         "name": "宜蘭合法民宿推薦",
         "description": "精選宜蘭地區合法民宿列表，包含親子、寵物、海景、包棟等主題民宿",
         "url": "https://yilanpass.com/homestay-list",
-        "numberOfItems": filteredBnbs.value?.length || 0,
-        "itemListElement": (filteredBnbs.value || []).slice(0, 20).map((bnb, index) => ({
+        "numberOfItems": pagination.value.totalCount || 0,
+        "itemListElement": (paginatedBnbs.value || []).slice(0, 20).map((bnb, index) => ({
           "@type": "ListItem",
           "position": index + 1,
           "item": {
@@ -715,7 +671,7 @@ useHead({
               "addressCountry": "TW"
             },
             "priceRange": bnb.prices?.fullRentWeekday ? 
-              `NT$${bnb.prices.fullRentWeekday} - NT$${bnb.prices.fullRentWeekend || bnb.prices.fullRentWeekday}` : 
+              `NT$${bnb.prices.fullRentWeekday} - NT$${bnb.prices.fullRentWeekday || bnb.prices.fullRentWeekday}` : 
               undefined,
             "aggregateRating": bnb.rating ? {
               "@type": "AggregateRating",
@@ -730,14 +686,7 @@ useHead({
   ]
 })
 
-// 當前頁的資料
-const paginatedBnbs = computed(() => {
-  const startIndex = (currentPage.value - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  return filteredBnbs.value.slice(startIndex, endIndex);
-});
-
-// 點擊熱門標籤 - 增強邏輯
+// 點擊熱門標籤
 const clickTag = (e) => {
   const tagText = e.target.textContent.trim();
   
@@ -753,7 +702,7 @@ const clickTag = (e) => {
   }
   
   currentPage.value = 1;
-  // filterBnbs 會自動觸發 (透過 watch)
+  // watch 會自動觸發 fetchFn
 }
 
 // 清除搜尋文字
@@ -800,6 +749,7 @@ const closeAdvancedSearch = () => {
 const applyAdvancedFilters = () => {
   closeAdvancedSearch();
   currentPage.value = 1;
+  fetchBnbsData(); // 立即觸發
 }
 
 // 移除單個主題特色
@@ -807,6 +757,7 @@ const removeThemeFeature = (feature) => {
   const index = selectedThemeFeatures.value.indexOf(feature);
   if (index > -1) {
     selectedThemeFeatures.value.splice(index, 1);
+    fetchBnbsData(); // 立即觸發
   }
 }
 
@@ -815,6 +766,7 @@ const removeServiceAmenity = (amenity) => {
   const index = selectedServiceAmenities.value.indexOf(amenity);
   if (index > -1) {
     selectedServiceAmenities.value.splice(index, 1);
+    fetchBnbsData(); // 立即觸發
   }
 }
 
@@ -823,14 +775,15 @@ const hasActiveFilters = computed(() => {
   return selectedThemeFeatures.value.length > 0 || selectedServiceAmenities.value.length > 0;
 })
 
-// 計算篩選結果數量
+// 計算篩選結果數量 (這裡直接用當前頁數量，或者可以顯示總數)
 const filteredResultsCount = computed(() => {
-  return filteredBnbs.value.length;
+  return pagination.value.totalCount;
 })
 
 // 根據區域過濾
 const filterByArea = () => {
   currentPage.value = 1;
+  // watch 會自動觸發
 };
 
 // 清除日期選擇
@@ -843,6 +796,7 @@ const clearDates = () => {
 };
 
 // 根據日期搜尋可用民宿
+// TODO: 未來可能需要將日期搜尋整合到後端統一篩選 API
 const searchByDates = async () => {
   if (!checkInDate.value || !checkOutDate.value) {
     console.log('日期不完整，取消日期搜尋');
@@ -855,6 +809,7 @@ const searchByDates = async () => {
   
   try {
     dateSearchMode.value = true;
+    // 日期搜尋目前仍使用獨立 API，建議未來整合
     loading.value = true;
 
     const response = await $fetch('/api/search-available-homestays', {
@@ -870,62 +825,46 @@ const searchByDates = async () => {
     if (response.success) {
       availableHomestays.value = response.data.homestays;
       console.log('日期搜尋成功，找到', availableHomestays.value.length, '個可用民宿');
+      // 注意：目前日期搜尋結果是前端分頁，如果需要 Server-Side Pagination 需要後端支援
+      // 這裡暫時保持原樣，或者是將 available ID 傳給 fetchBnbs
     } else {
       console.error('日期搜尋失敗:', response.error);
       availableHomestays.value = [];
-      // 可以顯示錯誤訊息給用戶
     }
   } catch (error) {
     console.error('日期搜尋發生錯誤:', error);
     availableHomestays.value = [];
   } finally {
-    loading.value = false;
+    // loading.value = false; // 由 store 控制
     currentPage.value = 1;
   }
 };
 
-// 從 store 獲取民宿資料
+// 從 store 獲取民宿資料 (Server-Side Pagination)
 const fetchBnbsData = async () => {
   console.log('=== fetchBnbsData 開始執行 ===');
-  console.log('📊 Store初始狀態檢查:');
-  console.log('- hasData:', homestayStore.hasData);
-  console.log('- 民宿數量:', homestayStore.getAllHomestays.length);
-  console.log('- loading:', homestayStore.getLoading);
-  console.log('- error:', homestayStore.getError);
   
   try {
-    // 使用 store 的 fetchHomestays 方法
-    console.log('🔄 開始從API獲取資料...');
-    await homestayStore.fetchHomestays();
+    const params = {
+      page: currentPage.value,
+      limit: itemsPerPage,
+      search: searchText.value,
+      location: selectedArea.value || '',
+      guest_count: guestCount.value || null,
+      themes: selectedThemeFeatures.value,
+      amenities: selectedServiceAmenities.value,
+      // 日期搜尋暫不整合到此，除非後端支援
+    };
+
+    console.log('🔄 開始從API獲取資料(分頁)...', params);
+    
+    await homestayStore.fetchHomestays(params);
+    
     console.log('✅ 從 store 獲取民宿資料成功');
-    
-    console.log('📊 Store載入後狀態:');
-    console.log('- hasData:', homestayStore.hasData);
-    console.log('- 民宿數量:', homestayStore.getAllHomestays.length);
-    console.log('- loading:', homestayStore.getLoading);
-    console.log('- error:', homestayStore.getError);
-    
-    if (homestayStore.getAllHomestays.length > 0) {
-      console.log('📝 前3個民宿示例:', homestayStore.getAllHomestays.slice(0, 3).map(h => ({
-        id: h.id,
-        name: h.name,
-        type: typeof h.id
-      })));
-    }
+    debugFilters();
     
     // 確保響應式更新
     await nextTick();
-    
-    // 立即檢查篩選狀態
-    setTimeout(() => {
-      console.log('=== 最終狀態檢查 ===');
-      console.log('loading:', loading.value);
-      console.log('error:', error.value);
-      console.log('bnbsData.length:', bnbsData.value.length);
-      console.log('filteredBnbs.length:', filteredBnbs.value.length);
-      console.log('paginatedBnbs.length:', paginatedBnbs.value.length);
-      debugFilters();
-    }, 100);
     
   } catch (err) {
     console.error('載入民宿資料失敗:', err);
@@ -934,11 +873,30 @@ const fetchBnbsData = async () => {
   console.log('=== fetchBnbsData 執行完成 ===');
 }
 
-// 監聽篩選條件變化
-watch([searchText, selectedArea, guestCount, selectedThemeFeatures, selectedServiceAmenities], () => {
-  currentPage.value = 1;
-  debugFilters(); // 除錯輸出
-}, { deep: true, immediate: false });
+// 監聽一般篩選條件變化 (Debounce 處理搜尋文字)
+let searchTimeout = null;
+watch([searchText], () => {
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1;
+    fetchBnbsData();
+  }, 500);
+});
+// 監聽其他立即生效的篩選條件
+watch([selectedArea, guestCount, selectedThemeFeatures, selectedServiceAmenities], () => {
+  if (currentPage.value !== 1) {
+    currentPage.value = 1;
+  } else {
+    fetchBnbsData();
+  }
+  debugFilters();
+}, { deep: true });
+
+// 監聽頁碼變化
+// 當頁碼改變時，直接觸發資料獲取
+watch(currentPage, () => {
+  fetchBnbsData();
+});
 
 // 監聽日期變化
 watch([checkInDate, checkOutDate], () => {
@@ -960,40 +918,23 @@ onMounted(async () => {
   // 載入民宿資料和進階搜尋選項
   try {
     await Promise.all([
-      fetchBnbsData(),
+      fetchBnbsData(), // 預設載入第一頁
       loadAdvancedSearchOptions()
     ]);
-    
-    // 如果仍然沒有資料，直接調用 API
-    if (homestayStore.getAllHomestays.length === 0) {
-      console.warn('⚠️ Store 載入失敗，直接調用 API...');
-      
-      const response = await $fetch('/api/fetchBnbs', { query: { limit: 20 } });
-      if (response.success && response.homestays) {
-        console.log('✅ 直接 API 調用成功，設置資料:', response.homestays.length);
-        homestayStore.setHomestays(response.homestays);
-      }
-    }
     
     console.log('🏁 最終載入結果:', homestayStore.getAllHomestays.length, '筆民宿');
   } catch (error) {
     console.error('❌ 載入失敗:', error);
   }
+  
+  // 為了視覺效果，先初始化一次
+  debugFilters();
 });
 
 // 清理函式
 onUnmounted(() => {
   document.body.style.overflow = 'auto';
 });
-
-// 在資料載入後執行除錯
-watch(bnbsData, (newData) => {
-  if (newData && newData.length > 0) {
-    console.log('民宿資料載入完成，總數:', newData.length);
-    console.log('第一筆資料樣本:', newData[0]);
-    debugFilters();
-  }
-}, { immediate: true });
 
 // 格式化人數範圍顯示
 const getGuestRange = (bnb) => {
@@ -1015,12 +956,6 @@ const getGuestRange = (bnb) => {
 const navigateToBnb = (id, event) => {
   console.log('=== 點擊事件觸發 ===');
   console.log('民宿 ID:', id);
-  
-  // 檢查store狀態
-  console.log('🏪 導航前Store狀態:');
-  console.log('- hasData:', homestayStore.hasData);
-  console.log('- 民宿數量:', homestayStore.getAllHomestays.length);
-  console.log('- 目標民宿是否存在:', homestayStore.getHomestayById(id) ? '是' : '否');
   
   // 確保阻止所有默認行為
   if (event) {
@@ -1065,24 +1000,6 @@ const prevImage = (bnbId, totalImages) => {
 
 const setCurrentImage = (bnbId, imageIndex) => {
   currentImageIndex.value[bnbId] = imageIndex;
-};
-
-// 自動輪播（可選 - 當滑鼠懸停時）
-const autoSlideInterval = ref({});
-
-const startAutoSlide = (bnbId, totalImages) => {
-  if (autoSlideInterval.value[bnbId]) return;
-  
-  autoSlideInterval.value[bnbId] = setInterval(() => {
-    nextImage(bnbId, totalImages);
-  }, 3000); // 每3秒切換一張
-};
-
-const stopAutoSlide = (bnbId) => {
-  if (autoSlideInterval.value[bnbId]) {
-    clearInterval(autoSlideInterval.value[bnbId]);
-    autoSlideInterval.value[bnbId] = null;
-  }
 };
 
 // 監聽資料變化，初始化圖片索引

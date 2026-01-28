@@ -25,7 +25,7 @@ const setCache = (key, data) => {
     data,
     timestamp: Date.now()
   });
-  
+
   // 清理過期的快取項目
   if (cache.size > 100) {
     const now = Date.now();
@@ -41,23 +41,30 @@ export default defineEventHandler(async (event) => {
   try {
     // 設定客戶端編碼為 UTF-8
     await pool.query('SET CLIENT_ENCODING TO UTF8');
-    
+
     const query = getQuery(event);
-    
-    // 設置篩選參數 - 只保留有效參數
+
+    // 設置篩選參數
+    const page = Math.max(1, parseInt(query.page) || 1);
+    const limit = Math.min(Math.max(1, parseInt(query.limit) || 12), 100); // 預設 12，最大 100
+    const offset = (page - 1) * limit;
+
     const filters = {
+      search: query.search || '',
       location: query.location || '',
       type: query.type || '',
       sort_by: query.sort_by || 'rating',
       order: query.order || 'desc',
       featured_only: query.featured_only === 'true',
       is_package: query.is_package || '',
-      guest_count: parseInt(query.guest_count) || null, // 新增人數篩選
-      limit: Math.min(parseInt(query.limit) || 20, 50) // 限制最大值
+      guest_count: parseInt(query.guest_count) || null,
+      themes: query.themes ? (Array.isArray(query.themes) ? query.themes : [query.themes]) : [],
+      amenities: query.amenities ? (Array.isArray(query.amenities) ? query.amenities : [query.amenities]) : []
     };
-    
-    // 檢查快取
-    const cacheKey = getCacheKey(filters);
+
+    // 檢查快取 (僅在沒有複雜篩選時使用快取，或者可以針對特定頁碼快取)
+    // 為了簡化，這裡暫時只針對沒有搜尋和篩選的請求做快取，或者根據完整參數做快取
+    const cacheKey = getCacheKey({ ...filters, page, limit });
     const cachedResult = getFromCache(cacheKey);
     if (cachedResult) {
       return {
@@ -73,9 +80,23 @@ export default defineEventHandler(async (event) => {
     const params = [];
     let paramIndex = 1;
 
+    // 關鍵字搜尋 (名稱、描述、地點)
+    if (filters.search) {
+      whereConditions.push(`(
+        h.name ILIKE $${paramIndex} OR 
+        h.location ILIKE $${paramIndex} OR 
+        h.capacity_description ILIKE $${paramIndex} OR
+        ${/* 搜尋主題特色陣列轉字串 */ ''}
+        h.theme_features::text ILIKE $${paramIndex}
+      )`);
+      params.push(`%${filters.search}%`);
+      paramIndex++;
+    }
+
+    // 地點篩選
     if (filters.location) {
-      whereConditions.push(`h.location ILIKE $${paramIndex}`);
-      params.push(`%${filters.location}%`);
+      whereConditions.push(`h.location = $${paramIndex}`); // 精確匹配區域，如 "羅東鎮"
+      params.push(filters.location);
       paramIndex++;
     }
 
@@ -93,18 +114,56 @@ export default defineEventHandler(async (event) => {
       paramIndex++;
     }
 
+    // 主題特色篩選 (PostgreSQL Array Containment @>)
+    if (filters.themes.length > 0) {
+      whereConditions.push(`h.theme_features @> $${paramIndex}::jsonb`);
+      params.push(JSON.stringify(filters.themes));
+      paramIndex++;
+    }
+
+    // 服務設施篩選
+    if (filters.amenities.length > 0) {
+      whereConditions.push(`h.service_amenities @> $${paramIndex}::jsonb`);
+      params.push(JSON.stringify(filters.amenities));
+      paramIndex++;
+    }
+
+    // 包棟篩選 (較複雜，需要 JOIN 或子查詢，這裡使用 EXISTS 優化)
+    // 為了效能，這裡假設有 pricing_types 欄位或是關聯查詢
+    // 如果沒有 denormalized 欄位，我們用子查詢
+    if (filters.is_package) {
+      const isPackage = filters.is_package === 'true';
+      whereConditions.push(`EXISTS (
+        SELECT 1 FROM homestay_pricing hp 
+        WHERE hp.homestay_id = h.id AND hp.is_package = $${paramIndex}
+      )`);
+      params.push(isPackage);
+      paramIndex++;
+    }
+
+    // 取得總筆數 (用於分頁)
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM homestays h
+      WHERE ${whereConditions.join(' AND ')}
+    `;
+
+    // 注意：params 已經包含了所有 where 條件所需的參數
+    // 但因為 countQuery 不需要 limit/offset，所以這裡是安全的
+
     // 建構 ORDER BY
     const orderMap = {
       'rating': 'h.rating',
       'price': 'h.min_price',
       'name': 'h.name',
-      'view_count': 'h.view_count'
+      'view_count': 'h.view_count',
+      'random': 'RANDOM()' // 如果需要隨機
     };
-    
+
     const orderBy = orderMap[filters.sort_by] || 'h.rating';
     const orderDirection = filters.order === 'asc' ? 'ASC' : 'DESC';
 
-    // 優化後的主查詢 - 包含前端所需的完整欄位
+    // 主查詢
     const mainQuery = `
       SELECT 
         h.id,
@@ -132,35 +191,38 @@ export default defineEventHandler(async (event) => {
         h.view_count
       FROM homestays h
       WHERE ${whereConditions.join(' AND ')}
-      ORDER BY ${orderBy} ${orderDirection}
-      LIMIT $${paramIndex}
+      ORDER BY ${orderBy} ${orderDirection} NULLS LAST
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
-    
-    params.push(filters.limit);
 
-    console.log('執行主查詢:', mainQuery);
-    console.log('參數:', params);
+    // 執行查詢 (並行)
+    const [countResult, homestaysResult] = await Promise.all([
+      pool.query(countQuery, params), // params 只有 where 條件
+      pool.query(mainQuery, [...params, limit, offset]) // 加上 limit 和 offset
+    ]);
 
-    const result = await pool.query(mainQuery, params);
-    const homestays = result.rows;
+    const totalCount = parseInt(countResult.rows[0].total);
+    const homestays = homestaysResult.rows;
 
     if (homestays.length === 0) {
       const emptyResult = {
         homestays: [],
         total_count: 0,
+        total_pages: 0,
+        current_page: page,
         database_info: {
           connection: '✅ 已連接到 Neon 資料庫',
           query_time: new Date().toISOString()
         }
       };
-      setCache(cacheKey, emptyResult);
+      // 只有在第一頁且無結果時才快取
+      if (page === 1) setCache(cacheKey, emptyResult);
       return { success: true, ...emptyResult };
     }
 
-    // 批量獲取民宿類型和價格資訊
+    // 批量獲取民宿類型和價格資訊 (針對當前頁的民宿)
     const homestayIds = homestays.map(h => h.id);
-    
-    
+
     // 批量查詢價格選項
     const pricingQuery = `
       SELECT 
@@ -174,10 +236,7 @@ export default defineEventHandler(async (event) => {
       ORDER BY homestay_id, price_amount
     `;
 
-    console.log('執行批量關聯查詢');
-    
     const pricingResult = await pool.query(pricingQuery, [homestayIds]);
-
 
     // 組織價格資料
     const pricingMap = {};
@@ -193,31 +252,17 @@ export default defineEventHandler(async (event) => {
       });
     });
 
-    // 初始化篩選後的民宿列表
-    let filteredHomestays = homestays;
-
-    // 根據住宿形式篩選
-    if (filters.is_package) {
-      const isPackage = filters.is_package === 'true';
-      filteredHomestays = filteredHomestays.filter(homestay => {
-        const pricing = pricingMap[homestay.id] || [];
-        return pricing.some(p => p.is_package === isPackage);
-      });
-    }
-
     // 合併資料
-    const enrichedHomestays = filteredHomestays.map(homestay => {
-      // 處理圖片資料 - 優先使用 images 陣列
+    const enrichedHomestays = homestays.map(homestay => {
+      // 處理圖片資料
       let imageUrls = [];
       if (homestay.images && Array.isArray(homestay.images) && homestay.images.length > 0) {
-        // 使用新的 images 陣列，過濾掉空值
         imageUrls = homestay.images.filter(url => url && url.trim());
       } else if (homestay.image_url) {
-        // 備用：使用舊的 image_url 欄位
         imageUrls = [homestay.image_url];
       }
 
-      // 處理價格資訊 - 與 fetchBnbDetail 保持一致的格式
+      // 處理價格資訊
       const prices = {
         weekday: homestay.min_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.min_price)}` : null,
         weekend: homestay.max_price ? `NT$ ${new Intl.NumberFormat('zh-TW').format(homestay.max_price)}` : null,
@@ -225,11 +270,9 @@ export default defineEventHandler(async (event) => {
         fullRentWeekend: null
       };
 
-      // 從 pricing_options 中獲取包棟價格
       const pricingOptions = pricingMap[homestay.id] || [];
       pricingOptions.forEach(pricing => {
         const formattedPrice = `NT$ ${new Intl.NumberFormat('zh-TW').format(pricing.amount)}`;
-        
         if (pricing.is_package) {
           if (pricing.is_weekday) {
             prices.fullRentWeekday = formattedPrice;
@@ -241,21 +284,17 @@ export default defineEventHandler(async (event) => {
 
       return {
         ...homestay,
-        // 前端期待的欄位格式
         area: homestay.location,
         address: homestay.city,
         description: homestay.capacity_description,
         image_urls: imageUrls,
         pricing_options: pricingMap[homestay.id] || [],
-        // features 欄位，與 fetchBnbDetail API 保持一致
         features: {
           peopleTypes: [homestay.capacity_description].filter(Boolean),
           themeFeatures: homestay.theme_features || [],
           serviceAmenities: homestay.service_amenities || []
         },
-        // prices 欄位，與 fetchBnbDetail API 保持一致
         prices: prices,
-        // contact 欄位，與 fetchBnbDetail API 保持一致
         contact: {
           phone: homestay.phone,
           website: homestay.website,
@@ -268,7 +307,9 @@ export default defineEventHandler(async (event) => {
 
     const finalResult = {
       homestays: enrichedHomestays,
-      total_count: enrichedHomestays.length,
+      total_count: totalCount,
+      total_pages: Math.ceil(totalCount / limit),
+      current_page: page,
       database_info: {
         connection: '✅ 已連接到 Neon 資料庫',
         project: 'yilan-homestay-real-data',
@@ -284,8 +325,8 @@ export default defineEventHandler(async (event) => {
 
   } catch (error) {
     console.error('資料庫查詢錯誤:', error);
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: '載入民宿資料時發生錯誤: ' + error.message,
       database_info: {
         connection: '❌ 資料庫連接失敗',
@@ -298,7 +339,7 @@ export default defineEventHandler(async (event) => {
 // 輔助函數：從容量描述中提取最大人數
 function extractMaxGuests(description) {
   if (!description) return null;
-  
+
   // 尋找最大的數字
   const numbers = description.match(/\d+/g);
   if (numbers) {
