@@ -1,220 +1,134 @@
 <template>
-  <header class="flex w-full justify-center container">
+  <header class="flex w-full justify-center container relative z-50">
     <div id="sidemenu">
-    <button class="sidemenu__btn" v-on:click="navOpen=!navOpen" v-bind:class="{active:navOpen}">
-				<span class="top"></span>
-				<span class="mid"></span>
-				<span class="bottom"></span>
-			</button>
-    <transition name="translateX">
-      <nav v-show="navOpen">
-        <div class="sidemenu__wrapper">
-          <ul class="sidemenu__list">
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/"
-              >
-                <p class="">優惠券</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/map"
-              >
-                <p class="">優惠券地圖</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/coupons/submit"
-              >
-                <p class="">提交優惠券</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/homestay-list"
-              >
-                <p class="">合法民宿推薦</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/relative"
-              >
-                <p class="">代訂服務</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/yilan-activities"
-              >
-                <p class="">宜蘭活動總匯</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/launch-schedule"
-              >
-                <p class="">更新時間列表</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/about"
-              >
-                <p class="">關於我們</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/rule"
-              >
-                <p class="">使用規範</p>
-              </NuxtLink>
-            </li>
-            <li v-if="!userData?.userId" class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                class="get"
-                :to="`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${host}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`"
-              >
-                <p class="">登入LINE</p>
-              </NuxtLink>
-            </li>
-            <li v-if="userData?.userId" class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                class="get"
-                to="/userInfo"
-              >
-                <p class="">查看已領</p>
-              </NuxtLink>
-            </li>
-            <!-- <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/homestay-register"
-              >
-                <p class="">民宿註冊申請</p>
-              </NuxtLink>
-            </li>
-            <li class="sidemenu__item" v-on:click="navOpen=!navOpen">
-              <NuxtLink
-                to="/homestay-login"
-              >
-                <p class="">民宿業者登入</p>
-              </NuxtLink>
-            </li> -->
-          </ul>
-        </div>
-      </nav>
-    </transition>
-  </div>
+      <button class="sidemenu__btn" v-on:click="navOpen=!navOpen" v-bind:class="{active:navOpen}">
+        <span class="top"></span>
+        <span class="mid"></span>
+        <span class="bottom"></span>
+      </button>
+      <transition name="translateX">
+        <nav v-show="navOpen">
+          <div class="sidemenu__wrapper">
+            <ul class="sidemenu__list">
+              <li v-for="(item, index) in menuItems" :key="index" class="sidemenu__item">
+                <div class="sidemenu__title" @click="toggleMobileSubmenu(index)">
+                  <span>{{ item.title }}</span>
+                  <Icon name="ri:arrow-down-s-line" class="transition-transform duration-300" :class="{ 'rotate-180': item.isOpen }" v-if="item.children" />
+                </div>
+                <transition name="slide-down">
+                  <ul v-show="item.isOpen" class="sidemenu__sublist">
+                     <li v-for="(child, cIndex) in item.children" :key="cIndex" class="sidemenu__subitem">
+                        <NuxtLink :to="child.path" @click="navOpen = false">
+                           {{ child.title }}
+                        </NuxtLink>
+                     </li>
+                     <li v-if="item.title === '探索優惠' && userData?.userId" class="sidemenu__subitem">
+                        <NuxtLink to="/userInfo" @click="navOpen = false">
+                          查看已領
+                        </NuxtLink>
+                     </li>
+                  </ul>
+                </transition>
+              </li>
+              
+               <li v-if="!userData?.userId" class="sidemenu__item" @click="navOpen = false">
+                <NuxtLink
+                  class="sidemenu__link"
+                  :to="`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${host}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`"
+                >
+                  登入LINE
+                </NuxtLink>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </transition>
+    </div>
+
     <nav class="index-nav flex w-full max-w-7xl items-center justify-between px-6 py-2">
-      <div class="nav-wrapper">
-        <NuxtLink
-          :to="{
-            name: 'index'
-          }"
-        >
-        <img src="/logo.jpg" width="200" alt="宜蘭旅遊通">
-          <!-- <div class="flex items-center justify-between">
-            <h1 class="index-title">宜蘭旅遊通</h1>
-          </div> -->
+      <div class="nav-wrapper flex items-center">
+        <NuxtLink :to="{ name: 'index' }">
+          <img src="/logo.jpg" width="200" alt="宜蘭旅遊通">
         </NuxtLink>
-        <!-- <div class="user-status">{{displayName ? `Hi, ${displayName}` : '未登入'}}</div> -->
       </div>
-      
-      <!-- 主要導航連結 -->
+
+      <!-- Desktop Navigation Links -->
       <div class="nav-links">
-        <NuxtLink to="/yilan-activities" class="nav-link">
-          宜蘭活動總匯
-        </NuxtLink>
-        <NuxtLink to="/homestay-list" class="nav-link">
-          合法民宿推薦
-        </NuxtLink>
-        <NuxtLink to="/homestay-register" class="nav-link">
-          民宿註冊申請
-        </NuxtLink>
-        <NuxtLink to="/homestay-login" class="nav-link">
-          民宿業者登入
-        </NuxtLink>
+        <div v-for="(item, index) in menuItems" :key="index" class="nav-item-group">
+          <div class="nav-link-btn">
+            {{ item.title }}
+            <Icon name="ri:arrow-down-s-line" class="nav-icon" />
+          </div>
+          
+          <!-- Dropdown Menu -->
+          <div class="nav-dropdown">
+             <div class="dropdown-content">
+                <NuxtLink 
+                  v-for="(child, cIndex) in item.children" 
+                  :key="cIndex" 
+                  :to="child.path"
+                  class="dropdown-link"
+                >
+                  {{ child.title }}
+                </NuxtLink>
+                 <NuxtLink 
+                  v-if="item.title === '探索優惠' && userData?.userId" 
+                  to="/userInfo"
+                  class="dropdown-link"
+                >
+                  查看已領
+                </NuxtLink>
+             </div>
+          </div>
+        </div>
       </div>
-      
-      <div class="user-info group relative p-2" v-show="userData" v-on:click="navOpen=!navOpen">
-        <img class="user-img" :src="userData?.pictureUrl" :alt="userData?.displayName">
-      </div>
-        <div v-if="userInfo" class="user-info group relative">
-          <div for="avatar" class="avatar cursor-pointer py-2" v-on:mouseenter="toggleEdit" v-on:mouseleave="toggleEdit" :on-focus="toggleEdit">
-            <img
-              class="user-img inline-block h-10 w-10 rounded-full bg-white/90 object-cover object-center p-0.5 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+
+      <!-- User Info / Login -->
+      <div class="flex items-center gap-4">
+        <!-- User Avatar Dropdown -->
+        <div v-if="userInfo" class="user-info group relative z-50">
+          <div class="avatar cursor-pointer py-2 flex items-center gap-2" @mouseenter="showEdit = true" @mouseleave="showEdit = false">
+             <img
+              class="user-img"
               :src="userInfo.avatar"
               alt="使用者選單"
             />
-            <div v-show="showEdit" class="user-info-list absolute right-0 hidden w-60 pt-1 text-gray-700 group-hover:block">
-              <div
-                class="mt-1 px-4 py-3 divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-              >
-                <div class="flex items-center">
-                  <img
-                    :src="userInfo.avatar"
-                    class="user-img inline-block h-9 w-9 rounded-full bg-white/90 object-cover object-center p-0.5 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur"
-                  />
-                  <div class="ml-3.5 flex-grow overflow-hidden">
-                    <p class="overflow-hidden text-ellipsis font-medium">{{ userInfo.nickname }}</p>
-                    <p class="overflow-hidden text-ellipsis text-xs text-gray-500">
-                      {{ userInfo.email }}
-                    </p>
-                  </div>
-                </div>
-                <div class="group/menu-item py-2">
-                  <NuxtLink
-                    class=""
-                    to="/articles/create"
-                  >
-                    <Icon
-                      class="mr-2 h-5 w-5"
-                      name="ri:pencil-line"
-                    />
-                    新增優惠券
-                  </NuxtLink>
-                </div>
-                <div class="py-1">
-                  <button
-                    class="logout-btn btn btn-info text-white"
-                    @click="handleLogout"
-                  >
-                    <Icon
-                      class="mr-2 h-5 w-5"
-                      name="ri:logout-box-line"
-                    />
-                    登出
-                  </button>
-                </div>
+            <span class="user-nickname hidden lg:block">{{ userInfo.nickname }}</span>
+            
+            <transition name="fade">
+              <div v-show="showEdit" class="user-info-list">
+                 <div class="user-menu">
+                    <div class="user-header">
+                       <p class="user-name">{{ userInfo.nickname }}</p>
+                       <p class="user-email">{{ userInfo.email }}</p>
+                    </div>
+                    <NuxtLink to="/articles/create" class="menu-item">
+                      <Icon name="ri:pencil-line" class="menu-icon" />
+                      新增優惠券
+                    </NuxtLink>
+                    <button @click="handleLogout" class="menu-item logout">
+                      <Icon name="ri:logout-box-line" class="menu-icon" />
+                      登出
+                    </button>
+                 </div>
               </div>
-            </div>
+            </transition>
           </div>
         </div>
-        <!-- 管理員登入入口 -->
-        <!-- <NuxtLink
-          v-else
-          class="login px-3 py-2"
-          to="/login"
-        >
-          登入
-        </NuxtLink> -->
-        <img :src="imgUrl" />
+      </div>
     </nav>
   </header>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import useStore from "~~/store";
 import useReferralStore from '~~/store/referral';
+import { useRoute } from 'vue-router'
 
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
-const imgUrl = ref('')
 const route = useRoute()
 const { host } = useRequestURL()
 
@@ -222,28 +136,58 @@ const store = useStore();
 const userData = computed(() => store.getUserData);
 const referral = useReferralStore();
 const navOpen = ref(false)
+
+// Menu Items Configuration
+const menuItems = ref([
+  {
+    title: '探索優惠',
+    path: '/',
+    isOpen: false,
+    children: [
+      { title: '優惠券列表', path: '/' },
+      { title: '優惠券地圖', path: '/map' },
+      { title: '提交優惠券', path: '/coupons/submit' },
+      { title: '更新時間列表', path: '/launch-schedule' },
+    ]
+  },
+  {
+    title: '住宿服務',
+    path: '/homestay-list',
+    isOpen: false,
+    children: [
+      { title: '合法民宿推薦', path: '/homestay-list' },
+      { title: '民宿註冊申請', path: '/homestay-register' },
+      { title: '民宿業者登入', path: '/homestay-login' },
+    ]
+  },
+  {
+    title: '旅遊資訊',
+    path: '/yilan-activities',
+    isOpen: false,
+    children: [
+      { title: '宜蘭活動總匯', path: '/yilan-activities' },
+      { title: '代訂服務', path: '/relative' },
+    ]
+  },
+  {
+    title: '關於平台',
+    path: '/about',
+    isOpen: false,
+    children: [
+      { title: '關於我們', path: '/about' },
+      { title: '使用規範', path: '/rule' },
+    ]
+  }
+])
+
+const toggleMobileSubmenu = (index) => {
+  menuItems.value[index].isOpen = !menuItems.value[index].isOpen
+}
+
 onMounted(() => {
   store.fetchAndSetUser()
   referral.setReferral(route.query)
 })
-// onMounted(async () => {
-//     try {
-//       await liff.init({ liffId: "2005661804-zld9QenV" }); // Use own liffId
-//       await liff.getProfile().then(profile => {
-//         if (!liff.isLoggedIn()) {
-//           return;
-//         }
-//         insertUser(profile)
-//         // 拿取profile
-//         // document.getElementById('userId').innerHTML = profile.userId
-//         displayName.value = profile.displayName
-//         imgUrl = profile.pictureUrl
-//         // document.getElementById('statusMessage').innerHTML = profile.statusMessage
-//       })
-//   }  catch (err) {
-//       console.log(`liff.state init error ${err}`);
-//   }
-// })
 
 watch(
   data,
@@ -263,219 +207,318 @@ const handleLogout = () => {
     navigateTo('/')
   })
 }
-
-const toggleEdit = () => {
-  showEdit.value = !showEdit.value;
-}
 </script>
 
 <style lang="scss" scoped>
-.login {
-  display: block;
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-.get {
-  font-size: 12px;
-}
-.user-info {
-  position: fixed;
-  right: 35px;
-  top: 5px;
-  width: auto;
-  z-index: 2;
-}
-.user-img {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  overflow: hidden;
-}
+/* Resurrected Original Styles & New SCSS for Dropdowns */
 .index-nav {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
-}
-.nav-wrapper {
-  display: flex;
-  align-items: center;
+  z-index: 40;
 }
 
-/* 主要導航連結樣式 */
 .nav-links {
   display: flex;
   align-items: center;
   gap: 20px;
   
   @media (max-width: 768px) {
-    display: none; /* 在手機版隱藏，使用側邊選單 */
+    display: none;
   }
 }
 
-.nav-link {
-  display: flex;
-  align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
+.nav-item-group {
+  position: relative;
+  cursor: pointer;
+  padding: 10px 0; /* Add trigger area */
+  
+  &:hover .nav-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Style for the main nav link triggers */
+  .nav-link-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      color: #764ba2;
+      background-color: rgba(118, 75, 162, 0.1);
+    }
+    
+    .nav-icon {
+      font-size: 14px;
+      transition: transform 0.3s;
+    }
+  }
+  
+  &:hover .nav-icon {
+    transform: rotate(180deg);
+  }
+}
+
+.nav-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  min-width: 180px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 50;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+}
+
+.dropdown-link {
+  display: block;
+  padding: 10px 16px;
+  color: #555;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
-
+  transition: background 0.2s;
+  
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    color: white;
+    background: #f9f9f9;
+    color: #764ba2;
   }
 }
 
-.index-title {
-  text-decoration: none;
-  color: #000;
-  font-size: 25px;
-  font-weight: bold;
+.user-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #eee;
 }
 
 .user-info-list {
   position: absolute;
   right: 0;
-  top: 40px;
-}
-.logout-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 70px;
-  height: 30px;
-  font-size: 14px;
-  padding: 0;
-}
-.user-status {
-  font-size: 12px;
-
+  top: 45px;
+  width: 240px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border: 1px solid #f0f0f0;
+  z-index: 100;
 }
 
-#sidemenu {
-	nav {
-		width: 100%;
-    height: 100%;
-		// height: calc(100% - #{$headerHeight} - #{$footerHeight});
-		background: #c9e0f6;
-		position: fixed;
-		top: 0;
-		right: 0;
-    z-index: 10;
-		// box-shadow: 2px 0 3px$grey-6;
-		// overflow-y: scroll;
-	}
-  .sidemenu__btn {
-    background-color: #f4606000;
+.user-menu {
+  padding: 8px 0;
+}
+
+.user-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 5px;
+  
+  .user-name {
+    font-weight: bold;
+    color: #333;
+    margin: 0;
   }
-  .sidemenu__item {
-      height: 60px;
-    }
-	.sidemenu {
-		&__btn {
-			display: block;
-			width: 40px;
-			height: 40px;
-			// background: grey;
-			border: none;
-			position: fixed;
-      right: 0;
-      margin: 7px;
-			appearance: none;
-			cursor: pointer;
-			outline: none;
-      z-index: 11;
-			span {
-				display: block;
-				width: 20px;
-				height: 2px;
-				margin: auto;
-				background: black;
-				position: absolute;
-				top: 0;
-				bottom: 0;
-				left: 0;
-				right: 0;
-				transition: all .4s ease;
-
-				&.top {
-					transform: translateY(-8px);
-				}
-
-				&.bottom {
-					transform: translateY(8px);
-				}
-			}
-			&.active{
-				.top {
-					transform: rotate(-45deg);
-				}
-				.mid{
-					transform: translateX(-20px) rotate(360deg);
-					opacity: 0;
-				}
-				.bottom {
-					transform: rotate(45deg);
-				}
-			}
-
-		}
-
-		&__wrapper {
-      padding-top: 50px;
-    }
-
-		&__list {
-			padding-top: 50px;
-      list-style:none;
-      padding: 0;
-      margin: 0;
-		}
-
-		&__item {
-			a {
-        text-decoration: none;
-				line-height: 1.6em;
-				font-size: 1.6em;
-				padding: .5em;
-				display: block;
-				color: white;
-				transition: .4s ease;
-
-				&:hover {
-					background: lightgrey;
-					color: dimgrey;
-				}
-			}
-		}
-	}
+  .user-email {
+    font-size: 12px;
+    color: #888;
+    margin: 0;
+  }
 }
 
-.translateX-enter{
-	transform:translateX(200px);
-	opacity: 0;
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  color: #555;
+  text-decoration: none;
+  font-size: 14px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  
+  &:hover {
+    background: #f5f5f5;
+    color: #333;
+  }
+  
+  &.logout {
+    color: #e53935;
+    border-top: 1px solid #f5f5f5;
+    margin-top: 5px;
+    
+    &:hover {
+      background: #ffebee;
+    }
+  }
+}
+
+.menu-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* Mobile Side Menu */
+#sidemenu {
+  .sidemenu__btn {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border: none;
+    position: fixed;
+    right: 7px; // Original was 7px
+    top: 5px; // Add top since fixed
+    // margin: 7px; // Remove margin if we use top/right
+    background: transparent;
+    z-index: 99;
+    cursor: pointer;
+    
+    @media (min-width: 768px) {
+      display: none;
+    }
+
+    span {
+      display: block;
+      width: 20px;
+      height: 2px;
+      margin: auto;
+      background: black;
+      position: absolute;
+      top: 0; bottom: 0; left: 0; right: 0;
+      transition: all .4s ease;
+
+      &.top { transform: translateY(-8px); }
+      &.mid { opacity: 1; } /* Restore mid */
+      &.bottom { transform: translateY(8px); }
+    }
+    
+    &.active {
+      .top { transform: rotate(-45deg); }
+      .mid { transform: translateX(-20px) rotate(360deg); opacity: 0; }
+      .bottom { transform: rotate(45deg); }
+    }
+  }
+
+  nav {
+    width: 100%;
+    height: 100%;
+    background: #c9e0f6;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 90;
+    overflow-y: auto;
+  }
+
+  .sidemenu__wrapper {
+    padding-top: 50px;
+  }
+
+  .sidemenu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidemenu__item {
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    
+    .sidemenu__title {
+      padding: 1.2em;
+      font-size: 1.4em;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    a {
+      text-decoration: none;
+      line-height: 1.6em;
+      font-size: 1.6em;
+      padding: .5em;
+      display: block;
+      color: white;
+      transition: .4s ease;
+
+      &:hover {
+        background: lightgrey;
+        color: dimgrey;
+      }
+    }
+    
+    .sidemenu__link {
+       padding: 1.2em; // Match title padding for non-expandable items
+    }
+  }
+  
+  .sidemenu__sublist {
+    background: rgba(0,0,0,0.1);
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidemenu__subitem {
+    a {
+      font-size: 1.2em;
+      padding-left: 2em;
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 0.8em 0.8em 0.8em 2em;
+      
+      &:hover {
+         background: rgba(255,255,255,0.2);
+      }
+    }
+  }
+}
+
+/* Transitions */
+.translateX-enter-active, .translateX-leave-active {
   transition: .3s ease;
 }
-
-.translateX-enter-active,.translateX-leave-active{
-	transform-origin: top right 0;
-	transition:.3s ease;
+.translateX-enter-from, .translateX-leave-to {
+  transform: translateX(200px);
+  opacity: 0;
+}
+.translateX-enter-to, .translateX-leave-from {
+  transform: translateX(0);
+  opacity: 1;
 }
 
-.translateX-leave-to{
-	transform: translateX(200px);
-	opacity: 0;
+.slide-down-enter-active, .slide-down-leave-active {
+  transition: all 0.3s ease-out;
+  max-height: 500px;
+  overflow: hidden;
 }
-.avatar {
-  padding-right: 10px;
+.slide-down-enter-from, .slide-down-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style>
