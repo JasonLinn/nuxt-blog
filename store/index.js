@@ -23,15 +23,14 @@ const useStore = defineStore("useStore", {
     async getCoupons(id) {
       const userCoupons = await $fetch(`/api/user/${id}`)
         .then((response) => {
-          return response?.coupons.map((item)=> JSON.parse(item)).sort((a, b)=> new Date(b.gotTime) - new Date(a.gotTime))
+          return response?.coupons.map((item) => JSON.parse(item)).sort((a, b) => new Date(b.gotTime) - new Date(a.gotTime))
         })
         .catch((error) => console.log(error))
 
-        this.couponData = userCoupons
+      this.couponData = userCoupons
     },
     async fetchAndSetUser(data) {
       const user = await fetchUser(data);
-      console.log(user, 'tttttt')
       this.userData = user;
     },
   },

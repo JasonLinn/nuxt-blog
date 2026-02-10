@@ -2,7 +2,7 @@ import axios from "axios"
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
-    console.log(event, 'eeeeeeeee', body)
+
     await axios({
         "url": 'https://api.line.me/v2/bot/message/push',
         "headers": {
@@ -12,14 +12,12 @@ export default defineEventHandler(async (event) => {
         "method": 'POST',
         "data": {
             "to": body.id,
-            "messages":[
+            "messages": [
                 {
-                    "type":"text",
+                    "type": "text",
                     "text": body.text
                 }
             ]
         }
-    }).then(res =>{
-        console.log(res, 'rrrr')
-    }).catch((error) => console.log(error, 'rrreeeeee'))
+    }).catch((error) => console.error('sendMsg error:', error))
 })
