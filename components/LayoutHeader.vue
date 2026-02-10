@@ -471,7 +471,7 @@ const handleLogout = () => {
   }
   
   .sidemenu__sublist {
-    background: rgba(0,0,0,0.1);
+    background: rgba(255, 255, 255, 0.4);
     list-style: none;
     padding: 0;
   }
@@ -481,12 +481,14 @@ const handleLogout = () => {
       font-size: 1.2em;
       padding-left: 2em;
       display: block;
-      color: white;
+      color: #4a5568; /* Dark gray for contrast against light background */
       text-decoration: none;
       padding: 0.8em 0.8em 0.8em 2em;
+      font-weight: 500;
       
       &:hover {
-         background: rgba(255,255,255,0.2);
+         background: rgba(255, 255, 255, 0.6);
+         color: #2d3748;
       }
     }
   }
