@@ -1,9 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const filePath = path.resolve(__dirname, '../../utils/referral.js')
+const filePath = path.resolve(process.cwd(), 'utils/referral.js')
 
 export default defineEventHandler(async (event) => {
   const method = event.method
