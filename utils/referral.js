@@ -189,7 +189,7 @@ export const referral = [
   },
   {
     code: '2026PJY',
-    name: ''
+    name: '澍蒔'
   },
   {
     code: '2026PKS',

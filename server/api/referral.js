@@ -1,25 +1,11 @@
 import { readBody, createError } from '#imports'
-import fs from 'node:fs/promises'
-import path from 'node:path'
+import { pool } from '../utils/db.js'
 
-const referralFilePath = path.resolve(process.cwd(), 'utils/referral.js')
-
-async function getReferralData() {
-  const content = await fs.readFile(referralFilePath, 'utf-8')
-  const match = content.match(/export const referral = ([\s\S]*)/)
-  if (!match || !match[1]) return []
-  let arrayString = match[1].trim()
-  if (arrayString.endsWith(';')) arrayString = arrayString.slice(0, -1)
-  const parse = new Function(`return ${arrayString}`)
-  return parse()
-}
-
-// 直接在处理函数中导入 referral 数据
 export default defineEventHandler(async (event) => {
   try {
     // 讀取請求體
     const body = await readBody(event);
-    
+
     // 驗證請求體中是否包含 code
     if (!body || !body.code) {
       throw createError({
@@ -30,9 +16,9 @@ export default defineEventHandler(async (event) => {
 
     const { code } = body;
 
-    // 從檔案讀取最新 referral 資料
-    const referral = await getReferralData()
-    const referralData = referral.find(ref => ref.code === code && ref.name);
+    // 從資料庫查詢推薦代碼
+    const result = await pool.query('SELECT code, name FROM referrals WHERE code = $1', [code]);
+    const referralData = result.rows[0];
 
     if (!referralData) {
       throw createError({
@@ -48,7 +34,7 @@ export default defineEventHandler(async (event) => {
 
   } catch (error) {
     console.error('推薦代碼驗證錯誤:', error);
-    
+
     throw createError({
       statusCode: error.statusCode || 500,
       message: error.message || "服務器錯誤，請稍後再試"
