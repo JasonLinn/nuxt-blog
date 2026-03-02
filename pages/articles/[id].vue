@@ -1,55 +1,58 @@
 <template>
-  <div class="container col-12">
-    <div v-if="pending">
-      <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
-    </div>
-    <template v-else>
-      <div v-if="error" class="my-4">
-        <span class="text-gray-500">發生了一點錯誤，請稍後再嘗試</span>
-        <p class="my-2 text-rose-500">{{ error }}</p>
+  <div class="article-page">
+    <div class="article-container">
+      <!-- 載入中 -->
+      <div v-if="pending" class="loading-state">
+        <Icon class="h-8 w-8 text-emerald-500 animate-spin" name="eos-icons:loading" />
+        <span class="ml-2 text-emerald-600 font-medium">載入中...</span>
       </div>
-      <div v-else-if="article" class="mb-8 flex w-full flex-col justify-center md:max-w-3xl">
-        <!-- 麵包屑 -->
-        <nav class="mb-4 text-sm">
-          <div class="flex items-center gap-2 text-gray-500">
-            <NuxtLink to="/" class="hover:text-blue-600">首頁</NuxtLink>
-            <span class="text-gray-400">/</span>
-            <span class="text-gray-700">{{ article.title }}</span>
-          </div>
-        </nav>
-        <!-- <div class="mt-4 flex justify-center">
-          <img :src="article.cover" class="cupon-img" />
-        </div> -->
-        <Carousel>
-          <Slide v-for="(img, index) in article.cover" :key="img">
-            <img
-              :src="img"
-              class="cupon-img"
-              @click="showImg(index)"
-              quality="50"
-            />
-          </Slide>
+      <template v-else>
+        <!-- 錯誤狀態 -->
+        <div v-if="error" class="error-state">
+          <span class="text-gray-500">發生了一點錯誤，請稍後再嘗試</span>
+          <p class="my-2 text-rose-500">{{ error }}</p>
+        </div>
+        <div v-else-if="article" class="article-card">
+          <!-- 麵包屑 -->
+          <nav class="breadcrumb">
+            <div class="flex items-center gap-2">
+              <NuxtLink to="/" class="breadcrumb-link">首頁</NuxtLink>
+              <span class="text-gray-300">/</span>
+              <span class="text-gray-600 line-clamp-1">{{ article.title }}</span>
+            </div>
+          </nav>
 
-          <template #addons="{ slidesCount }">
-            <Navigation v-if="slidesCount > 1" />
-            <Pagination v-if="slidesCount > 1" />
-          </template>
-        </Carousel>
-        <VueEasyLightbox
-          :visible="visibleRef"
-          :imgs="article.cover"
-          :index="indexRef"
-          @hide="onHide"
-        />
-        <div class="cupon-time my-2 flex flex-col justify-between sm:my-0 sm:flex-row sm:items-center">
-          <!-- <time class="my-2 text-sm text-gray-400">
-            {{ new Date(article.updated_at).toLocaleString('zh-TW') }}
-          </time> -->
-          <div class="cupon-share" tabindex="0" @click="isOpenShare = !isOpenShare" @blur="isOpenShare = false">
-            <svg  xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-share-fill cupon-share-icon" viewBox="0 0 16 16">
-              <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
-            </svg>
-            <div class="cupon-share-list" v-show="isOpenShare" >
+          <!-- 輪播圖 -->
+          <div class="carousel-wrapper">
+            <Carousel>
+              <Slide v-for="(img, index) in article.cover" :key="img">
+                <img
+                  :src="img"
+                  class="cupon-img"
+                  @click="showImg(index)"
+                  quality="50"
+                />
+              </Slide>
+              <template #addons="{ slidesCount }">
+                <Navigation v-if="slidesCount > 1" />
+                <Pagination v-if="slidesCount > 1" />
+              </template>
+            </Carousel>
+          </div>
+          <VueEasyLightbox
+            :visible="visibleRef"
+            :imgs="article.cover"
+            :index="indexRef"
+            @hide="onHide"
+          />
+
+          <!-- 工具列：分享 + 管理 -->
+          <div class="toolbar">
+            <div class="cupon-share" tabindex="0" @click="isOpenShare = !isOpenShare" @blur="isOpenShare = false">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-share-fill cupon-share-icon" viewBox="0 0 16 16">
+                <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
+              </svg>
+              <div class="cupon-share-list" v-show="isOpenShare">
                 <svg @click="shareCopy" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
                   <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
                 </svg>
@@ -57,94 +60,97 @@
                   <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
                   <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
                 </svg>
+              </div>
+            </div>
+            <div v-if="userInfo?.id === 1" class="admin-actions">
+              <NuxtLink
+                class="admin-btn edit"
+                :to="{ name: 'articles-edit', query: { id: route.params.id } }"
+              >
+                <Icon class="mr-1 h-4 w-4" name="ri:edit-line" />
+                編輯
+              </NuxtLink>
+              <button class="admin-btn delete" @click="handleDeleteArticle">
+                <Icon class="mr-1 h-4 w-4" name="ri:delete-bin-line" />
+                刪除
+              </button>
             </div>
           </div>
-          <div v-if="userInfo?.id === 1" class="flex-rowx flex gap-3">
-            <NuxtLink
-              class="flex items-center text-sm text-gray-400 hover:font-semibold hover:text-emerald-500"
-              :to="{
-                name: 'articles-edit',
-                query: {
-                  id: route.params.id
-                }
-              }"
-            >
-              <Icon class="mr-1 h-4 w-4" name="ri:edit-line" />
-              編輯
-            </NuxtLink>
-            <button
-              class="flex items-center text-sm text-gray-400 hover:font-semibold hover:text-rose-500"
-              @click="handleDeleteArticle"
-            >
-              <Icon class="mr-1 h-4 w-4" name="ri:delete-bin-line" />
-              刪除
+
+          <!-- 標題 -->
+          <h1 class="cupon-title">
+            {{ article.title }}
+          </h1>
+
+          <!-- 優惠內容 -->
+          <div class="cupon-text">
+            <div class="section-label">優惠內容</div>
+            <div>{{ article.content }}</div>
+          </div>
+
+          <!-- 標籤 -->
+          <div v-if="article.tags" class="cupon-tags">
+            <span class="section-label">標籤</span>
+            <div class="tags-list">
+              <span v-for="(tag, index) in parseTags(article.tags)" :key="index" class="tag-item">
+                # {{ tag }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Google地圖 -->
+          <div class="cupon-map">
+            <a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{ article.adress[0] }}</a>
+          </div>
+
+          <TipText></TipText>
+
+          <!-- 推薦店家 -->
+          <div class="referral-section" v-if="article.isReferral">
+            <div class="cupon-referral">
+              <span>推薦店家: {{ referralStore?.name || '無' }}</span>
+              <svg v-show="referralStore?.name" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+              </svg>
+            </div>
+            <div class="cupon-code">
+              <label>輸入推薦代碼:</label>
+              <input type="text" class="fererral-input" v-model="referralCode" placeholder="請輸入代碼">
+              <button class="fererral-comfirm" @click="checkReferral">驗證</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部操作區 -->
+        <div class="action-area">
+          <div class="coupon-pass" v-show="!article.isonce && !article.isReferral">出示即可使用</div>
+          <div>
+            <div class="cupon-amount" v-show="article.isReferral || article.isonce">
+              剩餘數量: {{ article.amount }}
+            </div>
+            <button v-show="article.isReferral && !isCheckReferral" type="button" class="action-btn disabled">
+              請輸入推薦代碼
+            </button>
+            <button v-show="checkIsOnce() && article.isonce && isCheckReferral" type="button" class="action-btn disabled">
+              每個帳號限領一次
+            </button>
+            <button v-show="checkIsOnce() && article.isonce && !isCheckReferral" type="button" class="action-btn disabled">
+              每個帳號限領一次
+            </button>
+            <button v-show="article.amount && article.hash && isCheckReferral && !checkIsOnce()" type="button" class="action-btn primary" @click="handleHashRecive">
+              領取限量優惠券
+            </button>
+            <button v-show="article.amount && !article.hash && isCheckReferral && !checkIsOnce()" type="button" class="action-btn primary" @click="getCupon">
+              領取優惠券
+              <Icon v-show="iconLoading" class="h-5 w-5 ml-2 animate-spin" name="eos-icons:loading" />
+            </button>
+            <button v-show="article.amount && article.hash && !isCheckReferral && !checkIsOnce()" type="button" class="action-btn primary" @click="handleHashRecive">
+              領取限量優惠券
             </button>
           </div>
         </div>
-        <h1 class="cupon-title break-words text-4xl font-semibold text-gray-700">
-          {{ article.title }}
-        </h1>
-        <div class="cupon-text">
-          【優惠內容】<div>{{ article.content }}</div>
-        </div>
-        <div v-if="article.tags" class="cupon-tags">
-          【標籤】{{ article.tags }}
-        </div>
-        <div class="cupon-map">
-          【Google地圖】相關產品資訊可點選：<a target="_blank" :href="`https://www.google.com/maps/?q=${article.title} ${article.adress[0]}`">{{article.adress[0]}}</a>
-        </div>
-        <TipText></TipText>
-        <div class="cupon-referral" v-if="article.isReferral">推薦店家: {{ referralStore?.name || `無` }}
-          <svg v-show="referralStore?.name" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-          </svg>
-        </div>
-        <div class="cupon-code" v-if="article.isReferral">
-          輸入推薦代碼:
-          <input type="text" class="fererral-input" v-model="referralCode">
-          <div class="btn fererral-comfirm" @click="checkReferral">代入</div>
-        </div>
-      </div>
-      <div>
-       <div class="coupon-pass" v-show="!article.isonce && !article.isReferral">出示即可使用</div>
-       <div>
-          <div class="cupon-amount" v-show="article.isReferral || article.isonce">
-            剩餘數量: {{ article.amount }}
-          </div>
-         <button v-show="article.isReferral && !isCheckReferral" type="button" class="btn btn-light">
-           請輸入推薦代碼
-         </button>
-         <!-- 只能領一次  需推薦碼 -->
-         <button v-show="checkIsOnce() && article.isonce && isCheckReferral" type="button" class="btn btn-light">
-           每個帳號限領一次
-         </button>
-         <!-- 只能領一次  並且不用推薦碼 -->
-         <button v-show="checkIsOnce() && article.isonce && !isCheckReferral" type="button" class="btn btn-light">
-           每個帳號限領一次
-         </button>
-         <button v-show="article.amount && article.hash && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="handleHashRecive">
-           領取限量優惠券
-         </button>
-         <!-- 限量優惠券  需推薦碼 -->
-         <button v-show="article.amount && !article.hash && isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="getCupon">
-           領取優惠券
-           <Icon v-show="iconLoading" class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
-         </button>
-         <!-- 限量優惠券  並且不用推薦碼 -->
-         <button v-show="article.amount && article.hash && !isCheckReferral && !checkIsOnce()" type="button" class="btn btn-success" @click="handleHashRecive">
-           領取限量優惠券
-         </button>
-       </div>
-
-       <!-- 條碼顯示區域 -->
-       <!-- <div v-if="showQRCode" class="barcode-container">
-         <canvas id="barcode"></canvas>
-         <div class="hash-number mt-3">
-           序號：{{ qrCodeData }}
-         </div>
-       </div> -->
+      </template>
     </div>
-    </template>
   </div>
 </template>
 
@@ -160,6 +166,15 @@ const route = useRoute()
 const store = useStore()
 const userData = computed(()=> store.getUserData)
 const userId = computed(()=> store.getUserId)
+
+// Helpers
+const parseTags = (tagsString) => {
+  if (!tagsString) return []
+  // Split by hash, comma, or space. Remove empty results, trim spaces.
+  return tagsString.split(/#|,| /)
+    .map(t => t.trim())
+    .filter(t => t.length > 0)
+}
 
 // const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null);
@@ -857,144 +872,433 @@ useSeoMeta({
 })
 </script>
 <style scoped>
-.cupon-text {
-  overflow-wrap: break-word;
-  margin-bottom: 5px;
-  white-space: pre-line;
-  line-height: 1.3;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-  font-size: 15px;
-}
-.cupon-tags {
-  margin-bottom: 5px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-  font-size: 15px;
-}
-.cupon-img {
-  max-width: 100%;
-}
-.cupon-time {
-  display: flex;
-  justify-content: flex-end;
-}
-.cupon-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  position: relative;
-}
-.cupon-share {
-  position: relative;
-  z-index: 1;
-}
-.cupon-share-icon {
-}
-.cupon-share-list {
-  width: 80px;
-  background-color: #c9e0f6;
-  position: absolute;
-  right: 0;
-  bottom: -40px;
-  padding: 10px;
-  border-radius: 40px;
-  display: flex;
-  justify-content: space-around;
-}
-.coupon-pass {
-  width: fit-content;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: #40a2ab;
-  color: #fff;
-}
-.cupon-amount {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 10px;
-}
-.cupon-referral {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+/* ====== 頁面基礎 ====== */
+.article-page {
+  min-height: 100vh;
+  background-color: #f8fafc; /* Softer, solid background */
+  padding: 24px 16px;
 }
 
-.cupon-referral > svg {
-  color: #00b4ff;
-  margin-left: 5px;
+.article-container {
+  max-width: 720px;
+  margin: 0 auto;
 }
-.cupon-code {
-  margin-bottom: 10px;
+
+/* ====== 載入 / 錯誤 ====== */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
 }
-.cupon-map {
-  margin-bottom: 5px;
-  padding: 10px;
-  background-color: #f8f9fa;
+
+.error-state {
+  padding: 20px;
+  background: #fef2f2;
+  border-left: 4px solid #ef4444;
   border-radius: 8px;
-  border: 1px solid #e9ecef;
-  font-weight: bold;
+  margin: 16px 0;
+  color: #7f1d1d;
+}
+
+/* ====== 卡片主體 ====== */
+.article-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+  padding: 0 0 16px 0; /* Reduced bottom padding from 28px to 16px to bring action area up */
+}
+
+/* ====== 麵包屑 ====== */
+.breadcrumb {
+  padding: 16px 20px 0;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.breadcrumb-link {
+  color: #64748b;
+  transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+  color: #10b981;
+}
+
+/* ====== 輪播圖 ====== */
+.carousel-wrapper {
+  margin: 12px 16px 0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.cupon-img {
+  max-width: 100%;
+  cursor: pointer;
+  transition: transform 0.4s ease;
+}
+
+.cupon-img:hover {
+  transform: scale(1.03);
+}
+
+/* ====== 工具列 ====== */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 20px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-btn {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.admin-btn.edit {
+  color: #c2410c;
+  background: #fff7ed;
+  border-color: #ffedd5;
+  text-decoration: none;
+}
+
+.admin-btn.edit:hover {
+  background: #ffedd5;
+}
+
+.admin-btn.delete {
+  color: #e11d48;
+  background: #fff1f2;
+  border-color: #ffe4e6;
+}
+
+.admin-btn.delete:hover {
+  background: #ffe4e6;
+}
+
+/* ====== 分享按鈕 ====== */
+.cupon-share {
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  color: #64748b;
+}
+
+.cupon-share:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.cupon-share-icon {
+  display: block;
+}
+
+.cupon-share-list {
+  width: 100px;
+  background: white;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  margin-top: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-around;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.cupon-share-list svg {
+  cursor: pointer;
+  color: #64748b;
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.cupon-share-list svg:hover {
+  background: #f1f5f9;
+  color: #0ea5e9;
+}
+
+/* ====== 標題 ====== */
+.cupon-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.4;
+  padding: 0 20px;
+  margin-bottom: 24px;
+}
+
+/* ====== 段落標籤 ====== */
+.section-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+/* ====== 優惠內容 ====== */
+.cupon-text {
+  overflow-wrap: break-word;
+  white-space: pre-line;
+  line-height: 1.6;
+  padding: 0 20px;
+  margin-bottom: 24px;
   font-size: 15px;
+  color: #475569;
+}
+
+/* ====== 標籤 ====== */
+.cupon-tags {
+  padding: 0 20px;
+  margin-bottom: 24px;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-item {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: background 0.2s, color 0.2s;
+  cursor: default;
+}
+
+.tag-item:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+/* ====== 地圖 ====== */
+/* ====== 地圖 ====== */
+.cupon-map {
+  padding: 0 20px;
+  margin-bottom: 24px;
+  font-size: 14px;
 }
 
 .cupon-map a {
-  color: #0d6efd;
+  color: #0ea5e9;
   text-decoration: none;
   font-weight: 500;
-  padding: 5px 10px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  transition: color 0.2s;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .cupon-map a:hover {
-  background-color: #e9ecef;
-  color: #0a58ca;
   text-decoration: underline;
+  color: #0284c7;
 }
 
 .cupon-map a::before {
   content: "📍";
-  font-size: 1.2em;
-}
-.fererral-input{
-  width: 100px;
-}
-.fererral-comfirm {
-  /* height: 24px; */
-  font-size: 12px;
-  color: #fff;
-  padding: 3px;
-  margin-left: 15px;
-  background-color: #ff9742;
+  font-size: 1.1em;
 }
 
+/* ====== 推薦區塊 ====== */
+.referral-section {
+  margin: 0 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.cupon-referral {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: #334155;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.cupon-referral > svg {
+  color: #10b981;
+  margin-left: 6px;
+}
+
+.cupon-code {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cupon-code label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #475569;
+}
+
+.fererral-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #0f172a;
+  background: white;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.fererral-input:focus {
+  border-color: #0ea5e9;
+}
+
+.fererral-input::placeholder {
+  color: #94a3b8;
+}
+
+.fererral-comfirm {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #334155;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.fererral-comfirm:hover {
+  background: #0f172a;
+}
+
+/* ====== 底部按鈕區 ====== */
+.action-area {
+  margin-top: 4px; /* Tightening the gap further to the card */
+  padding: 0 20px;
+  padding-top: 8px; /* Less pad */
+}
+
+.coupon-pass {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.cupon-amount {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+
+.action-btn.disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.action-btn.primary {
+  background: #0ea5e9;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #0284c7;
+}
+
+/* ====== 條碼 ====== */
 .barcode-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 24px;
   margin-top: 20px;
-  background-color: white;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
 .hash-number {
   font-size: 1.2em;
   font-weight: bold;
-  color: #333;
+  color: #334155;
   margin-top: 15px;
 }
 
 #barcode {
   max-width: 100%;
   height: auto;
+}
+
+/* ====== RWD ====== */
+@media (max-width: 640px) {
+  .article-page {
+    padding: 0;
+    background: transparent;
+  }
+
+  .article-card {
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
 }
 </style>
