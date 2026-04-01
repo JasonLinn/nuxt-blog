@@ -140,15 +140,17 @@
                   <h2 class="cupon-title">
                     <span class="">{{ article.title }}</span>
                   </h2>
-                  <span class="cupon-category">
-                    {{ getCategoryName(article.category) }}
-                  </span>
-                  <span class="cupon-category">
-                    {{ article.township[0] }}
-                  </span>
-                  <span class="cupon-category" :class="{'cupon-once': article.isonce}">
-                    {{ article.isonce ? '限量' : '免費' }}
-                  </span>
+                  <div class="cupon-tags">
+                    <span class="cupon-category">
+                      {{ getCategoryName(article.category) }}
+                    </span>
+                    <span class="cupon-category">
+                      {{ article.township[0] }}
+                    </span>
+                    <span class="cupon-category" :class="{'cupon-once': article.isonce}">
+                      {{ article.isonce ? '限量' : '免費' }}
+                    </span>
+                  </div>
                   <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
                     {{ date2LocaleString(article.updated_at) }}
                   </time> -->
@@ -508,24 +510,21 @@ const date2LocaleString = (date) => {
   font-weight: 800;
   color: #613030;
   line-height: 1.4;
+  margin-bottom: 8px;
 }
 .cupon-info {
   padding: 13px 8px 15px 8px;
   background-color: #fff;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  flex: 1; /* 讓資訊區塊填滿剩餘高度以達到高度統一 */
 }
 .cupon-info:hover {
   box-shadow: #000;
 }
-.cupon-img-wrapper {
-  overflow: hidden;
-}
-.cupon-img {
-  display: inline-block;
-  object-fit: cover;
-  border-radius: 10px;
+.cupon-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 5px 0 10px 0;
 }
 .cupon-category {
   display: inline-block;
@@ -533,7 +532,6 @@ const date2LocaleString = (date) => {
   padding: 4px 8px;
   color: #5db0be;
   background-color: rgba(100,179,244,.1);
-  margin: 10px 5px 10px 0;
   border-radius: 4px;
 }
 .cupon-once {
