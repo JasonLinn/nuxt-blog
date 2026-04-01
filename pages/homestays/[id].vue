@@ -457,7 +457,7 @@ useHead({
     },
     {
       rel: 'llms-txt',
-      href: 'https://aeo.washinmura.jp/ai/yilanpass-com/llms.txt'
+      href: `https://yilanpass.com/homestays/${homestay.id}/llms.txt`
     }
   ],
   script: [
@@ -472,7 +472,7 @@ useHead({
         "description": homestay.description || `位於宜蘭${homestay.area || homestay.location}的合法民宿${homestay.name}，提供優質住宿體驗。設有多樣化休閒設施，是您宜蘭旅遊的最佳選擇。`,
         "url": `https://yilanpass.com/homestays/${homestay.id}`,
         "sameAs": [
-          "https://aeo.washinmura.jp/aeo/shops/yilanpass-com/llms.txt",
+          `https://yilanpass.com/homestays/${homestay.id}/llms.txt`,
           `https://yilanpass.com/homestays/${homestay.id}`,
           "https://yilanpass.com",
           homestay.facebook_url,

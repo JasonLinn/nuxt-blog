@@ -223,7 +223,7 @@ useHead({
     },
     {
       rel: 'llms-txt',
-      href: 'https://aeo.washinmura.jp/ai/yilanpass-com/llms.txt'
+      href: 'https://yilanpass.com/llms.txt'
     }
   ]
 })
