@@ -9,6 +9,7 @@ const initState = {
   currentCate: '',
   township: [],
   searchText: null,
+  sort: 'random', // 預設排序
   currentPage: 0,
   pending: true,  // 初始為載入狀態
   data: null,
@@ -28,26 +29,27 @@ const useCouponStore = defineStore("useCouponStore", {
     async fetchAndSetCoupon(initData) {
       this.couponData.pending = true;
       this.couponData.error = null;
-      
+
       try {
         const data = await $fetch('/api/articles', {
           query: {
             category: initData.selectedCate || initState.currentCate,
             township: initData.selectedTown || initState.township,
             searchText: initData.searchText || initState.searchText,
+            sort: initData.sort || initState.sort,
             page: initData.currentPage || initState.currentPage,
             pageSize: initData.pageSize || 10
           }
         });
-        
+
         this.couponData.data = data;
         this.couponData.pending = false;
-        
+
         return { pending: false, data, error: null };
       } catch (error) {
         this.couponData.error = error;
         this.couponData.pending = false;
-        
+
         return { pending: false, data: null, error };
       }
     },

@@ -508,6 +508,10 @@ useHead({
     {
       rel: 'canonical',
       href: 'https://yilanpass.com/homestay-list'
+    },
+    {
+      rel: 'llms-txt',
+      href: 'https://aeo.washinmura.jp/ai/yilanpass-com/llms.txt'
     }
   ]
 })

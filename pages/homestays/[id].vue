@@ -454,6 +454,10 @@ useHead({
     {
       rel: 'canonical',
       href: canonicalUrl
+    },
+    {
+      rel: 'llms-txt',
+      href: 'https://aeo.washinmura.jp/ai/yilanpass-com/llms.txt'
     }
   ],
   script: [
@@ -468,13 +472,16 @@ useHead({
         "description": homestay.description || `位於宜蘭${homestay.area || homestay.location}的合法民宿${homestay.name}，提供優質住宿體驗。設有多樣化休閒設施，是您宜蘭旅遊的最佳選擇。`,
         "url": `https://yilanpass.com/homestays/${homestay.id}`,
         "sameAs": [
+          "https://aeo.washinmura.jp/aeo/shops/yilanpass-com/llms.txt",
+          `https://yilanpass.com/homestays/${homestay.id}`,
           "https://yilanpass.com",
           homestay.facebook_url,
           homestay.instagram_url,
           homestay.website
         ].filter(Boolean),
-        "image": homestay.image_urls || [],
+        "image": homestay.image_urls || ["/logo.jpg"],
         "logo": "https://yilanpass.com/logo.png",
+        "telephone": homestay.phone || homestay.contactPhone,
         "address": {
           "@type": "PostalAddress",
           "streetAddress": homestay.address,
@@ -488,8 +495,6 @@ useHead({
           "latitude": parseFloat(homestay.latitude),
           "longitude": parseFloat(homestay.longitude)
         } : undefined,
-        "telephone": homestay.phone || homestay.contactPhone,
-        "email": homestay.email,
         "priceRange": homestay.prices?.fullRentWeekday ? 
           `NT$${homestay.prices.fullRentWeekday} - NT$${homestay.prices.fullRentWeekend || homestay.prices.fullRentWeekday}` : 
           "NT$2000 - NT$8000",
@@ -502,20 +507,6 @@ useHead({
         "maximumAttendeeCapacity": homestay.max_guests,
         "minimumAttendeeCapacity": homestay.min_guests || 1,
         "petsAllowed": homestay.features?.serviceAmenities?.includes('寵物友善') || homestay.pet_friendly || false,
-        "smokingAllowed": homestay.features?.serviceAmenities?.includes('吸菸區') || false,
-        "aggregateRating": homestay.rating ? {
-          "@type": "AggregateRating",
-          "ratingValue": homestay.rating,
-          "bestRating": 5,
-          "worstRating": 1,
-          "ratingCount": homestay.total_reviews || homestay.reviewCount || 1
-        } : {
-          "@type": "AggregateRating",
-          "ratingValue": 4.0,
-          "bestRating": 5,
-          "worstRating": 1,
-          "ratingCount": 1
-        },
         "amenityFeature": [
           ...(homestay.features?.themeFeatures?.map(feature => ({
             "@type": "LocationFeatureSpecification",
@@ -527,88 +518,62 @@ useHead({
             "name": amenity,
             "value": true
           })) || [])
-        ],
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "住宿方案",
-          "itemListElement": homestay.features?.themeFeatures?.map((feature, index) => ({
-            "@type": "Offer",
-            "name": feature,
-            "description": `享受${feature}的優質住宿體驗`,
-            "price": homestay.prices?.fullRentWeekday || "2000",
-            "priceCurrency": "TWD",
-            "availability": "https://schema.org/InStock",
-            "validFrom": new Date().toISOString().split('T')[0],
-            "itemOffered": {
-              "@type": "Accommodation",
-              "name": `${homestay.name} - ${feature}`
-            }
-          })) || []
-        },
-        "mainEntityOfPage": {
-          "@type": "WebPage",
-          "@id": canonicalUrl,
-          "name": `${homestay.name} | 宜蘭民宿`,
-          "description": `${homestay.name}民宿詳細資訊`,
-          "url": canonicalUrl,
-          "breadcrumb": {
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "首頁",
-                "item": "https://yilanpass.com"
-              },
-              {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "民宿列表",
-                "item": "https://yilanpass.com/homestay-list"
-              },
-              {
-                "@type": "ListItem",
-                "position": 3,
-                "name": homestay.name,
-                "item": `https://yilanpass.com/homestays/${homestay.id}`
-              }
-            ]
-          }
-        },
-        "potentialAction": [
+        ]
+      })
+    },
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
           {
-            "@type": "ReserveAction",
-            "target": {
-              "@type": "EntryPoint",
-              "urlTemplate": `https://yilanpass.com/homestays/${homestay.id}`,
-              "actionPlatform": [
-                "http://schema.org/DesktopWebPlatform",
-                "http://schema.org/MobileWebPlatform"
-              ]
-            },
-            "result": {
-              "@type": "LodgingReservation",
-              "name": "民宿預訂"
+            "@type": "Question",
+            "name": `${homestay.name}最多可以住幾個人？`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": homestay.max_guests 
+                ? `住宿人數範圍為${homestay.min_guests || 1}至${homestay.max_guests}人，適合家族包棟、同學會或公司團體旅遊使用。`
+                : `${homestay.name}提供多種房型選擇，適合不同人數的團體入住，建議訂房時先與業者確認。`
             }
           },
           {
-            "@type": "SearchAction",
-            "target": {
-              "@type": "EntryPoint",
-              "urlTemplate": "https://yilanpass.com/homestay-list?search={search_term_string}",
-              "actionPlatform": [
-                "http://schema.org/DesktopWebPlatform",
-                "http://schema.org/MobileWebPlatform"
-              ]
-            },
-            "query-input": "required name=search_term_string"
+            "@type": "Question",
+            "name": `${homestay.name}可以帶寵物入住嗎？`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": (homestay.features?.serviceAmenities?.includes('寵物友善') || homestay.pet_friendly)
+                ? `可以，${homestay.name}為寵物友善民宿，歡迎毛孩子一同入住，建議訂房時先與業者確認相關規定。`
+                : `目前${homestay.name}的寵物入住規定，建議訂房前先致電與業者確認，以獲得最準確的資訊。`
+            }
+          },
+          {
+            "@type": "Question",
+            "name": `${homestay.name}包棟費用是多少？`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": homestay.prices?.fullRentWeekday 
+                ? `平日包棟${homestay.prices.fullRentWeekday}起，假日包棟${homestay.prices.fullRentWeekend || homestay.prices.fullRentWeekday}起；實際價格以訂房時為準。`
+                : `價格資訊請參考頁面說明或直接與業者聯繫，平日與假日價格會有所調整。`
+            }
+          },
+          {
+            "@type": "Question",
+            "name": `${homestay.name}附近有哪些景點？`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `民宿位於宜蘭${homestay.area || homestay.location}，鄰近宜蘭各大熱門景點，交通便利，非常適合安排宜蘭一日或兩日遊。`
+            }
+          },
+          {
+            "@type": "Question",
+            "name": `${homestay.name}有哪些娛樂設施？`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `提供的設施包括：${[...(homestay.features?.themeFeatures || []), ...(homestay.features?.serviceAmenities || [])].join('、') || '優質住宿環境'}。室內外娛樂一應俱全。`
+            }
           }
-        ],
-        "isPartOf": {
-          "@type": "WebSite",
-          "name": "宜蘭旅遊通",
-          "url": "https://yilanpass.com"
-        }
+        ]
       })
     }
   ]

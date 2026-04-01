@@ -3,15 +3,16 @@ import { couponPool } from '../utils/coupon-db.js'
 export default defineEventHandler(async (event) => {
   try {
     const query = await getQuery(event)
-    
+
     // 參數驗證和初始化
     const page = Math.max(parseInt(query.page) || 1, 1)
     const pageSize = Math.min(Math.max(parseInt(query.pageSize) || 10, 1), 100)
     const category = query.category?.trim() || null
     const township = query.township?.trim() || null
     const searchText = query.searchText?.trim() || null
+    const sort = query.sort?.trim() || 'random'
 
-    console.log('Articles API - Received params:', { category, township, searchText, page, pageSize })
+    console.log('Articles API - Received params:', { category, township, searchText, page, pageSize, sort })
 
     // 檢查 article 表格是否存在
     let tableExists = false
@@ -69,12 +70,20 @@ export default defineEventHandler(async (event) => {
 
     // 構建完整的 SQL 查詢
     const whereClause = conditions.length > 0 ? ` WHERE ${conditions.join(' AND ')}` : ''
-    
+
     // 計數查詢
     const countQuery = `SELECT COUNT(*) as total FROM "article"${whereClause}`
-    
-    // 數據查詢 - 添加分頁參數，使用隨機排序
-    const dataQuery = `SELECT * FROM "article"${whereClause} ORDER BY RANDOM() OFFSET $${paramCount} LIMIT $${paramCount + 1}`
+
+    // 排序邏輯
+    let orderClause = 'ORDER BY RANDOM()' // 預設隨機排序
+    if (sort === 'popular') {
+      orderClause = 'ORDER BY view_count DESC NULLS LAST, id DESC'
+    } else if (sort === 'newest') {
+      orderClause = 'ORDER BY id DESC'
+    }
+
+    // 數據查詢 - 添加分頁與動態排序
+    const dataQuery = `SELECT * FROM "article"${whereClause} ${orderClause} OFFSET $${paramCount} LIMIT $${paramCount + 1}`
     const dataParams = [...sqlParams, (page - 1) * pageSize, pageSize]
 
     console.log('Count Query:', countQuery)
@@ -123,7 +132,7 @@ export default defineEventHandler(async (event) => {
       detail: error.detail,
       stack: error.stack
     })
-    
+
     // 如果是表格不存在的錯誤，返回空結果而不是錯誤
     if (error.code === '42P01') { // relation does not exist
       console.log('Article table does not exist, returning empty result')
@@ -140,7 +149,7 @@ export default defineEventHandler(async (event) => {
         message: 'Article table not available - returning empty result'
       }
     }
-    
+
     // 區分不同類型的錯誤
     if (error.code) {
       // 資料庫錯誤
@@ -149,7 +158,7 @@ export default defineEventHandler(async (event) => {
         message: `資料庫查詢失敗: ${error.message}`
       })
     }
-    
+
     // 其他錯誤
     throw createError({
       statusCode: 500,

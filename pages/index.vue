@@ -19,6 +19,11 @@
         <option :value="null">選擇地區</option>
         <option v-for="town in township" :key="town.name" :value="town.name">{{ town.name }}</option>
       </select>
+      <select class="form-select col-4 category" v-model="selectedSort" @change="clickSort">
+        <option value="random">預設排序</option>
+        <option value="popular">熱門優惠</option>
+        <option value="newest">最新上架</option>
+      </select>
     </div>
     <div class="search">
         <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText" @input="handleSearchInput">
@@ -86,11 +91,21 @@
       <div v-else class="md:border-l md:border-gray-100">
         <div class="row">
           <article
-            v-for="article in couponObject.data.items"
+            v-for="(article, index) in couponObject.data.items"
             :key="article.id"
-            class="cupon col-md-3"
+            class="cupon col-md-3 relative"
           >
-            <div class="cupon-wrapper">
+            <!-- 排名標籤 Top 3 -->
+            <div v-if="selectedSort === 'popular' && index < 3" class="ranking-badge" :class="'rank-' + (index + 1)">
+              <Icon v-if="index === 0" name="ph:crown-fill" class="crown-icon" />
+              <span>TOP {{ index + 1 }}</span>
+            </div>
+            
+            <div class="cupon-wrapper" :class="{
+                'top-1-card': selectedSort === 'popular' && index === 0,
+                'top-2-card': selectedSort === 'popular' && index === 1,
+                'top-3-card': selectedSort === 'popular' && index === 2
+              }">
               <NuxtLink
                 class=""
                 :to="{
@@ -205,6 +220,10 @@ useHead({
     {
       rel: 'canonical',
       href: 'https://yilanpass.com'
+    },
+    {
+      rel: 'llms-txt',
+      href: 'https://aeo.washinmura.jp/ai/yilanpass-com/llms.txt'
     }
   ]
 })
@@ -215,6 +234,7 @@ const router = useRouter()
 const searchText = ref('')
 const selectedTown = ref(null)
 const selectedCate = ref('')
+const selectedSort = ref('random')
 
 const currentPage = computed(() => {
   return Math.max(parseInt(route.query.page) || 1, 1)
@@ -224,6 +244,7 @@ onMounted(() => {
   selectedCate.value = route.query.cate || ''
   selectedTown.value = route.query.town || null
   searchText.value = route.query.search || ''
+  selectedSort.value = route.query.sort || 'random'
 
   // 獲取熱門標籤
   fetchHotTags()
@@ -297,6 +318,7 @@ const updateRoute = (queryUpdates) => {
     cate: selectedCate.value || undefined,
     town: selectedTown.value || undefined,
     search: searchText.value || undefined,
+    sort: selectedSort.value === 'random' ? undefined : selectedSort.value,
     page: currentPage.value || undefined,
     ...queryUpdates
   }
@@ -338,6 +360,10 @@ const clickTown = () => {
   updateRoute({ town: selectedTown.value, page: 1 })
 }
 
+const clickSort = () => {
+  updateRoute({ sort: selectedSort.value, page: 1 })
+}
+
 const retryFetch = () => {
   fetchData()
 }
@@ -348,7 +374,8 @@ const fetchData = async () => {
       selectedCate: selectedCate.value,
       selectedTown: selectedTown.value,
       currentPage: currentPage.value,
-      searchText: searchText.value
+      searchText: searchText.value,
+      sort: selectedSort.value
     })
   } catch (error) {
     console.error('載入優惠券失敗:', error)
@@ -359,6 +386,7 @@ watch(() => route.query, async (newQuery) => {
   selectedCate.value = newQuery.cate || ''
   selectedTown.value = newQuery.town || null
   searchText.value = newQuery.search || ''
+  selectedSort.value = newQuery.sort || 'random'
   
   await fetchData()
 }, { immediate: true })
@@ -428,12 +456,45 @@ const date2LocaleString = (date) => {
   font-weight: bold;
 }
 
-.cupon {
-}
+
 .cupon-wrapper {
   overflow: hidden;
   margin-bottom: 20px;
+  border-radius: 12px; /* Add base radius */
+  transition: all 0.3s ease;
 }
+.top-1-card {
+  box-shadow: 0 0 0 3px #fbbf24;
+  transform: translateY(-4px);
+}
+.top-2-card {
+  box-shadow: 0 0 0 3px #94a3b8;
+  transform: translateY(-2px);
+}
+.top-3-card {
+  box-shadow: 0 0 0 3px #b45309;
+}
+
+.ranking-badge {
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 800;
+  font-size: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+.rank-1 { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+.rank-2 { background: linear-gradient(135deg, #64748b, #94a3b8); }
+.rank-3 { background: linear-gradient(135deg, #92400e, #b45309); }
+.crown-icon { font-size: 18px; }
+
 .cupon-title {
   font-size: 16px;
   font-weight: 800;
@@ -474,6 +535,7 @@ const date2LocaleString = (date) => {
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
