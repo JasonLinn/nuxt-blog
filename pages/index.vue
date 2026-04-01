@@ -20,9 +20,9 @@
         <option v-for="town in township" :key="town.name" :value="town.name">{{ town.name }}</option>
       </select>
       <select class="form-select col-4 category" v-model="selectedSort" @change="clickSort">
-        <option value="random">預設排序</option>
         <option value="popular">熱門優惠</option>
         <option value="newest">最新上架</option>
+        <option value="random">隨機排序</option>
       </select>
     </div>
     <div class="search">
@@ -236,7 +236,7 @@ const router = useRouter()
 const searchText = ref('')
 const selectedTown = ref(null)
 const selectedCate = ref('')
-const selectedSort = ref('random')
+const selectedSort = ref('popular')
 
 const currentPage = computed(() => {
   return Math.max(parseInt(route.query.page) || 1, 1)
@@ -246,7 +246,7 @@ onMounted(() => {
   selectedCate.value = route.query.cate || ''
   selectedTown.value = route.query.town || null
   searchText.value = route.query.search || ''
-  selectedSort.value = route.query.sort || 'random'
+  selectedSort.value = route.query.sort || 'popular'
 
   // 獲取熱門標籤
   fetchHotTags()
@@ -388,7 +388,7 @@ watch(() => route.query, async (newQuery) => {
   selectedCate.value = newQuery.cate || ''
   selectedTown.value = newQuery.town || null
   searchText.value = newQuery.search || ''
-  selectedSort.value = newQuery.sort || 'random'
+  selectedSort.value = newQuery.sort || 'popular'
   
   await fetchData()
 }, { immediate: true })
@@ -458,6 +458,9 @@ const date2LocaleString = (date) => {
   font-weight: bold;
 }
 
+.cupon {
+  position: relative;
+}
 
 .cupon-wrapper {
   overflow: hidden;

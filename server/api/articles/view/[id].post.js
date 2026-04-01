@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
 
     // 增加瀏覽量
     const updateResult = await couponPool.query(
-      'UPDATE article SET view_count = COALESCE(view_count, 0) + 1 WHERE id = $1 RETURNING id',
+      'UPDATE article SET view_count = COALESCE(view_count, 0) + 1, view_count_monthly = COALESCE(view_count_monthly, 0) + 1 WHERE id = $1 RETURNING id',
       [id]
     )
 

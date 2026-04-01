@@ -77,7 +77,7 @@ export default defineEventHandler(async (event) => {
     // 排序邏輯
     let orderClause = 'ORDER BY RANDOM()' // 預設隨機排序
     if (sort === 'popular') {
-      orderClause = 'ORDER BY view_count DESC NULLS LAST, id DESC'
+      orderClause = 'ORDER BY view_count_monthly DESC NULLS LAST, view_count DESC NULLS LAST, id DESC'
     } else if (sort === 'newest') {
       orderClause = 'ORDER BY id DESC'
     }

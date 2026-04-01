@@ -9,7 +9,7 @@ const initState = {
   currentCate: '',
   township: [],
   searchText: null,
-  sort: 'random', // 預設排序
+  sort: 'popular', // 預設排序
   currentPage: 0,
   pending: true,  // 初始為載入狀態
   data: null,
