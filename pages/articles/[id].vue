@@ -850,24 +850,59 @@ const shareCoupon = () => {
   });
 }
 
-useHead({
-  title: article.value.title
-})
-
-const description = article.value.content.replace(/\n/g, ' ').substring(0, 300)
+// SEO 優化
 const { origin } = useRequestURL()
 const { baseURL } = useRuntimeConfig().app
+const description = article.value.content.replace(/\n/g, ' ').substring(0, 160)
+const tags = parseTags(article.value.tags).join(', ')
+
+useHead({
+  title: `${article.value.title} | 宜蘭旅遊通 - 優惠券詳情`,
+  meta: [
+    { name: 'keywords', content: `${tags}, 宜蘭優惠, 宜蘭旅遊, 優惠券` },
+    { name: 'author', content: '宜蘭旅遊通' }
+  ],
+  link: [
+    {
+      rel: 'canonical',
+      href: `${origin}${baseURL}articles/${article.value.id}`
+    }
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": article.value.title,
+        "description": description,
+        "image": article.value.cover[0],
+        "brand": {
+          "@type": "Brand",
+          "name": "宜蘭旅遊通"
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": `${origin}${baseURL}articles/${article.value.id}`,
+          "priceCurrency": "TWD",
+          "price": "0",
+          "availability": "https://schema.org/InStock"
+        }
+      })
+    }
+  ]
+})
 
 useSeoMeta({
   description,
-  ogTitle: article.value.title,
+  ogTitle: `${article.value.title} | 宜蘭旅遊通`,
   ogDescription: description,
   ogImage: article.value.cover[0],
-  ogUrl: () => `${origin}${baseURL}/articles/${article.value.id}`,
-  twitterTitle: article.value.title,
+  ogUrl: () => `${origin}${baseURL}articles/${article.value.id}`,
+  ogType: 'website',
+  twitterTitle: `${article.value.title} | 宜蘭旅遊通`,
   twitterDescription: description,
   twitterImage: article.value.cover[0],
-  twitterUrl: () => `${origin}${baseURL}/articles/${article.value.id}`,
   twitterCard: 'summary_large_image'
 })
 </script>
