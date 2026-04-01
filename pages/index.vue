@@ -462,6 +462,14 @@ const date2LocaleString = (date) => {
   margin-bottom: 20px;
   border-radius: 12px; /* Add base radius */
   transition: all 0.3s ease;
+  height: calc(100% - 20px);
+  display: flex;
+  flex-direction: column;
+}
+.cupon-wrapper > a {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 .top-1-card {
   box-shadow: 0 0 0 3px #fbbf24;
@@ -504,6 +512,9 @@ const date2LocaleString = (date) => {
 .cupon-info {
   padding: 13px 8px 15px 8px;
   background-color: #fff;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .cupon-info:hover {
   box-shadow: #000;
