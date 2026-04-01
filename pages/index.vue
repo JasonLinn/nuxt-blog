@@ -95,16 +95,16 @@
             :key="article.id"
             class="cupon col-md-3 relative"
           >
-            <!-- 排名標籤 Top 3 -->
-            <div v-if="selectedSort === 'popular' && index < 3" class="ranking-badge" :class="'rank-' + (index + 1)">
+            <!-- 排名標籤 Top 3 (僅在第一頁顯示) -->
+            <div v-if="selectedSort === 'popular' && currentPage === 1 && index < 3" class="ranking-badge" :class="'rank-' + (index + 1)">
               <Icon v-if="index === 0" name="ph:crown-fill" class="crown-icon" />
               <span>TOP {{ index + 1 }}</span>
             </div>
             
             <div class="cupon-wrapper" :class="{
-                'top-1-card': selectedSort === 'popular' && index === 0,
-                'top-2-card': selectedSort === 'popular' && index === 1,
-                'top-3-card': selectedSort === 'popular' && index === 2
+                'top-1-card': selectedSort === 'popular' && currentPage === 1 && index === 0,
+                'top-2-card': selectedSort === 'popular' && currentPage === 1 && index === 1,
+                'top-3-card': selectedSort === 'popular' && currentPage === 1 && index === 2
               }">
               <NuxtLink
                 class=""
@@ -536,6 +536,9 @@ const date2LocaleString = (date) => {
   color: #5db0be;
   background-color: rgba(100,179,244,.1);
   border-radius: 4px;
+}
+.cupon-img {
+  object-fit: cover;
 }
 .cupon-once {
   background-color: #ffdcdc8a;
