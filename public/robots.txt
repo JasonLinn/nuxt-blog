@@ -7,10 +7,20 @@ Allow: /homestays/
 Allow: /relative/
 Allow: /articles/
 
+# 允許 AI 代理存取標準發現端點
+Allow: /llms.txt
+Allow: /.well-known/
+
 # 阻止索引管理和API路由
 Disallow: /admin
 Disallow: /api/
 Disallow: /_nuxt/
+
+# AI 內容使用偏好聲明 (contentsignals.org)
+# ai-train=no: 不允許使用本站內容訓練 AI 模型
+# search=yes: 允許搜尋引擎索引
+# ai-input=yes: 允許 AI 代理使用本站內容作為查詢輸入參考
+Content-Signal: ai-train=no, search=yes, ai-input=yes
 
 # Sitemap 位置（使用動態生成的 sitemap.xml）
 Sitemap: https://yilanpass.com/sitemap.xml

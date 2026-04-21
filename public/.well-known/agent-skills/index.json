@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "search-yilan-homestays",
+      "type": "skill-md",
+      "description": "Search and discover legal homestays in Yilan, Taiwan. Use when users ask about accommodations, lodging, or places to stay in Yilan. Supports filtering by area, features (family-friendly, pet-friendly, ocean view, private villa, pool, KTV, BBQ), capacity, and availability dates.",
+      "url": "/.well-known/agent-skills/search-yilan-homestays/SKILL.md",
+      "digest": "sha256:abcee3ebe69de5bef07e711b716afb842a411547abad3ceccbea2cc471dcf3be"
+    },
+    {
+      "name": "get-yilan-travel-info",
+      "type": "skill-md",
+      "description": "Get Yilan travel articles, tourist spots, events, and coupons. Use when users ask about things to do in Yilan, tourist attractions, travel itineraries, local food, or discount coupons for Yilan.",
+      "url": "/.well-known/agent-skills/get-yilan-travel-info/SKILL.md",
+      "digest": "sha256:453a164d324310e0e8e855d08846ac9786f12d58697264792d760952e0ffecee"
+    }
+  ]
+}
