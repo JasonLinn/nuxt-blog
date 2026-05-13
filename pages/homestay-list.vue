@@ -1055,6 +1055,10 @@ watch(bnbsData, (newData) => {
   transition: transform 0.3s ease;
   cursor: pointer;
   position: relative;
+  // 對齊優惠券設計：讓同列卡片高度一致
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 20px);
 }
 .bnb-wrapper:hover {
   transform: translateY(-5px);
@@ -1071,6 +1075,14 @@ watch(bnbsData, (newData) => {
 .bnb-info {
   padding: 13px 8px 15px 8px;
   background-color: #fff;
+  // 填滿剩餘高度以達到高度統一
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+// 包棟價格區塊永遠貼底，多筆卡片底部對齊看起來更整齊
+.bnb-info .price-info {
+  margin-top: auto;
 }
 .bnb-img-wrapper {
   overflow: hidden;
@@ -1525,10 +1537,6 @@ watch(bnbsData, (newData) => {
   margin-top: 8px;
   font-size: 11px;
   color: #888;
-}
-
-.bnb-wrapper {
-  position: relative;
 }
 
 /* 調整原有樣式 */
