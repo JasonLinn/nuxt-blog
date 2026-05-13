@@ -2,9 +2,6 @@
   <div class="flex container">
     <div class="selectWrapper">
       <select class="category flex col-4 form-select" v-model="selectedCate" @change="clickCate">
-        <!-- <option class="category-item active" value="index" defalut>
-          全
-        </option> -->
         <option
           v-for="cate in category"
           class="category-item"
@@ -232,6 +229,7 @@ useHead({
 
 const route = useRoute()
 const router = useRouter()
+
 
 const searchText = ref('')
 const selectedTown = ref(null)
@@ -563,6 +561,7 @@ const date2LocaleString = (date) => {
   width: 100%;
   padding-right: 35px;
 }
+
 .cancel-icon, .search-icon {
   position: absolute;
   right: 8px;

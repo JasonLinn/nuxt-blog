@@ -42,6 +42,22 @@
               </li>
                </ClientOnly>
             </ul>
+
+            <!-- 站點數據 -->
+            <div class="sidemenu__stats" aria-label="站點數據">
+              <div class="ss-row">
+                <span class="ss-num">{{ displayVisitorCount }}</span>
+                <span class="ss-label">人次造訪</span>
+              </div>
+              <div class="ss-row">
+                <span class="ss-num">{{ partnerStores }}</span>
+                <span class="ss-label">店家優惠</span>
+              </div>
+              <div class="ss-row">
+                <span class="ss-num">{{ partnerHotels }}</span>
+                <span class="ss-label">合作旅宿</span>
+              </div>
+            </div>
           </div>
         </nav>
       </transition>
@@ -52,6 +68,12 @@
         <NuxtLink :to="{ name: 'index' }">
           <img src="/logo.jpg" width="200" alt="宜蘭旅遊通">
         </NuxtLink>
+        <!-- 站點數據徽章（桌機顯示，手機改於側選單顯示） -->
+        <div class="nav-stats" aria-label="站點數據">
+          <span class="ns-item"><b>{{ displayVisitorCount }}</b><i>人次造訪</i></span>
+          <span class="ns-item"><b>{{ partnerStores }}</b><i>店家優惠</i></span>
+          <span class="ns-item"><b>{{ partnerHotels }}</b><i>合作旅宿</i></span>
+        </div>
       </div>
 
       <!-- Desktop Navigation Links -->
@@ -139,6 +161,9 @@ const userData = computed(() => store.getUserData);
 const referral = useReferralStore();
 const navOpen = ref(false)
 
+// 站點統計
+const { partnerStores, partnerHotels, displayVisitorCount, animateVisitor } = useSiteStats()
+
 // Menu Items Configuration
 const menuItems = ref([
   {
@@ -189,6 +214,7 @@ const toggleMobileSubmenu = (index) => {
 onMounted(() => {
   store.fetchAndSetUser()
   referral.setReferral(route.query)
+  animateVisitor()
 })
 
 watch(
@@ -212,6 +238,62 @@ const handleLogout = () => {
 </script>
 
 <style lang="scss" scoped>
+// 桌機版：Logo 右側的站點數據徽章
+.nav-wrapper {
+  gap: 24px;
+}
+.nav-stats {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  .ns-item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    line-height: 1;
+    white-space: nowrap;
+
+    b {
+      font-size: 16px;
+      font-weight: 700;
+      color: #613030;
+      letter-spacing: -0.3px;
+    }
+    i {
+      font-style: normal;
+      font-size: 11.5px;
+      color: #8a7a78;
+      letter-spacing: 0.3px;
+    }
+  }
+
+  .ns-item + .ns-item {
+    padding-left: 14px;
+    border-left: 1px solid #ececec;
+  }
+}
+
+@media (max-width: 1100px) {
+  .nav-stats {
+    gap: 10px;
+    .ns-item {
+      b { font-size: 14px; }
+      i { font-size: 10.5px; }
+    }
+    .ns-item + .ns-item {
+      padding-left: 10px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  // 手機版改於側選單顯示，這裡隱藏
+  .nav-stats {
+    display: none;
+  }
+}
+
 /* Resurrected Original Styles & New SCSS for Dropdowns */
 .index-nav {
   width: 100%;
@@ -221,6 +303,7 @@ const handleLogout = () => {
   position: relative;
   z-index: 40;
 }
+
 
 .nav-links {
   display: flex;
@@ -476,6 +559,44 @@ const handleLogout = () => {
     background: rgba(255, 255, 255, 0.4);
     list-style: none;
     padding: 0;
+  }
+
+  // 側選單站點數據
+  .sidemenu__stats {
+    margin: 24px 20px 32px;
+    padding: 20px 16px;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    .ss-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .ss-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+    .ss-label {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+    .ss-row + .ss-row {
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.35);
+    }
   }
   
   .sidemenu__subitem {
