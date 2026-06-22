@@ -183,7 +183,6 @@ const menuItems = ref([
     isOpen: false,
     children: [
       { title: '合法民宿推薦', path: '/homestay-list' },
-      { title: '民宿註冊申請', path: '/homestay-register' },
       { title: '民宿業者登入', path: '/homestay-login' },
     ]
   },
