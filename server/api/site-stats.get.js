@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
       'pageview'
     ),
     withTimeout(
-      couponPool.query('SELECT COUNT(*)::int AS c FROM "article"'),
+      couponPool.query('SELECT COUNT(*)::int AS c FROM "article" WHERE "archived_at" IS NULL'),
       QUERY_TIMEOUT_MS,
       'partner_stores'
     ),

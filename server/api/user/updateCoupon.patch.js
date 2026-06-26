@@ -9,14 +9,48 @@ const couponPool = new Pool({
   }
 })
 
+const getCouponId = (coupon) => {
+  try {
+    const parsedCoupon = typeof coupon === 'string' ? JSON.parse(coupon) : coupon
+    return parsedCoupon?.id ? String(parsedCoupon.id) : null
+  } catch (error) {
+    return null
+  }
+}
+
 export default defineEventHandler(async (event) => {
-    const body = await readBody(event)
-    console.log(event, body, 'dfadfsdfcccc')
+  const body = await readBody(event)
+  const coupons = Array.isArray(body.coupons) ? body.coupons : []
+  const couponIds = coupons.map(getCouponId).filter(Boolean)
+
+  let activeCoupons = coupons
+
+  if (couponIds.length) {
+    const activeCouponIds = await couponPool
+      .query(
+        'SELECT "id" FROM "article" WHERE "id" = ANY($1::int[]) AND "archived_at" IS NULL;',
+        [[...new Set(couponIds)].map(Number).filter(Number.isFinite)]
+      )
+      .then((result) => new Set(result.rows.map((row) => String(row.id))))
+      .catch((error) => {
+        console.error(error)
+        throw createError({
+          statusCode: 500,
+          message: '無法取得優惠券狀態，請稍候再試'
+        })
+      })
+
+    activeCoupons = coupons.filter((coupon) => {
+      const couponId = getCouponId(coupon)
+      if (!couponId) return true
+      return activeCouponIds.has(couponId)
+    })
+  }
 
   const couponRecord = await couponPool
     .query(
       'UPDATE "user" SET "coupons" =  $1 WHERE "user_id" = $2 RETURNING *;',
-      [body.coupons, body.userId]
+      [activeCoupons, body.userId]
     )
     .then((result) => {
       if (result.rowCount === 1) {

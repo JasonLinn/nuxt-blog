@@ -29,6 +29,45 @@ export default defineEventHandler(async (event) => {
       message: '取得LINE ID失敗，請稍候再試'
     })
   }
-  // console.log(userRecord, 'ooooooo')
-  return userRecord
+
+  const coupons = Array.isArray(userRecord.coupons) ? userRecord.coupons : []
+  const couponIds = coupons
+    .map((coupon) => {
+      try {
+        const parsedCoupon = typeof coupon === 'string' ? JSON.parse(coupon) : coupon
+        return parsedCoupon?.id ? String(parsedCoupon.id) : null
+      } catch (error) {
+        return null
+      }
+    })
+    .filter(Boolean)
+
+  if (!couponIds.length) return userRecord
+
+  const activeCouponIds = await couponPool
+    .query(
+      'SELECT "id" FROM "article" WHERE "id" = ANY($1::int[]) AND "archived_at" IS NULL;',
+      [[...new Set(couponIds)].map(Number).filter(Number.isFinite)]
+    )
+    .then((result) => new Set(result.rows.map((row) => String(row.id))))
+    .catch((error) => {
+      console.error(error)
+      throw createError({
+        statusCode: 500,
+        message: '無法取得優惠券狀態，請稍候再試'
+      })
+    })
+
+  return {
+    ...userRecord,
+    coupons: coupons.filter((coupon) => {
+      try {
+        const parsedCoupon = typeof coupon === 'string' ? JSON.parse(coupon) : coupon
+        if (!parsedCoupon?.id) return true
+        return activeCouponIds.has(String(parsedCoupon.id))
+      } catch (error) {
+        return true
+      }
+    })
+  }
 })

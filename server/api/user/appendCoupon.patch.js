@@ -18,12 +18,26 @@ export default defineEventHandler(async (event) => {
             //   }
     // const articleId = await getRouterParam(event, 'id')
     const body = await readBody(event)
-    console.log(event, body, 'cccccccccccc')
+    const couponId = body.coupon?.id
+
+    if (!couponId) {
+      throw createError({
+        statusCode: 400,
+        message: '缺少優惠券 ID'
+      })
+    }
 
   const couponRecord = await couponPool
     .query(
-      'UPDATE "user" SET "coupons" = array_append("coupons", $1) WHERE "user_id" = $2 RETURNING *;',
-      [body.coupon, body.user.userId]
+      `WITH active_coupon AS (
+        SELECT 1 FROM "article" WHERE "id" = $3 AND "archived_at" IS NULL
+      )
+      UPDATE "user"
+      SET "coupons" = array_append("coupons", $1)
+      WHERE "user_id" = $2
+        AND EXISTS (SELECT 1 FROM active_coupon)
+      RETURNING *;`,
+      [body.coupon, body.user.userId, couponId]
     )
     .then((result) => {
       if (result.rowCount === 1) {
@@ -41,7 +55,7 @@ export default defineEventHandler(async (event) => {
   if (!couponRecord) {
     throw createError({
       statusCode: 400,
-      message: '更新優惠券失敗，請稍候再試'
+      message: '優惠券已封存或不存在'
     })
   }
 

@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // 動態構建 WHERE 條件和參數
-    const conditions = []
+    const conditions = ['"archived_at" IS NULL']
     const sqlParams = []
     let paramCount = 1
 
@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // 構建完整的 SQL 查詢
-    const whereClause = conditions.length > 0 ? ` WHERE ${conditions.join(' AND ')}` : ''
+    const whereClause = ` WHERE ${conditions.join(' AND ')}`
 
     // 計數查詢
     const countQuery = `SELECT COUNT(*) as total FROM "article"${whereClause}`

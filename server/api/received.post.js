@@ -13,15 +13,24 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   const receivedRecord = await couponPool
-    .query('INSERT INTO "received" ("coupon_title", "coupon_id", "coupon_content", "user_id", "user_name", "remark", "received_time") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;', [
-      body.coupon_title,
-      body.coupon_id,
-      body.coupon_content,
-      body.user_id,
-      body.user_name,
-      body.remark,
-      body.received_time
-    ])
+    .query(
+      `WITH active_coupon AS (
+        SELECT 1 FROM "article" WHERE "id" = $2 AND "archived_at" IS NULL
+      )
+      INSERT INTO "received" ("coupon_title", "coupon_id", "coupon_content", "user_id", "user_name", "remark", "received_time")
+      SELECT $1, $2, $3, $4, $5, $6, $7
+      WHERE EXISTS (SELECT 1 FROM active_coupon)
+      RETURNING *;`,
+      [
+        body.coupon_title,
+        body.coupon_id,
+        body.coupon_content,
+        body.user_id,
+        body.user_name,
+        body.remark,
+        body.received_time
+      ]
+    )
     .then((result) => {
       if (result.rowCount === 1) {
         return result.rows?.[0]
@@ -38,7 +47,7 @@ export default defineEventHandler(async (event) => {
   if (!receivedRecord) {
     throw createError({
       statusCode: 400,
-      message: '兌換失敗，請稍候再試'
+      message: '優惠券已封存或不存在'
     })
   }
 

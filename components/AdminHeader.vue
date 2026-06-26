@@ -49,6 +49,12 @@
       >
         優惠券審核
       </NuxtLink>
+      <NuxtLink
+        to="/admin/coupons"
+        :class="['admin-nav-link', { active: isActive('/admin/coupons') }]"
+      >
+        優惠券管理
+      </NuxtLink>
       <button @click="logout" class="logout-btn">登出</button>
     </div>
   </div>

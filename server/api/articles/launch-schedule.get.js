@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     console.log('Launch Schedule API - Fetching all articles')
 
     // 查詢文章表格
-    const articleQuery = 'SELECT * FROM "article" ORDER BY updated_at DESC'
+    const articleQuery = 'SELECT * FROM "article" WHERE "archived_at" IS NULL ORDER BY updated_at DESC'
     
     // 查詢代訂服務表格
     const relativeQuery = 'SELECT * FROM "relative" ORDER BY updated_at DESC'
@@ -95,4 +95,4 @@ export default defineEventHandler(async (event) => {
       message: '無法取得上架時間列表，請稍候再試'
     })
   }
-}) 
+})

@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   const articleRecord = await couponPool
     .query(
-      'UPDATE "article" SET "amount" = $1, "updated_at" = NOW() WHERE "id" = $2 RETURNING *;',
+      'UPDATE "article" SET "amount" = $1, "updated_at" = NOW() WHERE "id" = $2 AND "archived_at" IS NULL RETURNING *;',
       [body.amount, body.id]
     )
     .then((result) => {
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
   if (!articleRecord) {
     throw createError({
       statusCode: 400,
-      message: '更新優惠券失敗，請稍候再試'
+      message: '優惠券已封存或不存在'
     })
   }
 

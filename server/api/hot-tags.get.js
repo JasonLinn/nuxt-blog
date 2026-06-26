@@ -27,7 +27,8 @@ export default defineEventHandler(async (event) => {
       const result = await couponPool.query(
         `SELECT COUNT(*) as article_count, SUM(COALESCE(used_times, 0)) as total_usage
          FROM "article" 
-         WHERE (title ILIKE $1 OR content ILIKE $1 OR tags ILIKE $1)`,
+         WHERE "archived_at" IS NULL
+           AND (title ILIKE $1 OR content ILIKE $1 OR tags ILIKE $1)`,
         [`%${tag}%`]
       )
       
@@ -69,4 +70,4 @@ export default defineEventHandler(async (event) => {
       message: '使用預設標籤（發生錯誤）'
     }
   }
-}) 
+})

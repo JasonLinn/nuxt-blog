@@ -303,7 +303,7 @@ export default defineEventHandler(async (event) => {
 
 const getCupon = async () => {
   const cuponRecords = await couponPool
-    .query(`SELECT * FROM "article"`)
+    .query(`SELECT * FROM "article" WHERE "archived_at" IS NULL`)
     .then((result) => result.rows)
     .catch((error) => {
       console.error(error)

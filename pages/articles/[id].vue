@@ -62,7 +62,7 @@
                 </svg>
               </div>
             </div>
-            <div v-if="userInfo?.id === 1" class="admin-actions">
+            <div v-if="isBackendAdmin" class="admin-actions">
               <NuxtLink
                 class="admin-btn edit"
                 :to="{ name: 'articles-edit', query: { id: route.params.id } }"
@@ -70,10 +70,11 @@
                 <Icon class="mr-1 h-4 w-4" name="ri:edit-line" />
                 編輯
               </NuxtLink>
-              <button class="admin-btn delete" @click="handleDeleteArticle">
-                <Icon class="mr-1 h-4 w-4" name="ri:delete-bin-line" />
-                刪除
+              <button v-if="!article.archived_at" class="admin-btn archive" @click="handleArchiveArticle">
+                <Icon class="mr-1 h-4 w-4" name="ri:archive-line" />
+                封存
               </button>
+              <span v-else class="archived-label">已封存</span>
             </div>
           </div>
 
@@ -249,7 +250,9 @@ const hideModal = () => {
   }
 }
 
-const { pending, data: article, error } = await useFetch(`/api/articles/${route.params.id}`)
+const { pending, data: article, error } = await useFetch(`/api/articles/${route.params.id}`, {
+  headers: useRequestHeaders(['cookie'])
+})
 // article.value.referral = referralStore
 if (error.value) {
   console.log(error.value)
@@ -257,6 +260,20 @@ if (error.value) {
 }
 
 const userInfo = useState('userInfo')
+const isBackendAdmin = ref(false)
+
+const checkBackendAdmin = async () => {
+  try {
+    const response = await $fetch('/api/admin-auth', {
+      headers: useRequestHeaders(['cookie'])
+    })
+    isBackendAdmin.value = Boolean(response?.success && response?.admin)
+  } catch (error) {
+    isBackendAdmin.value = false
+  }
+}
+
+await checkBackendAdmin()
 
 const checkIsOnce = () => {
   let wasGet = false
@@ -274,20 +291,20 @@ const checkIsOnce = () => {
   return wasGet && article.value && article.value.isonce
 }
 
-const handleDeleteArticle = () => {
+const handleArchiveArticle = () => {
   if (!process.client) return;
   if (!article.value) {
-    console.log('無法刪除，article 不存在')
+    console.log('無法封存，article 不存在')
     return
   }
-  const answer = confirm('你確定要刪除優惠券嗎？')
+  const answer = confirm('你確定要封存優惠券嗎？封存後前台將無法看到這張優惠券。')
 
   if (answer) {
-    $fetch(`/api/articles/${route.params.id}`, {
-      method: 'DELETE'
+    $fetch(`/api/admin/coupons/${route.params.id}/archive`, {
+      method: 'POST'
     })
       .then(() => {
-        navigateTo('/')
+        navigateTo('/admin/coupons?status=archived')
       })
       .catch((error) => {
         console.log(error)
@@ -1038,14 +1055,25 @@ useSeoMeta({
   background: #ffedd5;
 }
 
-.admin-btn.delete {
-  color: #e11d48;
-  background: #fff1f2;
-  border-color: #ffe4e6;
+.admin-btn.archive {
+  color: #92400e;
+  background: #fffbeb;
+  border-color: #fde68a;
 }
 
-.admin-btn.delete:hover {
-  background: #ffe4e6;
+.admin-btn.archive:hover {
+  background: #fef3c7;
+}
+
+.archived-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* ====== 分享按鈕 ====== */

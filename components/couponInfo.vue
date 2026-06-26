@@ -65,13 +65,6 @@
                 <Icon class="mr-1 h-4 w-4" name="ri:edit-line" />
                 編輯
               </NuxtLink>
-              <button
-                class="flex items-center text-sm text-gray-400 hover:font-semibold hover:text-rose-500"
-                @click="handleDeleteArticle"
-              >
-                <Icon class="mr-1 h-4 w-4" name="ri:delete-bin-line" />
-                刪除
-              </button>
             </div>
           </div>
           <h1 class="cupon-title break-words text-4xl font-semibold text-gray-700">
@@ -223,23 +216,6 @@
       return JSON.parse(cup).id == article.value.id
     })
     return wasGet && article.value.isonce
-  }
-  
-  const handleDeleteArticle = () => {
-    const answer = confirm('你確定要刪除優惠券嗎？')
-  
-    if (answer) {
-      $fetch(`/api/articles/${route.params.id}`, {
-        method: 'DELETE'
-      })
-        .then(() => {
-          navigateTo('/')
-        })
-        .catch((error) => {
-          console.error(error)
-          alert(error)
-        })
-    }
   }
   
   const sendPatch = async () => {
