@@ -1,666 +1,770 @@
 <!-- pages/map.vue -->
 <template>
-    <div class="map-container">
-      <!-- 載入狀態 -->
-      <div v-if="isMapLoading" class="loading-overlay">
-        <div class="loading-content">
-          <Icon class="h-8 w-8 text-blue-500 animate-spin" name="eos-icons:loading" />
-          <span class="ml-2 text-gray-600">載入地圖中...</span>
-        </div>
+  <div class="map-container">
+    <!-- 載入狀態 -->
+    <div v-if="isMapLoading" class="loading-overlay">
+      <div class="loading-content">
+        <Icon class="h-8 w-8 animate-spin text-blue-500" name="eos-icons:loading" />
+        <span class="ml-2 text-gray-600">載入地圖中...</span>
       </div>
-      
-      <!-- 民宿資料載入狀態 -->
-      <div v-else-if="isLoadingHomestay && activeCategoriesMap.housing" class="loading-overlay-partial">
-        <div class="loading-content">
-          <Icon class="h-6 w-6 text-green-500 animate-spin" name="eos-icons:loading" />
-          <span class="ml-2 text-gray-600">載入民宿資料中...</span>
-        </div>
+    </div>
+
+    <!-- 民宿資料載入狀態 -->
+    <div
+      v-else-if="isLoadingHomestay && activeCategoriesMap.housing"
+      class="loading-overlay-partial"
+    >
+      <div class="loading-content">
+        <Icon class="h-6 w-6 animate-spin text-green-500" name="eos-icons:loading" />
+        <span class="ml-2 text-gray-600">載入民宿資料中...</span>
       </div>
-      
-      <!-- 錯誤狀態 -->
-      <div v-else-if="mapError" class="error-overlay">
-        <div class="error-content">
-          <span class="text-red-600">地圖載入失敗</span>
-          <p class="text-gray-600 mt-2">{{ mapError }}</p>
-          <button @click="retryLoadMap" class="retry-btn">重試</button>
-        </div>
+    </div>
+
+    <!-- 錯誤狀態 -->
+    <div v-else-if="mapError" class="error-overlay">
+      <div class="error-content">
+        <span class="text-red-600">地圖載入失敗</span>
+        <p class="mt-2 text-gray-600">{{ mapError }}</p>
+        <button class="retry-btn" @click="retryLoadMap">重試</button>
       </div>
-      
-      <div class="control-bar" v-show="!isMapLoading && !mapError">
-        <div class="control-title">地標類別</div>
-        <div class="control-buttons">
-          <button 
-            v-for="(category, index) in categories" 
-            :key="index" 
-            @click="toggleCategory(category.key)"
-            :class="{ 
-              active: activeCategoriesMap[category.key],
-              loading: category.key === 'housing' && isLoadingHomestay
-            }"
-            :disabled="category.key === 'housing' && isLoadingHomestay"
-            class="category-btn"
+    </div>
+
+    <section v-show="!isMapLoading && !mapError" class="control-bar" aria-label="地圖探索工具">
+      <div class="control-heading">
+        <div>
+          <p class="control-eyebrow">YILAN DISCOVERY</p>
+          <h1 class="control-title">探索宜蘭好去處</h1>
+        </div>
+        <span class="place-count" aria-live="polite">
+          {{ isMapLoading ? '載入中' : `${couponData.length} 個地點` }}
+        </span>
+      </div>
+
+      <div class="control-buttons">
+        <button
+          v-for="(category, index) in categories"
+          :key="index"
+          :class="{
+            active: activeCategoriesMap[category.key],
+            loading: category.key === 'housing' && isLoadingHomestay
+          }"
+          :disabled="category.key === 'housing' && isLoadingHomestay"
+          class="category-btn"
+          type="button"
+          :aria-pressed="activeCategoriesMap[category.key]"
+          :aria-label="`${activeCategoriesMap[category.key] ? '隱藏' : '顯示'}${category.label}`"
+          @click="toggleCategory(category.key)"
+        >
+          <span v-if="category.key === 'housing' && isLoadingHomestay" class="loading-spinner">
+            <Icon name="eos-icons:loading" />
+          </span>
+          <Icon v-else :name="category.icon" class="category-icon" aria-hidden="true" />
+          <span class="category-copy">
+            <strong>{{ category.name }}</strong>
+            <small>{{ category.label }}</small>
+          </span>
+        </button>
+      </div>
+
+      <div class="search-container">
+        <Icon name="ri:search-line" class="search-icon" aria-hidden="true" />
+        <label class="visually-hidden" for="map-place-search">搜尋地點</label>
+        <input
+          id="map-place-search"
+          v-model="searchQuery"
+          type="text"
+          placeholder="搜尋店家、景點或住宿"
+          class="search-input"
+          autocomplete="off"
+          spellcheck="false"
+          :aria-expanded="searchResults.length > 0"
+          aria-controls="map-search-results"
+          @input="handleSearchInput"
+        />
+        <button
+          v-if="searchQuery"
+          type="button"
+          class="search-clear"
+          aria-label="清除搜尋"
+          @click="clearSearch"
+        >
+          <Icon name="ri:close-line" />
+        </button>
+        <div
+          v-if="searchResults && searchResults.length > 0"
+          id="map-search-results"
+          class="search-results"
+        >
+          <button
+            v-for="(result, index) in searchResults"
+            :key="result.id || index"
+            class="search-result-item"
+            type="button"
+            @click="navigateToLocation(result)"
           >
-            <span v-if="category.key === 'housing' && isLoadingHomestay" class="loading-spinner">
-              <Icon class="h-4 w-4 animate-spin" name="eos-icons:loading" />
-            </span>
-            <span v-else>{{ category.name }}</span>
-          </button>
-        </div>
-        
-        <div class="search-container">
-          <input 
-            type="text" 
-            v-model="searchQuery" 
-            @input="handleSearchInput" 
-            placeholder="搜尋地點..." 
-            class="search-input"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <div v-if="searchResults && searchResults.length > 0" class="search-results">
-            <div 
-              v-for="(result, index) in searchResults" 
-              :key="result.id || index" 
-              @click="navigateToLocation(result)"
-              class="search-result-item"
+            <span
+              class="result-pin"
+              :style="{ backgroundColor: getCategoryMeta(result.category).color }"
             >
-              {{ result.title }}
-            </div>
-          </div>
-        </div>
-        
-        <div class="control-options">
-          <button 
-            @click="toggleLabels"
-            :class="{ active: showLabels }"
-            class="option-btn"
-          >
-            {{ showLabels ? '隱藏店名' : '顯示店名' }}
+              <Icon :name="getCategoryMeta(result.category).icon" aria-hidden="true" />
+            </span>
+            <span class="result-copy">
+              <strong>{{ result.title }}</strong>
+              <small>{{ getCategoryMeta(result.category).label }}</small>
+            </span>
+            <Icon name="ri:arrow-right-s-line" class="result-arrow" aria-hidden="true" />
           </button>
         </div>
       </div>
-      <div id="map" ref="mapRef"></div>
-      <button class="location-btn" @click="getCurrentLocation" v-show="!isMapLoading && !mapError">
-        <span class="location-icon">📍</span>
+
+      <div class="control-options">
+        <span class="option-copy">
+          <Icon name="ri:price-tag-3-line" aria-hidden="true" />
+          顯示地點名稱
+        </span>
+        <button
+          :class="{ active: showLabels }"
+          class="option-btn"
+          type="button"
+          role="switch"
+          :aria-checked="showLabels"
+          @click="toggleLabels"
+        >
+          <span class="switch-knob"></span>
+          <span class="visually-hidden">{{ showLabels ? '隱藏店名' : '顯示店名' }}</span>
+        </button>
+      </div>
+    </section>
+    <div id="map" ref="mapRef"></div>
+    <button
+      v-show="!isMapLoading && !mapError"
+      class="location-btn"
+      type="button"
+      aria-label="移動到我的目前位置"
+      @click="getCurrentLocation"
+    >
+      <Icon name="ri:crosshair-2-line" class="location-icon" />
+      <span class="location-label">我的位置</span>
+    </button>
+
+    <!-- 地標資訊面板 -->
+    <div
+      ref="infoPanelRef"
+      class="map-info-panel"
+      :class="{ 'map-info-panel-open': isInfoPanelOpen }"
+    >
+      <button
+        class="map-info-toggle"
+        type="button"
+        :aria-expanded="isInfoPanelOpen"
+        aria-label="切換地點資訊面板"
+        @click="isInfoPanelOpen = !isInfoPanelOpen"
+      >
+        <span class="panel-handle"></span>
+        <Icon
+          name="ri:arrow-up-s-line"
+          class="map-toggle"
+          :class="{ 'arrow-upside': isInfoPanelOpen }"
+        />
       </button>
-      
-      <!-- 地標資訊面板 -->
-      <div class="map-info-panel" :class="{ 'map-info-panel-open': isInfoPanelOpen }" ref="infoPanelRef">
-        <div class="map-info-toggle" @click="isInfoPanelOpen = !isInfoPanelOpen">
-          <Icon name="ri:arrow-up-s-line" class="map-toggle" :class="{ 'arrow-upside': isInfoPanelOpen }" />
-        </div>
-        <div class="map-info-wrapper" v-if="selectedCoupon && selectedCoupon.id">
-          <!-- 民宿資訊顯示 -->
-          <div v-if="selectedCoupon.detailUrl && selectedCoupon.detailUrl.includes('/homestays/')" class="homestay-info">
-            <div class="homestay-header">
-              <h3 class="homestay-title">{{ selectedCoupon.title }}</h3>
+      <div v-if="selectedCoupon && selectedCoupon.id" class="map-info-wrapper">
+        <!-- 民宿資訊顯示 -->
+        <div
+          v-if="selectedCoupon.detailUrl && selectedCoupon.detailUrl.includes('/homestays/')"
+          class="homestay-info"
+        >
+          <div class="homestay-header">
+            <h3 class="homestay-title">{{ selectedCoupon.title }}</h3>
+          </div>
+
+          <div v-if="selectedCoupon.image_url" class="homestay-image">
+            <img :src="selectedCoupon.image_url" :alt="selectedCoupon.title" />
+          </div>
+
+          <div class="homestay-details">
+            <div v-if="selectedCoupon.description" class="detail-item">
+              <span class="detail-label"><Icon name="ri:map-pin-line" />位置：</span>
+              <span class="detail-value">{{ selectedCoupon.description }}</span>
             </div>
-            
-            <div class="homestay-image" v-if="selectedCoupon.image_url">
-              <img :src="selectedCoupon.image_url" :alt="selectedCoupon.title" />
+
+            <div v-if="selectedCoupon.price" class="detail-item">
+              <span class="detail-label"><Icon name="ri:money-dollar-circle-line" />價格：</span>
+              <span class="detail-value">{{ selectedCoupon.price }}</span>
             </div>
-            
-            <div class="homestay-details">
-              <div class="detail-item" v-if="selectedCoupon.description">
-                <span class="detail-label">📍 位置：</span>
-                <span class="detail-value">{{ selectedCoupon.description }}</span>
+
+            <div v-if="selectedCoupon.min_guests || selectedCoupon.max_guests" class="detail-item">
+              <span class="detail-label"><Icon name="ri:group-line" />人數：</span>
+              <span class="detail-value">
+                {{ selectedCoupon.min_guests || 1 }} - {{ selectedCoupon.max_guests || '不限' }} 人
+              </span>
+            </div>
+
+            <div v-if="selectedCoupon.content" class="detail-item">
+              <span class="detail-label"><Icon name="ri:file-text-line" />描述：</span>
+              <span class="detail-value">{{ selectedCoupon.content }}</span>
+            </div>
+
+            <div v-if="selectedCoupon.phone || selectedCoupon.website" class="homestay-contact">
+              <div v-if="selectedCoupon.phone" class="contact-item">
+                <a :href="`tel:${selectedCoupon.phone}`" class="contact-link">
+                  <Icon name="ri:phone-line" />{{ selectedCoupon.phone }}
+                </a>
               </div>
-              
-              <div class="detail-item" v-if="selectedCoupon.price">
-                <span class="detail-label">💰 價格：</span>
-                <span class="detail-value">{{ selectedCoupon.price }}</span>
-              </div>
-              
-              <div class="detail-item" v-if="selectedCoupon.min_guests || selectedCoupon.max_guests">
-                <span class="detail-label">👥 人數：</span>
-                <span class="detail-value">
-                  {{ selectedCoupon.min_guests || 1 }} - {{ selectedCoupon.max_guests || '不限' }} 人
-                </span>
-              </div>
-              
-              <div class="detail-item" v-if="selectedCoupon.content">
-                <span class="detail-label">📝 描述：</span>
-                <span class="detail-value">{{ selectedCoupon.content }}</span>
-              </div>
-              
-              <div class="homestay-contact" v-if="selectedCoupon.phone || selectedCoupon.website">
-                <div class="contact-item" v-if="selectedCoupon.phone">
-                  <a :href="`tel:${selectedCoupon.phone}`" class="contact-link">
-                    📞 {{ selectedCoupon.phone }}
-                  </a>
-                </div>
-                <div class="contact-item" v-if="selectedCoupon.website">
-                  <a :href="selectedCoupon.website" target="_blank" class="contact-link">
-                    🌐 官方網站
-                  </a>
-                </div>
-              </div>
-              
-              <div class="homestay-actions">
-                <nuxt-link :to="selectedCoupon.detailUrl" class="view-detail-btn">
-                  查看詳細資訊
-                </nuxt-link>
+              <div v-if="selectedCoupon.website" class="contact-item">
+                <a :href="selectedCoupon.website" target="_blank" class="contact-link">
+                  <Icon name="ri:global-line" />官方網站
+                </a>
               </div>
             </div>
-          </div>
-          
-          <!-- 原有的優惠券資訊 -->
-          <CouponInfo v-else :couponId="selectedCoupon.id" :key="selectedCoupon.id"></CouponInfo>
-        </div>
-        <div class="map-info-wrapper" v-else-if="selectedCoupon && !selectedCoupon.id">
-          <div class="debug-info">
-            <h3>除錯資訊</h3>
-            <p>選中的優惠券沒有 ID</p>
-            <pre>{{ JSON.stringify(selectedCoupon, null, 2) }}</pre>
+
+            <div class="homestay-actions">
+              <nuxt-link :to="selectedCoupon.detailUrl" class="view-detail-btn">
+                查看詳細資訊
+              </nuxt-link>
+            </div>
           </div>
         </div>
-        <div class="map-info-wrapper" v-else-if="isInfoPanelOpen">
-          <div class="debug-info">
-            <p>面板已開啟但沒有選中的優惠券</p>
-          </div>
+
+        <!-- 原有的優惠券資訊 -->
+        <CouponInfo v-else :key="selectedCoupon.id" :coupon-id="selectedCoupon.id"></CouponInfo>
+      </div>
+      <div v-else-if="selectedCoupon && !selectedCoupon.id" class="map-info-wrapper">
+        <div class="debug-info">
+          <h3>除錯資訊</h3>
+          <p>選中的優惠券沒有 ID</p>
+          <pre>{{ JSON.stringify(selectedCoupon, null, 2) }}</pre>
+        </div>
+      </div>
+      <div v-else-if="isInfoPanelOpen" class="map-info-wrapper">
+        <div class="debug-info">
+          <p>面板已開啟但沒有選中的優惠券</p>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted, reactive, computed, watch, onUnmounted, nextTick } from 'vue';
-  import useCouponMapStore from "~~/store/couponMap";
-  import { Loader } from '@googlemaps/js-api-loader';
+  </div>
+</template>
 
-  // SEO 優化
-  useSeoMeta({
-    title: '優惠券地圖 - 探索周邊優惠',
-    ogTitle: '優惠券地圖 - 探索周邊優惠',
-    description: '在地圖上探索宜蘭各地的優惠券和特色商家位置',
-    ogDescription: '在地圖上探索宜蘭各地的優惠券和特色商家位置',
-    keywords: '優惠券,地圖,宜蘭,位置,商家,導航',
-    canonical: 'https://yilanpass.com/map'
-  })
+<script setup>
+import { ref, onMounted, reactive, computed, watch, onUnmounted, nextTick } from 'vue'
+import { Loader } from '@googlemaps/js-api-loader'
+import useCouponMapStore from '~~/store/couponMap'
 
-  // 額外設定 head link (雙重保險)
-  useHead({
-    link: [
-      {
-        rel: 'canonical',
-        href: 'https://yilanpass.com/map'
-      }
-    ]
-  })
+// SEO 優化
+useSeoMeta({
+  title: '優惠券地圖 - 探索周邊優惠',
+  ogTitle: '優惠券地圖 - 探索周邊優惠',
+  description: '在地圖上探索宜蘭各地的優惠券和特色商家位置',
+  ogDescription: '在地圖上探索宜蘭各地的優惠券和特色商家位置',
+  keywords: '優惠券,地圖,宜蘭,位置,商家,導航',
+  canonical: 'https://yilanpass.com/map'
+})
 
-  const store = useCouponMapStore();
-  const couponObject = computed(() => store.getCouponData);
-  const selectedCategory = ref(null);
-  
-  // 民宿資料狀態
-  const homestayData = ref([]);
-  const isLoadingHomestay = ref(false);
-  
-  // 活躍類別狀態 - 預設只顯示「食」類別
-  const activeCategoriesMap = reactive({
-    eat: true,
-    play: false,
-    housing: false,
-    traffic: false
-  });
-  
-  // 效能優化：使用快取的計算屬性
-  const couponDataCache = new Map();
-  const homestayDataCache = new Map();
-  
-  // 整合資料來源
-  const mapData = computed(() => {
-    // 確保在客戶端運行
-    if (process.server) return [];
-    
-    // 檢查是否只選擇了 housing 類別
-    const isHousingOnly = activeCategoriesMap.housing && 
-                         !activeCategoriesMap.eat && 
-                         !activeCategoriesMap.play && 
-                         !activeCategoriesMap.traffic;
-    
-    // 如果只選擇住宿類別，使用民宿資料
-    if (isHousingOnly) {
-      return homestayData.value || [];
+// 額外設定 head link (雙重保險)
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://yilanpass.com/map'
     }
-    
-    // 否則使用原有的優惠券資料，但過濾掉住宿類別（避免重複）
-    const couponItems = couponObject.value?.data?.items || [];
-    const filteredItems = couponItems.filter(item => item.category !== 'housing');
-    
-    // 如果選擇了住宿類別，合併民宿資料
-    if (activeCategoriesMap.housing) {
-      return [...filteredItems, ...(homestayData.value || [])];
-    }
-    
-    return filteredItems;
-  });
-  
-  const couponData = computed(() => {
-    if (!mapData.value || !Array.isArray(mapData.value)) return [];
-    
-    const cacheKey = `${Object.entries(activeCategoriesMap).filter(([k, v]) => v).map(([k]) => k).join('_')}_${mapData.value?.length || 0}`;
-    
-    if (couponDataCache.has(cacheKey)) {
-      return couponDataCache.get(cacheKey);
-    }
-    
-    const result = mapData.value.filter(item => {
-      const categoryKey = item.category || '';
-      return activeCategoriesMap[categoryKey];
-    });
-    
-    couponDataCache.set(cacheKey, result);
-    
-    // 限制快取大小
-    if (couponDataCache.size > 10) {
-      const firstKey = couponDataCache.keys().next().value;
-      couponDataCache.delete(firstKey);
-    }
-    
-    return result;
-  });
-  
-  // 載入狀態管理
-  const isMapLoading = ref(true);
-  const mapError = ref(null);
-  
-  // 初始化數據
-  if (!couponData.value?.length) {
-    store.fetchAndSetCoupon({pageSize: 150});
+  ]
+})
+
+const store = useCouponMapStore()
+const couponObject = computed(() => store.getCouponData)
+// 民宿資料狀態
+const homestayData = ref([])
+const isLoadingHomestay = ref(false)
+
+// 活躍類別狀態 - 預設只顯示「食」類別
+const activeCategoriesMap = reactive({
+  eat: true,
+  play: false,
+  housing: false,
+  traffic: false
+})
+
+// 效能優化：使用快取的計算屬性
+const couponDataCache = new Map()
+
+// 整合資料來源
+const mapData = computed(() => {
+  // 確保在客戶端運行
+  if (process.server) return []
+
+  // 檢查是否只選擇了 housing 類別
+  const isHousingOnly =
+    activeCategoriesMap.housing &&
+    !activeCategoriesMap.eat &&
+    !activeCategoriesMap.play &&
+    !activeCategoriesMap.traffic
+
+  // 如果只選擇住宿類別，使用民宿資料
+  if (isHousingOnly) {
+    return homestayData.value || []
   }
-  
-  // 民宿資料獲取函數
-  const fetchHomestayData = async () => {
-    if (isLoadingHomestay.value) return;
-    
-    try {
-      isLoadingHomestay.value = true;
-      console.log('📡 獲取民宿地圖資料...');
-      
-      const response = await fetch('/api/homestay-map-data');
-      const data = await response.json();
-      
-      if (data.success && data.data?.items) {
-        homestayData.value = data.data.items;
-        console.log('✅ 民宿資料載入成功，數量:', data.data.items.length);
-      } else {
-        console.error('❌ 民宿資料載入失敗:', data.error);
-        homestayData.value = [];
-      }
-    } catch (error) {
-      console.error('❌ 民宿資料獲取錯誤:', error);
-      homestayData.value = [];
-    } finally {
-      isLoadingHomestay.value = false;
-    }
-  };
 
-  // 地標資訊面板控制
-  const isInfoPanelOpen = ref(false);
-  const selectedCoupon = ref(null);
-  const infoPanelRef = ref(null);
-  
-  // 地图容器引用
-  const mapRef = ref(null);
-  let map = null;
-  let markers = [];
-  let markerPool = []; // 標記池，重複使用標記對象
-  let userLocationMarker = null;
-  
-  // 標籤顯示控制 - 預設開啟店名顯示
-  const showLabels = ref(true);
-  
-  // 搜尋功能優化
-  const searchQuery = ref('');
-  const searchResults = ref([]);
-  let searchTimeout = null;
-  const searchCache = new Map();
-  
-  // 防彈跳搜尋處理
-  const handleSearchInput = () => {
-    if (searchTimeout) clearTimeout(searchTimeout);
-    
-    // 如果搜尋框為空，立即清空結果
-    if (!searchQuery.value.trim()) {
-      searchResults.value = [];
-      return;
+  // 否則使用原有的優惠券資料，但過濾掉住宿類別（避免重複）
+  const couponItems = couponObject.value?.data?.items || []
+  const filteredItems = couponItems.filter((item) => item.category !== 'housing')
+
+  // 如果選擇了住宿類別，合併民宿資料
+  if (activeCategoriesMap.housing) {
+    return [...filteredItems, ...(homestayData.value || [])]
+  }
+
+  return filteredItems
+})
+
+const couponData = computed(() => {
+  if (!mapData.value || !Array.isArray(mapData.value)) return []
+
+  const cacheKey = `${Object.entries(activeCategoriesMap)
+    .filter(([k, v]) => v)
+    .map(([k]) => k)
+    .join('_')}_${mapData.value?.length || 0}`
+
+  if (couponDataCache.has(cacheKey)) {
+    return couponDataCache.get(cacheKey)
+  }
+
+  const result = mapData.value.filter((item) => {
+    const categoryKey = item.category || ''
+    return activeCategoriesMap[categoryKey]
+  })
+
+  couponDataCache.set(cacheKey, result)
+
+  // 限制快取大小
+  if (couponDataCache.size > 10) {
+    const firstKey = couponDataCache.keys().next().value
+    couponDataCache.delete(firstKey)
+  }
+
+  return result
+})
+
+// 載入狀態管理
+const isMapLoading = ref(true)
+const mapError = ref(null)
+
+// 初始化數據
+if (!couponData.value?.length) {
+  store.fetchAndSetCoupon({ pageSize: 150 })
+}
+
+// 民宿資料獲取函數
+const fetchHomestayData = async () => {
+  if (isLoadingHomestay.value) return
+
+  try {
+    isLoadingHomestay.value = true
+    console.log('獲取民宿地圖資料...')
+
+    const response = await fetch('/api/homestay-map-data')
+    const data = await response.json()
+
+    if (data.success && data.data?.items) {
+      homestayData.value = data.data.items
+      console.log('民宿資料載入成功，數量:', data.data.items.length)
+    } else {
+      console.error('民宿資料載入失敗:', data.error)
+      homestayData.value = []
     }
-    
-    searchTimeout = setTimeout(() => {
-      performSearch();
-    }, 300); // 300ms 防彈跳
-  };
-  
-  // 優化的搜尋函數
-  const performSearch = () => {
-    const query = searchQuery.value.trim();
-    
-    if (!query) {
-      searchResults.value = [];
-      return;
+  } catch (error) {
+    console.error('民宿資料獲取錯誤:', error)
+    homestayData.value = []
+  } finally {
+    isLoadingHomestay.value = false
+  }
+}
+
+// 地標資訊面板控制
+const isInfoPanelOpen = ref(false)
+const selectedCoupon = ref(null)
+const infoPanelRef = ref(null)
+
+// 地图容器引用
+const mapRef = ref(null)
+let map = null
+let markers = []
+const markerPool = [] // 標記池，重複使用標記對象
+let userLocationMarker = null
+
+// 預設顯示地點名稱，使用者仍可透過開關隱藏
+const showLabels = ref(true)
+
+// 搜尋功能優化
+const searchQuery = ref('')
+const searchResults = ref([])
+let searchTimeout = null
+const searchCache = new Map()
+
+// 防彈跳搜尋處理
+const handleSearchInput = () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+
+  // 如果搜尋框為空，立即清空結果
+  if (!searchQuery.value.trim()) {
+    searchResults.value = []
+    return
+  }
+
+  searchTimeout = setTimeout(() => {
+    performSearch()
+  }, 300) // 300ms 防彈跳
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  searchResults.value = []
+}
+
+// 優化的搜尋函數
+const performSearch = () => {
+  const query = searchQuery.value.trim()
+
+  if (!query) {
+    searchResults.value = []
+    return
+  }
+
+  // 檢查快取
+  if (searchCache.has(query)) {
+    searchResults.value = searchCache.get(query)
+    return
+  }
+
+  if (!mapData.value || !Array.isArray(mapData.value)) {
+    return
+  }
+
+  // 過濾符合搜尋條件的地點
+  const queryLower = query.toLowerCase()
+  const results = mapData.value
+    .filter((item) => {
+      // 優先匹配標題，然後是內容和描述
+      const titleMatch = item.title && item.title.toLowerCase().includes(queryLower)
+      if (titleMatch) return true
+
+      const contentMatch = item.content && item.content.toLowerCase().includes(queryLower)
+      if (contentMatch) return true
+
+      const descriptionMatch =
+        item.description && item.description.toLowerCase().includes(queryLower)
+      return descriptionMatch
+    })
+    .slice(0, 5) // 限制最多顯示5個結果
+
+  // 快取搜尋結果
+  searchCache.set(query, results)
+
+  // 限制快取大小
+  if (searchCache.size > 20) {
+    const firstKey = searchCache.keys().next().value
+    searchCache.delete(firstKey)
+  }
+
+  searchResults.value = results
+}
+
+// 導航到選擇的位置
+const navigateToLocation = (location) => {
+  console.log('點擊搜尋結果:', location) // 除錯用
+
+  if (!map || !location.position) {
+    console.error('地圖或位置無效:', { map: !!map, position: location.position })
+    return
+  }
+
+  // 檢查位置對象是否有效
+  if (typeof location.position.lat !== 'number' || typeof location.position.lng !== 'number') {
+    console.error('無效的位置對象:', location)
+    return
+  }
+
+  // 移動地圖到選擇的位置
+  const position = new google.maps.LatLng(
+    parseFloat(location.position.lat),
+    parseFloat(location.position.lng)
+  )
+
+  map.setCenter(position)
+  map.setZoom(16)
+
+  // 清空搜尋結果
+  searchQuery.value = ''
+  searchResults.value = []
+
+  // 高亮顯示選中的標記
+  highlightMarker(location)
+
+  // 顯示地標資訊 - 延遲一點確保地圖移動完成
+  setTimeout(() => {
+    showCouponInfo(location)
+  }, 300)
+}
+
+// 顯示地標資訊
+const showCouponInfo = (coupon) => {
+  console.log('顯示資訊面板:', coupon) // 除錯用
+  selectedCoupon.value = coupon
+  isInfoPanelOpen.value = true
+
+  // 確保面板能夠正確顯示，延遲一點時間讓動畫觸發
+  nextTick(() => {
+    const panel = document.querySelector('.map-info-panel')
+    if (panel) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
-    
-    // 檢查快取
-    if (searchCache.has(query)) {
-      searchResults.value = searchCache.get(query);
-      return;
-    }
-    
-    if (!mapData.value || !Array.isArray(mapData.value)) {
-      return;
-    }
-    
-    // 過濾符合搜尋條件的地點
-    const queryLower = query.toLowerCase();
-    const results = mapData.value
-      .filter(item => {
-        // 優先匹配標題，然後是內容和描述
-        const titleMatch = item.title && item.title.toLowerCase().includes(queryLower);
-        if (titleMatch) return true;
-        
-        const contentMatch = item.content && item.content.toLowerCase().includes(queryLower);
-        if (contentMatch) return true;
-        
-        const descriptionMatch = item.description && item.description.toLowerCase().includes(queryLower);
-        return descriptionMatch;
-      })
-      .slice(0, 5); // 限制最多顯示5個結果
-    
-    // 快取搜尋結果
-    searchCache.set(query, results);
-    
-    // 限制快取大小
-    if (searchCache.size > 20) {
-      const firstKey = searchCache.keys().next().value;
-      searchCache.delete(firstKey);
-    }
-    
-    searchResults.value = results;
-  };
-  
-  // 導航到選擇的位置
-  const navigateToLocation = (location) => {
-    console.log('點擊搜尋結果:', location); // 除錯用
-    
-    if (!map || !location.position) {
-      console.error('地圖或位置無效:', { map: !!map, position: location.position });
-      return;
-    }
-    
-    // 檢查位置對象是否有效
-    if (typeof location.position.lat !== 'number' || typeof location.position.lng !== 'number') {
-      console.error('無效的位置對象:', location);
-      return;
-    }
-    
-    // 移動地圖到選擇的位置
-    const position = new google.maps.LatLng(
-      parseFloat(location.position.lat),
-      parseFloat(location.position.lng)
-    );
-    
-    map.setCenter(position);
-    map.setZoom(16);
-    
-    // 清空搜尋結果
-    searchQuery.value = '';
-    searchResults.value = [];
-    
-    // 高亮顯示選中的標記
-    highlightMarker(location);
-    
-    // 顯示地標資訊 - 延遲一點確保地圖移動完成
-    setTimeout(() => {
-      showCouponInfo(location);
-    }, 300);
-  };
-  
-  // 顯示地標資訊
-  const showCouponInfo = (coupon) => {
-    console.log('顯示資訊面板:', coupon); // 除錯用
-    selectedCoupon.value = coupon;
-    isInfoPanelOpen.value = true;
-    
-    // 確保面板能夠正確顯示，延遲一點時間讓動畫觸發
-    nextTick(() => {
-      const panel = document.querySelector('.map-info-panel');
-      if (panel) {
-        panel.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      }
-    });
-  };
-  
-  // 優化的高亮標記函數
-  const highlightMarker = (location) => {
-    const targetLat = parseFloat(location.position.lat);
-    const targetLng = parseFloat(location.position.lng);
-    
-    // 使用 requestAnimationFrame 優化動畫效能
-    requestAnimationFrame(() => {
-      markers.forEach(marker => {
-        if (marker instanceof google.maps.Marker && 
-            marker.getPosition && 
-            Math.abs(marker.getPosition().lat() - targetLat) < 0.0001 && 
-            Math.abs(marker.getPosition().lng() - targetLng) < 0.0001) {
-          
-          // 臨時放大標記
-          const icon = marker.getIcon();
-          if (icon && icon.scale) {
-            const originalScale = icon.scale;
-            icon.scale = originalScale * 1.5;
-            marker.setIcon(icon);
-            
-            // 2秒後恢復原始大小
-            setTimeout(() => {
-              if (marker.getMap()) { // 確保標記還在地圖上
-                icon.scale = originalScale;
-                marker.setIcon(icon);
-              }
-            }, 2000);
-          }
-          
-          // 如果標籤未顯示，臨時顯示此標記的標題
-          if (!showLabels.value) {
-            const titleOverlay = markers.find(m => 
-              m instanceof TitleOverlay && 
-              Math.abs(m.position.lat() - targetLat) < 0.0001 && 
-              Math.abs(m.position.lng() - targetLng) < 0.0001
-            );
-            
-            if (titleOverlay) {
-              titleOverlay.show();
-              setTimeout(() => {
-                if (titleOverlay.div) { // 確保覆蓋層還存在
-                  titleOverlay.hide();
-                }
-              }, 3000);
+  })
+}
+
+// 優化的高亮標記函數
+const highlightMarker = (location) => {
+  const targetLat = parseFloat(location.position.lat)
+  const targetLng = parseFloat(location.position.lng)
+
+  // 使用 requestAnimationFrame 優化動畫效能
+  requestAnimationFrame(() => {
+    markers.forEach((marker) => {
+      if (
+        marker instanceof google.maps.Marker &&
+        marker.getPosition &&
+        Math.abs(marker.getPosition().lat() - targetLat) < 0.0001 &&
+        Math.abs(marker.getPosition().lng() - targetLng) < 0.0001
+      ) {
+        // 臨時放大標記
+        const icon = marker.getIcon()
+        if (icon && icon.scale) {
+          const originalScale = icon.scale
+          icon.scale = originalScale * 1.5
+          marker.setIcon(icon)
+
+          // 2秒後恢復原始大小
+          setTimeout(() => {
+            if (marker.getMap()) {
+              // 確保標記還在地圖上
+              icon.scale = originalScale
+              marker.setIcon(icon)
             }
+          }, 2000)
+        }
+
+        // 如果標籤未顯示，臨時顯示此標記的標題
+        if (!showLabels.value) {
+          const titleOverlay = markers.find(
+            (m) =>
+              m instanceof TitleOverlay &&
+              Math.abs(m.position.lat() - targetLat) < 0.0001 &&
+              Math.abs(m.position.lng() - targetLng) < 0.0001
+          )
+
+          if (titleOverlay) {
+            titleOverlay.show()
+            setTimeout(() => {
+              if (titleOverlay.div) {
+                // 確保覆蓋層還存在
+                titleOverlay.hide()
+              }
+            }, 3000)
           }
         }
-      });
-    });
-  };
-  
-  // 切換標籤顯示/隱藏
-  const toggleLabels = () => {
-    showLabels.value = !showLabels.value;
-    updateMarkerLabels();
-  };
-  
-  // 批量更新標記標籤
-  const updateMarkerLabels = () => {
-    if (!window.google || !window.google.maps || !map) return;
-    
-    // 使用 requestAnimationFrame 優化批量更新
-    requestAnimationFrame(() => {
-      markers.forEach(marker => {
-        if (marker instanceof google.maps.Marker && marker.getLabel) {
-          const label = marker.getLabel();
-          if (label) {
-            marker.setLabel(label);
-          }
-        }
-        
-        if (marker instanceof TitleOverlay) {
-          marker.toggle(showLabels.value);
-        }
-      });
-    });
-  };
-  
-  // 地標類別
-  const categories = [
-    { key: 'eat', name: '食', icon: '🍽️', color: '#FF5722' },
-    { key: 'play', name: '樂', icon: '🎪', color: '#2196F3' },
-    { key: 'housing', name: '住', icon: '🏠', color: '#4CAF50' },
-    { key: 'traffic', name: '行', icon: '🚗', color: '#FFC107' }
-  ];
-  
-  // 切換類別顯示/隱藏
-  const toggleCategory = async (category) => {
-    // 如果是切換到住宿類別且還沒有民宿資料，則載入資料
-    if (category === 'housing' && !activeCategoriesMap[category] && homestayData.value.length === 0) {
-      await fetchHomestayData();
-    }
-    
-    activeCategoriesMap[category] = !activeCategoriesMap[category];
-    // 使用 nextTick 確保響應式更新完成後再更新標記
-    nextTick(() => {
-      updateMarkers();
-    });
-  };
-  
-  // 標記池管理：重複使用標記對象
-  const getMarkerFromPool = () => {
-    return markerPool.pop() || null;
-  };
-  
-  const returnMarkerToPool = (marker) => {
-    if (marker instanceof google.maps.Marker) {
-      marker.setMap(null);
-      marker.setPosition(null);
-      marker.setTitle('');
-      markerPool.push(marker);
-    }
-  };
-  
-  // 優化的標記更新函數
-  const updateMarkers = () => {
-    if (!window.google || !window.google.maps || !map) {
-      return;
-    }
-    
-    // 將現有標記回收到池中
-    markers.forEach(marker => {
-      if (marker instanceof google.maps.Marker) {
-        returnMarkerToPool(marker);
-      } else if (marker instanceof TitleOverlay) {
-        marker.setMap(null);
       }
-    });
-    markers = [];
-    
-    // 批量處理標記創建
-    const newMarkers = [];
-    const newTitleOverlays = [];
-    
-    if (couponData.value && Array.isArray(couponData.value)) {
-      couponData.value.forEach(landmark => {
-        // 檢查位置對象是否有效
-        if (!landmark.position || typeof landmark.position.lat !== 'number' || typeof landmark.position.lng !== 'number') {
-          return;
+    })
+  })
+}
+
+// 切換標籤顯示/隱藏
+const toggleLabels = () => {
+  showLabels.value = !showLabels.value
+  updateMarkerLabels()
+}
+
+// 批量更新標記標籤
+const updateMarkerLabels = () => {
+  if (!window.google || !window.google.maps || !map) return
+
+  // 使用 requestAnimationFrame 優化批量更新
+  requestAnimationFrame(() => {
+    markers.forEach((marker) => {
+      if (marker instanceof google.maps.Marker && marker.getLabel) {
+        const label = marker.getLabel()
+        if (label) {
+          marker.setLabel(label)
         }
-        
-        const categoryKey = landmark.category || '';
-        const categoryObj = categories.find(cat => cat.key === categoryKey);
-        
-        if (categoryObj && activeCategoriesMap[categoryObj.key]) {
-          // 嘗試從池中獲取標記
-          let marker = getMarkerFromPool();
-          
-          if (!marker) {
-            marker = new google.maps.Marker({
-              map: map,
-              zIndex: 1
-            });
-          }
-          
-          // 配置標記
-          marker.setPosition(new google.maps.LatLng(
+      }
+
+      if (marker instanceof TitleOverlay) {
+        marker.toggle(showLabels.value)
+      }
+    })
+  })
+}
+
+// 地標類別
+const categories = [
+  { key: 'eat', name: '食', label: '美食', icon: 'ri:restaurant-line', color: '#E76F51' },
+  { key: 'play', name: '樂', label: '景點', icon: 'ri:landscape-line', color: '#2A9D8F' },
+  { key: 'housing', name: '住', label: '住宿', icon: 'ri:hotel-bed-line', color: '#52796F' },
+  { key: 'traffic', name: '行', label: '交通', icon: 'ri:car-line', color: '#E9A23B' }
+]
+
+const getCategoryMeta = (categoryKey) => {
+  return (
+    categories.find((category) => category.key === categoryKey) || {
+      label: '地點',
+      icon: 'ri:map-pin-line',
+      color: '#667085'
+    }
+  )
+}
+
+// 切換類別顯示/隱藏
+const toggleCategory = async (category) => {
+  // 如果是切換到住宿類別且還沒有民宿資料，則載入資料
+  if (category === 'housing' && !activeCategoriesMap[category] && homestayData.value.length === 0) {
+    await fetchHomestayData()
+  }
+
+  activeCategoriesMap[category] = !activeCategoriesMap[category]
+  // 使用 nextTick 確保響應式更新完成後再更新標記
+  nextTick(() => {
+    updateMarkers()
+  })
+}
+
+// 標記池管理：重複使用標記對象
+const getMarkerFromPool = () => {
+  return markerPool.pop() || null
+}
+
+const returnMarkerToPool = (marker) => {
+  if (marker instanceof google.maps.Marker) {
+    marker.setMap(null)
+    marker.setPosition(null)
+    marker.setTitle('')
+    markerPool.push(marker)
+  }
+}
+
+// 優化的標記更新函數
+const updateMarkers = () => {
+  if (!window.google || !window.google.maps || !map) {
+    return
+  }
+
+  // 將現有標記回收到池中
+  markers.forEach((marker) => {
+    if (marker instanceof google.maps.Marker) {
+      returnMarkerToPool(marker)
+    } else if (marker instanceof TitleOverlay) {
+      marker.setMap(null)
+    }
+  })
+  markers = []
+
+  // 批量處理標記創建
+  const newMarkers = []
+  const newTitleOverlays = []
+
+  if (couponData.value && Array.isArray(couponData.value)) {
+    couponData.value.forEach((landmark) => {
+      // 檢查位置對象是否有效
+      if (
+        !landmark.position ||
+        typeof landmark.position.lat !== 'number' ||
+        typeof landmark.position.lng !== 'number'
+      ) {
+        return
+      }
+
+      const categoryKey = landmark.category || ''
+      const categoryObj = categories.find((cat) => cat.key === categoryKey)
+
+      if (categoryObj && activeCategoriesMap[categoryObj.key]) {
+        // 嘗試從池中獲取標記
+        let marker = getMarkerFromPool()
+
+        if (!marker) {
+          marker = new google.maps.Marker({
+            map,
+            zIndex: 1
+          })
+        }
+
+        // 配置標記
+        marker.setPosition(
+          new google.maps.LatLng(
             parseFloat(landmark.position.lat),
             parseFloat(landmark.position.lng)
-          ));
-          marker.setMap(map);
-          marker.setTitle(landmark.title);
-          marker.setIcon({
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: categoryObj.color,
-            fillOpacity: 0.7,
-            strokeWeight: 1,
-            strokeColor: '#FFFFFF',
-            scale: 14
-          });
-          marker.setLabel({
-            text: categoryObj.icon,
-            fontSize: '16px',
-            fontWeight: 'bold'
-          });
-          
-          // 移除舊的事件監聽器並添加新的
-          google.maps.event.clearInstanceListeners(marker);
-          marker.addListener('click', () => {
-            window.isMarkerClick = true;
-            showCouponInfo(landmark);
-            highlightMarker(landmark);
-          });
-          
-          newMarkers.push(marker);
-          
-          // 創建標題覆蓋層
-          if (landmark.title) {
-            const titleOverlay = new TitleOverlay(
-              new google.maps.LatLng(
-                parseFloat(landmark.position.lat),
-                parseFloat(landmark.position.lng)
-              ),
-              landmark.title,
-              map
-            );
-            
-            titleOverlay.toggle(showLabels.value);
-            newTitleOverlays.push(titleOverlay);
-          }
+          )
+        )
+        marker.setMap(map)
+        marker.setTitle(landmark.title)
+        marker.setIcon({
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: categoryObj.color,
+          fillOpacity: 0.92,
+          strokeWeight: 3,
+          strokeColor: '#FFFFFF',
+          scale: 9
+        })
+        marker.setLabel(null)
+
+        // 移除舊的事件監聽器並添加新的
+        google.maps.event.clearInstanceListeners(marker)
+        marker.addListener('click', () => {
+          window.isMarkerClick = true
+          showCouponInfo(landmark)
+          highlightMarker(landmark)
+        })
+
+        newMarkers.push(marker)
+
+        // 創建標題覆蓋層
+        if (landmark.title) {
+          const titleOverlay = new TitleOverlay(
+            new google.maps.LatLng(
+              parseFloat(landmark.position.lat),
+              parseFloat(landmark.position.lng)
+            ),
+            landmark.title,
+            map
+          )
+
+          titleOverlay.toggle(showLabels.value)
+          newTitleOverlays.push(titleOverlay)
         }
-      });
-    }
-    
-    // 批量添加到標記陣列
-    markers.push(...newMarkers, ...newTitleOverlays);
-  };
-  
-  // 自定義標題覆蓋層類
-  let TitleOverlay;
-  
-  // 初始化 TitleOverlay 類
-  const initTitleOverlay = () => {
-    if (!window.google || !window.google.maps) {
-      return null;
-    }
-    
-    class TitleOverlay extends google.maps.OverlayView {
-      constructor(position, title, map) {
-        super();
-        this.position = position;
-        this.title = title;
-        this.map = map;
-        this.div = null;
-        this.setMap(map);
       }
-      
-      onAdd() {
-        const div = document.createElement('div');
-        div.style.cssText = `
+    })
+  }
+
+  // 批量添加到標記陣列
+  markers.push(...newMarkers, ...newTitleOverlays)
+}
+
+// 自定義標題覆蓋層類
+let TitleOverlay
+
+// 初始化 TitleOverlay 類
+const initTitleOverlay = () => {
+  if (!window.google || !window.google.maps) {
+    return null
+  }
+
+  class TitleOverlay extends google.maps.OverlayView {
+    constructor(position, title, map) {
+      super()
+      this.position = position
+      this.title = title
+      this.map = map
+      this.div = null
+      this.setMap(map)
+    }
+
+    onAdd() {
+      const div = document.createElement('div')
+      div.style.cssText = `
           position: absolute;
           background-color: rgba(0, 0, 0, 0.6);
           color: white;
@@ -679,819 +783,1356 @@
           transform: translate(-50%, -100%);
           margin-top: -10px;
           display: ${showLabels.value ? 'block' : 'none'};
-        `;
-        div.textContent = this.title;
-        
-        this.div = div;
-        const panes = this.getPanes();
-        panes.overlayMouseTarget.appendChild(div);
-      }
-      
-      draw() {
-        if (!this.div) return;
-        
-        const overlayProjection = this.getProjection();
-        if (!overlayProjection) return;
-        
-        const position = overlayProjection.fromLatLngToDivPixel(this.position);
-        if (!position) return;
-        
-        this.div.style.left = position.x + 'px';
-        this.div.style.top = position.y + 'px';
-      }
-      
-      onRemove() {
-        if (this.div && this.div.parentNode) {
-          this.div.parentNode.removeChild(this.div);
-          this.div = null;
-        }
-      }
-      
-      hide() {
-        if (this.div) {
-          this.div.style.display = 'none';
-        }
-      }
-      
-      show() {
-        if (this.div) {
-          this.div.style.display = 'block';
-        }
-      }
-      
-      toggle(visible) {
-        if (this.div) {
-          this.div.style.display = visible ? 'block' : 'none';
-        }
+        `
+      div.textContent = this.title
+
+      this.div = div
+      const panes = this.getPanes()
+      panes.overlayMouseTarget.appendChild(div)
+    }
+
+    draw() {
+      if (!this.div) return
+
+      const overlayProjection = this.getProjection()
+      if (!overlayProjection) return
+
+      const position = overlayProjection.fromLatLngToDivPixel(this.position)
+      if (!position) return
+
+      this.div.style.left = position.x + 'px'
+      this.div.style.top = position.y + 'px'
+    }
+
+    onRemove() {
+      if (this.div && this.div.parentNode) {
+        this.div.parentNode.removeChild(this.div)
+        this.div = null
       }
     }
 
-    return TitleOverlay;
-  };
-  
-  // 優化的當前位置獲取
-  const getCurrentLocation = () => {
-    if (!window.google || !window.google.maps) {
-      alert('地圖尚未完全載入，請稍後再試。');
-      return;
+    hide() {
+      if (this.div) {
+        this.div.style.display = 'none'
+      }
     }
-    
-    if (!navigator.geolocation) {
-      alert('您的瀏覽器不支援地理位置功能。');
-      return;
+
+    show() {
+      if (this.div) {
+        this.div.style.display = 'block'
+      }
     }
-    
-    // 顯示載入狀態
-    const locationBtn = document.querySelector('.location-btn');
-    if (locationBtn) {
-      locationBtn.style.opacity = '0.6';
-      locationBtn.style.pointerEvents = 'none';
+
+    toggle(visible) {
+      if (this.div) {
+        this.div.style.display = visible ? 'block' : 'none'
+      }
     }
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        
-        map.setCenter(userLocation);
-        map.setZoom(16);
-        
-        // 清理舊的用戶位置標記
-        if (userLocationMarker) {
-          userLocationMarker.setMap(null);
-        }
-        
-        // 添加新的用戶位置標記
-        userLocationMarker = new google.maps.Marker({
-          position: new google.maps.LatLng(userLocation.lat, userLocation.lng),
-          map: map,
-          title: '我的位置',
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: '#4285F4',
-            fillOpacity: 1,
-            strokeColor: '#FFFFFF',
-            strokeWeight: 2
-          },
-          label: {
-            text: '📍',
-            fontSize: '16px',
-            fontWeight: 'bold'
-          },
-          zIndex: 1000
-        });
-        
-        // 恢復按鈕狀態
-        if (locationBtn) {
-          locationBtn.style.opacity = '1';
-          locationBtn.style.pointerEvents = 'auto';
-        }
-      },
-      (error) => {
-        console.error('獲取位置失敗:', error);
-        alert('無法獲取您的位置，請確保已授予位置權限。');
-        
-        // 恢復按鈕狀態
-        if (locationBtn) {
-          locationBtn.style.opacity = '1';
-          locationBtn.style.pointerEvents = 'auto';
-        }
+  }
+
+  return TitleOverlay
+}
+
+// 優化的當前位置獲取
+const getCurrentLocation = () => {
+  if (!window.google || !window.google.maps) {
+    alert('地圖尚未完全載入，請稍後再試。')
+    return
+  }
+
+  if (!navigator.geolocation) {
+    alert('您的瀏覽器不支援地理位置功能。')
+    return
+  }
+
+  // 顯示載入狀態
+  const locationBtn = document.querySelector('.location-btn')
+  if (locationBtn) {
+    locationBtn.style.opacity = '0.6'
+    locationBtn.style.pointerEvents = 'none'
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const userLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      }
+
+      map.setCenter(userLocation)
+      map.setZoom(16)
+
+      // 清理舊的用戶位置標記
+      if (userLocationMarker) {
+        userLocationMarker.setMap(null)
+      }
+
+      // 添加新的用戶位置標記
+      userLocationMarker = new google.maps.Marker({
+        position: new google.maps.LatLng(userLocation.lat, userLocation.lng),
+        map,
+        title: '我的位置',
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: '#4285F4',
+          fillOpacity: 1,
+          strokeColor: '#FFFFFF',
+          strokeWeight: 2
+        },
+        zIndex: 1000
+      })
+
+      // 恢復按鈕狀態
+      if (locationBtn) {
+        locationBtn.style.opacity = '1'
+        locationBtn.style.pointerEvents = 'auto'
+      }
+    },
+    (error) => {
+      console.error('獲取位置失敗:', error)
+      alert('無法獲取您的位置，請確保已授予位置權限。')
+
+      // 恢復按鈕狀態
+      if (locationBtn) {
+        locationBtn.style.opacity = '1'
+        locationBtn.style.pointerEvents = 'auto'
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 300000 // 5分鐘快取
+    }
+  )
+}
+
+// 重試載入地圖
+const retryLoadMap = async () => {
+  mapError.value = null
+  isMapLoading.value = true
+  try {
+    await loadGoogleMapsApi()
+    await initMap()
+  } catch (error) {
+    console.error('重試載入失敗:', error)
+    mapError.value = error.message || '地圖載入失敗'
+  } finally {
+    isMapLoading.value = false
+  }
+}
+
+// 異步載入 Google Maps API
+const loadGoogleMapsApi = async () => {
+  try {
+    const config = useRuntimeConfig()
+    const googleMapsApiKey = config.public.GOOGLE_MAPS_API_KEY
+
+    if (!googleMapsApiKey) {
+      throw new Error('Google Maps API Key 未設定')
+    }
+
+    const loader = new Loader({
+      apiKey: googleMapsApiKey,
+      version: 'weekly',
+      libraries: ['places'] // 如果需要的話
+    })
+
+    await loader.load()
+  } catch (error) {
+    console.error('Google Maps API 載入失敗:', error)
+    throw error
+  }
+}
+
+// 優化的地圖初始化
+const initMap = () => {
+  if (!window.google || !window.google.maps) {
+    throw new Error('Google Maps API 尚未載入')
+  }
+
+  const center = { lat: 24.677407, lng: 121.75371 }
+
+  map = new google.maps.Map(mapRef.value, {
+    center,
+    zoom: 12,
+    mapTypeControl: true,
+    streetViewControl: true,
+    fullscreenControl: true,
+    gestureHandling: 'greedy',
+    styles: [
+      {
+        featureType: 'administrative.land_parcel',
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }]
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5分鐘快取
+        featureType: 'poi',
+        elementType: 'labels.text',
+        stylers: [{ visibility: 'off' }]
+      },
+      {
+        featureType: 'poi.business',
+        stylers: [{ visibility: 'off' }]
+      },
+      {
+        featureType: 'road.local',
+        stylers: [{ visibility: 'off' }]
       }
-    );
-  };
-  
-  // 重試載入地圖
-  const retryLoadMap = async () => {
-    mapError.value = null;
-    isMapLoading.value = true;
-    try {
-      await loadGoogleMapsApi();
-      await initMap();
-    } catch (error) {
-      console.error('重試載入失敗:', error);
-      mapError.value = error.message || '地圖載入失敗';
-    } finally {
-      isMapLoading.value = false;
-    }
-  };
-  
-  // 異步載入 Google Maps API
-  const loadGoogleMapsApi = async () => {
-    try {
-      const config = useRuntimeConfig();
-      const googleMapsApiKey = config.public.GOOGLE_MAPS_API_KEY;
+    ]
+  })
 
-      if (!googleMapsApiKey) {
-        throw new Error('Google Maps API Key 未設定');
-      }
-      
-      const loader = new Loader({
-        apiKey: googleMapsApiKey,
-        version: 'weekly',
-        libraries: ['places'] // 如果需要的話
-      });
-      
-      await loader.load();
-    } catch (error) {
-      console.error('Google Maps API 載入失敗:', error);
-      throw error;
-    }
-  };
+  // 初始化 TitleOverlay 類
+  TitleOverlay = initTitleOverlay()
 
-  // 優化的地圖初始化
-  const initMap = async () => {
-    if (!window.google || !window.google.maps) {
-      throw new Error('Google Maps API 尚未載入');
-    }
-    
-    const center = { lat: 24.677407, lng: 121.75371 };
-    
-    map = new google.maps.Map(mapRef.value, {
-      center: center,
-      zoom: 12,
-      mapTypeControl: true,
-      streetViewControl: true,
-      fullscreenControl: true,
-      gestureHandling: "greedy",
-      styles: [
-        {
-          featureType: 'administrative.land_parcel',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }]
-        },
-        {
-          featureType: 'poi',
-          elementType: 'labels.text',
-          stylers: [{ visibility: 'off' }]
-        },
-        {
-          featureType: 'poi.business',
-          stylers: [{ visibility: 'off' }]
-        },
-        {
-          featureType: 'road.local',
-          stylers: [{ visibility: 'off' }]
-        }
-      ]
-    });
-    
-    // 初始化 TitleOverlay 類
-    TitleOverlay = initTitleOverlay();
-    
-    if (!TitleOverlay) {
-      throw new Error('TitleOverlay 初始化失敗');
-    }
-    
-    // 初始化標記
-    updateMarkers();
-    
-    // 節流的縮放事件監聽器
-    let zoomTimeout = null;
-    map.addListener('zoom_changed', () => {
-      if (zoomTimeout) clearTimeout(zoomTimeout);
-      zoomTimeout = setTimeout(() => {
-        const zoom = map.getZoom();
-        
-        requestAnimationFrame(() => {
-          markers.forEach(marker => {
-            if (marker instanceof google.maps.Marker && marker.getIcon) {
-              const icon = marker.getIcon();
-              if (icon && typeof icon.scale === 'number') {
-                const newScale = 10 + (zoom / 3);
-                icon.scale = newScale;
-                marker.setIcon(icon);
-              }
+  if (!TitleOverlay) {
+    throw new Error('TitleOverlay 初始化失敗')
+  }
+
+  // 初始化標記
+  updateMarkers()
+
+  // 節流的縮放事件監聽器
+  let zoomTimeout = null
+  map.addListener('zoom_changed', () => {
+    if (zoomTimeout) clearTimeout(zoomTimeout)
+    zoomTimeout = setTimeout(() => {
+      const zoom = map.getZoom()
+
+      requestAnimationFrame(() => {
+        markers.forEach((marker) => {
+          if (marker instanceof google.maps.Marker && marker.getIcon) {
+            const icon = marker.getIcon()
+            if (icon && typeof icon.scale === 'number') {
+              const newScale = 6 + zoom / 4
+              icon.scale = newScale
+              marker.setIcon(icon)
             }
-          });
-        });
-      }, 100);
-    });
-    
-    // 優化的地圖移動事件
-    let idleTimeout = null;
-    map.addListener('idle', () => {
-      if (idleTimeout) clearTimeout(idleTimeout);
-      idleTimeout = setTimeout(() => {
-        markers.forEach(marker => {
-          if (marker instanceof TitleOverlay) {
-            marker.draw();
           }
-        });
-      }, 50);
-    });
-  };
-  
-  // 優化的 couponData 監聽器
-  let updateTimeout = null;
-  watch(() => couponData.value, (newValue) => {
+        })
+      })
+    }, 100)
+  })
+
+  // 優化的地圖移動事件
+  let idleTimeout = null
+  map.addListener('idle', () => {
+    if (idleTimeout) clearTimeout(idleTimeout)
+    idleTimeout = setTimeout(() => {
+      markers.forEach((marker) => {
+        if (marker instanceof TitleOverlay) {
+          marker.draw()
+        }
+      })
+    }, 50)
+  })
+}
+
+// 優化的 couponData 監聽器
+let updateTimeout = null
+watch(
+  () => couponData.value,
+  (newValue) => {
     if (newValue && Array.isArray(newValue) && newValue.length > 0 && map) {
-      if (updateTimeout) clearTimeout(updateTimeout);
+      if (updateTimeout) clearTimeout(updateTimeout)
       updateTimeout = setTimeout(() => {
-        updateMarkers();
-      }, 100);
+        updateMarkers()
+      }, 100)
     }
-  }, { deep: false }); // 使用淺監聽提升效能
-  
-  // 優化的點擊外部處理
-  const handleClickOutside = (event) => {
-    if (!isInfoPanelOpen.value || !infoPanelRef.value) return;
-    
-    if (infoPanelRef.value.contains(event.target)) return;
-    
-    const controlBar = document.querySelector('.control-bar');
-    const locationBtn = document.querySelector('.location-btn');
-    
-    if ((controlBar && controlBar.contains(event.target)) || 
-        (locationBtn && locationBtn.contains(event.target))) {
-      return;
+  },
+  { deep: false }
+) // 使用淺監聽提升效能
+
+// 優化的點擊外部處理
+const handleClickOutside = (event) => {
+  if (!isInfoPanelOpen.value || !infoPanelRef.value) return
+
+  if (infoPanelRef.value.contains(event.target)) return
+
+  const controlBar = document.querySelector('.control-bar')
+  const locationBtn = document.querySelector('.location-btn')
+
+  if (
+    (controlBar && controlBar.contains(event.target)) ||
+    (locationBtn && locationBtn.contains(event.target))
+  ) {
+    return
+  }
+
+  if (window.isMarkerClick) {
+    window.isMarkerClick = false
+    return
+  }
+
+  isInfoPanelOpen.value = false
+}
+
+// 清理函數
+const cleanup = () => {
+  // 清理定時器
+  if (searchTimeout) clearTimeout(searchTimeout)
+  if (updateTimeout) clearTimeout(updateTimeout)
+
+  // 清理事件監聽器的定時器
+  const allTimeouts = [searchTimeout, updateTimeout]
+  allTimeouts.forEach((timeout) => {
+    if (timeout) clearTimeout(timeout)
+  })
+
+  // 清理標記
+  markers.forEach((marker) => {
+    if (marker instanceof google.maps.Marker) {
+      google.maps.event.clearInstanceListeners(marker)
+      marker.setMap(null)
+    } else if (marker instanceof TitleOverlay) {
+      marker.setMap(null)
     }
-    
-    if (window.isMarkerClick) {
-      window.isMarkerClick = false;
-      return;
-    }
-    
-    isInfoPanelOpen.value = false;
-  };
-  
-  // 清理函數
-  const cleanup = () => {
-    // 清理定時器
-    if (searchTimeout) clearTimeout(searchTimeout);
-    if (updateTimeout) clearTimeout(updateTimeout);
-    
-    // 清理事件監聽器的定時器
-    const allTimeouts = [searchTimeout, updateTimeout];
-    allTimeouts.forEach(timeout => {
-      if (timeout) clearTimeout(timeout);
-    });
-    
-    // 清理標記
-    markers.forEach(marker => {
-      if (marker instanceof google.maps.Marker) {
-        google.maps.event.clearInstanceListeners(marker);
-        marker.setMap(null);
-      } else if (marker instanceof TitleOverlay) {
-        marker.setMap(null);
-      }
-    });
-    
-    // 清理標記池
-    markerPool.forEach(marker => {
-      google.maps.event.clearInstanceListeners(marker);
-    });
-    
-    // 清理用戶位置標記
-    if (userLocationMarker) {
-      google.maps.event.clearInstanceListeners(userLocationMarker);
-      userLocationMarker.setMap(null);
-    }
-    
-    // 清理地圖事件監聽器
-    if (map) {
-      google.maps.event.clearInstanceListeners(map);
-    }
-    
-    // 清理快取
-    couponDataCache.clear();
-    searchCache.clear();
-    
-    // 移除 DOM 事件監聽器
-    document.removeEventListener('click', handleClickOutside);
-  };
-  
-  // 組件掛載
-  onMounted(async () => {
-    try {
-      window.isMarkerClick = false;
-      
-      await loadGoogleMapsApi();
-      await initMap();
-      
-      document.addEventListener('click', handleClickOutside, { passive: true });
-    } catch (error) {
-      console.error('地圖初始化失敗:', error);
-      mapError.value = error.message || '地圖載入失敗';
-    } finally {
-      isMapLoading.value = false;
-    }
-  });
-  
-  // 組件卸載
-  onUnmounted(() => {
-    cleanup();
-  });
-  </script>
-  
-  <style scoped>
-  .map-container {
-    position: relative;
-    width: 100%;
-    height: calc(100vh - 70px);
+  })
+
+  // 清理標記池
+  markerPool.forEach((marker) => {
+    google.maps.event.clearInstanceListeners(marker)
+  })
+
+  // 清理用戶位置標記
+  if (userLocationMarker) {
+    google.maps.event.clearInstanceListeners(userLocationMarker)
+    userLocationMarker.setMap(null)
   }
-  
-  .loading-overlay, .error-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+
+  // 清理地圖事件監聽器
+  if (map) {
+    google.maps.event.clearInstanceListeners(map)
   }
-  
-  .loading-content, .error-content {
-    text-align: center;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  // 清理快取
+  couponDataCache.clear()
+  searchCache.clear()
+
+  // 移除 DOM 事件監聽器
+  document.removeEventListener('click', handleClickOutside)
+}
+
+// 組件掛載
+onMounted(async () => {
+  try {
+    window.isMarkerClick = false
+
+    await loadGoogleMapsApi()
+    await initMap()
+
+    document.addEventListener('click', handleClickOutside, { passive: true })
+  } catch (error) {
+    console.error('地圖初始化失敗:', error)
+    mapError.value = error.message || '地圖載入失敗'
+  } finally {
+    isMapLoading.value = false
   }
-  
-  .retry-btn {
-    margin-top: 12px;
-    padding: 8px 16px;
-    background-color: #4285F4;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .retry-btn:hover {
-    background-color: #3367D6;
-  }
-  
-  #map {
-    width: 100%;
-    height: 100%;
-  }
-  
+})
+
+// 組件卸載
+onUnmounted(() => {
+  cleanup()
+})
+</script>
+
+<style scoped lang="scss">
+.map-container {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 70px);
+}
+
+.loading-overlay,
+.error-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-content,
+.error-content {
+  text-align: center;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.retry-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover {
+  background-color: #3367d6;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+.control-bar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 60%;
+  max-width: 400px;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+}
+
+.control-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.search-container {
+  position: relative;
+  margin: 10px 0;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4285f4;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 20;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.search-result-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background-color: #f5f5f5;
+}
+
+.control-options {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+}
+
+.category-btn,
+.option-btn {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.option-btn {
+  width: 100%;
+  font-size: 12px;
+}
+
+.category-btn.active,
+.option-btn.active {
+  background-color: #4285f4;
+  color: white;
+  border-color: #4285f4;
+}
+
+.category-btn:hover:not(.active),
+.option-btn:hover:not(.active) {
+  background-color: #f1f1f1;
+}
+
+.category-btn.active:hover,
+.option-btn.active:hover {
+  background-color: #3367d6;
+}
+
+.location-btn {
+  position: absolute;
+  bottom: 160px;
+  right: 6px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: white;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s;
+}
+
+.location-btn:hover {
+  background-color: #f1f1f1;
+  transform: scale(1.05);
+}
+
+.location-btn:active {
+  transform: scale(0.95);
+}
+
+.location-icon {
+  font-size: 24px;
+}
+
+.map-info-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+  transform: translateY(calc(100% - 30px));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 20;
+  max-height: 60vh;
+  overflow: hidden;
+}
+
+.map-info-panel-open {
+  transform: translateY(0);
+}
+
+.map-info-toggle {
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: rgba(249, 249, 249, 0.8);
+  border-radius: 12px 12px 0 0;
+  backdrop-filter: blur(5px);
+}
+
+.map-toggle {
+  font-size: 24px;
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+.arrow-upside {
+  transform: rotate(180deg);
+}
+
+.map-info-wrapper {
+  padding: 15px;
+  overflow-y: auto;
+  max-height: calc(60vh - 30px);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
   .control-bar {
-    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    padding: 8px;
+  }
+
+  .control-buttons {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .category-btn {
+    flex: 1;
+    min-width: calc(25% - 3px);
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .location-btn {
+    bottom: 120px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .location-icon {
+    font-size: 20px;
+  }
+}
+
+/* 滾動條樣式優化 */
+.search-results::-webkit-scrollbar,
+.map-info-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.search-results::-webkit-scrollbar-track,
+.map-info-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.search-results::-webkit-scrollbar-thumb,
+.map-info-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+.search-results::-webkit-scrollbar-thumb:hover,
+.map-info-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 除錯資訊樣式 */
+.debug-info {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 10px;
+}
+
+.debug-info h3 {
+  color: #dc3545;
+  margin-bottom: 10px;
+}
+
+.debug-info p {
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.debug-info pre {
+  background-color: #e9ecef;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  overflow-x: auto;
+}
+
+/* 民宿資訊樣式 */
+.homestay-info {
+  padding: 15px;
+}
+
+.homestay-header {
+  margin-bottom: 15px;
+}
+
+.homestay-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.homestay-image {
+  margin-bottom: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.homestay-image img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.homestay-details {
+  margin-bottom: 15px;
+}
+
+.detail-item {
+  display: flex;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.detail-label {
+  font-weight: bold;
+  color: #555;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #666;
+  flex: 1;
+}
+
+.homestay-contact {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.contact-item {
+  margin-bottom: 5px;
+}
+
+.contact-item:last-child {
+  margin-bottom: 0;
+}
+
+.contact-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 14px;
+  display: inline-block;
+  transition: color 0.2s;
+}
+
+.contact-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.homestay-actions {
+  text-align: center;
+}
+
+.view-detail-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.view-detail-btn:hover {
+  background-color: #45a049;
+}
+
+/* 載入狀態樣式 */
+.loading-overlay-partial {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.loading-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-spinner svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 按鈕載入狀態 */
+.category-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.category-btn:disabled .loading-spinner {
+  color: #666;
+}
+
+/* 2026 map experience refresh */
+.map-container {
+  --map-ink: #173b36;
+  --map-muted: #667085;
+  --map-accent: #168c7b;
+  --map-accent-dark: #0e6b5e;
+  --map-surface: rgba(255, 255, 255, 0.94);
+  height: calc(100dvh - 84px);
+  min-height: 560px;
+  overflow: hidden;
+  background: #dce9e5;
+}
+
+.control-bar {
+  top: 18px;
+  left: 18px;
+  width: min(420px, calc(100% - 36px));
+  max-width: none;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 20px;
+  background: var(--map-surface);
+  box-shadow:
+    0 18px 44px rgba(23, 59, 54, 0.16),
+    0 2px 8px rgba(23, 59, 54, 0.08);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  z-index: 5;
+}
+
+.control-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.control-eyebrow {
+  margin: 0 0 2px;
+  color: var(--map-accent);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.control-title {
+  margin: 0;
+  color: var(--map-ink);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.place-count {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: var(--map-accent-dark);
+  background: #e6f5f1;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.control-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.category-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 7px 6px;
+  border: 1px solid #e2e8e6;
+  border-radius: 13px;
+  color: #52615f;
+  background: #f8faf9;
+  box-shadow: none;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.category-btn:hover:not(.active) {
+  border-color: #b9d7d1;
+  background: #f0f7f5;
+  transform: translateY(-1px);
+}
+
+.category-btn.active,
+.category-btn.active:hover {
+  border-color: var(--map-accent);
+  color: white;
+  background: linear-gradient(145deg, #1a9b88, #117466);
+  box-shadow: 0 7px 16px rgba(22, 140, 123, 0.22);
+}
+
+.category-btn:focus-visible,
+.option-btn:focus-visible,
+.location-btn:focus-visible,
+.search-result-item:focus-visible,
+.search-clear:focus-visible,
+.map-info-toggle:focus-visible {
+  outline: 3px solid rgba(22, 140, 123, 0.28);
+  outline-offset: 2px;
+}
+
+.category-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.category-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.05;
+}
+
+.category-copy strong {
+  font-size: 14px;
+}
+
+.category-copy small {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.78;
+}
+
+.search-container {
+  margin: 0;
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  z-index: 1;
+  color: #6f7f7c;
+  font-size: 19px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.search-input {
+  height: 46px;
+  padding: 10px 42px;
+  border: 1px solid #dce5e2;
+  border-radius: 13px;
+  color: var(--map-ink);
+  background: #fff;
+  font-size: 14px;
+  box-shadow: inset 0 1px 2px rgba(23, 59, 54, 0.03);
+}
+
+.search-input::placeholder {
+  color: #98a3a1;
+}
+
+.search-input:focus {
+  border-color: var(--map-accent);
+  box-shadow: 0 0 0 4px rgba(22, 140, 123, 0.1);
+}
+
+.search-clear {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  color: #667085;
+  background: #eef3f1;
+}
+
+.search-results {
+  top: calc(100% + 8px);
+  padding: 6px;
+  border: 1px solid #e2e9e7;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(23, 59, 54, 0.18);
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  padding: 9px;
+  border: 0;
+  border-bottom: 1px solid #edf1f0;
+  border-radius: 9px;
+  color: var(--map-ink);
+  background: transparent;
+  text-align: left;
+}
+
+.search-result-item:hover {
+  background: #f0f7f5;
+}
+
+.result-pin {
+  display: grid;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+  color: #fff;
+  font-size: 17px;
+}
+
+.result-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.result-copy strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-copy small {
+  color: var(--map-muted);
+  font-size: 11px;
+}
+
+.result-arrow {
+  color: #98a3a1;
+  font-size: 20px;
+}
+
+.control-options {
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 11px 2px 0;
+  border-top-color: #e7eceb;
+}
+
+.option-copy {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #4f625f;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.option-copy svg {
+  color: var(--map-accent);
+  font-size: 17px;
+}
+
+.option-btn {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #cbd5d2;
+}
+
+.option-btn:hover:not(.active) {
+  background: #b8c5c2;
+}
+
+.option-btn.active,
+.option-btn.active:hover {
+  background: var(--map-accent);
+}
+
+.switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  transition: transform 180ms ease;
+}
+
+.option-btn.active .switch-knob {
+  transform: translateX(18px);
+}
+
+.location-btn {
+  right: 18px;
+  bottom: 44px;
+  width: auto;
+  height: 46px;
+  gap: 7px;
+  padding: 0 15px;
+  border: 1px solid rgba(23, 59, 54, 0.12);
+  border-radius: 14px;
+  color: var(--map-ink);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 9px 24px rgba(23, 59, 54, 0.18);
+  font-weight: 700;
+}
+
+.location-btn:hover {
+  color: var(--map-accent-dark);
+  background: #fff;
+  transform: translateY(-2px);
+}
+
+.location-icon {
+  color: var(--map-accent);
+  font-size: 22px;
+}
+
+.location-label {
+  font-size: 13px;
+}
+
+.detail-label,
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-label svg,
+.contact-link svg {
+  flex: 0 0 auto;
+  color: var(--map-accent);
+  font-size: 17px;
+}
+
+.map-info-panel {
+  left: 50%;
+  right: auto;
+  width: min(680px, calc(100% - 32px));
+  border: 1px solid rgba(23, 59, 54, 0.09);
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -16px 40px rgba(23, 59, 54, 0.16);
+  transform: translate(-50%, calc(100% - 24px));
+}
+
+.map-info-panel-open {
+  transform: translate(-50%, 0);
+}
+
+.map-info-toggle {
+  position: relative;
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 22px 22px 0 0;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.panel-handle {
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  background: #c8d4d1;
+}
+
+.map-toggle {
+  position: absolute;
+  right: 16px;
+  font-size: 20px;
+}
+
+.loading-content,
+.error-content {
+  max-width: min(360px, calc(100% - 32px));
+  padding: 24px;
+  border: 1px solid #e4ebe9;
+  border-radius: 18px;
+  box-shadow: 0 18px 44px rgba(23, 59, 54, 0.14);
+}
+
+.retry-btn,
+.view-detail-btn {
+  border-radius: 10px;
+  background: var(--map-accent);
+}
+
+.retry-btn:hover,
+.view-detail-btn:hover {
+  background: var(--map-accent-dark);
+}
+
+@media (max-width: 768px) {
+  .map-container {
+    height: calc(100dvh - 64px);
+  }
+
+  .control-bar {
     top: 10px;
     left: 10px;
-    width: 60%;
-    max-width: 400px;
-    z-index: 1;
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(5px);
+    right: 10px;
+    width: auto;
+    padding: 13px;
+    border-radius: 17px;
   }
-  
+
+  .control-heading {
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .control-eyebrow {
+    display: none;
+  }
+
   .control-title {
-    font-weight: bold;
-    margin-bottom: 8px;
-    text-align: center;
+    font-size: 16px;
   }
-  
+
+  .place-count {
+    margin-top: 0;
+    font-size: 11px;
+  }
+
   .control-buttons {
     display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
+    flex-wrap: nowrap;
+    gap: 6px;
   }
-  
-  .search-container {
-    position: relative;
-    margin: 10px 0;
-    width: 100%;
+
+  .category-btn {
+    min-width: 0;
+    min-height: 42px;
+    padding: 5px;
   }
-  
-  .search-input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+
+  .category-icon {
     font-size: 16px;
-    box-sizing: border-box;
-    transition: border-color 0.2s;
   }
-  
-  .search-input:focus {
-    outline: none;
-    border-color: #4285F4;
+
+  .category-copy strong {
+    font-size: 12px;
   }
-  
-  .search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 0 0 4px 4px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 20;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  .category-copy small {
+    display: none;
   }
-  
-  .search-result-item {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
-    transition: background-color 0.2s;
+
+  .search-input {
+    height: 42px;
+    font-size: 13px;
   }
-  
-  .search-result-item:last-child {
-    border-bottom: none;
+
+  .search-clear {
+    top: 5px;
   }
-  
-  .search-result-item:hover {
-    background-color: #f5f5f5;
-  }
-  
+
   .control-options {
-    display: flex;
-    justify-content: center;
-    margin-top: 8px;
-    border-top: 1px solid #eee;
+    margin-top: 9px;
     padding-top: 8px;
   }
-  
-  .category-btn, .option-btn {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .option-btn {
-    width: 100%;
-    font-size: 12px;
-  }
-  
-  .category-btn.active, .option-btn.active {
-    background-color: #4285F4;
-    color: white;
-    border-color: #4285F4;
-  }
-  
-  .category-btn:hover:not(.active), .option-btn:hover:not(.active) {
-    background-color: #f1f1f1;
-  }
-  
-  .category-btn.active:hover, .option-btn.active:hover {
-    background-color: #3367D6;
-  }
-  
+
   .location-btn {
-    position: absolute;
-    bottom: 160px;
-    right: 6px;
-    width: 48px;
-    height: 48px;
+    right: 12px;
+    bottom: 38px;
+    width: 46px;
+    height: 46px;
+    padding: 0;
     border-radius: 50%;
-    background-color: white;
-    border: none;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    transition: all 0.2s;
   }
-  
-  .location-btn:hover {
-    background-color: #f1f1f1;
-    transform: scale(1.05);
+
+  .location-label {
+    display: none;
   }
-  
-  .location-btn:active {
-    transform: scale(0.95);
-  }
-  
-  .location-icon {
-    font-size: 24px;
-  }
-  
+
   .map-info-panel {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: white;
-    border-radius: 12px 12px 0 0;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
-    transform: translateY(calc(100% - 30px));
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 20;
-    max-height: 60vh;
-    overflow: hidden;
-  }
-  
-  .map-info-panel-open {
-    transform: translateY(0);
-  }
-  
-  .map-info-toggle {
-    height: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    background-color: rgba(249, 249, 249, 0.8);
-    border-radius: 12px 12px 0 0;
-    backdrop-filter: blur(5px);
-  }
-  
-  .map-toggle {
-    font-size: 24px;
-    color: #666;
-    transition: transform 0.3s ease;
-  }
-  
-  .arrow-upside {
-    transform: rotate(180deg);
-  }
-  
-  .map-info-wrapper {
-    padding: 15px;
-    overflow-y: auto;
-    max-height: calc(60vh - 30px);
-  }
-  
-  /* 響應式設計 */
-  @media (max-width: 768px) {
-    .control-bar {
-      top: 5px;
-      left: 5px;
-      right: 5px;
-      padding: 8px;
-    }
-    
-    .control-buttons {
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-    
-    .category-btn {
-      flex: 1;
-      min-width: calc(25% - 3px);
-      font-size: 12px;
-      padding: 6px 8px;
-    }
-    
-    .location-btn {
-      bottom: 120px;
-      right: 10px;
-      width: 44px;
-      height: 44px;
-    }
-    
-    .location-icon {
-      font-size: 20px;
-    }
-  }
-  
-  /* 滾動條樣式優化 */
-  .search-results::-webkit-scrollbar,
-  .map-info-wrapper::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  .search-results::-webkit-scrollbar-track,
-  .map-info-wrapper::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-  
-  .search-results::-webkit-scrollbar-thumb,
-  .map-info-wrapper::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 2px;
-  }
-  
-  .search-results::-webkit-scrollbar-thumb:hover,
-  .map-info-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-  }
-  
-  /* 除錯資訊樣式 */
-  .debug-info {
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    margin: 10px;
-  }
-  
-  .debug-info h3 {
-    color: #dc3545;
-    margin-bottom: 10px;
-  }
-  
-  .debug-info p {
-    color: #6c757d;
-    margin-bottom: 10px;
-  }
-  
-  .debug-info pre {
-    background-color: #e9ecef;
-    padding: 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    overflow-x: auto;
-  }
-  
-  /* 民宿資訊樣式 */
-  .homestay-info {
-    padding: 15px;
-  }
-  
-  .homestay-header {
-    margin-bottom: 15px;
-  }
-  
-  .homestay-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 8px;
-  }
-  
-  .homestay-image {
-    margin-bottom: 15px;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  
-  .homestay-image img {
     width: 100%;
-    height: 200px;
-    object-fit: cover;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 20px 20px 0 0;
   }
-  
-  .homestay-details {
-    margin-bottom: 15px;
-  }
-  
-  .detail-item {
-    display: flex;
-    margin-bottom: 8px;
-    font-size: 14px;
-  }
-  
-  .detail-label {
-    font-weight: bold;
-    color: #555;
-    min-width: 60px;
-    flex-shrink: 0;
-  }
-  
-  .detail-value {
-    color: #666;
-    flex: 1;
-  }
-  
-  .homestay-contact {
-    margin-bottom: 15px;
+
+  .map-info-wrapper {
     padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 6px;
   }
-  
-  .contact-item {
-    margin-bottom: 5px;
-  }
-  
-  .contact-item:last-child {
-    margin-bottom: 0;
-  }
-  
-  .contact-link {
-    color: #007bff;
-    text-decoration: none;
-    font-size: 14px;
-    display: inline-block;
-    transition: color 0.2s;
-  }
-  
-  .contact-link:hover {
-    color: #0056b3;
-    text-decoration: underline;
-  }
-  
-  .homestay-actions {
-    text-align: center;
-  }
-  
-  .view-detail-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: bold;
-    transition: background-color 0.2s;
-  }
-  
-  .view-detail-btn:hover {
-    background-color: #45a049;
+}
+
+@media (max-width: 380px) {
+  .control-bar {
+    padding: 11px;
   }
 
-  /* 載入狀態樣式 */
-  .loading-overlay-partial {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    color: white;
-    font-size: 18px;
-    font-weight: 500;
+  .category-btn {
+    gap: 3px;
   }
 
-  .loading-spinner {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+  .category-icon {
+    display: none;
   }
+}
 
-  .loading-spinner svg {
-    animation: spin 1s linear infinite;
+@media (prefers-reduced-motion: reduce) {
+  .category-btn,
+  .location-btn,
+  .switch-knob,
+  .map-info-panel,
+  .map-toggle {
+    transition: none;
   }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  /* 按鈕載入狀態 */
-  .category-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-
-  .category-btn:disabled .loading-spinner {
-    color: #666;
-  }
-  </style>
+}
+</style>
