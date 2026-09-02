@@ -262,12 +262,12 @@
               :key="bnb.id"
               class="bnb col-md-3"
             >
-            <div 
-              class="bnb-wrapper" 
-              @click.prevent.stop="navigateToBnb(bnb.id, $event)" 
+            <NuxtLink
+              :to="`/homestays/${bnb.id}`"
+              class="bnb-wrapper"
+              @click="handleBnbClick(bnb.id)"
               @mouseenter="hoveredBnb = bnb.id"
               @mouseleave="hoveredBnb = null"
-              style="cursor: pointer;"
             >
               <div class="bnb-img-wrapper">
                 <!-- 多圖展示 - 如果有多張圖片就顯示輪播，否則顯示單張 -->
@@ -287,7 +287,7 @@
                     <!-- 左右導航按鈕 -->
                     <button 
                       v-if="bnb.image_urls.length > 1"
-                      @click.stop="prevImage(bnb.id, bnb.image_urls.length)"
+                      @click.stop.prevent="prevImage(bnb.id, bnb.image_urls.length)"
                       class="nav-btn prev-btn"
                       :style="{ opacity: hoveredBnb === bnb.id ? 1 : 0 }"
                     >
@@ -298,7 +298,7 @@
                     
                     <button 
                       v-if="bnb.image_urls.length > 1"
-                      @click.stop="nextImage(bnb.id, bnb.image_urls.length)"
+                      @click.stop.prevent="nextImage(bnb.id, bnb.image_urls.length)"
                       class="nav-btn next-btn"
                       :style="{ opacity: hoveredBnb === bnb.id ? 1 : 0 }"
                     >
@@ -313,7 +313,7 @@
                     <button
                       v-for="(imageUrl, imageIndex) in bnb.image_urls.slice(0, 5)"
                       :key="imageIndex"
-                      @click.stop="setCurrentImage(bnb.id, imageIndex)"
+                      @click.stop.prevent="setCurrentImage(bnb.id, imageIndex)"
                       class="indicator-dot"
                       :class="{ 'active': currentImageIndex[bnb.id] === imageIndex }"
                     ></button>
@@ -450,7 +450,7 @@
                   <span>{{ bnb.view_count }} 次查看</span>
                 </div>
               </div>
-            </div>
+            </NuxtLink>
             </article>
           </div>
           <!-- 分頁功能 -->
@@ -487,7 +487,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
-import { navigateTo } from 'nuxt/app';
 import useHomestayStore from '~/store/homestay.js';
 
 // SEO 設定
@@ -966,30 +965,10 @@ const getGuestRange = (bnb) => {
   return ''
 }
 
-const navigateToBnb = (id, event) => {
-  console.log('=== 點擊事件觸發 ===');
-  console.log('民宿 ID:', id);
-  
-  // 確保阻止所有默認行為
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-  }
-  
-  if (!id) {
-    console.error('無效的民宿ID');
-    return false;
-  }
-
-  // 先更新查看次數
+const handleBnbClick = (id) => {
+  if (!id) return;
+  // NuxtLink 負責導航，這裡只需更新查看次數
   homestayStore.updateViewCount(id);
-  
-  // 使用 navigateTo 而不是 window.location.href 來保持store狀態
-  console.log('🚀 使用 navigateTo 導航到:', `/homestays/${id}`);
-  navigateTo(`/homestays/${id}`);
-  
-  return false;
 }
 
 // 圖片輪播控制函數
@@ -1068,6 +1047,14 @@ watch(bnbsData, (newData) => {
   display: flex;
   flex-direction: column;
   height: calc(100% - 20px);
+  // NuxtLink 渲染為 <a>，重置瀏覽器預設連結樣式
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+  }
 }
 .bnb-wrapper:hover {
   transform: translateY(-5px);
