@@ -51,11 +51,12 @@
             <div v-if="bnb.image_urls && bnb.image_urls.length > 0" class="image-gallery">
               <!-- 主圖展示 -->
               <div class="main-image-container">
-                <img 
-                  :src="bnb.image_urls[currentMainImageIndex]" 
-                  :alt="`${bnb.name} - 主圖`" 
-                  class="main-image" 
+                <img
+                  :src="bnb.image_urls[currentMainImageIndex]"
+                  :alt="`${bnb.name} - 主圖`"
+                  class="main-image"
                   @click="openLightbox(currentMainImageIndex)"
+                  @error="handleImgError"
                 />
                 
                 <!-- 導航按鈕 -->
@@ -109,10 +110,11 @@
                     :class="{ 'active': index === currentMainImageIndex }"
                     @click="setMainImage(index)"
                   >
-                    <img 
-                      :src="imageUrl" 
-                      :alt="`${bnb.name} - 縮圖 ${index + 1}`" 
+                    <img
+                      :src="imageUrl"
+                      :alt="`${bnb.name} - 縮圖 ${index + 1}`"
                       class="thumbnail-image"
+                      @error="handleImgError"
                     />
                     <div class="thumbnail-overlay">
                       <div class="thumbnail-number">{{ index + 1 }}</div>
@@ -583,6 +585,13 @@ useHead({
 const currentMainImageIndex = ref(0);
 const lightboxVisible = ref(false);
 const lightboxIndex = ref(0);
+
+// 圖片載入失敗時的替代圖檔
+const PLACEHOLDER_IMG = '/images/bnb-placeholder.svg';
+const handleImgError = (event) => {
+  if (event.target.src.includes(PLACEHOLDER_IMG)) return;
+  event.target.src = PLACEHOLDER_IMG;
+};
 
 // 縮圖導航狀態
 const showThumbnailNav = ref({

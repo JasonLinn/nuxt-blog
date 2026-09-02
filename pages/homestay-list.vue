@@ -281,6 +281,7 @@
                       class="slider-image"
                       :class="{ 'active': currentImageIndex[bnb.id] === imageIndex }"
                       style="pointer-events: none;"
+                      @error="handleImgError"
                     />
                     
                     <!-- 左右導航按鈕 -->
@@ -337,9 +338,10 @@
                     :alt="bnb.name"
                     height="165"
                     width="366"
-                    :src="bnb.image_urls && bnb.image_urls.length > 0 ? bnb.image_urls[0] : '/images/bnb-placeholder.jpg'"
+                    :src="bnb.image_urls && bnb.image_urls.length > 0 ? bnb.image_urls[0] : PLACEHOLDER_IMG"
                     class="bnb-img"
                     style="pointer-events: none;"
+                    @error="handleImgError"
                   />
                   <!-- 如果只有一張圖片，也顯示圖片數量 -->
                   <div v-if="bnb.image_urls && bnb.image_urls.length === 1" class="image-count-badge">
@@ -541,6 +543,13 @@ const availableServiceAmenities = ref([]);
 // 圖片輪播相關狀態
 const currentImageIndex = ref({});
 const hoveredBnb = ref(null);
+
+// 圖片載入失敗時的替代圖檔
+const PLACEHOLDER_IMG = '/images/bnb-placeholder.svg';
+const handleImgError = (event) => {
+  if (event.target.src.includes(PLACEHOLDER_IMG)) return;
+  event.target.src = PLACEHOLDER_IMG;
+};
 
 // 從store獲取資料
 const bnbsData = computed(() => homestayStore.getAllHomestays);
