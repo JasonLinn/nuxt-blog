@@ -1,56 +1,43 @@
 /**
- * Function will initialize Google Map with default settings
+ * Initializes open-source Leaflet map (backward compatible helper)
  *
- * @param map_html DOM HTML element in which Google Map will be initialized
+ * @param map_html DOM HTML element in which Map will be initialized
  */
-export const initializeGoogleMap = map_html => {
-    if (!useGoogleMapHTML().value) {
-      console.error("google_map_html is not defined")
-      return
-    }
+export const initializeGoogleMap = async (map_html: HTMLElement) => {
+  if (process.server) return;
   
-    // Initialize Google Map
-    useGoogleMap().value = new google.maps.Map(map_html, {
-      center: { lat: 24.69295, lng: 121.7195 }, // Default map view position
-      zoom: 12, // Default zoom
-  
-      styles: [
-        {
-          featureType: "poi",
-          stylers: [{ visibility: "on" }]
-        }
-      ],
-  
-      clickableIcons: false,
-      streetViewControl: false,
-      mapTypeControl: false,
-      draggableCursor: "crosshair",
-      fullscreenControl: false,
-      minZoom: 2,
-  
-      restriction: {
-        latLngBounds: {
-          north: 85,
-          south: -85,
-          west: -180,
-          east: 180
-        }
-      },
-  
-      gestureHandling: "greedy", // Does not need 2 fingers to move on map when using touchscreen (Not working on Firefox Mobile. Safari, not sure.)
-      keyboardShortcuts: false
-    })
+  try {
+    const L = await import('leaflet');
+    
+    const map = L.map(map_html, {
+      center: [24.69295, 121.7195],
+      zoom: 12
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    useGoogleMap().value = map;
+    return map;
+  } catch (error) {
+    console.error('Failed to initialize map:', error);
   }
-  
-  // Function used to center Google Map to specific coordinates
-  export const centerGoogleMap = (lat, lng) => {
-    const googleMap = useGoogleMap().value
-  
-    if (!googleMap) {
-      console.error("google_map is not defined")
-      return
-    }
-  
-    googleMap.setCenter({ lat, lng })
+};
+
+// Function used to center Map to specific coordinates
+export const centerGoogleMap = (lat: number, lng: number) => {
+  const map = useGoogleMap().value;
+
+  if (!map) {
+    console.error("map is not defined");
+    return;
   }
-  
+
+  if (typeof map.setView === 'function') {
+    map.setView([lat, lng]);
+  } else if (typeof map.setCenter === 'function') {
+    map.setCenter({ lat, lng });
+  }
+};

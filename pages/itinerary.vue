@@ -792,25 +792,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
 
 // 取得運行時配置
 const config = useRuntimeConfig();
-
-// 直接在頁面中載入 Google Maps API
-useHead({
-  script: [
-    {
-      src: `https://maps.googleapis.com/maps/api/js?key=${config.public.GOOGLE_MAPS_API_KEY}&libraries=places,geometry,drawing`,
-      defer: true,
-      onload: () => {
-        console.log('Google Maps API loaded via useHead');
-        // 發送載入完成事件
-        window.dispatchEvent(new Event('google-maps-loaded'));
-      }
-    }
-  ]
-});
 
 // SEO 設定
 useSeoMeta({
@@ -882,11 +867,15 @@ const googleSearchResults = ref([]);
 const isGoogleSearching = ref(false);
 const isSubmitting = ref(false);
 
-// 地圖相關
+// 開源地圖相關 (Leaflet + OpenStreetMap)
+let L = null;
 let map = null;
+let markersLayer = null;
 let markers = [];
-let directionsService = null;
-let directionsRenderer = null;
+let routePolyline = null;
+let osmTileLayer = null;
+let satelliteTileLayer = null;
+let currentMapType = 'roadmap';
 
 // 推薦行程相關 - 使用 useFetch 在頂層載入
 const { data: recommendedItinerariesData, pending: loadingRecommended, error: recommendedError } = await useFetch('/api/recommended-itineraries')
@@ -1119,8 +1108,9 @@ const selectPlace = (place) => {
     const lng = parseFloat(place.longitude);
     
     if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-      map.setCenter({ lat: lat, lng: lng });
-      map.setZoom(15);
+      if (typeof map.setView === 'function') {
+        map.setView([lat, lng], 15, { animate: true });
+      }
     }
   }
   
@@ -1735,51 +1725,48 @@ const onSelectLocation = () => {
   showSubmissionModal.value = true;
 };
 
-// 地圖功能
+// 開源地圖初始化 (Leaflet + OpenStreetMap)
 const initMap = async () => {
-  console.log('initMap called, google available:', typeof google !== 'undefined');
+  if (process.server) return;
   
-  if (typeof google === 'undefined') {
-    console.error('Google Maps API 未載入');
-    return;
+  if (!L) {
+    L = await import('leaflet');
   }
 
-  console.log('Creating map instance...');
-  
   const mapElement = document.getElementById('itinerary-map');
-  console.log('Map element found:', !!mapElement);
-  
   if (!mapElement) {
     console.error('Map container element not found');
     return;
   }
 
-  map = new google.maps.Map(mapElement, {
-    center: { lat: 24.7021, lng: 121.7378 }, // 宜蘭中心點
+  if (map) {
+    await updateMap();
+    return;
+  }
+
+  map = L.map(mapElement, {
+    center: [24.7021, 121.7378], // 宜蘭中心點
     zoom: 11,
-    mapTypeId: 'roadmap',
-    styles: [
-      {
-        featureType: 'poi',
-        elementType: 'labels',
-        stylers: [{ visibility: 'off' }]
-      }
-    ]
+    zoomControl: false
   });
 
-  console.log('Map created successfully:', !!map);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  directionsService = new google.maps.DirectionsService();
-  directionsRenderer = new google.maps.DirectionsRenderer({
-    suppressMarkers: true,
-    polylineOptions: {
-      strokeColor: '#3b82f6',
-      strokeWeight: 4
-    }
+  osmTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
   });
-  directionsRenderer.setMap(map);
 
-  console.log('Map initialization completed');
+  satelliteTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and GIS Community',
+    maxZoom: 18
+  });
+
+  osmTileLayer.addTo(map);
+  currentMapType = 'roadmap';
+
+  markersLayer = L.layerGroup().addTo(map);
+  console.log('Leaflet Map initialization completed');
   await updateMap();
 };
 
@@ -2058,234 +2045,113 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
   `;
 };
 
+const escapeHtml = (str) => {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 const updateMap = async () => {
   console.log('=== updateMap 開始執行 ===');
   
-  if (!map) {
+  if (!map || !markersLayer || !L) {
     console.log('地圖尚未初始化，跳過更新');
     return;
   }
 
-  // 清除現有標記和標籤覆蓋物
-  markers.forEach(marker => {
-    marker.setMap(null);
-    // 清除地名標籤覆蓋物
-    if (marker.labelOverlay) {
-      marker.labelOverlay.setMap(null);
-    }
-  });
+  // 清除現有標記
+  markersLayer.clearLayers();
   markers = [];
+
+  // 清除舊路線
+  if (routePolyline) {
+    map.removeLayer(routePolyline);
+    routePolyline = null;
+  }
 
   console.log('清除舊標記完成');
 
-  // 顯示所有地點（不只是行程中的地點）
-  console.log('原始地點數量 (places.value):', places.value?.length || 0);
-  
   const allPlaces = filteredPlaces.value;
-  console.log('過濾後地點數量 (filteredPlaces):', allPlaces?.length || 0);
-  console.log('過濾條件:', {
-    selectedCategories: selectedCategories.value,
-    searchQuery: searchQuery.value,
-    showFeaturedOnly: showFeaturedOnly.value,
-    showPrivateOnly: showPrivateOnly.value
-  });
-  
   const dayPlaces = getCurrentDayPlaces();
   
   console.log('開始更新地圖標記...');
-  console.log('總地點數量:', allPlaces.length);
-  console.log('當天行程地點數量:', dayPlaces.length);
+  console.log('總地點數量:', allPlaces?.length || 0);
+  console.log('當天行程地點數量:', dayPlaces?.length || 0);
   
-  // 為所有地點添加標記
   let validPlaceCount = 0;
   let invalidPlaceCount = 0;
   
-  for (const [index, place] of allPlaces.entries()) {
-    // 驗證地點的經緯度資料 - 支援字串和數字格式
-    const lat = parseFloat(place.latitude);
-    const lng = parseFloat(place.longitude);
-    
-    if (!place.latitude || !place.longitude || 
-        isNaN(lat) || isNaN(lng) ||
-        lat === 0 || lng === 0) {
-      console.warn('跳過無效的地點座標:', place.name, {
-        latitude: place.latitude,
-        longitude: place.longitude,
-        parsed_lat: lat,
-        parsed_lng: lng,
-        type_lat: typeof place.latitude,
-        type_lng: typeof place.longitude
-      });
-      invalidPlaceCount++;
-      continue;
-    }
-    
-    validPlaceCount++;
-    const isInItinerary = dayPlaces.some(item => item.place.id === place.id);
-    
-    const marker = new google.maps.Marker({
-      position: { lat: lat, lng: lng },
-      map: map,
-      title: place.name,
-      icon: {
-        url: 'data:image/svg+xml,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-            <circle cx="16" cy="16" r="14" fill="${isInItinerary ? '#10b981' : '#3b82f6'}" stroke="white" stroke-width="2"/>
-            <text x="16" y="20" text-anchor="middle" fill="white" font-size="10" font-weight="bold">
-              ${isInItinerary ? '✓' : '●'}
-            </text>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(32, 32),
-        anchor: new google.maps.Point(16, 16)
+  if (allPlaces && Array.isArray(allPlaces)) {
+    for (const place of allPlaces) {
+      const lat = parseFloat(place.latitude);
+      const lng = parseFloat(place.longitude);
+      
+      if (!place.latitude || !place.longitude || 
+          isNaN(lat) || isNaN(lng) ||
+          lat === 0 || lng === 0) {
+        invalidPlaceCount++;
+        continue;
       }
-    });
-
-    // 保存地點引用到 marker
-    marker.place = place;
-
-    // 創建地名標籤 overlay
-    const labelDiv = document.createElement('div');
-    labelDiv.className = 'map-place-label';
-    labelDiv.textContent = place.name;
-    labelDiv.style.cssText = `
-      position: absolute;
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 12px;
-      font-weight: bold;
-      color: #1f2937;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      white-space: nowrap;
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      pointer-events: none;
-      z-index: 1000;
-      transform: translateX(-50%);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    `;
-
-    // 創建自定義 overlay 來顯示地名標籤
-    class PlaceLabelOverlay extends google.maps.OverlayView {
-      constructor(position, content, map) {
-        super();
-        this.position = position;
-        this.content = content;
-        this.setMap(map);
-      }
-
-      onAdd() {
-        const panes = this.getPanes();
-        panes.overlayLayer.appendChild(this.content);
-      }
-
-      onRemove() {
-        if (this.content.parentNode) {
-          this.content.parentNode.removeChild(this.content);
-        }
-      }
-
-      draw() {
-        const projection = this.getProjection();
-        const position = projection.fromLatLngToDivPixel(this.position);
-        
-        if (position) {
-          this.content.style.left = position.x + 'px';
-          this.content.style.top = (position.y - 45) + 'px'; // 在地標上方顯示
-        }
-      }
-    }
-
-    // 創建地名標籤覆蓋物
-    const labelOverlay = new PlaceLabelOverlay(
-      new google.maps.LatLng(lat, lng),
-      labelDiv,
-      map
-    );
-
-    // 將覆蓋物引用保存到 marker，以便後續清理
-    marker.labelOverlay = labelOverlay;
-
-    // 創建基本的 InfoWindow（不載入詳細資料）
-    const content = createBasicPlaceInfoWindowContent(place);
-    const infoWindow = new google.maps.InfoWindow({
-      content: content,
-      maxWidth: 320
-    });
-
-    marker.addListener('click', async () => {
-      // 關閉其他 InfoWindow
-      markers.forEach(m => {
-        if (m.infoWindow) {
-          m.infoWindow.close();
-        }
-      });
-
-      // 先顯示載入狀態
-      const loadingContent = `
-        <div style="max-width: 300px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; text-align: center;">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-            <div style="width: 20px; height: 20px; border: 2px solid #e5e7eb; border-top: 2px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-            <span style="color: #6b7280; font-size: 14px;">正在載入詳細資料...</span>
-          </div>
-          <p style="margin: 0; color: #9ca3af; font-size: 12px;">請稍候片刻</p>
-        </div>
-        <style>
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        </style>
-      `;
-      infoWindow.setContent(loadingContent);
-      infoWindow.open(map, marker);
-
-      try {
-        // 載入詳細資訊
-        const detailedContent = await createPlaceInfoWindowContent(place, true);
-        infoWindow.setContent(detailedContent);
-      } catch (error) {
-        console.error('載入地點詳細資訊失敗:', error);
-        // 顯示錯誤訊息，但仍保留基本功能
-        const errorContent = `
-          <div style="max-width: 300px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            <div style="display: flex; gap: 12px; align-items: flex-start;">
-              <img src="${getPlaceImage(place)}" alt="${place.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-              <div style="flex: 1; min-width: 0;">
-                <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937; line-height: 1.3;">${place.name}</h4>
-                <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 13px; line-height: 1.4;">${place.address || '地址資訊不詳'}</p>
-                <div style="margin: 8px 0; padding: 8px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; color: #dc2626; font-size: 12px;">
-                  ⚠️ 無法載入最新資料，顯示基本資訊
-                </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  <button
-                    onclick="window.addPlaceToItinerary('${place.id}')"
-                    style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s;"
-                    onmouseover="this.style.background='#059669'"
-                    onmouseout="this.style.background='#10b981'"
-                  >
-                    加入行程
-                  </button>
-                </div>
-              </div>
+      
+      validPlaceCount++;
+      const isInItinerary = dayPlaces.some(item => item.place.id === place.id);
+      
+      const markerIcon = L.divIcon({
+        className: 'itinerary-marker-wrapper',
+        html: `
+          <div class="itinerary-custom-marker">
+            <div class="itinerary-marker-label">${escapeHtml(place.name)}</div>
+            <div class="itinerary-marker-pin ${isInItinerary ? 'in-itinerary' : ''}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                <circle cx="16" cy="16" r="13" fill="${isInItinerary ? '#10b981' : '#3b82f6'}" stroke="white" stroke-width="2"/>
+                <text x="16" y="20" text-anchor="middle" fill="white" font-size="12" font-weight="bold">
+                  ${isInItinerary ? '✓' : '●'}
+                </text>
+              </svg>
             </div>
           </div>
-        `;
-        infoWindow.setContent(errorContent);
-      }
-    });
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -18]
+      });
 
-    // 保存 infoWindow 引用以便關閉
-    marker.infoWindow = infoWindow;
-    markers.push(marker);
+      const marker = L.marker([lat, lng], { icon: markerIcon });
+      marker.place = place;
+
+      // 點擊 Marker 顯示 Popup
+      marker.on('click', async () => {
+        const loadingContent = `
+          <div style="max-width: 300px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+              <div style="width: 20px; height: 20px; border: 2px solid #e5e7eb; border-top: 2px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+              <span style="color: #6b7280; font-size: 14px;">正在載入詳細資料...</span>
+            </div>
+            <p style="margin: 0; color: #9ca3af; font-size: 12px;">請稍候片刻</p>
+          </div>
+        `;
+        marker.bindPopup(loadingContent, { maxWidth: 320 }).openPopup();
+
+        try {
+          const detailedContent = await createPlaceInfoWindowContent(place, true);
+          marker.setPopupContent(detailedContent);
+        } catch (error) {
+          console.error('載入地點詳細資訊失敗:', error);
+          const basicContent = createBasicPlaceInfoWindowContent(place);
+          marker.setPopupContent(basicContent);
+        }
+      });
+
+      marker.addTo(markersLayer);
+      markers.push(marker);
+    }
   }
 
-  // 繪製行程路線（只針對行程中的地點）
+  // 繪製行程路線（只針對當天行程中的地點）
   if (dayPlaces.length > 1) {
-    // 過濾出有效座標的地點
     const validDayPlaces = dayPlaces.filter(item => {
       const lat = parseFloat(item.place.latitude);
       const lng = parseFloat(item.place.longitude);
@@ -2294,72 +2160,68 @@ const updateMap = async () => {
     });
     
     if (validDayPlaces.length > 1) {
-      const waypoints = validDayPlaces.slice(1, -1).map(item => ({
-        location: { lat: parseFloat(item.place.latitude), lng: parseFloat(item.place.longitude) },
-        stopover: true
-      }));
-
-      directionsService.route({
-        origin: { lat: parseFloat(validDayPlaces[0].place.latitude), lng: parseFloat(validDayPlaces[0].place.longitude) },
-        destination: { lat: parseFloat(validDayPlaces[validDayPlaces.length - 1].place.latitude), lng: parseFloat(validDayPlaces[validDayPlaces.length - 1].place.longitude) },
-        waypoints: waypoints,
-        travelMode: google.maps.TravelMode.DRIVING
-      }, (result, status) => {
-        if (status === 'OK') {
-          directionsRenderer.setDirections(result);
+      const coords = validDayPlaces
+        .map(item => `${parseFloat(item.place.longitude)},${parseFloat(item.place.latitude)}`)
+        .join(';');
+      
+      try {
+        const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`);
+        const data = await res.json();
+        
+        if (data.code === 'Ok' && data.routes && data.routes[0]) {
+          const latLngs = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+          if (routePolyline) {
+            map.removeLayer(routePolyline);
+          }
+          routePolyline = L.polyline(latLngs, {
+            color: '#3b82f6',
+            weight: 4,
+            opacity: 0.85
+          }).addTo(map);
+        } else {
+          throw new Error('OSRM route failed');
         }
-      });
-    } else {
-      // 如果沒有足夠的有效地點，清除之前的路線
-      directionsRenderer.setDirections({ routes: [] });
+      } catch (err) {
+        console.warn('OSRM 路線獲取失敗，改用直連線條:', err);
+        if (routePolyline) {
+          map.removeLayer(routePolyline);
+        }
+        const directCoords = validDayPlaces.map(item => [
+          parseFloat(item.place.latitude),
+          parseFloat(item.place.longitude)
+        ]);
+        routePolyline = L.polyline(directCoords, {
+          color: '#3b82f6',
+          weight: 4,
+          opacity: 0.85,
+          dashArray: '6, 6'
+        }).addTo(map);
+      }
     }
-  } else {
-    // 如果沒有路線，清除之前的路線
-    directionsRenderer.setDirections({ routes: [] });
   }
-  
+
   console.log('地圖更新完成統計:');
   console.log('- 有效地點:', validPlaceCount);
   console.log('- 無效地點:', invalidPlaceCount);
   console.log('- 總標記數量:', markers.length);
-  
-  // 如果有標記，調整地圖範圍以顯示所有標記
+
+  // 調整視野以容納所有標記
   if (markers.length > 0) {
-    const bounds = new google.maps.LatLngBounds();
-    let markerCount = 0;
-    
-    markers.forEach(marker => {
-      if (marker.getPosition) {
-        bounds.extend(marker.getPosition());
-        markerCount++;
-      }
-    });
-    
-    console.log('設定地圖範圍，標記數:', markerCount);
-    
-    if (markerCount > 0) {
-      map.fitBounds(bounds);
-      
-      // 如果只有一個標記，設定適當的縮放等級
-      if (markerCount === 1) {
-        setTimeout(() => {
-          map.setZoom(15);
-        }, 100);
-      }
+    if (markers.length === 1) {
+      map.setView(markers[0].getLatLng(), 15);
+    } else {
+      const bounds = L.latLngBounds(markers.map(m => m.getLatLng()));
+      map.fitBounds(bounds, { padding: [40, 40] });
     }
   } else {
-    console.log('沒有標記，使用預設中心點');
-    map.setCenter({ lat: 24.7021, lng: 121.7378 });
-    map.setZoom(11);
+    map.setView([24.7021, 121.7378], 11);
   }
 };
 
 const centerMap = () => {
-  if (!map) return;
+  if (!map || !L) return;
   
   const dayPlaces = getCurrentDayPlaces();
-  
-  // 過濾出有效座標的地點
   const validDayPlaces = dayPlaces.filter(item => {
     const lat = parseFloat(item.place.latitude);
     const lng = parseFloat(item.place.longitude);
@@ -2368,24 +2230,28 @@ const centerMap = () => {
   });
   
   if (validDayPlaces.length === 0) {
-    map.setCenter({ lat: 24.7021, lng: 121.7378 });
-    map.setZoom(11);
+    map.setView([24.7021, 121.7378], 11);
     return;
   }
 
-  const bounds = new google.maps.LatLngBounds();
-  validDayPlaces.forEach(item => {
-    bounds.extend({ lat: parseFloat(item.place.latitude), lng: parseFloat(item.place.longitude) });
-  });
-  
-  map.fitBounds(bounds);
+  const bounds = L.latLngBounds(
+    validDayPlaces.map(item => [parseFloat(item.place.latitude), parseFloat(item.place.longitude)])
+  );
+  map.fitBounds(bounds, { padding: [40, 40] });
 };
 
 const toggleMapType = () => {
-  if (!map) return;
+  if (!map || !osmTileLayer || !satelliteTileLayer) return;
   
-  const currentType = map.getMapTypeId();
-  map.setMapTypeId(currentType === 'roadmap' ? 'satellite' : 'roadmap');
+  if (currentMapType === 'roadmap') {
+    map.removeLayer(osmTileLayer);
+    satelliteTileLayer.addTo(map);
+    currentMapType = 'satellite';
+  } else {
+    map.removeLayer(satelliteTileLayer);
+    osmTileLayer.addTo(map);
+    currentMapType = 'roadmap';
+  }
 };
 
 // 行程儲存
@@ -2468,37 +2334,27 @@ onMounted(async () => {
       loadCategories()
     ]);
     
-    console.log('Data loaded, checking for map element...');
-    const mapElement = document.getElementById('itinerary-map');
-    console.log('Map element found:', !!mapElement);
-    
-    // 等待 Google Maps API 載入
-    if (typeof google !== 'undefined') {
-      console.log('Google API already available, initializing map...');
-      await initMap();
-      
-      // 初始化完成後，如果有地點資料，立即更新地圖
-      if (places.value && places.value.length > 0) {
-        console.log('地點資料已載入，立即更新地圖');
-        await updateMap();
-      }
-    } else {
-      console.log('Google API not available, waiting for load event...');
-      // 監聽 Google Maps API 載入完成
-      window.addEventListener('google-maps-loaded', async () => {
-        console.log('Google Maps API load event received');
-        await initMap();
-        
-        // 初始化完成後，如果有地點資料，立即更新地圖
-        if (places.value && places.value.length > 0) {
-          console.log('地點資料已載入，立即更新地圖');
-          await updateMap();
-        }
-      });
+    console.log('Data loaded, initializing open-source map...');
+    await initMap();
+    if (places.value && places.value.length > 0) {
+      console.log('地點資料已載入，立即更新地圖');
+      await updateMap();
     }
+  } catch (error) {
+    console.error('初始化頁面資料或地圖失敗:', error);
   } finally {
     loading.value = false;
   }
+});
+
+onUnmounted(() => {
+  if (map) {
+    map.remove();
+    map = null;
+  }
+  markersLayer = null;
+  markers = [];
+  routePolyline = null;
 });
 </script>
 
@@ -4548,6 +4404,96 @@ onMounted(async () => {
   
   .photo-remove-btn {
     opacity: 1; // 在手機上總是顯示移除按鈕
+  }
+}
+
+:deep(.itinerary-marker-wrapper) {
+  background: transparent;
+  border: none;
+}
+
+:deep(.itinerary-custom-marker) {
+  position: relative;
+  cursor: pointer;
+
+  .itinerary-marker-label {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -6px);
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    transition: all 0.2s ease;
+  }
+
+  .itinerary-marker-pin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.22));
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+}
+
+:deep(.leaflet-popup-content-wrapper) {
+  border-radius: 16px;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.16);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 4px;
+}
+
+:deep(.leaflet-popup-tip) {
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.1);
+}
+
+:deep(.leaflet-bar) {
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12) !important;
+  a {
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    color: #334155 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: 18px !important;
+    transition: all 0.15s ease;
+    &:hover {
+      background-color: #ffffff !important;
+      color: #3b82f6 !important;
+    }
+  }
+}
+
+:deep(.leaflet-control-attribution) {
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(6px);
+  font-size: 10px !important;
+  color: #94a3b8 !important;
+  padding: 2px 8px !important;
+  border-top-left-radius: 8px;
+  a {
+    color: #64748b !important;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 </style>

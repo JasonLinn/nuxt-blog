@@ -1,39 +1,53 @@
 <template>
-    <div>
-        <div ref="google_map" id="map"></div>
-    </div>
+  <div class="open-map-wrapper">
+    <div ref="mapContainer" id="map" class="map-view"></div>
+  </div>
 </template>
 
-<script>
-export default defineComponent({
-  setup() {
-    const google_map = ref(null)
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 
-    onMounted(() => {
-      if (!google_map.value) throw new Error("Google Map DOM element not found")
-      const existingMap = useGoogleMapHTML().value
+const mapContainer = ref(null)
+let mapInstance = null
 
-      // Append existing Google Map HTML to the DOM or create new one
-      if (existingMap) {
-        google_map.value.appendChild(existingMap)
-      } else {
-        useGoogleMapHTML().value = google_map.value // Save google map html
-        initializeGoogleMap(google_map.value) // Init Google Map
-      }
+onMounted(async () => {
+  if (process.server || !mapContainer.value) return
+
+  try {
+    const L = await import('leaflet')
+    mapInstance = L.map(mapContainer.value, {
+      center: [24.69295, 121.7195],
+      zoom: 12
     })
 
-    return { google_map }
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(mapInstance)
+
+    useGoogleMap().value = mapInstance
+  } catch (error) {
+    console.error('Failed to initialize Leaflet map:', error)
+  }
+})
+
+onUnmounted(() => {
+  if (mapInstance) {
+    mapInstance.remove()
+    mapInstance = null
   }
 })
 </script>
 
 <style scoped>
-#map {
-    /* Define Map measures */
-    height: 600px;
-    width: 100%;
+.open-map-wrapper {
+  width: 100%;
+  height: 100%;
+}
 
-    /* Center Map */
-    margin: auto;
+.map-view {
+  height: 600px;
+  width: 100%;
+  margin: auto;
 }
 </style>

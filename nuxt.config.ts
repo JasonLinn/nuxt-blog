@@ -5,7 +5,7 @@
 // })
 import { resolve } from 'path'
 export default defineNuxtConfig({
-  css: ['~/assets/scss/main.scss'],
+  css: ['~/assets/scss/main.scss', 'leaflet/dist/leaflet.css'],
   modules: [
     'nuxt-icon',
     '@nuxtjs/ngrok',
@@ -44,7 +44,7 @@ export default defineNuxtConfig({
       }
     },
     optimizeDeps: {
-      include: ["@fawmi/vue-google-maps", "fast-deep-equal"],
+      include: ["fast-deep-equal"],
     },
     define: {
       global: 'globalThis',
