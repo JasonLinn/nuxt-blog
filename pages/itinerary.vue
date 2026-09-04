@@ -342,10 +342,10 @@
           
           <!-- 地圖控制項 -->
           <div class="map-controls">
-            <button @click="centerMap" class="btn-control">
+            <button @click="centerMap" class="btn-control" aria-label="重置地圖視野">
               <Icon name="mdi:crosshairs-gps" />
             </button>
-            <button @click="toggleMapType" class="btn-control">
+            <button @click="toggleMapType" class="btn-control" aria-label="切換衛星與標準圖資">
               <Icon name="mdi:layers" />
             </button>
           </div>
@@ -876,6 +876,7 @@ let routePolyline = null;
 let osmTileLayer = null;
 let satelliteTileLayer = null;
 let currentMapType = 'roadmap';
+let updateMapSeq = 0;
 
 // 推薦行程相關 - 使用 useFetch 在頂層載入
 const { data: recommendedItinerariesData, pending: loadingRecommended, error: recommendedError } = await useFetch('/api/recommended-itineraries')
@@ -1770,23 +1771,36 @@ const initMap = async () => {
   await updateMap();
 };
 
+const escapeHtml = (str) => {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 // 創建基本地點資訊的 InfoWindow 內容 - 不載入詳細資料
 const createBasicPlaceInfoWindowContent = (place) => {
   console.log('創建基本地點資訊:', place.name);
 
+  const safeName = escapeHtml(place.name);
+  const safeAddress = escapeHtml(place.address || '地址資訊不詳');
+  const safeId = escapeHtml(place.id);
+
   // 基本照片
-  const basicImageHtml = `<img src="${getPlaceImage(place)}" alt="${place.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
+  const basicImageHtml = `<img src="${getPlaceImage(place)}" alt="${safeName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
 
   return `
     <div style="max-width: 300px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
       <div style="display: flex; gap: 12px; align-items: flex-start;">
         ${basicImageHtml}
         <div style="flex: 1; min-width: 0;">
-          <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937; line-height: 1.3;">${place.name}</h4>
-          <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 13px; line-height: 1.4;">${place.address || '地址資訊不詳'}</p>
+          <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937; line-height: 1.3;">${safeName}</h4>
+          <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 13px; line-height: 1.4;">${safeAddress}</p>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button
-              onclick="window.addPlaceToItinerary('${place.id}')"
+              onclick="window.addPlaceToItinerary('${safeId}')"
               style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s;"
               onmouseover="this.style.background='#059669'"
               onmouseout="this.style.background='#10b981'"
@@ -1908,6 +1922,9 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
     }
   }
 
+  const safeName = escapeHtml(placeDetails.name);
+  const safeId = escapeHtml(placeDetails.id);
+
   // 取得當前時間用於顯示資料新鮮度
   const now = new Date();
   const timeString = now.toLocaleTimeString('zh-TW', { 
@@ -1921,9 +1938,9 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
         const photoUrl = photo.photo_reference 
           ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${photo.photo_reference}&key=${config.public.GOOGLE_MAPS_API_KEY}`
           : getPlaceImage(placeDetails);
-        return `<img src="${photoUrl}" alt="${placeDetails.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 4px;">`;
+        return `<img src="${photoUrl}" alt="${safeName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 4px;">`;
       }).join('')
-    : `<img src="${getPlaceImage(placeDetails)}" alt="${placeDetails.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
+    : `<img src="${getPlaceImage(placeDetails)}" alt="${safeName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
 
   // 生成評分 HTML
   const ratingHtml = placeDetails.rating 
@@ -1972,15 +1989,15 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
         ${placeDetails.reviews.slice(0, 2).map(review => `
           <div style="margin: 4px 0; padding: 4px; background: #f9fafb; border-radius: 4px; font-size: 11px;">
             <div style="display: flex; align-items: center; margin-bottom: 2px;">
-              <strong style="font-size: 11px;">${review.author_name || '匿名用戶'}</strong>
+              <strong style="font-size: 11px;">${escapeHtml(review.author_name || '匿名用戶')}</strong>
               <div style="margin-left: 8px;">
                 ${Array.from({ length: 5 }, (_, i) => 
                   `<span style="color: ${i < (review.rating || 0) ? '#fbbf24' : '#d1d5db'}; font-size: 10px;">★</span>`
                 ).join('')}
               </div>
-              ${review.relative_time_description ? `<span style="margin-left: 8px; color: #9ca3af; font-size: 9px;">${review.relative_time_description}</span>` : ''}
+              ${review.relative_time_description ? `<span style="margin-left: 8px; color: #9ca3af; font-size: 9px;">${escapeHtml(review.relative_time_description)}</span>` : ''}
             </div>
-            <p style="margin: 2px 0; line-height: 1.3; color: #4b5563;">${(review.text || '').length > 100 ? (review.text || '').substring(0, 100) + '...' : (review.text || '無評論內容')}</p>
+            <p style="margin: 2px 0; line-height: 1.3; color: #4b5563;">${escapeHtml((review.text || '').length > 100 ? (review.text || '').substring(0, 100) + '...' : (review.text || '無評論內容'))}</p>
           </div>
         `).join('')}
       </div>
@@ -1999,8 +2016,8 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
   const contactHtml = placeDetails.formatted_phone_number || placeDetails.website
     ? `
       <div style="margin: 8px 0; font-size: 11px;">
-        ${placeDetails.formatted_phone_number ? `<div><strong>電話:</strong> ${placeDetails.formatted_phone_number}</div>` : ''}
-        ${placeDetails.website ? `<div><strong>網站:</strong> <a href="${placeDetails.website}" target="_blank" style="color: #3b82f6;">查看</a></div>` : ''}
+        ${placeDetails.formatted_phone_number ? `<div><strong>電話:</strong> ${escapeHtml(placeDetails.formatted_phone_number)}</div>` : ''}
+        ${placeDetails.website ? `<div><strong>網站:</strong> <a href="${encodeURI(placeDetails.website)}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6;">查看</a></div>` : ''}
       </div>
     `
     : '';
@@ -2015,8 +2032,8 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
   return `
     <div style="max-width: 320px; font-family: system-ui;">
       <div style="margin-bottom: 8px;">
-        <h4 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #1f2937;">${placeDetails.name}</h4>
-        <p style="margin: 0; color: #6b7280; font-size: 12px;">${getCategoryName(placeDetails.category_id)}</p>
+        <h4 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #1f2937;">${safeName}</h4>
+        <p style="margin: 0; color: #6b7280; font-size: 12px;">${escapeHtml(getCategoryName(placeDetails.category_id))}</p>
         ${businessStatusHtml}
         ${ratingHtml}
         ${priceLevelHtml}
@@ -2032,26 +2049,17 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
       ${contactHtml}
       
       <div style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;">
-        <button onclick="window.selectPlaceFromMap('${placeDetails.id}')" 
+        <button onclick="window.selectPlaceFromMap('${safeId}')" 
                 style="background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
           查看詳情
         </button>
-        <button onclick="window.addPlaceToItinerary('${placeDetails.id}')" 
+        <button onclick="window.addPlaceToItinerary('${safeId}')" 
                 style="background: #10b981; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
           加入行程
         </button>
       </div>
     </div>
   `;
-};
-
-const escapeHtml = (str) => {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 };
 
 const updateMap = async () => {
@@ -2061,6 +2069,8 @@ const updateMap = async () => {
     console.log('地圖尚未初始化，跳過更新');
     return;
   }
+
+  const currentSeq = ++updateMapSeq;
 
   // 清除現有標記
   markersLayer.clearLayers();
@@ -2168,6 +2178,8 @@ const updateMap = async () => {
         const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`);
         const data = await res.json();
         
+        if (currentSeq !== updateMapSeq) return;
+
         if (data.code === 'Ok' && data.routes && data.routes[0]) {
           const latLngs = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
           if (routePolyline) {
@@ -2182,6 +2194,7 @@ const updateMap = async () => {
           throw new Error('OSRM route failed');
         }
       } catch (err) {
+        if (currentSeq !== updateMapSeq) return;
         console.warn('OSRM 路線獲取失敗，改用直連線條:', err);
         if (routePolyline) {
           map.removeLayer(routePolyline);
@@ -2348,6 +2361,10 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+    searchTimeout = null;
+  }
   if (map) {
     map.remove();
     map = null;

@@ -555,7 +555,7 @@ const toggleCategory = async (category) => {
 
 // HTML 特殊字元轉義輔助函式
 const escapeHtml = (str) => {
-  return String(str)
+  return String(str || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
