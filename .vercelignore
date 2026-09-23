@@ -7,3 +7,6 @@ node_modules
 *.log
 docs/migration-evidence
 scripts/test-migration-workflows.mjs
+public/uploads
+.claude
+.vscode
