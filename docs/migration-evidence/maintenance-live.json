@@ -1,0 +1,17 @@
+{
+  "at": "2026-09-23T17:19:19.465Z",
+  "results": [
+    {
+      "method": "GET",
+      "status": 503,
+      "retryAfter": "1200",
+      "cache": "no-store"
+    },
+    {
+      "method": "POST",
+      "status": 503,
+      "retryAfter": "1200",
+      "cache": "no-store"
+    }
+  ]
+}

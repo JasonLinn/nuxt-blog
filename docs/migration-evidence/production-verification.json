@@ -1,0 +1,90 @@
+{
+  "at": "2026-09-23T17:25:54.610Z",
+  "passed": true,
+  "routing": {
+    "id": "2373",
+    "targetBefore": 93,
+    "targetAfter": 94,
+    "sourceBefore": 93,
+    "sourceAfter": 93
+  },
+  "results": [
+    {
+      "path": "/api/fetchBnbs",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/fetchBnbDetail",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/homestay-map-data",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/places",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/place-categories",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/yilan-activities",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/features-options",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/recommended-itineraries",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/homestay-availability-v2",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/admin-login",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/homestay-login",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/homestay-auth",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/admin-pending-homestays",
+      "status": 200,
+      "success": true
+    },
+    {
+      "path": "/api/admin/update-availability-v2",
+      "status": 401
+    },
+    {
+      "path": "/api/relative",
+      "status": 200
+    },
+    {
+      "path": "/api/site-stats",
+      "status": 200
+    }
+  ]
+}

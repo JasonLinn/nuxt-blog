@@ -1,0 +1,441 @@
+{
+  "checkedAt": "2026-09-23T17:22:12.950Z",
+  "equal": true,
+  "differences": [],
+  "normalizations": [
+    "Visible column order ignores dropped-column physical slots",
+    "Literal varchar array casts are canonicalized for PG 17 deparser equivalence"
+  ],
+  "source": {
+    "data": {
+      "\"public\".\"cleanup_logs\"": {
+        "rows": 1,
+        "sha256": "17a4bb5ac3192fb989abda37a12d8ae21d1cfa27569401f7678bccdc62c32849"
+      },
+      "\"public\".\"feature_items\"": {
+        "rows": 36,
+        "sha256": "8c6dec7f9f136bf054054f7de546dc79f57038e76f64d302f9a386db8494db23"
+      },
+      "\"public\".\"homestay_availability\"": {
+        "rows": 740,
+        "sha256": "72c936f7192616ad4b301ca99b6677e5388a3079116dbaec9085fefbe5f43389"
+      },
+      "\"public\".\"homestay_availability_rolling\"": {
+        "rows": 4,
+        "sha256": "395e582e3db66ddc27459809ad34200ddf6c5c29bc28cf2a47a814e34194b99f"
+      },
+      "\"public\".\"homestay_availability_sparse\"": {
+        "rows": 5,
+        "sha256": "48d65c37c59c9e40c05f1c723b7c80d5029d8f1f23d54527143ad735d50112a9"
+      },
+      "\"public\".\"homestay_booking_status\"": {
+        "rows": 4,
+        "sha256": "c88d12bca0fa795244cd85cb62de2ad10c4a94e9ff04a11ec1f1ecff0579c3a4"
+      },
+      "\"public\".\"homestay_bookings\"": {
+        "rows": 1,
+        "sha256": "8cce7b1d6179a27ca80a620885826b07bfd83ec494810bf14e51e3e3f279197a"
+      },
+      "\"public\".\"homestay_pricing\"": {
+        "rows": 160,
+        "sha256": "a753e768c8e729ab44813039747d33db42a158730128fe2492613af91ead4e8a"
+      },
+      "\"public\".\"homestay_types\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"homestays\"": {
+        "rows": 51,
+        "sha256": "d2c20c3e90f1ed01e4498ba54396f3d8ba5e4095a186c70d356158ae550f7012"
+      },
+      "\"public\".\"itineraries\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"itinerary_items\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"itinerary_ratings\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"place_categories\"": {
+        "rows": 6,
+        "sha256": "315f4a3ac2a99cc08219feb15e0398ed06919d44667c9e75e60410e86b5f9f40"
+      },
+      "\"public\".\"place_images\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"places\"": {
+        "rows": 23,
+        "sha256": "edc948732829f6b861e0a4706bfe163964347983eb013a1c042c0a996aed584d"
+      },
+      "\"public\".\"recommended_itineraries\"": {
+        "rows": 1,
+        "sha256": "fa6d65c7b268d0bf665f18eb653df6b3906872736983873f0f131ba32b305f32"
+      },
+      "\"public\".\"referrals\"": {
+        "rows": 126,
+        "sha256": "83244a2d396496e01c7e3d99edd16edec33e0835f5adbfb2265b7f734063ab83"
+      },
+      "\"public\".\"yilan_activities\"": {
+        "rows": 35,
+        "sha256": "8c5af86a2c4b7b24bbf679df8126abf4070c8a22974ea8462f0f712a56d43172"
+      }
+    },
+    "sequences": {
+      "\"public\".\"cleanup_logs_id_seq\"": {
+        "last_value": "1",
+        "is_called": true
+      },
+      "\"public\".\"feature_items_id_seq\"": {
+        "last_value": "36",
+        "is_called": true
+      },
+      "\"public\".\"homestay_availability_id_seq\"": {
+        "last_value": "1480",
+        "is_called": true
+      },
+      "\"public\".\"homestay_availability_rolling_id_seq\"": {
+        "last_value": "8",
+        "is_called": true
+      },
+      "\"public\".\"homestay_availability_sparse_id_seq\"": {
+        "last_value": "5",
+        "is_called": true
+      },
+      "\"public\".\"homestay_booking_status_id_seq\"": {
+        "last_value": "8",
+        "is_called": true
+      },
+      "\"public\".\"homestay_bookings_id_seq\"": {
+        "last_value": "2",
+        "is_called": true
+      },
+      "\"public\".\"homestay_pricing_id_seq\"": {
+        "last_value": "475",
+        "is_called": true
+      },
+      "\"public\".\"homestay_types_id_seq\"": {
+        "last_value": "13",
+        "is_called": true
+      },
+      "\"public\".\"itineraries_id_seq\"": {
+        "last_value": "1",
+        "is_called": false
+      },
+      "\"public\".\"itinerary_items_id_seq\"": {
+        "last_value": "1",
+        "is_called": false
+      },
+      "\"public\".\"itinerary_ratings_id_seq\"": {
+        "last_value": "1",
+        "is_called": false
+      },
+      "\"public\".\"place_categories_id_seq\"": {
+        "last_value": "6",
+        "is_called": true
+      },
+      "\"public\".\"place_images_id_seq\"": {
+        "last_value": "1",
+        "is_called": false
+      },
+      "\"public\".\"places_id_seq\"": {
+        "last_value": "24",
+        "is_called": true
+      },
+      "\"public\".\"recommended_itineraries_id_seq\"": {
+        "last_value": "4",
+        "is_called": true
+      },
+      "\"public\".\"yilan_activities_id_seq\"": {
+        "last_value": "62",
+        "is_called": true
+      }
+    },
+    "metadata": {
+      "columns": {
+        "count": 253,
+        "sha256": "29127671eacac192d7d6676d8f46d79d878f22c85144925d26d26adb7e32e409"
+      },
+      "indexes": {
+        "count": 69,
+        "sha256": "2fceadf9fb3ba16721f824ab0f8235b64369a3b2f65df5760c3f33f5ae88c324"
+      },
+      "constraints": {
+        "count": 45,
+        "sha256": "7b8af82d8974da02d800da213acced98da7a1cccc68eaae96284d03d6914f6dd"
+      },
+      "functions": {
+        "count": 3,
+        "sha256": "1775b01d2e9b21d3ace7af0992a0621b42a6a36a97ebdda34263f26d86dd5acd"
+      },
+      "triggers": {
+        "count": 1,
+        "sha256": "0ca02503e5111efc2b21e22a89ceb2af69d87a2f88a4a0cbeeed61f88d5c7733"
+      },
+      "views": {
+        "count": 1,
+        "sha256": "5fac856aa720d0f35941c5fcd528213f4a9178ac9f8d962f252f39d3897f6000"
+      },
+      "relations": {
+        "count": 106,
+        "sha256": "b1e502eded35b4ab563a7e9abaa5d224311bbc74722d984c69d376fe79aeec28"
+      },
+      "sequenceDefinitions": {
+        "count": 17,
+        "sha256": "0f875a8a9ae23bd2f852676e5120bc60c6752298a3c3b599b5fd0a35b9bb6f4c"
+      },
+      "policies": {
+        "count": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "defaultPrivileges": {
+        "count": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "extensions": {
+        "count": 1,
+        "sha256": "87af5806acc6c2bd809f28a80f5a5f373f78cdf5280927604a2aa64a099f01e9"
+      },
+      "schemas": {
+        "count": 1,
+        "sha256": "54411cf05d1a7995fc97a9c91bbd2ccc25f758b8e719ee3dd1bc0faffe19dfb2"
+      },
+      "functionPermissions": {
+        "count": 3,
+        "sha256": "cd804ee77f6db379123b89c70b07bc5cdf06557ad56f1c518dbbd245feffb37d"
+      },
+      "memberships": {
+        "count": 1,
+        "sha256": "cc32779e552d5c246385d07b2ab82effa6fd774e4e26ac4c3bd57c2885e44345"
+      },
+      "databasePrivileges": {
+        "count": 1,
+        "sha256": "7fe8a893e6867ac74f9128b6111b1169a474c3d53077e122b08d580797ec6969"
+      },
+      "role": {
+        "count": 1,
+        "sha256": "0991aa3af43dee44f21d607ebb919f4cfdd6ad613008c42cb723220c3a7531d1"
+      }
+    }
+  },
+  "target": {
+    "data": {
+      "\"public\".\"cleanup_logs\"": {
+        "rows": 1,
+        "sha256": "17a4bb5ac3192fb989abda37a12d8ae21d1cfa27569401f7678bccdc62c32849"
+      },
+      "\"public\".\"feature_items\"": {
+        "rows": 36,
+        "sha256": "8c6dec7f9f136bf054054f7de546dc79f57038e76f64d302f9a386db8494db23"
+      },
+      "\"public\".\"homestay_availability\"": {
+        "rows": 740,
+        "sha256": "72c936f7192616ad4b301ca99b6677e5388a3079116dbaec9085fefbe5f43389"
+      },
+      "\"public\".\"homestay_availability_rolling\"": {
+        "rows": 4,
+        "sha256": "395e582e3db66ddc27459809ad34200ddf6c5c29bc28cf2a47a814e34194b99f"
+      },
+      "\"public\".\"homestay_availability_sparse\"": {
+        "rows": 5,
+        "sha256": "48d65c37c59c9e40c05f1c723b7c80d5029d8f1f23d54527143ad735d50112a9"
+      },
+      "\"public\".\"homestay_booking_status\"": {
+        "rows": 4,
+        "sha256": "c88d12bca0fa795244cd85cb62de2ad10c4a94e9ff04a11ec1f1ecff0579c3a4"
+      },
+      "\"public\".\"homestay_bookings\"": {
+        "rows": 1,
+        "sha256": "8cce7b1d6179a27ca80a620885826b07bfd83ec494810bf14e51e3e3f279197a"
+      },
+      "\"public\".\"homestay_pricing\"": {
+        "rows": 160,
+        "sha256": "a753e768c8e729ab44813039747d33db42a158730128fe2492613af91ead4e8a"
+      },
+      "\"public\".\"homestay_types\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"homestays\"": {
+        "rows": 51,
+        "sha256": "d2c20c3e90f1ed01e4498ba54396f3d8ba5e4095a186c70d356158ae550f7012"
+      },
+      "\"public\".\"itineraries\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"itinerary_items\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"itinerary_ratings\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"place_categories\"": {
+        "rows": 6,
+        "sha256": "315f4a3ac2a99cc08219feb15e0398ed06919d44667c9e75e60410e86b5f9f40"
+      },
+      "\"public\".\"place_images\"": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "\"public\".\"places\"": {
+        "rows": 23,
+        "sha256": "edc948732829f6b861e0a4706bfe163964347983eb013a1c042c0a996aed584d"
+      },
+      "\"public\".\"recommended_itineraries\"": {
+        "rows": 1,
+        "sha256": "fa6d65c7b268d0bf665f18eb653df6b3906872736983873f0f131ba32b305f32"
+      },
+      "\"public\".\"referrals\"": {
+        "rows": 126,
+        "sha256": "83244a2d396496e01c7e3d99edd16edec33e0835f5adbfb2265b7f734063ab83"
+      },
+      "\"public\".\"yilan_activities\"": {
+        "rows": 35,
+        "sha256": "8c5af86a2c4b7b24bbf679df8126abf4070c8a22974ea8462f0f712a56d43172"
+      }
+    },
+    "sequences": {
+      "\"public\".\"cleanup_logs_id_seq\"": {
+        "last_value": "1",
+        "is_called": true
+      },
+      "\"public\".\"feature_items_id_seq\"": {
+        "last_value": "36",
+        "is_called": true
+      },
+      "\"public\".\"homestay_availability_id_seq\"": {
+        "last_value": "1480",
+        "is_called": true
+      },
+      "\"public\".\"homestay_availability_rolling_id_seq\"": {
+        "last_value": "8",
+        "is_called": true
+      },
+      "\"public\".\"homestay_availability_sparse_id_seq\"": {
+        "last_value": "5",
+        "is_called": true
+      },
+      "\"public\".\"homestay_booking_status_id_seq\"": {
+        "last_value": "8",
+        "is_called": true
+      },
+      "\"public\".\"homestay_bookings_id_seq\"": {
+        "last_value": "2",
+        "is_called": true
+      },
+      "\"public\".\"homestay_pricing_id_seq\"": {
+        "last_value": "475",
+        "is_called": true
+      },
+      "\"public\".\"homestay_types_id_seq\"": {
+        "last_value": "13",
+        "is_called": true
+      },
+      "\"public\".\"itineraries_id_seq\"": {
+        "last_value": "1",
+        "is_called": false
+      },
+      "\"public\".\"itinerary_items_id_seq\"": {
+        "last_value": "1",
+        "is_called": false
+      },
+      "\"public\".\"itinerary_ratings_id_seq\"": {
+        "last_value": "1",
+        "is_called": false
+      },
+      "\"public\".\"place_categories_id_seq\"": {
+        "last_value": "6",
+        "is_called": true
+      },
+      "\"public\".\"place_images_id_seq\"": {
+        "last_value": "1",
+        "is_called": false
+      },
+      "\"public\".\"places_id_seq\"": {
+        "last_value": "24",
+        "is_called": true
+      },
+      "\"public\".\"recommended_itineraries_id_seq\"": {
+        "last_value": "4",
+        "is_called": true
+      },
+      "\"public\".\"yilan_activities_id_seq\"": {
+        "last_value": "62",
+        "is_called": true
+      }
+    },
+    "metadata": {
+      "columns": {
+        "count": 253,
+        "sha256": "29127671eacac192d7d6676d8f46d79d878f22c85144925d26d26adb7e32e409"
+      },
+      "indexes": {
+        "count": 69,
+        "sha256": "2fceadf9fb3ba16721f824ab0f8235b64369a3b2f65df5760c3f33f5ae88c324"
+      },
+      "constraints": {
+        "count": 45,
+        "sha256": "7b8af82d8974da02d800da213acced98da7a1cccc68eaae96284d03d6914f6dd"
+      },
+      "functions": {
+        "count": 3,
+        "sha256": "1775b01d2e9b21d3ace7af0992a0621b42a6a36a97ebdda34263f26d86dd5acd"
+      },
+      "triggers": {
+        "count": 1,
+        "sha256": "0ca02503e5111efc2b21e22a89ceb2af69d87a2f88a4a0cbeeed61f88d5c7733"
+      },
+      "views": {
+        "count": 1,
+        "sha256": "5fac856aa720d0f35941c5fcd528213f4a9178ac9f8d962f252f39d3897f6000"
+      },
+      "relations": {
+        "count": 106,
+        "sha256": "b1e502eded35b4ab563a7e9abaa5d224311bbc74722d984c69d376fe79aeec28"
+      },
+      "sequenceDefinitions": {
+        "count": 17,
+        "sha256": "0f875a8a9ae23bd2f852676e5120bc60c6752298a3c3b599b5fd0a35b9bb6f4c"
+      },
+      "policies": {
+        "count": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "defaultPrivileges": {
+        "count": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "extensions": {
+        "count": 1,
+        "sha256": "87af5806acc6c2bd809f28a80f5a5f373f78cdf5280927604a2aa64a099f01e9"
+      },
+      "schemas": {
+        "count": 1,
+        "sha256": "54411cf05d1a7995fc97a9c91bbd2ccc25f758b8e719ee3dd1bc0faffe19dfb2"
+      },
+      "functionPermissions": {
+        "count": 3,
+        "sha256": "cd804ee77f6db379123b89c70b07bc5cdf06557ad56f1c518dbbd245feffb37d"
+      },
+      "memberships": {
+        "count": 1,
+        "sha256": "cc32779e552d5c246385d07b2ab82effa6fd774e4e26ac4c3bd57c2885e44345"
+      },
+      "databasePrivileges": {
+        "count": 1,
+        "sha256": "7fe8a893e6867ac74f9128b6111b1169a474c3d53077e122b08d580797ec6969"
+      },
+      "role": {
+        "count": 1,
+        "sha256": "0991aa3af43dee44f21d607ebb919f4cfdd6ad613008c42cb723220c3a7531d1"
+      }
+    }
+  }
+}
