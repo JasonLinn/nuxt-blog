@@ -87,7 +87,7 @@ npm run dev
 
 ### Vercel 部署
 1. 在 Vercel 專案設定中新增環境變數
-2. 確保 `DATABASE_URL` 和 `GOOGLE_MAPS_API_KEY` 已設定
+2. 確保 `HOMESTAY_DATABASE_URL` / `MARKETING_DATABASE_URL` 和 `GOOGLE_MAPS_API_KEY` 已設定
 
 ### 其他平台
 確保所有環境變數都已正確設定在部署平台上。

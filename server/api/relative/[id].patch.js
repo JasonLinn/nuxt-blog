@@ -1,3 +1,5 @@
+import databaseConfig from '../../../utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 import { Pool, neonConfig } from '@neondatabase/serverless'
 
 // 強制使用 HTTP fetch 連線，避免 serverless 環境 WebSocket 問題
@@ -5,7 +7,7 @@ neonConfig.webSocket = false;
 
 // 優惠券資料庫連線
 const couponPool = new Pool({
-  connectionString: 'postgresql://nuxt-marketing_owner:ys7ZNVhOrg9c@ep-rough-voice-a1ele0z6-pooler.ap-southeast-1.aws.neon.tech/nuxt-marketing'
+  connectionString: databaseUrl('marketing')
 })
 
 export default defineEventHandler(async (event) => {

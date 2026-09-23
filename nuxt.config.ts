@@ -18,7 +18,6 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     // 只在服務器端可用的私有鍵
-    DATABASE_URL: process.env.DATABASE_URL,
     GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_USERNAME: process.env.GITHUB_USERNAME,

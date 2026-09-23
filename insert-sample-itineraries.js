@@ -1,8 +1,10 @@
+import databaseConfig from './utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 // 插入推薦行程測試資料
 const { createPool } = require('@vercel/postgres');
 
 // 你需要設定實際的資料庫連接字串
-const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+const connectionString = databaseUrl('homestay');
 
 async function insertSampleData() {
   const pool = createPool({

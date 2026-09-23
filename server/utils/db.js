@@ -1,3 +1,5 @@
+import databaseConfig from '../../utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 import { Pool, neonConfig } from '@neondatabase/serverless'
 import ws from 'ws'
 
@@ -6,8 +8,8 @@ if (typeof window === 'undefined') {
   neonConfig.webSocketConstructor = ws
 }
 
-// 使用明確的連線字串，確保連線正常 // DB使用民宿資料庫
-const connectionString = 'postgresql://neondb_owner:npg_DSt86GUynwli@ep-fancy-snow-a8232ddc-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&charset=utf8'
+// 民宿及共用景點、活動、行程使用專用連線；不回退到優惠券資料庫。
+const connectionString = databaseUrl('homestay')
 
 export const pool = new Pool({ 
   connectionString,
@@ -25,7 +27,7 @@ export const query = async (text, params = []) => {
     const result = await pool.query(text, params)
     return result
   } catch (error) {
-    console.error('Database query error:', error)
+    console.error('Database query error:', { code: error.code || 'QUERY_FAILED' })
     throw error
   }
 }

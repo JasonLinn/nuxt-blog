@@ -1,3 +1,4 @@
+const { databaseUrl } = require('../utils/database-config.cjs');
 // 建立站點瀏覽計數表（執行於 coupon DB）
 const { Pool } = require('pg')
 const fs = require('fs')
@@ -5,7 +6,7 @@ const path = require('path')
 
 const pool = new Pool({
   connectionString:
-    'postgresql://nuxt-marketing_owner:ys7ZNVhOrg9c@ep-rough-voice-a1ele0z6-pooler.ap-southeast-1.aws.neon.tech/nuxt-marketing?sslmode=require&channel_binding=require',
+    databaseUrl('marketing'),
   ssl: { rejectUnauthorized: false },
 })
 

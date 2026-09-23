@@ -47,7 +47,8 @@ yarn install
 
 ```bash
 # 資料庫連接
-DATABASE_URL=postgresql://username:password@host:port/database
+HOMESTAY_DATABASE_URL=postgresql://ROLE:PASSWORD@HOMESTAY_HOST/neondb?sslmode=require
+MARKETING_DATABASE_URL=postgresql://ROLE:PASSWORD@MARKETING_HOST/nuxt-marketing?sslmode=require
 
 # Google Maps API
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
@@ -382,7 +383,7 @@ npm run generate  # 靜態生成
 ### 常見問題
 
 1. **資料庫連接失敗**
-   - 檢查 `DATABASE_URL` 環境變數
+   - 檢查 `HOMESTAY_DATABASE_URL` / `MARKETING_DATABASE_URL` 環境變數
    - 確認資料庫伺服器可訪問
    - 檢查防火牆設定
 

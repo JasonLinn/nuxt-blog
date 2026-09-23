@@ -1,9 +1,10 @@
+const { databaseUrl } = require('./utils/database-config.cjs');
 require('dotenv').config();
 const { Pool } = require('pg');
 
 // 使用與 server/utils/db.js 相同的連線設定
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: databaseUrl('homestay'),
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 

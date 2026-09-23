@@ -1,0 +1,130 @@
+{
+  "checkedAt": "2026-09-23T15:51:35.306Z",
+  "results": [
+    {
+      "name": "admin login",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "reject anonymous review",
+      "status": 401,
+      "passed": true
+    },
+    {
+      "name": "admin approve",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "homestay password login",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "homestay auth cookie",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "reject invalid password",
+      "status": 401,
+      "passed": true
+    },
+    {
+      "name": "reject anonymous edit",
+      "status": 401,
+      "passed": true
+    },
+    {
+      "name": "owner edit",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "reject anonymous room update",
+      "status": 401,
+      "passed": true
+    },
+    {
+      "name": "reject another property room update",
+      "status": 403,
+      "passed": true
+    },
+    {
+      "name": "owner room update",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "room availability reread",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "admin room update",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "detail after edit",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "/api/fetchBnbs",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "/api/homestay-map-data",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "/api/places",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "/api/place-categories",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "/api/yilan-activities",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "/api/features-options",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "/api/recommended-itineraries",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "/api/admin/system-status",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "/api/search-available-homestays",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "admin itinerary edit",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "admin revoke approval",
+      "status": 200,
+      "passed": true
+    }
+  ]
+}

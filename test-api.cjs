@@ -1,6 +1,7 @@
+const { databaseUrl } = require('./utils/database-config.cjs');
 const { Client } = require('pg');
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_DSt86GUynwli@ep-fancy-snow-a8232ddc-pooler.eastus2.azure.neon.tech/neondb?sslmode=require';
+const connectionString = databaseUrl('homestay');
 
 async function testApi() {
   const client = new Client({

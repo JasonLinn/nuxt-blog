@@ -1,8 +1,10 @@
+import databaseConfig from '../utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 import pg from 'pg';
 
 const { Pool } = pg;
 const couponPool = new Pool({
-    connectionString: 'postgresql://nuxt-marketing_owner:ys7ZNVhOrg9c@ep-rough-voice-a1ele0z6-pooler.ap-southeast-1.aws.neon.tech/nuxt-marketing?sslmode=require&channel_binding=require',
+    connectionString: databaseUrl('marketing'),
     ssl: { rejectUnauthorized: false }
 });
 

@@ -1,8 +1,10 @@
+import databaseConfig from './utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 import pkg from 'pg';
 const { Pool } = pkg;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: databaseUrl('homestay'),
   ssl: { rejectUnauthorized: false }
 });
 

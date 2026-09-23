@@ -1,3 +1,5 @@
+import databaseConfig from '../../../utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 import { defineEventHandler, readBody, createError } from 'h3'
 import pg from 'pg'
 import dotenv from 'dotenv'
@@ -7,7 +9,7 @@ dotenv.config()
 
 // 創建數據庫連接池
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL
+  connectionString: databaseUrl('marketing')
 })
 
 export default defineEventHandler(async (event) => {

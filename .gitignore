@@ -26,3 +26,4 @@ logs
 # Uploaded files
 public/uploads/
 .claude/settings.local.json
+.vercel/

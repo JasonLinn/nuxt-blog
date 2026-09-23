@@ -36,7 +36,8 @@ GITHUB_REPO=用來儲存圖片的倉庫名稱
 
 ```bash
 # 資料庫 (必需)
-DATABASE_URL=postgresql://username:password@host:port/database
+HOMESTAY_DATABASE_URL=postgresql://ROLE:PASSWORD@HOMESTAY_HOST/neondb?sslmode=require
+MARKETING_DATABASE_URL=postgresql://ROLE:PASSWORD@MARKETING_HOST/nuxt-marketing?sslmode=require
 
 # Google Maps (選填)
 GOOGLE_MAPS_API_KEY=你的Google地圖API金鑰

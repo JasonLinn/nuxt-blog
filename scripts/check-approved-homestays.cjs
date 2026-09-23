@@ -1,3 +1,4 @@
+const { databaseUrl } = require('../utils/database-config.cjs');
 const { Pool, neonConfig } = require('@neondatabase/serverless')
 const ws = require('ws')
 
@@ -7,7 +8,7 @@ if (typeof window === 'undefined') {
 }
 
 // 資料庫連接配置
-const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_DSt86GUynwli@ep-fancy-snow-a8232ddc-pooler.eastus2.azure.neon.tech/neondb?sslmode=require'
+const connectionString = databaseUrl('homestay')
 const pool = new Pool({ 
   connectionString,
   max: 10,

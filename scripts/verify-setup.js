@@ -18,7 +18,8 @@ console.log('🔍 檢查系統設定...\n')
 // 檢查環境變數
 console.log('📋 環境變數檢查：')
 const requiredEnvVars = [
-  'DATABASE_URL',
+  'HOMESTAY_DATABASE_URL',
+  'MARKETING_DATABASE_URL',
   'GOOGLE_MAPS_API_KEY'
 ]
 
@@ -26,10 +27,7 @@ let envVarsOk = true
 requiredEnvVars.forEach(varName => {
   const value = process.env[varName]
   if (value) {
-    // 只顯示前幾個字元，保護敏感資訊
-    const displayValue = varName === 'DATABASE_URL' || varName === 'GOOGLE_MAPS_API_KEY'
-      ? value.substring(0, 10) + '...'
-      : value
+    const displayValue = '[SET]'
     console.log(`  ✅ ${varName}: ${displayValue}`)
   } else {
     console.log(`  ❌ ${varName}: 未設定`)

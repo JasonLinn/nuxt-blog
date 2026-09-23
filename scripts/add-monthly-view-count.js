@@ -1,10 +1,12 @@
+import databaseConfig from '../utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 import pg from 'pg';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const { Pool } = pg;
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: databaseUrl('marketing'),
   ssl: { rejectUnauthorized: false }
 });
 

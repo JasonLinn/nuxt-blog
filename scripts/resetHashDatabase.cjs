@@ -1,3 +1,4 @@
+const { databaseUrl } = require('../utils/database-config.cjs');
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
 
@@ -6,7 +7,7 @@ dotenv.config();
 
 async function resetHashDatabase() {
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
+    connectionString: databaseUrl('marketing')
   });
 
   try {

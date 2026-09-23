@@ -1,3 +1,5 @@
+import databaseConfig from '../../../../utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 // 刪除推薦行程
 import pg from 'pg';
 const { Pool } = pg;
@@ -5,8 +7,7 @@ import jwt from 'jsonwebtoken'
 
 // 獲取 Neon 資料庫連接字串
 const getConnectionString = () => {
-  const config = useRuntimeConfig();
-  return config.DATABASE_URL || process.env.DATABASE_URL;
+  return databaseUrl('homestay');
 };
 
 export default defineEventHandler(async (event) => {

@@ -1,3 +1,5 @@
+import databaseConfig from './database-config.cjs';
+const { databaseUrl } = databaseConfig;
 import { Pool, PoolClient } from 'pg'
 
 interface HashItem {
@@ -16,7 +18,7 @@ class HashDatabase {
 
   constructor() {
     this.pool = new Pool({
-      connectionString: process.env.DATABASE_URL || 'postgresql://user:password@ap-southeast-1.aws.neon.tech/nuxt-marketing'
+      connectionString: databaseUrl('marketing')
     })
   }
 

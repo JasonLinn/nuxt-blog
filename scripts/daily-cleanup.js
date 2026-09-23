@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import databaseConfig from '../utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 
 /**
  * 每日自動清理腳本
@@ -19,10 +21,10 @@ const { Pool } = pg;
 dotenv.config();
 
 async function runDailyCleanup() {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = databaseUrl('homestay');
   
   if (!connectionString) {
-    console.error('❌ DATABASE_URL 環境變數未設定');
+    console.error('❌ HOMESTAY_DATABASE_URL 環境變數未設定');
     process.exit(1);
   }
 

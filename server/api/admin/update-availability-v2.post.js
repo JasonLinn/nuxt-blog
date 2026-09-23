@@ -1,4 +1,7 @@
+import databaseConfig from '../../../utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
 import pg from 'pg';
+import jwt from 'jsonwebtoken';
 const { Pool } = pg;
 
 /**
@@ -11,8 +14,7 @@ const { Pool } = pg;
 
 // 獲取 Neon 資料庫連接字串
 const getConnectionString = () => {
-  const config = useRuntimeConfig();
-  return config.DATABASE_URL || process.env.DATABASE_URL;
+  return databaseUrl('homestay');
 };
 
 // 驗證日期格式
@@ -22,6 +24,19 @@ const isValidDate = (dateString) => {
 };
 
 export default defineEventHandler(async (event) => {
+  // Restoring this route's database connection must not expose anonymous writes.
+  const adminToken = getCookie(event, 'admin_access_token');
+  const homestayToken = getCookie(event, 'homestay_access_token');
+  let identity;
+  try {
+    const decoded = adminToken
+      ? jwt.verify(adminToken, 'JWT_SIGN_SECRET_ADMIN_2024')
+      : jwt.verify(homestayToken || '', 'JWT_SIGN_SECRET_HOMESTAY_2024');
+    identity = decoded.data;
+    if (identity?.type !== (adminToken ? 'admin' : 'homestay')) throw new Error('Invalid role');
+  } catch {
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
+  }
   // 只允許 POST 方法
   if (getMethod(event) !== 'POST') {
     throw createError({
@@ -32,6 +47,9 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
   const { homestayId, updates } = body;
+  if (identity.type === 'homestay' && String(identity.id) !== String(homestayId)) {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' });
+  }
 
   console.log('=== 管理員更新可用性狀態 API v2 ===');
   console.log('參數:', { homestayId, updates: updates?.length });

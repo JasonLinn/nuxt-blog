@@ -1,10 +1,15 @@
-const { Pool } = require('pg')
-const fs = require('fs')
-const path = require('path')
+import databaseConfig from '../utils/database-config.cjs';
+const { databaseUrl } = databaseConfig;
+import pg from 'pg'
+const { Pool } = pg
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // 資料庫連接配置（根據您的實際配置調整）
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/your_database',
+  connectionString: databaseUrl('marketing'),
 })
 
 async function runMigration() {
