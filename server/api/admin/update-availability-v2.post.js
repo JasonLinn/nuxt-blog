@@ -30,8 +30,8 @@ export default defineEventHandler(async (event) => {
   let identity;
   try {
     const decoded = adminToken
-      ? jwt.verify(adminToken, 'JWT_SIGN_SECRET_ADMIN_2024')
-      : jwt.verify(homestayToken || '', 'JWT_SIGN_SECRET_HOMESTAY_2024');
+      ? jwt.verify(adminToken, getJwtSecret('admin', event))
+      : jwt.verify(homestayToken || '', getJwtSecret('homestay', event));
     identity = decoded.data;
     if (identity?.type !== (adminToken ? 'admin' : 'homestay')) throw new Error('Invalid role');
   } catch {

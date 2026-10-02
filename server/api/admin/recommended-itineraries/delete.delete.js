@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      const decoded = jwt.verify(accessToken, 'JWT_SIGN_SECRET_ADMIN_2024')
+      const decoded = jwt.verify(accessToken, getJwtSecret('admin', event))
       if (!decoded.data || decoded.data.type !== 'admin') {
         throw createError({
           statusCode: 401,

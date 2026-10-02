@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
         exp: expires,
         data: jwtTokenPayload
       },
-      'JWT_SIGN_SECRET_ADMIN_2024'
+      getJwtSecret('admin', event)
     );
 
     // 設置Cookie

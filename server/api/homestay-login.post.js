@@ -81,7 +81,7 @@ export default defineEventHandler(async (event) => {
         exp: expires,
         data: jwtTokenPayload
       },
-      'JWT_SIGN_SECRET_HOMESTAY_2024'
+      getJwtSecret('homestay', event)
     );
 
     // 設置Cookie

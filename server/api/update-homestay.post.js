@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const decoded = jwt.verify(accessToken, 'JWT_SIGN_SECRET_HOMESTAY_2024');
+    const decoded = jwt.verify(accessToken, getJwtSecret('homestay', event));
     
     if (!decoded.data || decoded.data.type !== 'homestay') {
       throw createError({

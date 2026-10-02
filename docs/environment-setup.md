@@ -39,6 +39,11 @@ GITHUB_REPO=用來儲存圖片的倉庫名稱
 HOMESTAY_DATABASE_URL=postgresql://ROLE:PASSWORD@HOMESTAY_HOST/neondb?sslmode=require
 MARKETING_DATABASE_URL=postgresql://ROLE:PASSWORD@MARKETING_HOST/nuxt-marketing?sslmode=require
 
+# JWT 簽章密鑰 (必需；每種 token 使用不同的隨機值)
+JWT_SECRET_ADMIN=<openssl rand -base64 48 的輸出>
+JWT_SECRET_HOMESTAY=<openssl rand -base64 48 的輸出>
+JWT_SECRET_USER=<openssl rand -base64 48 的輸出>
+
 # Google Maps (選填)
 GOOGLE_MAPS_API_KEY=你的Google地圖API金鑰
 
@@ -56,6 +61,8 @@ NGROK_AUTHTOKEN=你的ngrok權杖
 # Line Bot (選填)
 CHANNEL_ACCESS_TOKEN=你的Line Bot權杖
 ```
+
+部署前，請在部署環境（例如 Vercel 或 Netlify）設定三個全新的 JWT 密鑰。舊管理員密鑰 `JWT_SIGN_SECRET_ADMIN_2024` 已存在於 Git 歷史中，必須視為已洩漏；請為每個變數各自執行 `openssl rand -base64 48` 產生不同值。更換密鑰後，既有管理員、民宿及一般使用者 token 都會失效，需重新登入。
 
 ## 重新啟動
 

@@ -19,6 +19,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // 只在服務器端可用的私有鍵
     GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+    JWT_SECRET_ADMIN: process.env.JWT_SECRET_ADMIN,
+    JWT_SECRET_HOMESTAY: process.env.JWT_SECRET_HOMESTAY,
+    JWT_SECRET_USER: process.env.JWT_SECRET_USER,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_USERNAME: process.env.GITHUB_USERNAME,
     GITHUB_REPO: process.env.GITHUB_REPO,
