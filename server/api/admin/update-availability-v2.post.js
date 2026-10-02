@@ -1,8 +1,8 @@
 import databaseConfig from '../../../utils/database-config.cjs';
-const { databaseUrl } = databaseConfig;
 import pg from 'pg';
-import jwt from 'jsonwebtoken';
+import { requireAdminRole, requireHomestayRole } from '../../utils/requireRole.js';
 const { Pool } = pg;
+const { databaseUrl } = databaseConfig;
 
 /**
  * 管理員更新民宿可用性狀態 API (v2 - 使用陣列結構)
@@ -26,14 +26,9 @@ const isValidDate = (dateString) => {
 export default defineEventHandler(async (event) => {
   // Restoring this route's database connection must not expose anonymous writes.
   const adminToken = getCookie(event, 'admin_access_token');
-  const homestayToken = getCookie(event, 'homestay_access_token');
   let identity;
   try {
-    const decoded = adminToken
-      ? jwt.verify(adminToken, getJwtSecret('admin', event))
-      : jwt.verify(homestayToken || '', getJwtSecret('homestay', event));
-    identity = decoded.data;
-    if (identity?.type !== (adminToken ? 'admin' : 'homestay')) throw new Error('Invalid role');
+    identity = adminToken ? requireAdminRole(event) : requireHomestayRole(event);
   } catch {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }

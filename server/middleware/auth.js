@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken'
+import { verifyJwt } from '../utils/jwtSecret.js'
 
 const urls = [
   {
@@ -35,7 +35,7 @@ export default defineEventHandler((event) => {
 
   if (jwtToken) {
     try {
-      const { data: user } = jwt.verify(jwtToken, getJwtSecret('user', event))
+      const { data: user } = verifyJwt(jwtToken, 'user', event)
 
       event.context.auth = {
         user

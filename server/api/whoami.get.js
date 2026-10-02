@@ -1,10 +1,8 @@
-import jwt from 'jsonwebtoken'
+import { requireRole } from '../utils/requireRole.js'
 
 export default defineEventHandler((event) => {
-  const jwtToken = getCookie(event, 'access_token')
-
   try {
-    const { data: userInfo } = jwt.verify(jwtToken, getJwtSecret('user', event))
+    const userInfo = requireRole(event, 'user', 'access_token')
 
     return {
       id: userInfo.id,
