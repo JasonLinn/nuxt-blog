@@ -35,7 +35,7 @@ export default defineEventHandler((event) => {
 
   if (jwtToken) {
     try {
-      const { data: user } = jwt.verify(jwtToken, 'JWT_SIGN_SECRET_PLEASE_REPLACE_WITH_YOUR_KEY')
+      const { data: user } = jwt.verify(jwtToken, getJwtSecret('user', event))
 
       event.context.auth = {
         user

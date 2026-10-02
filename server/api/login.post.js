@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
       exp: expires,
       data: jwtTokenPayload
     },
-    'JWT_SIGN_SECRET_PLEASE_REPLACE_WITH_YOUR_KEY'
+    getJwtSecret('user', event)
   )
 
   setCookie(event, 'access_token', jwtToken, {

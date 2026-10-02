@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken'
 
-const ADMIN_JWT_SECRET = 'JWT_SIGN_SECRET_ADMIN_2024'
-
 export const requireAdmin = (event) => {
   const accessToken = getCookie(event, 'admin_access_token')
 
@@ -13,7 +11,7 @@ export const requireAdmin = (event) => {
   }
 
   try {
-    const decoded = jwt.verify(accessToken, ADMIN_JWT_SECRET)
+    const decoded = jwt.verify(accessToken, getJwtSecret('admin', event))
 
     if (!decoded.data || decoded.data.type !== 'admin') {
       throw new Error('Invalid admin token')
