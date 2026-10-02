@@ -1,40 +1,22 @@
-import jwt from 'jsonwebtoken'
+import { loginAdmin } from '../utils/adminLogin.js'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  try {
+    const { account, password } = await readBody(event)
+    if (!account || !password) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: '請輸入帳號和密碼'
+      })
+    }
 
-  if (!(body.account === 'admin' && body.password === '123')) {
+    return await loginAdmin(event, account, password, true)
+  } catch (error) {
+    if (error.statusCode) throw error
+
     throw createError({
-      statusCode: 400,
-      statusMessage: '登入失敗'
+      statusCode: 500,
+      statusMessage: '登入系統發生錯誤'
     })
   }
-
-  const jwtTokenPayload = {
-    id: 1,
-    nickname: 'admin',
-    email: 'admin@gmail.com',
-    avatar: 'https://images.unsplash.com/photo-1577023311546-cdc07a8454d9?fit=crop&w=128&h=128'
-  }
-
-  const maxAge = 60 * 60 * 24 * 7
-  const expires = Math.floor(Date.now() / 1000) + maxAge
-
-  const jwtToken = jwt.sign(
-    {
-      exp: expires,
-      data: jwtTokenPayload
-    },
-    getJwtSecret('user', event)
-  )
-
-  setCookie(event, 'access_token', jwtToken, {
-    maxAge,
-    expires: new Date(expires * 1000),
-    secure: true,
-    httpOnly: true,
-    path: '/'
-  })
-
-  return '登入成功'
 })

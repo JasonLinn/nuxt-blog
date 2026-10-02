@@ -1,9 +1,10 @@
-import databaseConfig from '../../../../utils/database-config.cjs';
-const { databaseUrl } = databaseConfig;
-// 刪除推薦行程
 import pg from 'pg';
+import databaseConfig from '../../../../utils/database-config.cjs';
+import { requireAdminRole } from '../../../utils/requireRole.js'
+
+// 刪除推薦行程
 const { Pool } = pg;
-import jwt from 'jsonwebtoken'
+const { databaseUrl } = databaseConfig;
 
 // 獲取 Neon 資料庫連接字串
 const getConnectionString = () => {
@@ -22,13 +23,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      const decoded = jwt.verify(accessToken, getJwtSecret('admin', event))
-      if (!decoded.data || decoded.data.type !== 'admin') {
-        throw createError({
-          statusCode: 401,
-          statusMessage: 'Need admin permission'
-        })
-      }
+      requireAdminRole(event)
     } catch (jwtError) {
       throw createError({
         statusCode: 401,

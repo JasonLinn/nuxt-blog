@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken'
+import { requireAdminRole } from '../../utils/requireRole.js'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -12,18 +12,12 @@ export default defineEventHandler(async (event) => {
     }
 
     // 驗證 JWT token
-    const decoded = jwt.verify(accessToken, getJwtSecret('admin', event))
-    
-    if (!decoded.data || decoded.data.type !== 'admin') {
-      return {
-        isAdmin: false
-      }
-    }
+    const admin = requireAdminRole(event)
 
     return {
       isAdmin: true,
-      adminId: decoded.data.admin_id,
-      adminName: decoded.data.admin_name
+      adminId: admin.admin_id,
+      adminName: admin.admin_name
     }
 
   } catch (error) {

@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import { pool } from '../utils/db.js';
+import { verifyBcryptPassword } from '../utils/adminCredentials.js';
+import { signJwt } from '../utils/jwtSecret.js';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -43,21 +43,7 @@ export default defineEventHandler(async (event) => {
 
     const homestay = result.rows[0];
 
-    // 驗證密碼 - 支援兩種方式
-    let passwordValid = false;
-    
-    if (homestay.password_hash) {
-      // 方式1: 新的加密密碼驗證
-      passwordValid = await bcrypt.compare(password, homestay.password_hash);
-    }
-    
-    if (!passwordValid) {
-      // 方式2: 舊的 B + 編號格式（向後相容）
-      const expectedPassword = `B${account}`;
-      passwordValid = (password === expectedPassword);
-    }
-
-    if (!passwordValid) {
+    if (!(await verifyBcryptPassword(password, homestay.password_hash))) {
       throw createError({
         statusCode: 401,
         statusMessage: '帳號或密碼錯誤'
@@ -76,12 +62,13 @@ export default defineEventHandler(async (event) => {
     const maxAge = 60 * 60 * 24 * 7; // 7天
     const expires = Math.floor(Date.now() / 1000) + maxAge;
 
-    const jwtToken = jwt.sign(
+    const jwtToken = signJwt(
       {
         exp: expires,
         data: jwtTokenPayload
       },
-      getJwtSecret('homestay', event)
+      'homestay',
+      event
     );
 
     // 設置Cookie

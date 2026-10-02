@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
 import { pool } from '../utils/db.js';
+import { requireHomestayRole } from '../utils/requireRole.js';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -13,16 +13,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const decoded = jwt.verify(accessToken, getJwtSecret('homestay', event));
-    
-    if (!decoded.data || decoded.data.type !== 'homestay') {
-      throw createError({
-        statusCode: 401,
-        statusMessage: '無效的登入狀態'
-      });
-    }
-
-    const homestayId = decoded.data.id;
+    const { id: homestayId } = requireHomestayRole(event);
     const updateData = await readBody(event);
 
     // 調試：檢查接收到的特色資料

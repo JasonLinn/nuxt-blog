@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
 import { sendApprovalEmail, sendRejectionEmail } from '../utils/emailService.js';
 import { pool } from '../utils/db.js';
+import { requireAdminRole } from '../utils/requireRole.js';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const decoded = jwt.verify(accessToken, getJwtSecret('admin', event));
+    const decoded = { data: requireAdminRole(event) };
     
     if (!decoded.data || decoded.data.type !== 'admin') {
       throw createError({
