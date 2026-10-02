@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
 
     const homestay = result.rows[0];
 
-    if (!await verifyBcryptPassword(password, homestay.password_hash)) {
+    if (!(await verifyBcryptPassword(password, homestay.password_hash))) {
       throw createError({
         statusCode: 401,
         statusMessage: '帳號或密碼錯誤'
@@ -62,10 +62,14 @@ export default defineEventHandler(async (event) => {
     const maxAge = 60 * 60 * 24 * 7; // 7天
     const expires = Math.floor(Date.now() / 1000) + maxAge;
 
-    const jwtToken = signJwt({
-      exp: expires,
-      data: jwtTokenPayload
-    }, 'homestay', event);
+    const jwtToken = signJwt(
+      {
+        exp: expires,
+        data: jwtTokenPayload
+      },
+      'homestay',
+      event
+    );
 
     // 設置Cookie
     setCookie(event, 'homestay_access_token', jwtToken, {

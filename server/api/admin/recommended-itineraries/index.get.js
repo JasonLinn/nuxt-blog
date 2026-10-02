@@ -1,8 +1,9 @@
-import databaseConfig from '../../../../utils/database-config.cjs';
-// 管理員取得推薦行程 (包含未啟用的)
 import pg from 'pg';
-const { Pool } = pg;
+import databaseConfig from '../../../../utils/database-config.cjs';
 import { requireAdminRole } from '../../../utils/requireRole.js'
+
+// 管理員取得推薦行程 (包含未啟用的)
+const { Pool } = pg;
 const { databaseUrl } = databaseConfig;
 
 // 獲取 Neon 資料庫連接字串

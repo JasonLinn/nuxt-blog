@@ -13,9 +13,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const decoded = { data: requireHomestayRole(event) };
-
-    const homestayId = decoded.data.id;
+    const { id: homestayId } = requireHomestayRole(event);
     const updateData = await readBody(event);
 
     // 調試：檢查接收到的特色資料

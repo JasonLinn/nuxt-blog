@@ -1,5 +1,5 @@
-import databaseConfig from '../../../utils/database-config.cjs';
 import pg from 'pg';
+import databaseConfig from '../../../utils/database-config.cjs';
 import { requireAdminRole, requireHomestayRole } from '../../utils/requireRole.js';
 const { Pool } = pg;
 const { databaseUrl } = databaseConfig;
