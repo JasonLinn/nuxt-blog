@@ -59,6 +59,9 @@ export default defineNuxtConfig({
   },
   routeRules : {
     '/api/sitemap.xml': { redirect: '/sitemap.xml' },
+    '/homestay-login': { headers: { 'X-Robots-Tag': 'noindex, follow' } },
+    '/homestay-register': { headers: { 'X-Robots-Tag': 'noindex, follow' } },
+    '/homestay-admin': { headers: { 'X-Robots-Tag': 'noindex, follow' } },
     // '/api/sendMsg' : {
     //     proxy : { to : "https://api.line.me/v2/bot/message/push" , },
     // },

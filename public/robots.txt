@@ -14,7 +14,11 @@ Allow: /.well-known/
 # 阻止索引管理和API路由
 Disallow: /admin
 Disallow: /api/
-Disallow: /_nuxt/
+# Nuxt JavaScript and CSS are required to render public pages.
+Allow: /_nuxt/
+Allow: /api/fetchBnbs
+Allow: /api/fetchBnbDetail
+Allow: /api/features-options
 
 # AI 內容使用偏好聲明 (contentsignals.org)
 # ai-train=no: 不允許使用本站內容訓練 AI 模型

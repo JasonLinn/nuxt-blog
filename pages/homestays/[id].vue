@@ -7,11 +7,11 @@
     </div>
 
     <!-- 錯誤狀態 -->
-    <div v-else-if="error" class="error-container">
+    <div v-else-if="fetchError" class="error-container">
       <div class="error-icon">⚠️</div>
       <h3 class="error-title">載入失敗</h3>
-      <p class="error-message">{{ error }}</p>
-      <button @click="fetchBnbDetail" class="retry-btn">重新載入</button>
+      <p class="error-message">{{ fetchError }}</p>
+      <button @click="refresh" class="retry-btn">重新載入</button>
     </div>
 
     <!-- 找不到民宿 -->
@@ -55,6 +55,8 @@
                   :src="bnb.image_urls[currentMainImageIndex]"
                   :alt="`${bnb.name} - 主圖`"
                   class="main-image"
+                  fetchpriority="high"
+                  decoding="async"
                   @click="openLightbox(currentMainImageIndex)"
                   @error="handleImgError"
                 />
@@ -114,6 +116,8 @@
                       :src="imageUrl"
                       :alt="`${bnb.name} - 縮圖 ${index + 1}`"
                       class="thumbnail-image"
+                      loading="lazy"
+                      decoding="async"
                       @error="handleImgError"
                     />
                     <div class="thumbnail-overlay">
@@ -406,20 +410,25 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useFetch, createError, useSeoMeta, useHead } from 'nuxt/app';
 
+import { buildHomestaySeo, serializeJsonLd } from '~/utils/homestay-seo.js';
+
+// Recreate page state and metadata when navigating between homestays.
+definePageMeta({ key: route => route.params.id });
+
 // 直接從URL獲取ID參數
 const route = useRoute();
 const bnbId = route.params.id;
 
 // 使用 useFetch 進行 SSR 資料獲取
-const { data: bnbData, error: fetchError } = await useFetch('/api/fetchBnbDetail', {
+const { data: bnbData, error: fetchError, refresh } = await useFetch('/api/fetchBnbDetail', {
   query: { id: bnbId }
 });
 
 // 處理錯誤
 if (fetchError.value || !bnbData.value?.bnb) {
   throw createError({
-    statusCode: 404,
-    statusMessage: 'Page Not Found',
+    statusCode: fetchError.value?.statusCode === 404 ? 404 : 503,
+    statusMessage: fetchError.value?.statusCode === 404 ? 'Page Not Found' : 'Service Unavailable',
     fatal: true
   });
 }
@@ -428,158 +437,31 @@ if (fetchError.value || !bnbData.value?.bnb) {
 const bnb = computed(() => bnbData.value?.bnb);
 const loading = ref(false); // SSR 完成後就不需要 loading 狀態了，或者可以保留給切換圖片等操作
 
-// 設定 SEO
-// 因為是 SSR，這裡的 bnb.value 已經有值，可以直接使用
-const homestay = bnb.value;
-const canonicalUrl = `https://yilanpass.com/homestays/${homestay.id}`;
-
+// Metadata and structured data use the same public fields rendered on this page.
+const seo = computed(() => buildHomestaySeo(bnb.value));
 useSeoMeta({
-  title: `${homestay.name} | 宜蘭合法民宿 - 宜蘭旅遊通-宜蘭觀光民宿行銷協會`,
-  ogTitle: `${homestay.name} | 宜蘭旅遊通-宜蘭觀光民宿行銷協會`,
-  description: homestay.description || `位於宜蘭${homestay.area || homestay.location}的合法民宿${homestay.name}，提供優質住宿體驗。可能設有戲水池、KTV、烤肉設施等休閒娛樂設備，查看詳細房型、價格與預訂資訊。`,
-  ogDescription: homestay.description || `宜蘭${homestay.area}優質民宿${homestay.name}，提供多樣化休閒設施`,
-  keywords: `${homestay.name},宜蘭民宿,${homestay.area || homestay.location}民宿,合法民宿,戲水池民宿,KTV民宿,烤肉民宿,游泳池民宿,唱歌民宿,BBQ民宿${homestay.features?.themeFeatures ? ',' + homestay.features.themeFeatures.join(',') : ''}${homestay.features?.serviceAmenities ? ',' + homestay.features.serviceAmenities.join(',') : ''}`,
-  ogImage: homestay.image_urls?.[0] || 'https://yilanpass.com/logo.png',
-  ogUrl: canonicalUrl,
+  title: () => seo.value.title,
+  description: () => seo.value.description,
+  ogTitle: () => seo.value.title,
+  ogDescription: () => seo.value.description,
+  ogImage: () => seo.value.image,
+  ogUrl: () => seo.value.url,
   ogType: 'website',
   twitterCard: 'summary_large_image',
-  twitterTitle: `${homestay.name} | 宜蘭民宿`,
-  twitterDescription: homestay.description || `宜蘭${homestay.area}優質民宿${homestay.name}`,
-  twitterImage: homestay.image_urls?.[0] || 'https://yilanpass.com/logo.png',
-  robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
-  canonical: canonicalUrl
+  twitterTitle: () => seo.value.title,
+  twitterDescription: () => seo.value.description,
+  twitterImage: () => seo.value.image,
+  twitterUrl: () => seo.value.url,
+  robots: 'index, follow, max-image-preview:large'
 });
-
-// 額外設定 head link & JSON-LD
-useHead({
+useHead(() => ({
+  titleTemplate: null,
   link: [
-    {
-      rel: 'canonical',
-      href: canonicalUrl
-    },
-    {
-      rel: 'llms-txt',
-      href: `https://yilanpass.com/homestays/${homestay.id}/llms.txt`
-    }
+    { rel: 'canonical', href: seo.value.url },
+    { rel: 'llms-txt', href: `${seo.value.url}/llms.txt` }
   ],
-  script: [
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": ["LodgingBusiness", "LocalBusiness"],
-        "@id": canonicalUrl,
-        "name": homestay.name,
-        "alternateName": `${homestay.name} 民宿`,
-        "description": homestay.description || `位於宜蘭${homestay.area || homestay.location}的合法民宿${homestay.name}，提供優質住宿體驗。設有多樣化休閒設施，是您宜蘭旅遊的最佳選擇。`,
-        "url": `https://yilanpass.com/homestays/${homestay.id}`,
-        "sameAs": [
-          `https://yilanpass.com/homestays/${homestay.id}/llms.txt`,
-          `https://yilanpass.com/homestays/${homestay.id}`,
-          "https://yilanpass.com",
-          homestay.facebook_url,
-          homestay.instagram_url,
-          homestay.website
-        ].filter(Boolean),
-        "image": homestay.image_urls || ["/logo.jpg"],
-        "logo": "https://yilanpass.com/logo.png",
-        "telephone": homestay.phone || homestay.contactPhone,
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": homestay.address,
-          "addressLocality": homestay.area || homestay.location,
-          "addressRegion": "宜蘭縣",
-          "postalCode": homestay.postal_code,
-          "addressCountry": "TW"
-        },
-        "geo": homestay.latitude && homestay.longitude ? {
-          "@type": "GeoCoordinates",
-          "latitude": parseFloat(homestay.latitude),
-          "longitude": parseFloat(homestay.longitude)
-        } : undefined,
-        "priceRange": homestay.prices?.fullRentWeekday ? 
-          `NT$${homestay.prices.fullRentWeekday} - NT$${homestay.prices.fullRentWeekend || homestay.prices.fullRentWeekday}` : 
-          "NT$2000 - NT$8000",
-        "currenciesAccepted": "TWD",
-        "paymentAccepted": ["Cash", "Credit Card", "Bank Transfer"],
-        "openingHours": "Mo-Su 24:00",
-        "checkinTime": "15:00",
-        "checkoutTime": "11:00",
-        "numberOfRooms": homestay.roomCount || homestay.room_count,
-        "maximumAttendeeCapacity": homestay.max_guests,
-        "minimumAttendeeCapacity": homestay.min_guests || 1,
-        "petsAllowed": homestay.features?.serviceAmenities?.includes('寵物友善') || homestay.pet_friendly || false,
-        "amenityFeature": [
-          ...(homestay.features?.themeFeatures?.map(feature => ({
-            "@type": "LocationFeatureSpecification",
-            "name": feature,
-            "value": true
-          })) || []),
-          ...(homestay.features?.serviceAmenities?.map(amenity => ({
-            "@type": "LocationFeatureSpecification", 
-            "name": amenity,
-            "value": true
-          })) || [])
-        ]
-      })
-    },
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": `${homestay.name}最多可以住幾個人？`,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": homestay.max_guests 
-                ? `住宿人數範圍為${homestay.min_guests || 1}至${homestay.max_guests}人，適合家族包棟、同學會或公司團體旅遊使用。`
-                : `${homestay.name}提供多種房型選擇，適合不同人數的團體入住，建議訂房時先與業者確認。`
-            }
-          },
-          {
-            "@type": "Question",
-            "name": `${homestay.name}可以帶寵物入住嗎？`,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": (homestay.features?.serviceAmenities?.includes('寵物友善') || homestay.pet_friendly)
-                ? `可以，${homestay.name}為寵物友善民宿，歡迎毛孩子一同入住，建議訂房時先與業者確認相關規定。`
-                : `目前${homestay.name}的寵物入住規定，建議訂房前先致電與業者確認，以獲得最準確的資訊。`
-            }
-          },
-          {
-            "@type": "Question",
-            "name": `${homestay.name}包棟費用是多少？`,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": homestay.prices?.fullRentWeekday 
-                ? `平日包棟${homestay.prices.fullRentWeekday}起，假日包棟${homestay.prices.fullRentWeekend || homestay.prices.fullRentWeekday}起；實際價格以訂房時為準。`
-                : `價格資訊請參考頁面說明或直接與業者聯繫，平日與假日價格會有所調整。`
-            }
-          },
-          {
-            "@type": "Question",
-            "name": `${homestay.name}附近有哪些景點？`,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": `民宿位於宜蘭${homestay.area || homestay.location}，鄰近宜蘭各大熱門景點，交通便利，非常適合安排宜蘭一日或兩日遊。`
-            }
-          },
-          {
-            "@type": "Question",
-            "name": `${homestay.name}有哪些娛樂設施？`,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": `提供的設施包括：${[...(homestay.features?.themeFeatures || []), ...(homestay.features?.serviceAmenities || [])].join('、') || '優質住宿環境'}。室內外娛樂一應俱全。`
-            }
-          }
-        ]
-      })
-    }
-  ]
-});
+  script: [{ key: 'homestay-schema', type: 'application/ld+json', innerHTML: serializeJsonLd(seo.value.schema) }]
+}));
 
 // 圖片畫廊相關狀態
 const currentMainImageIndex = ref(0);

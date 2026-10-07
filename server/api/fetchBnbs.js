@@ -76,7 +76,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // 建構主查詢的 WHERE 條件
-    const whereConditions = ['h.available = true'];
+    const whereConditions = ['h.available = true', "h.status = 'approved'"];
     const params = [];
     let paramIndex = 1;
 
@@ -191,7 +191,7 @@ export default defineEventHandler(async (event) => {
         h.view_count
       FROM homestays h
       WHERE ${whereConditions.join(' AND ')}
-      ORDER BY ${orderBy} ${orderDirection} NULLS LAST
+      ORDER BY ${orderBy} ${orderDirection} NULLS LAST, h.id ASC
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
@@ -207,8 +207,8 @@ export default defineEventHandler(async (event) => {
     if (homestays.length === 0) {
       const emptyResult = {
         homestays: [],
-        total_count: 0,
-        total_pages: 0,
+        total_count: totalCount,
+        total_pages: Math.ceil(totalCount / limit),
         current_page: page,
         database_info: {
           connection: '✅ 已連接到 Neon 資料庫',

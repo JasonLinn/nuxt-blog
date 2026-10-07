@@ -1,5 +1,6 @@
 <template>
   <div class="flex container">
+    <h1 class="homestay-list-title">宜蘭民宿推薦</h1>
     <!-- 搜尋控制區域 -->
     <div class="search-controls">
       <!-- 地區選擇 -->
@@ -461,8 +462,8 @@
               <a
                 v-if="currentPage > 1"
                 class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-                @click="currentPage = currentPage - 1"
-                href="javascript:void(0)"
+                @click.prevent="currentPage = currentPage - 1"
+                :href="pageHref(currentPage - 1)"
               >
                 <Icon name="ri:arrow-left-s-line" />
                 {{ currentPage - 1 }}
@@ -471,8 +472,8 @@
               <a
                 v-if="currentPage < totalPages"
                 class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-                @click="currentPage = currentPage + 1"
-                href="javascript:void(0)"
+                @click.prevent="currentPage = currentPage + 1"
+                :href="pageHref(currentPage + 1)"
               >
                 {{ currentPage + 1 }}
                 <Icon name="ri:arrow-right-s-line" />
@@ -488,34 +489,54 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import useHomestayStore from '~/store/homestay.js';
+import { parseListPage, serializeJsonLd } from '~/utils/homestay-seo.js';
+
+const route = useRoute();
+const router = useRouter();
+if (parseListPage(route.query.page) === null) {
+  throw createError({ statusCode: 404, statusMessage: 'Page Not Found', fatal: true });
+}
+// Keep filter resets synchronous; router.push updates the URL asynchronously.
+const currentPage = ref(parseListPage(route.query.page));
+watch(() => route.query.page, value => {
+  const page = parseListPage(value);
+  if (page === null) {
+    showError({ statusCode: 404, statusMessage: 'Page Not Found' });
+    return;
+  }
+  currentPage.value = page;
+});
+const pageHref = page => page > 1 ? `/homestay-list?page=${page}` : '/homestay-list';
+const canonicalUrl = computed(() => `https://yilanpass.com${pageHref(currentPage.value)}`);
 
 // SEO 設定
 useSeoMeta({
-  title: '宜蘭合法民宿推薦 | 精選優質民宿住宿 - 宜蘭旅遊通-宜蘭觀光民宿行銷協會',
+  title: () => `宜蘭民宿推薦${currentPage.value > 1 ? `｜第 ${currentPage.value} 頁` : ''}｜宜蘭旅遊通`,
   ogTitle: '宜蘭合法民宿推薦 | 宜蘭旅遊通-宜蘭觀光民宿行銷協會',
   description: '宜蘭旅遊通-宜蘭觀光民宿行銷協會提供宜蘭地區合法民宿，包含親子民宿、寵物民宿、海景民宿、包棟民宿、戲水池民宿、KTV民宿、烤肉民宿等多種主題特色民宿。透過進階搜尋功能，讓您輕鬆找到理想的住宿選擇，規劃完美的宜蘭之旅。',
   ogDescription: '精選宜蘭地區合法民宿，提供親子、寵物、海景、包棟、戲水池、KTV、烤肉等多種主題住宿選擇',
   keywords: '宜蘭民宿推薦,合法民宿,親子民宿,寵物民宿,海景民宿,包棟民宿,戲水池民宿,KTV民宿,烤肉民宿,游泳池民宿,唱歌民宿,BBQ民宿,宜蘭住宿,民宿搜尋,宜蘭旅遊',
   ogImage: 'https://yilanpass.com/logo.png',
-  ogUrl: 'https://yilanpass.com/homestay-list',
+  ogUrl: () => canonicalUrl.value,
+  twitterUrl: () => canonicalUrl.value,
   twitterCard: 'summary_large_image',
-  robots: 'index, follow',
-  canonical: 'https://yilanpass.com/homestay-list'
+  robots: 'index, follow, max-image-preview:large'
 })
 
-// 額外設定 head link (雙重保險)
-useHead({
+// Each paginated page has its own canonical URL.
+useHead(() => ({
+  titleTemplate: null,
   link: [
     {
       rel: 'canonical',
-      href: 'https://yilanpass.com/homestay-list'
+      href: canonicalUrl.value
     },
     {
       rel: 'llms-txt',
       href: 'https://yilanpass.com/llms.txt'
     }
   ]
-})
+}))
 
 // 使用 homestay store
 const homestayStore = useHomestayStore();
@@ -523,7 +544,6 @@ const homestayStore = useHomestayStore();
 const searchText = ref('');
 const selectedArea = ref(null);
 const guestCount = ref(null);
-const currentPage = ref(1);
 const itemsPerPage = 12; // 與後端預設一致
 
 // 日期搜尋相關
@@ -655,48 +675,26 @@ const debugFilters = () => {
   });
 }
 
-// 結構化資料 (JSON-LD) - 民宿列表
-useHead({
-  script: [
-    {
-      type: 'application/ld+json',
-      children: computed(() => JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        "name": "宜蘭合法民宿推薦",
-        "description": "精選宜蘭地區合法民宿列表，包含親子、寵物、海景、包棟等主題民宿",
-        "url": "https://yilanpass.com/homestay-list",
-        "numberOfItems": pagination.value.totalCount || 0,
-        "itemListElement": (paginatedBnbs.value || []).slice(0, 20).map((bnb, index) => ({
-          "@type": "ListItem",
-          "position": index + 1,
-          "item": {
-            "@type": "LodgingBusiness",
-            "name": bnb.name,
-            "description": bnb.description,
-            "url": `https://yilanpass.com/homestays/${bnb.id}`,
-            "image": bnb.image_urls?.[0],
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": bnb.area || bnb.location,
-              "addressRegion": "宜蘭縣",
-              "addressCountry": "TW"
-            },
-            "priceRange": bnb.prices?.fullRentWeekday ? 
-              `NT$${bnb.prices.fullRentWeekday} - NT$${bnb.prices.fullRentWeekday || bnb.prices.fullRentWeekday}` : 
-              undefined,
-            "aggregateRating": bnb.rating ? {
-              "@type": "AggregateRating",
-              "ratingValue": bnb.rating,
-              "bestRating": 5,
-              "ratingCount": bnb.total_reviews || 1
-            } : undefined
-          }
-        }))
+// Describe only the cards actually rendered, without invented ratings or prices.
+useHead(() => ({
+  script: [{
+    key: 'homestay-list-schema',
+    type: 'application/ld+json',
+    innerHTML: serializeJsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: '宜蘭民宿推薦',
+      url: canonicalUrl.value,
+      numberOfItems: paginatedBnbs.value.length,
+      itemListElement: paginatedBnbs.value.map((bnb, index) => ({
+        '@type': 'ListItem',
+        position: (currentPage.value - 1) * itemsPerPage + index + 1,
+        name: bnb.name,
+        url: `https://yilanpass.com/homestays/${encodeURIComponent(bnb.id)}`
       }))
-    }
-  ]
-})
+    })
+  }]
+}));
 
 // 點擊熱門標籤
 const clickTag = (e) => {
@@ -907,6 +905,9 @@ watch([selectedArea, guestCount, selectedThemeFeatures, selectedServiceAmenities
 // 監聽頁碼變化
 // 當頁碼改變時，直接觸發資料獲取
 watch(currentPage, () => {
+  if (parseListPage(route.query.page) !== currentPage.value) {
+    router.push({ path: '/homestay-list', query: currentPage.value > 1 ? { page: currentPage.value } : {} });
+  }
   fetchBnbsData();
 });
 
@@ -924,28 +925,24 @@ watch([checkInDate, checkOutDate], () => {
 
 let searchDateTimeout = null;
 
-onMounted(async () => {
-  console.log('🚀 onMounted 觸發 - 開始載入民宿資料');
-  
-  // 載入民宿資料和進階搜尋選項
-  try {
-    await Promise.all([
-      fetchBnbsData(), // 預設載入第一頁
-      loadAdvancedSearchOptions()
-    ]);
-    
-    console.log('🏁 最終載入結果:', homestayStore.getAllHomestays.length, '筆民宿');
-  } catch (error) {
-    console.error('❌ 載入失敗:', error);
-  }
-  
-  // 為了視覺效果，先初始化一次
-  debugFilters();
+// Fetch before SSR renders; Pinia state is included in the Nuxt payload for hydration.
+const { error: initialError } = await useAsyncData(`homestay-list-${currentPage.value}`, async () => {
+  await homestayStore.fetchHomestays({ page: currentPage.value, limit: itemsPerPage });
+  return true;
 });
+if (initialError.value) {
+  throw createError({ statusCode: 503, statusMessage: 'Service Unavailable', fatal: true });
+}
+if (currentPage.value > Math.max(1, pagination.value.totalPages)) {
+  throw createError({ statusCode: 404, statusMessage: 'Page Not Found', fatal: true });
+}
+onMounted(loadAdvancedSearchOptions);
 
 // 清理函式
 onUnmounted(() => {
   document.body.style.overflow = 'auto';
+  clearTimeout(searchTimeout);
+  clearTimeout(searchDateTimeout);
 });
 
 // 格式化人數範圍顯示
@@ -1005,6 +1002,13 @@ watch(bnbsData, (newData) => {
 </script>
 
 <style lang="scss" scoped>
+.homestay-list-title {
+  width: 100%;
+  font-size: 1.5rem;
+  margin: 0 0 1rem;
+  color: #2c3e50;
+}
+
 /* 搜尋控制區域 */
 .search-controls {
   display: flex;
@@ -2365,4 +2369,4 @@ watch(bnbsData, (newData) => {
     font-size: 12px;
   }
 }
-</style> 
+</style>

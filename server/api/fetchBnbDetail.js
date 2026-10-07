@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
         h.featured,
         h.view_count
       FROM homestays h
-      WHERE h.id = $1 AND h.available = true
+      WHERE h.id = $1 AND h.available = true AND h.status = 'approved'
     `;
 
     console.log('執行查詢:', homestayQuery, '參數:', [homestayId]);
@@ -62,10 +62,7 @@ export default defineEventHandler(async (event) => {
     console.log('查詢結果數量:', homestayResult.rows.length);
     
     if (homestayResult.rows.length === 0) {
-      return {
-        success: false,
-        error: '找不到指定的民宿'
-      };
+      throw createError({ statusCode: 404, statusMessage: 'Homestay Not Found' });
     }
 
     const homestay = homestayResult.rows[0];
@@ -168,10 +165,8 @@ export default defineEventHandler(async (event) => {
     };
 
   } catch (error) {
-    console.error('獲取民宿詳情錯誤:', error);
-    return {
-      success: false,
-      error: '載入民宿詳情時發生錯誤: ' + error.message
-    };
+    if (error.statusCode === 404) throw error;
+    console.error('獲取民宿詳情錯誤:', { code: error.code || 'QUERY_FAILED' });
+    throw createError({ statusCode: 503, statusMessage: 'Service Unavailable' });
   }
 }); 
