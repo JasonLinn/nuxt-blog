@@ -14,7 +14,9 @@
     "db:migrate-homestays": "node scripts/run-homestays-migration.cjs",
     "images:process": "node scripts/processImages.js",
     "images:web": "node -e \"import('./scripts/processImages.js').then(m => m.main())\"",
-    "images:backup": "node -e \"console.log('手動備份功能，請使用 images:process 選擇備份選項')\""
+    "images:backup": "node -e \"console.log('手動備份功能，請使用 images:process 選擇備份選項')\"",
+    "test:security": "node --test tests/security*.test.mjs",
+    "test:security:build": "node scripts/test-security-built.mjs"
   },
   "devDependencies": {
     "@neondatabase/serverless": "^0.6.1",
@@ -56,7 +58,8 @@
     "sass": "^1.77.4",
     "sharp": "^0.33.5",
     "ws": "^8.18.3",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xss": "^1.0.15"
   },
   "overrides": {
     "vue": "latest"

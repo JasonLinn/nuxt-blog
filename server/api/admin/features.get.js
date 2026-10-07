@@ -1,6 +1,8 @@
+import { requireAdmin } from '../../utils/admin-auth.js'
 import pool from '~/server/utils/db.js';
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     // 從資料庫獲取所有特色項目
     const query = `

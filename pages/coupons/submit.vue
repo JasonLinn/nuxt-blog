@@ -368,6 +368,7 @@
 </template>
 
 <script setup>
+useSubmissionLogin()
 import { ref, reactive } from 'vue'
 import { category } from '~/utils/category'
 

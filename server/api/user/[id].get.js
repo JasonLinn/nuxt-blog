@@ -1,3 +1,4 @@
+import { requireLineUser } from '../../utils/line-session.js'
 import databaseConfig from '../../../utils/database-config.cjs';
 const { databaseUrl } = databaseConfig;
 import pkg from 'pg'
@@ -13,9 +14,11 @@ const couponPool = new Pool({
 
 export default defineEventHandler(async (event) => {
   const user_id = getRouterParam(event, 'id')
+  requireLineUser(event, user_id)
+  setHeader(event, 'Cache-Control', 'private, no-store')
 
   const userRecord = await couponPool
-    .query('SELECT * FROM "user" WHERE "user_id" = $1;', [user_id])
+    .query('SELECT user_id, name, cover, coupons FROM "user" WHERE "user_id" = $1;', [user_id])
     .then((result) => result.rows?.[0])
     .catch((error) => {
       console.error(error)

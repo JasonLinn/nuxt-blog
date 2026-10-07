@@ -35,7 +35,8 @@
                 <li v-if="!userData?.userId" class="sidemenu__item" @click="navOpen = false">
                 <NuxtLink
                   class="sidemenu__link"
-                  :to="`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${host}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`"
+                  :to="`/api/line/login?returnTo=${encodeURIComponent(route.path)}`"
+                  external
                 >
                   登入LINE
                 </NuxtLink>

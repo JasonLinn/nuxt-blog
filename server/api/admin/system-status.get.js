@@ -1,3 +1,4 @@
+import { requireAdmin } from '../../utils/admin-auth.js'
 import databaseConfig from '../../../utils/database-config.cjs';
 const { databaseUrl } = databaseConfig;
 import pg from 'pg';
@@ -20,6 +21,7 @@ const formatDate = (date) => {
 };
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   console.log('=== 系統狀態查詢 ===');
 
   try {

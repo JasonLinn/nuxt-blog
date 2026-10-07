@@ -1,9 +1,10 @@
+import { requiredSecret, equalSecret } from '../utils/security.js'
 import jwt from 'jsonwebtoken'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
-  if (!(body.account === 'admin' && body.password === '123')) {
+  if (!(equalSecret(body.account, requiredSecret('LEGACY_ADMIN_USERNAME')) && equalSecret(body.password, requiredSecret('LEGACY_ADMIN_PASSWORD')))) {
     throw createError({
       statusCode: 400,
       statusMessage: '登入失敗'
@@ -25,13 +26,14 @@ export default defineEventHandler(async (event) => {
       exp: expires,
       data: jwtTokenPayload
     },
-    'JWT_SIGN_SECRET_PLEASE_REPLACE_WITH_YOUR_KEY'
+    requiredSecret('LEGACY_JWT_SECRET')
   )
 
   setCookie(event, 'access_token', jwtToken, {
     maxAge,
     expires: new Date(expires * 1000),
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
     httpOnly: true,
     path: '/'
   })

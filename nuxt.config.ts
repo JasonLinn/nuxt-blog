@@ -27,7 +27,7 @@ export default defineNuxtConfig({
     
     // 可以暴露給客戶端的公共鍵
     public: {
-      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_BROWSER_API_KEY,
       GA_MEASUREMENT_ID: process.env.GA_MEASUREMENT_ID || 'G-45PDMJHNT9'
     },
   },
@@ -59,9 +59,6 @@ export default defineNuxtConfig({
   },
   routeRules : {
     '/api/sitemap.xml': { redirect: '/sitemap.xml' },
-    '/api/notify' : {
-        proxy : { to : "https://notify-api.line.me/api/notify" , },
-    },
     // '/api/sendMsg' : {
     //     proxy : { to : "https://api.line.me/v2/bot/message/push" , },
     // },

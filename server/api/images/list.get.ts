@@ -1,6 +1,8 @@
+import { requireAdmin } from '../../utils/admin-auth.js'
 import { defineEventHandler, createError } from 'h3'
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     const config = useRuntimeConfig()
     const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config

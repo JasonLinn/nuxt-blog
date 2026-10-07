@@ -1,7 +1,9 @@
+import { requireAdmin } from '../../../utils/admin-auth.js'
 // 管理員 - 更新地點
 import { pool } from '../../../utils/db.js';
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   let requestBody = null;
   
   try {

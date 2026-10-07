@@ -18,7 +18,14 @@ const useStore = defineStore("useStore", {
       // return this.userData
     },
     setCoupons(coupons) {
-      this.couponData = coupons
+      const parsed = (coupons || []).map(item => typeof item === 'string' ? JSON.parse(item) : item).filter(Boolean)
+      this.couponData = parsed.sort((a, b) => new Date(b.gotTime) - new Date(a.gotTime))
+      if (this.userData) this.userData.coupons = this.couponData.map(item => JSON.stringify(item))
+    },
+    recordClaim(coupon) {
+      const current = (this.userData?.coupons || []).map(item => typeof item === 'string' ? JSON.parse(item) : item).filter(Boolean)
+      if (!current.some(item => coupon.claimId && item.claimId === coupon.claimId)) current.push(coupon)
+      this.setCoupons(current)
     },
     async getCoupons(id) {
       const userCoupons = await $fetch(`/api/user/${id}`)
@@ -27,7 +34,7 @@ const useStore = defineStore("useStore", {
         })
         .catch((error) => console.log(error))
 
-      this.couponData = userCoupons
+      if (userCoupons) this.setCoupons(userCoupons)
     },
     async fetchAndSetUser(data) {
       const user = await fetchUser(data);

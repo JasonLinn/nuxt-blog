@@ -729,9 +729,12 @@ const activeServiceAmenities = computed(() => {
 // 載入特色項目
 const loadFeatures = async () => {
   try {
-    const response = await $fetch('/api/admin/features');
+    const response = await $fetch('/api/features-options');
     if (response.success) {
-      featuresData.value = response.data;
+      featuresData.value = {
+        themeFeatures: response.data.themeFeatures.map(name => ({ name, is_active: true })),
+        serviceAmenities: response.data.serviceAmenities.map(name => ({ name, is_active: true }))
+      };
     } else {
       console.error('載入特色項目失敗:', response.error);
       // 如果API失敗，使用備用的硬編碼列表
@@ -1800,4 +1803,4 @@ onMounted(async () => {
   border-radius: 12px;
   overflow: hidden;
 }
-</style> 
+</style>

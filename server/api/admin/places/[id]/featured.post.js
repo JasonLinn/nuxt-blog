@@ -1,7 +1,9 @@
+import { requireAdmin } from '../../../../utils/admin-auth.js'
 // 管理員 - 切換地點精選狀態
 import { pool } from '../../../../utils/db.js';
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     // 這裡應該加入管理員權限驗證
     // const user = await validateAdminToken(event);

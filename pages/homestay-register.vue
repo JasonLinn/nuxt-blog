@@ -509,6 +509,7 @@
 </template>
 
 <script setup>
+useSubmissionLogin()
 import { ref, computed, onMounted } from 'vue';
 import { township } from '~/utils/category.js';
 

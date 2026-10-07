@@ -218,44 +218,24 @@
     return wasGet && article.value.isonce
   }
   
-  const sendPatch = async () => {
-    await $fetch(`/api/cupon`, {
-        method: 'PATCH',
-          body: {
-            id: route.params.id,
-            amount: article.value.amount -1
-          }
-      })
-      .then((response) => {
-        article.value.amount = response.amount
-      })
-      .catch((error) => alert(error))
+  const sendPatch = async () => {} // Inventory is part of the claim transaction.
+const patchUser = async () => {
+  iconLoading.value = true
+  try {
+    const result = await $fetch('/api/user/appendCoupon', {
+      method: 'PATCH', body: { articleId: article.value.id, referralCode: referralStore.value?.code }
+    })
+    article.value.amount = result.amount
+    store.recordClaim(result.coupon)
+    alert('領取成功!')
+    await navigateTo('/userInfo')
+    return result
+  } finally {
+    iconLoading.value = false
   }
-  
-  const patchUser = async (profile) => {
-    // 設定推薦店家
-    article.value.referral = referralStore.value
-    //增加領取時間
-    article.value.gotTime = new Date()
-    //暫時填進已領優惠券
-    userData?.value?.coupons.push(JSON.stringify(article.value))
-    store.setUser(userData)
-    //打API更新資料庫
-    await $fetch(`/api/user/appendCoupon`, {
-        method: 'PATCH',
-          body: {
-            coupon: article.value,
-            user: profile,
-          }
-      })
-      .then((response) => {
-        alert('領取成功!')
-        navigateTo('/userInfo')
-      })
-      .catch((error) => alert(error))
-  }
-  
-  const checkReferral = async () => {
+}
+
+const checkReferral = async () => {
     try {
       if (!referralCode.value) {
         alert('請輸入推薦代碼');
@@ -304,26 +284,19 @@
   }
   
   const getCupon = async () => {
-    iconLoading = true
-  
-    if (!userId.value) {
-      alert("請先登入")
-      navigateTo(`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=https://${window?.location.hostname}/line_callback&state=${route.path}&bot_prompt=normal&scope=openid%20email%20profile`,{ external: true })
-      return
-    }
-  
-    if (userId.value) {
-      await patchUser(userData.value)
-      await sendPatch()
-    } else {
-      await liff.getProfile().then(profile => {
-        patchUser(profile)
-      })
-      await sendPatch()
-    }
-  
+  if (iconLoading.value) return
+  if (!userId.value) {
+    alert('請先登入')
+    await navigateTo(`/api/line/login?returnTo=${encodeURIComponent(route.path)}`, { external: true })
     return
-    // let checkIcon = referralStore?.value?.name ? "https://yilanpass.com/icon/check-circle-fill.svg" : "";
+  }
+  try {
+    await patchUser()
+  } catch (error) {
+    alert(error.response?.status === 409 ? '此優惠券已領取或已無庫存，請重新整理。' : '領取失敗，請稍後再試。')
+  }
+  return
+  // let checkIcon = referralStore?.value?.name ? "https://yilanpass.com/icon/check-circle-fill.svg" : "";
     let cupon = {
           "type": "bubble",
           "size": "giga",

@@ -1,6 +1,8 @@
+import { requireAdmin } from '../../utils/admin-auth.js'
 import { pool } from '~/server/utils/db.js'
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     const client = await pool.connect()
     

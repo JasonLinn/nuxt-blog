@@ -1,5 +1,6 @@
+import { requiredSecret } from '../utils/security.js'
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import { verifyHomestayPassword } from '../utils/homestay-password.js';
 import { pool } from '../utils/db.js';
 
 export default defineEventHandler(async (event) => {
@@ -43,20 +44,7 @@ export default defineEventHandler(async (event) => {
 
     const homestay = result.rows[0];
 
-    // 驗證密碼 - 支援兩種方式
-    let passwordValid = false;
-    
-    if (homestay.password_hash) {
-      // 方式1: 新的加密密碼驗證
-      passwordValid = await bcrypt.compare(password, homestay.password_hash);
-    }
-    
-    if (!passwordValid) {
-      // 方式2: 舊的 B + 編號格式（向後相容）
-      const expectedPassword = `B${account}`;
-      passwordValid = (password === expectedPassword);
-    }
-
+    const passwordValid = await verifyHomestayPassword(password, homestay.password_hash);
     if (!passwordValid) {
       throw createError({
         statusCode: 401,
@@ -81,14 +69,15 @@ export default defineEventHandler(async (event) => {
         exp: expires,
         data: jwtTokenPayload
       },
-      'JWT_SIGN_SECRET_HOMESTAY_2024'
+      requiredSecret('HOMESTAY_JWT_SECRET')
     );
 
     // 設置Cookie
     setCookie(event, 'homestay_access_token', jwtToken, {
       maxAge,
       expires: new Date(expires * 1000),
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       httpOnly: true,
       path: '/'
     });

@@ -1,9 +1,13 @@
+import { validateActivityUpdate } from '../../utils/security.js'
+import { saveLocalImage, deleteOwnedImage } from '../../utils/safe-images.js'
+import { requireAdmin } from '../../utils/admin-auth.js'
 import { query } from '~/server/utils/db.js'
 import formidable from 'formidable'
 import fs from 'fs'
 import path from 'path'
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     // TODO: 驗證管理員權限
     // const session = await requireAdminAuth(event)
@@ -39,8 +43,9 @@ export default defineEventHandler(async (event) => {
     if (contentType && contentType.includes('multipart/form-data')) {
       // 處理包含文件上傳的請求
       const form = formidable({
-        uploadDir: './public/activities',
-        keepExtensions: true,
+          keepExtensions: false,
+        maxFieldsSize: 256 * 1024,
+        maxTotalFileSize: 25 * 1024 * 1024,
         maxFileSize: 5 * 1024 * 1024,
         maxFiles: 5
       })
@@ -61,13 +66,7 @@ export default defineEventHandler(async (event) => {
           if (file.size > 0) {
             console.log('處理圖片檔案:', file.originalFilename, file.size, 'bytes')
             
-            const timestamp = Date.now()
-            const ext = path.extname(file.originalFilename || file.newFilename)
-            const newFilename = `${timestamp}-${Math.random().toString(36).substr(2, 9)}${ext}`
-            const newPath = path.join('./public/activities', newFilename)
-            
-            fs.renameSync(file.filepath, newPath)
-            const imageUrl = `/activities/${newFilename}`
+            const imageUrl = await saveLocalImage(file)
             newImageUrls.push(imageUrl)
             
             console.log('圖片儲存成功:', imageUrl)
@@ -81,18 +80,10 @@ export default defineEventHandler(async (event) => {
       const imagesToDelete = fields.deleteImages ? 
         (Array.isArray(fields.deleteImages) ? fields.deleteImages : [fields.deleteImages]) : []
       
-      imagesToDelete.forEach(imageUrl => {
+      for (const imageUrl of imagesToDelete) {
         newImageUrls = newImageUrls.filter(url => url !== imageUrl)
-        // 刪除物理文件
-        try {
-          const imagePath = path.join('./public', imageUrl)
-          if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath)
-          }
-        } catch (error) {
-          console.error('Error deleting image file:', error)
-        }
-      })
+        await deleteOwnedImage(imageUrl, existingActivity.images, 'activities')
+      }
       
       // 提取表單數據
       const getData = (field) => {
@@ -129,6 +120,7 @@ export default defineEventHandler(async (event) => {
       }
     }
     
+    validateActivityUpdate(updateData)
     // 驗證必填欄位
     if (updateData.title !== undefined && !updateData.title.trim()) {
       throw createError({

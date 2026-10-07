@@ -1,3 +1,4 @@
+import { escapeHtml } from '../../utils/safe-content.js'
 import nodemailer from 'nodemailer'
 
 // 創建郵件傳送器
@@ -207,6 +208,7 @@ const getRejectionEmailTemplate = (homestayName, homestayId, rejectionReason) =>
 
 // 管理員通知郵件模板
 const getAdminNotificationTemplate = (homestayName, homestayId, applicantEmail, location) => {
+  ;[homestayName, homestayId, applicantEmail, location] = [homestayName, homestayId, applicantEmail, location].map(escapeHtml)
   return {
     subject: '🏠 新民宿申請通知 - 待審核',
     html: `

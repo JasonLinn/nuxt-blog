@@ -1,9 +1,12 @@
+import { requiredSecret } from './security.js'
 import jwt from 'jsonwebtoken'
+import { getCookie, createError } from 'h3'
 
-const ADMIN_JWT_SECRET = 'JWT_SIGN_SECRET_ADMIN_2024'
+
 
 export const requireAdmin = (event) => {
-  const accessToken = getCookie(event, 'admin_access_token')
+  const modernToken = getCookie(event, 'admin_access_token')
+  const accessToken = modernToken || getCookie(event, 'access_token')
 
   if (!accessToken) {
     throw createError({
@@ -13,13 +16,13 @@ export const requireAdmin = (event) => {
   }
 
   try {
-    const decoded = jwt.verify(accessToken, ADMIN_JWT_SECRET)
+    const decoded = jwt.verify(accessToken, requiredSecret(modernToken ? 'ADMIN_JWT_SECRET' : 'LEGACY_JWT_SECRET'), { algorithms: ['HS256'] })
 
-    if (!decoded.data || decoded.data.type !== 'admin') {
+    if (!decoded.data || (modernToken ? decoded.data.type !== 'admin' : decoded.data.id !== 1)) {
       throw new Error('Invalid admin token')
     }
 
-    return decoded.data
+    return { ...decoded.data, type: 'admin' }
   } catch (error) {
     throw createError({
       statusCode: 401,

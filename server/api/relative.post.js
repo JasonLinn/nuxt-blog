@@ -1,3 +1,4 @@
+import { requireAdmin } from '../utils/admin-auth.js'
 import databaseConfig from '../../utils/database-config.cjs';
 const { databaseUrl } = databaseConfig;
 import { Pool } from '@neondatabase/serverless'
@@ -8,6 +9,7 @@ const couponPool = new Pool({
 })
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   // if (event.context?.auth?.user?.id !== 1) {
   //   throw createError({
   //     statusCode: 401,

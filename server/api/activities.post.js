@@ -1,14 +1,18 @@
+import { requireUploader } from '../utils/upload-auth.js'
+import { saveLocalImage } from '../utils/safe-images.js'
 import { query } from '~/server/utils/db.js'
 import formidable from 'formidable'
 import fs from 'fs'
 import path from 'path'
 
 export default defineEventHandler(async (event) => {
+  requireUploader(event)
   try {
     // 解析 multipart/form-data
     const form = formidable({
-      uploadDir: './public/activities',
-      keepExtensions: true,
+      keepExtensions: false,
+        maxFieldsSize: 256 * 1024,
+        maxTotalFileSize: 25 * 1024 * 1024,
       maxFileSize: 5 * 1024 * 1024, // 5MB
       maxFiles: 5
     })
@@ -27,14 +31,7 @@ export default defineEventHandler(async (event) => {
       
       for (const file of imageFiles) {
         if (file.size > 0) {
-          const timestamp = Date.now()
-          const ext = path.extname(file.originalFilename || file.newFilename)
-          const newFilename = `${timestamp}-${Math.random().toString(36).substr(2, 9)}${ext}`
-          const newPath = path.join('./public/activities', newFilename)
-          
-          // 移動文件到目標位置
-          fs.renameSync(file.filepath, newPath)
-          imageUrls.push(`/activities/${newFilename}`)
+          imageUrls.push(await saveLocalImage(file))
         }
       }
     }

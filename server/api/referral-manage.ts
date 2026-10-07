@@ -1,7 +1,9 @@
-import { readBody } from '#imports'
+import { requireAdmin } from '../utils/admin-auth.js'
+import { readBody } from 'h3'
 import { pool } from '../utils/db.js'
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   const method = event.method
 
   if (method === 'GET') {

@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   // 如果是獲取 API Key
   if (query.type === 'key') {
     // 確保 API Key 存在
-    if (!config.GOOGLE_MAPS_API_KEY) {
+    if (!config.public.GOOGLE_MAPS_API_KEY) {
       console.error('Google Maps API Key not found in runtime config');
       throw createError({
         statusCode: 500,
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     }
 
     return {
-      key: config.GOOGLE_MAPS_API_KEY
+      key: config.public.GOOGLE_MAPS_API_KEY
     };
   }
   

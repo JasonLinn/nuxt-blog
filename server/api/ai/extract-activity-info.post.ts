@@ -1,27 +1,11 @@
+import { requireAdmin } from '../../utils/admin-auth.js'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   console.log('🚀 AI 提取活動資訊 API 被調用')
   
   try {
-    // 檢查管理員權限
-    console.log('🔐 開始檢查管理員權限...')
-    const cookies = parseCookies(event)
-    const adminToken = cookies.admin_access_token
-    
-    console.log('🍪 管理員 Token 存在:', !!adminToken)
-    
-    if (!adminToken) {
-      console.log('❌ 缺少管理員 Token')
-      throw createError({
-        statusCode: 401,
-        statusMessage: '需要管理員權限'
-      })
-    }
-
-    // 這裡可以添加更嚴格的 Token 驗證
-    console.log('✅ 管理員權限驗證通過')
-
     // 讀取上傳的檔案
     console.log('📁 開始處理上傳檔案...')
     const formData = await readMultipartFormData(event)

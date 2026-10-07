@@ -1,8 +1,14 @@
+import { normalizeImage } from '../../utils/safe-images.js'
+import { rm } from 'node:fs/promises'
+import { validateActivityUpdate } from '../../utils/security.js'
+import { saveLocalImage, deleteOwnedImage } from '../../utils/safe-images.js'
+import { requireAdmin } from '../../utils/admin-auth.js'
 import { query } from '~/server/utils/db.js'
 import formidable from 'formidable'
 import { readFile } from 'fs/promises'
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     // TODO: 驗證管理員權限
     // const session = await requireAdminAuth(event)
@@ -39,7 +45,9 @@ export default defineEventHandler(async (event) => {
     if (contentType && contentType.includes('multipart/form-data')) {
       // 處理包含文件上傳的請求
       const form = formidable({
-        keepExtensions: true,
+        keepExtensions: false,
+        maxFieldsSize: 256 * 1024,
+        maxTotalFileSize: 25 * 1024 * 1024,
         maxFileSize: 5 * 1024 * 1024,
         maxFiles: 5
       })
@@ -54,7 +62,7 @@ export default defineEventHandler(async (event) => {
           if (file.size > 0) {
             try {
               // 使用統一的上傳函式
-              const uploadResult = await uploadFile(file)
+              const uploadResult = await uploadFile(file, true)
               if (uploadResult.success) {
                 newImageUrls.push(uploadResult.url)
               }
@@ -70,22 +78,10 @@ export default defineEventHandler(async (event) => {
       const imagesToDelete = fields.deleteImages ? 
         (Array.isArray(fields.deleteImages) ? fields.deleteImages : [fields.deleteImages]) : []
       
-      imagesToDelete.forEach(imageUrl => {
+      for (const imageUrl of imagesToDelete) {
         newImageUrls = newImageUrls.filter(url => url !== imageUrl)
-        // 注意：GitHub 存儲的圖片無法直接刪除，本地圖片可以刪除
-        if (imageUrl.startsWith('/yilan-activities/')) {
-          try {
-            const { join } = require('path')
-            const { unlinkSync, existsSync } = require('fs')
-            const imagePath = join('./public', imageUrl)
-            if (existsSync(imagePath)) {
-              unlinkSync(imagePath)
-            }
-          } catch (error) {
-            console.error('Error deleting local image file:', error)
-          }
-        }
-      })
+        await deleteOwnedImage(imageUrl, existingActivity.images, 'yilan-activities')
+      }
       
       // 提取表單數據
       const getData = (field) => {
@@ -119,6 +115,7 @@ export default defineEventHandler(async (event) => {
       }
     }
     
+    validateActivityUpdate(updateData)
     // 驗證必填欄位
     if (updateData.title !== undefined && !updateData.title.trim()) {
       throw createError({
@@ -182,13 +179,16 @@ export default defineEventHandler(async (event) => {
 })
 
 // 圖片上傳函式 - 與 POST API 相同邏輯
-async function uploadFile(file) {
+async function uploadFile(file, allowGitHub) {
   try {
     const config = useRuntimeConfig()
     const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
 
+    const image = await normalizeImage(await readFile(file.filepath))
+    file.safeImage = image
+    file.mimetype = 'image/webp'
     // 驗證文件類型
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+    const allowedTypes = ['image/webp']
     if (!file.mimetype || !allowedTypes.includes(file.mimetype)) {
       throw new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.')
     }
@@ -202,7 +202,7 @@ async function uploadFile(file) {
     // 檢查 GitHub 配置是否完整
     const hasGitHubConfig = GITHUB_USERNAME && GITHUB_REPO && GITHUB_TOKEN
     
-    if (hasGitHubConfig) {
+    if (hasGitHubConfig && allowGitHub) {
       // 使用 GitHub 上傳
       return await uploadToGitHub(file, config)
     } else {
@@ -217,7 +217,7 @@ async function uploadFile(file) {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     }
-  }
+  } finally { await rm(file.filepath, { force: true }) }
 }
 
 // GitHub 上傳函數
@@ -226,10 +226,10 @@ async function uploadToGitHub(file, config) {
   
   // 生成唯一的檔案名稱
   const timestamp = new Date().getTime()
-  const fileName = `${timestamp}-${file.originalFilename || file.newFilename}`
+  const fileName = file.safeImage.filename
 
   // 讀取檔案並轉換為 base64
-  const fileData = await readFile(file.filepath)
+  const fileData = file.safeImage.data
   const base64Data = Buffer.from(fileData).toString('base64')
 
   // 上傳到 GitHub
@@ -271,7 +271,7 @@ async function uploadToLocal(file) {
   // 生成唯一的檔案名稱
   const timestamp = new Date().getTime()
   const extension = file.originalFilename?.split('.').pop() || 'jpg'
-  const fileName = `${timestamp}-${Math.random().toString(36).substr(2, 9)}.${extension}`
+  const fileName = file.safeImage.filename
 
   // 設定上傳目錄
   const uploadDir = join(process.cwd(), 'public', 'yilan-activities')
@@ -282,7 +282,7 @@ async function uploadToLocal(file) {
   }
 
   // 讀取並儲存文件
-  const fileData = await readFile(file.filepath)
+  const fileData = file.safeImage.data
   const filePath = join(uploadDir, fileName)
   await writeFile(filePath, fileData)
 

@@ -1,3 +1,4 @@
+import { requiredSecret } from '../utils/security.js'
 import jwt from 'jsonwebtoken';
 import { sendApprovalEmail, sendRejectionEmail } from '../utils/emailService.js';
 import { pool } from '../utils/db.js';
@@ -14,7 +15,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const decoded = jwt.verify(accessToken, 'JWT_SIGN_SECRET_ADMIN_2024');
+    const decoded = jwt.verify(accessToken, requiredSecret('ADMIN_JWT_SECRET'));
     
     if (!decoded.data || decoded.data.type !== 'admin') {
       throw createError({

@@ -1,3 +1,5 @@
+import { requireAdmin } from '../../../utils/admin-auth.js'
+import { requiredSecret } from '../../../utils/security.js'
 import databaseConfig from '../../../../utils/database-config.cjs';
 const { databaseUrl } = databaseConfig;
 // 管理員建立/更新推薦行程
@@ -11,6 +13,7 @@ const getConnectionString = () => {
 };
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     // 檢查管理員權限
     const accessToken = getCookie(event, 'admin_access_token')
@@ -22,7 +25,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      const decoded = jwt.verify(accessToken, 'JWT_SIGN_SECRET_ADMIN_2024')
+      const decoded = jwt.verify(accessToken, requiredSecret('ADMIN_JWT_SECRET'))
       if (!decoded.data || decoded.data.type !== 'admin') {
         throw createError({
           statusCode: 401,

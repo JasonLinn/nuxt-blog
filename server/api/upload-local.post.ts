@@ -1,9 +1,12 @@
+import { normalizeImage } from '../utils/safe-images.js'
+import { requireUploader } from '../utils/upload-auth.js'
 import { defineEventHandler, readMultipartFormData } from 'h3'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
 
 export default defineEventHandler(async (event) => {
+  requireUploader(event)
   try {
     // 讀取上傳的文件
     const files = await readMultipartFormData(event)
@@ -11,7 +14,7 @@ export default defineEventHandler(async (event) => {
       throw new Error('No file uploaded')
     }
 
-    const file = files[0]
+    const file = await normalizeImage(files[0].data)
     
     // 檢查文件類型
     if (!file.type) {
@@ -19,7 +22,7 @@ export default defineEventHandler(async (event) => {
     }
     
     // 驗證文件類型
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+    const allowedTypes = ['image/webp']
     if (!allowedTypes.includes(file.type)) {
       throw new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.')
     }
@@ -38,7 +41,7 @@ export default defineEventHandler(async (event) => {
     // 生成唯一的檔案名稱
     const timestamp = new Date().getTime()
     const extension = file.filename.split('.').pop()
-    const fileName = `${timestamp}-${file.filename}`
+    const fileName = file.filename
 
     // 設定上傳目錄
     const uploadDir = join(process.cwd(), 'public', 'uploads')

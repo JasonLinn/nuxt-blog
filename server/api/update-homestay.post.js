@@ -1,3 +1,4 @@
+import { requiredSecret } from '../utils/security.js'
 import jwt from 'jsonwebtoken';
 import { pool } from '../utils/db.js';
 
@@ -13,7 +14,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const decoded = jwt.verify(accessToken, 'JWT_SIGN_SECRET_HOMESTAY_2024');
+    const decoded = jwt.verify(accessToken, requiredSecret('HOMESTAY_JWT_SECRET'));
     
     if (!decoded.data || decoded.data.type !== 'homestay') {
       throw createError({

@@ -1,10 +1,15 @@
+import { getAdmin } from '../utils/admin-auth.js'
+import { publicActivity } from '../utils/security.js'
 import { query } from '~/server/utils/db.js'
 
 export default defineEventHandler(async (event) => {
   try {
     const url = getQuery(event)
-    const { status, limit, offset, dateFilter } = url
+    let { status, limit, offset, dateFilter } = url
     
+    const admin = getAdmin(event)
+    if (!admin) status = 'approved'
+    setHeader(event, 'Cache-Control', 'private, no-store')
     let sql = `
       SELECT 
         id, title, description, images, event_date, event_time, end_date, end_time, is_multi_day,
@@ -168,7 +173,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      data: result.rows,
+      data: admin ? result.rows : result.rows.map(publicActivity),
       total,
       message: 'Activities fetched successfully'
     }

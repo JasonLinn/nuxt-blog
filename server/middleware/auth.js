@@ -1,47 +1,16 @@
-import jwt from 'jsonwebtoken'
-
-const urls = [
-  {
-    path: '/api/articles',
-    method: 'POST'
-  },
-  {
-    path: /^\/api\/articles\/(.*)($|\?.*|#.*)/,
-    method: 'DELETE'
-  },
-  {
-    path: /^\/api\/articles\/(.*)($|\?.*|#.*)/,
-    method: 'PATCH'
-  }
-]
-
-export default defineEventHandler((event) => {
-  const requireVerify = urls.some((apiUrl) => {
-    if (event.method === apiUrl.method) {
-      if (apiUrl.path instanceof RegExp) {
-        return apiUrl.path.test(event.path)
-      }
-
-      return event.path === apiUrl.path
+import { defineEventHandler, getRequestURL, getHeader, createError } from 'h3'
+import { requireAdmin } from '../utils/admin-auth.js'
+export default defineEventHandler(event => {
+  const pathname = getRequestURL(event).pathname
+  if (!pathname.startsWith('/api/')) return
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(event.method)) {
+    const origin = getHeader(event, 'origin')
+    if (getHeader(event, 'sec-fetch-site') === 'cross-site' || (origin && origin !== getRequestURL(event).origin)) {
+      throw createError({ statusCode: 403, statusMessage: 'Cross-origin request rejected' })
     }
-
-    return false
-  })
-
-  if (!requireVerify) {
-    return
   }
-  const jwtToken = getCookie(event, 'access_token')
-
-  if (jwtToken) {
-    try {
-      const { data: user } = jwt.verify(jwtToken, 'JWT_SIGN_SECRET_PLEASE_REPLACE_WITH_YOUR_KEY')
-
-      event.context.auth = {
-        user
-      }
-    } catch (error) {
-      console.error(error)
-    }
+  if ((pathname === '/api/articles' && event.method === 'POST') || (/^\/api\/articles\/[^/]+\/?$/.test(pathname) && ['PATCH', 'DELETE'].includes(event.method))) {
+    const user = requireAdmin(event)
+    event.context.auth = { user: { ...user, id: 1 } }
   }
 })

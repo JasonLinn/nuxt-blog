@@ -1,6 +1,9 @@
+import { requireAdmin } from '../../utils/admin-auth.js'
+import { requiredSecret } from '../../utils/security.js'
 import jwt from 'jsonwebtoken';
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     // 驗證管理員身份
     const accessToken = getCookie(event, 'admin_access_token');
@@ -12,7 +15,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const decoded = jwt.verify(accessToken, 'JWT_SIGN_SECRET_ADMIN_2024');
+    const decoded = jwt.verify(accessToken, requiredSecret('ADMIN_JWT_SECRET'));
     
     if (!decoded.data || decoded.data.type !== 'admin') {
       throw createError({

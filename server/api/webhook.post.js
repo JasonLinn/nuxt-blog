@@ -1,3 +1,5 @@
+import { createHmac } from 'node:crypto'
+import { equalSecret, requiredSecret } from '../utils/security.js'
 import databaseConfig from '../../utils/database-config.cjs';
 const { databaseUrl } = databaseConfig;
 import * as line from '@line/bot-sdk'
@@ -283,24 +285,16 @@ async function handleEvent (event) {
 }
 
 export default defineEventHandler(async (event) => {
-    try {
-      const body = await readBody(event)
-      await Promise
-      .all(body.events.map(handleEvent))
-      .then((result) => {
-        console.log(result)
-      })
-      .catch((err) => {
-        console.error(err);
-        // res.status(500).end();
-      });
-      } catch (e) {
-        console.log(e, 'EEEEEEEEERRRR')
-        // throw createError({
-        //   statusCode: 401,
-        //   statusMessage: 'Unauthorized'
-        // })
-      }
+    const raw = await readRawBody(event, false)
+    const signature = getHeader(event, 'x-line-signature')
+    const expected = createHmac('sha256', requiredSecret('LINE_MESSAGING_CHANNEL_SECRET')).update(raw || Buffer.alloc(0)).digest('base64')
+    if (!equalSecret(signature, expected)) throw createError({ statusCode: 401, statusMessage: 'Invalid webhook signature' })
+
+    let body
+    try { body = JSON.parse(raw.toString('utf8')) } catch { throw createError({ statusCode: 400, statusMessage: 'Invalid webhook body' }) }
+    if (!Array.isArray(body.events)) throw createError({ statusCode: 400, statusMessage: 'Invalid events' })
+    await Promise.all(body.events.map(handleEvent))
+    return { success: true }
 })
 
 const getCupon = async () => {

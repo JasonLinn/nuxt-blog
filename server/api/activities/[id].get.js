@@ -1,3 +1,5 @@
+import { getAdmin } from '../../utils/admin-auth.js'
+import { publicActivity } from '../../utils/security.js'
 import { query } from '~/server/utils/db.js'
 
 export default defineEventHandler(async (event) => {
@@ -11,6 +13,8 @@ export default defineEventHandler(async (event) => {
       })
     }
     
+    const admin = getAdmin(event)
+    setHeader(event, 'Cache-Control', 'private, no-store')
     const sql = `
       SELECT 
         id, title, description, images, event_date, event_time, location, activity_type,
@@ -18,7 +22,7 @@ export default defineEventHandler(async (event) => {
         status, rejection_reason, submitter_name, submitter_email, admin_notes,
         created_at, updated_at, approved_at, approved_by
       FROM yilan_activities 
-      WHERE id = $1
+      WHERE id = $1 ${admin ? '' : "AND status = 'approved'"}
     `
     
     const result = await query(sql, [parseInt(id)])
@@ -32,7 +36,7 @@ export default defineEventHandler(async (event) => {
     
     return {
       success: true,
-      data: result.rows[0],
+      data: admin ? result.rows[0] : publicActivity(result.rows[0]),
       message: 'Activity fetched successfully'
     }
     

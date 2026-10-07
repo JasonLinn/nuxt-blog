@@ -1,3 +1,4 @@
+import { requiredSecret } from '../../utils/security.js'
 import databaseConfig from '../../../utils/database-config.cjs';
 const { databaseUrl } = databaseConfig;
 import pg from 'pg';
@@ -30,8 +31,8 @@ export default defineEventHandler(async (event) => {
   let identity;
   try {
     const decoded = adminToken
-      ? jwt.verify(adminToken, 'JWT_SIGN_SECRET_ADMIN_2024')
-      : jwt.verify(homestayToken || '', 'JWT_SIGN_SECRET_HOMESTAY_2024');
+      ? jwt.verify(adminToken, requiredSecret('ADMIN_JWT_SECRET'))
+      : jwt.verify(homestayToken || '', requiredSecret('HOMESTAY_JWT_SECRET'));
     identity = decoded.data;
     if (identity?.type !== (adminToken ? 'admin' : 'homestay')) throw new Error('Invalid role');
   } catch {

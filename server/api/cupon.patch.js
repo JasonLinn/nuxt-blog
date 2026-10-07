@@ -1,3 +1,4 @@
+import { requireAdmin } from '../utils/admin-auth.js'
 import databaseConfig from '../../utils/database-config.cjs';
 const { databaseUrl } = databaseConfig;
 import pkg from 'pg'
@@ -12,6 +13,7 @@ const couponPool = new Pool({
 })
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   const body = await readBody(event)
 
   const articleRecord = await couponPool

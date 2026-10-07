@@ -1,66 +1,19 @@
-import liff from "@line/liff";
-import { LIFF_ID } from "./liffID";
+import liff from '@line/liff'
+import { LIFF_ID } from './liffID'
 
-const fetchUser = async (data) => {
-
-  // web登入
-  if (data) {
-    const webProfile = {
-      'userId': data.sub,
-      'pictureUrl': data.picture,
-      'displayName': data.name,
-    }
-    await insertUser(webProfile)
-    webProfile.coupons = await getUserCoupons(webProfile)
-
-    return webProfile
-  }
+const fetchUser = async (profile) => {
   try {
-    await liff.init({ liffId: LIFF_ID[useRoute().name] }); // Use own liffId
-    const user = await liff.getProfile().then(async (profile) => {
-      if (!liff.isLoggedIn()) {
-        return;
+    if (!profile) {
+      try { profile = await $fetch('/api/line/session') } catch {
+        await liff.init({ liffId: LIFF_ID[useRoute().name] })
+        if (!liff.isLoggedIn()) return
+        const result = await $fetch('/api/line/session', { method: 'POST', body: { accessToken: liff.getAccessToken() } })
+        profile = result.profile
       }
-      //寫入DB
-      await insertUser(profile)
-      //獲取已領Coupon訊息
-      profile.coupons = await getUserCoupons(profile)
-      return profile
-    })
-
-    return user;
-
-  } catch (err) {
-    console.warn(`liff init error: ${err}`);
-  }
-};
-
-
-const insertUser = async (profile) => {
-  await $fetch(`/api/user/user`, {
-    method: 'POST',
-    body: {
-      name: profile.displayName,
-      cover: profile.pictureUrl,
-      user_id: profile.userId,
-      coupons: [],
-      msg_times: 0,
     }
-  })
-    .then((response) => {
-
-      // article.value.amount = response.amount
-    })
-    .catch((error) => alert(error))
+    await $fetch('/api/user/user', { method: 'POST', body: { user_id: profile.userId } })
+    const user = await $fetch(`/api/user/${profile.userId}`)
+    return { ...profile, coupons: user.coupons }
+  } catch { return null }
 }
-
-const getUserCoupons = async (profile) => {
-  return await $fetch(`/api/user/${profile.userId}`)
-    .then((response) => {
-      return response?.coupons
-    })
-    .catch((error) => alert(error))
-}
-
-export default fetchUser;
-
+export default fetchUser

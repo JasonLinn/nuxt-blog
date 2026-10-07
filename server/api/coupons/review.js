@@ -1,7 +1,9 @@
+import { requireAdmin } from '../../utils/admin-auth.js'
 // 管理員審核優惠券
 import { couponPool } from '../../utils/coupon-db.js'
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   const method = getMethod(event)
   
   try {

@@ -488,6 +488,7 @@
 </template>
 
 <script setup>
+useSubmissionLogin()
 
 // 檢查是否為管理員
 const isAdmin = ref(false)

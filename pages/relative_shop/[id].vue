@@ -78,7 +78,7 @@
           <h1 class="cupon-title break-words text-4xl font-semibold text-gray-700">
             {{ article.title }}
           </h1>
-          <div class="cupon-text" v-html="article.content">
+          <div class="cupon-text" v-html="sanitizeRichContent(article.content)">
           </div>
         </div>
         <RelativeFooter></RelativeFooter>
@@ -184,6 +184,7 @@
 </style>
   
   <script setup>
+import { sanitizeRichContent } from '~/utils/rich-content.js'
   import liff from "@line/liff";
   import useReferralStore from "~/store/referral";
   import { referral } from "~/utils/referral"

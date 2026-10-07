@@ -1,13 +1,17 @@
+import { requiredSecret } from '../utils/security.js'
+import { requireAdmin } from '../utils/admin-auth.js'
 import axios from "axios"
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
     const body = await readBody(event)
 
+    if (typeof body.id !== 'string' || !/^U[a-f0-9]{32}$/.test(body.id) || typeof body.text !== 'string' || !body.text.length || body.text.length > 5000) throw createError({ statusCode: 400, statusMessage: 'Invalid message' })
     await axios({
         "url": 'https://api.line.me/v2/bot/message/push',
         "headers": {
             'Content-Type': 'application/json',
-            "Authorization": 'Bearer +qlxI8MrmkzmLSRhMnyQ2Y4bBrFWpJGpvTliKBVR7mHGZV4Ffh2XbTXca72KWzXtHt5B9tXQEeQwH7eB9JbWde+lVyaOz1TPBRw43R+onRwFi4xEHYz+vk8ec7wgAY4GMC/gTcdhXcvY9paiY2nqZwdB04t89/1O/w1cDnyilFU=',
+            "Authorization": 'Bearer ' + requiredSecret('LINE_MESSAGE_ACCESS_TOKEN'),
         },
         "method": 'POST',
         "data": {
@@ -19,5 +23,5 @@ export default defineEventHandler(async (event) => {
                 }
             ]
         }
-    }).catch((error) => console.error('sendMsg error:', error))
+    }).catch(() => { throw createError({ statusCode: 502, statusMessage: 'LINE delivery failed' }) })
 })

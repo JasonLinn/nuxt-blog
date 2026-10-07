@@ -352,6 +352,7 @@
 </template>
 
 <script setup>
+import { sanitizeRichContent } from '~/utils/rich-content.js'
 const route = useRoute()
 const activity = ref(null)
 const loading = ref(true)
@@ -396,7 +397,7 @@ const formatDateTime = (dateString) => {
 
 const formatDescription = (description) => {
   if (!description) return ''
-  return description.replace(/\n/g, '<br>')
+  return sanitizeRichContent(description.replace(/\n/g, '<br>'))
 }
 
 // 圖片相關函數

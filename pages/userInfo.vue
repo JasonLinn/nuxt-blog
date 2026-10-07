@@ -168,54 +168,15 @@ const fakeUser = {
 //     console.log(JSON.parse(item).title, 'kkkkkk')
 // })
 
-const received = (e) => {
-  const getted = confirm("是否確認兌換?");
-  let couponGetted = {}
-
-  if (getted) {
-    let newCoupons = coupons.value.map((objectCoupon)=> {
-      if (objectCoupon.gotTime == e.target.id) {
-        objectCoupon.received = true
-        objectCoupon.receivedTime = new Date()
-        couponGetted = objectCoupon
-
-        return couponGetted
-      }
-
-      return objectCoupon
-    })
-
-    $fetch('/api/received', {
-      method: 'POST',
-      body: {
-        coupon_title: couponGetted.title,
-        coupon_id: couponGetted.id,
-        coupon_content: couponGetted.content,
-        user_id: userId || 0,
-        user_name: userName || 'undefined',
-        remark: '',
-        received_time: couponGetted.receivedTime
-      }
-    })
-      .then((response) => {
-        console.log(response)
-      })
-      .catch((error) => console.log(error))
-
-
-    $fetch(`/api/user/updateCoupon`, {
-      method: 'PATCH',
-        body: {
-          coupons: newCoupons,
-          userId: userId,
-        }
-    })
-    .then(async () => {
-      alert('已標註兌換!')
-      await store.setCoupons(newCoupons)
-    })
-    .catch((error) => console.log(error))
-  }
+const received = async (e) => {
+  if (!confirm('是否確認兌換?')) return
+  const coupon = coupons.value.find(item => item.gotTime === e.target.id)
+  if (!coupon) return
+  try {
+    const result = await $fetch('/api/received', { method: 'POST', body: { coupon_id: coupon.id, claimId: coupon.claimId, gotTime: coupon.gotTime } })
+    await store.setCoupons(result.coupons)
+    alert('已標註兌換!')
+  } catch { alert('兌換失敗，請重新整理後再試。') }
 }
 
 const barcodeLoaded = ref({})

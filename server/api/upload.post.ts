@@ -1,3 +1,5 @@
+import { normalizeImage } from '../utils/safe-images.js'
+import { requireUploader } from '../utils/upload-auth.js'
 import { defineEventHandler, readMultipartFormData } from 'h3'
 import { Buffer } from 'buffer'
 import { writeFile, mkdir } from 'fs/promises'
@@ -5,6 +7,7 @@ import { join } from 'path'
 import { existsSync } from 'fs'
 
 export default defineEventHandler(async (event) => {
+  requireUploader(event)
   try {
     const config = useRuntimeConfig()
     const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
@@ -15,10 +18,10 @@ export default defineEventHandler(async (event) => {
       throw new Error('No file uploaded')
     }
 
-    const file = files[0]
+    const file = await normalizeImage(files[0].data)
     
     // 驗證文件類型
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+    const allowedTypes = ['image/webp']
     if (!file.type || !allowedTypes.includes(file.type)) {
       throw new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.')
     }
@@ -56,7 +59,7 @@ async function uploadToGitHub(file: any, config: any) {
   
   // 生成唯一的檔案名稱
   const timestamp = new Date().getTime()
-  const fileName = `${timestamp}-${file.filename}`
+  const fileName = file.filename
 
   // 轉換為 base64
   const base64Data = Buffer.from(file.data).toString('base64')
@@ -96,7 +99,7 @@ async function uploadToLocal(file: any) {
   // 生成唯一的檔案名稱
   const timestamp = new Date().getTime()
   const extension = file.filename?.split('.').pop() || 'jpg'
-  const fileName = `${timestamp}-${Math.random().toString(36).substr(2, 9)}.${extension}`
+  const fileName = file.filename
 
   // 設定上傳目錄
   const uploadDir = join(process.cwd(), 'public', 'uploads')

@@ -1,3 +1,4 @@
+import { requiredSecret, equalSecret } from '../utils/security.js'
 import jwt from 'jsonwebtoken';
 
 export default defineEventHandler(async (event) => {
@@ -14,12 +15,12 @@ export default defineEventHandler(async (event) => {
 
     // 硬編碼的管理員帳密（實際環境應從環境變數取得）
     const adminCredentials = {
-      username: 'admin',
-      password: 'admin123'
+      username: requiredSecret('ADMIN_USERNAME'),
+      password: requiredSecret('ADMIN_PASSWORD')
     };
 
     // 驗證帳號密碼
-    if (username !== adminCredentials.username || password !== adminCredentials.password) {
+    if (!equalSecret(username, adminCredentials.username) || !equalSecret(password, adminCredentials.password)) {
       throw createError({
         statusCode: 401,
         statusMessage: '帳號或密碼錯誤'
@@ -41,14 +42,15 @@ export default defineEventHandler(async (event) => {
         exp: expires,
         data: jwtTokenPayload
       },
-      'JWT_SIGN_SECRET_ADMIN_2024'
+      requiredSecret('ADMIN_JWT_SECRET')
     );
 
     // 設置Cookie
     setCookie(event, 'admin_access_token', jwtToken, {
       maxAge,
       expires: new Date(expires * 1000),
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       httpOnly: true,
       path: '/'
     });

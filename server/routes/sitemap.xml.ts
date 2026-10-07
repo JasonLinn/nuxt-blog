@@ -81,7 +81,7 @@ export default defineEventHandler(async (event) => {
           
           urlEntry += `
     <image:image>
-      <image:loc>${imageUrl}</image:loc>
+      <image:loc>${escapeXml(imageUrl)}</image:loc>
       <image:title>${escapeXml(homestay.name || '宜蘭民宿')}</image:title>
       <image:caption>${escapeXml(homestay.name || '宜蘭民宿')} - 宜蘭旅遊通推薦民宿</image:caption>
     </image:image>`

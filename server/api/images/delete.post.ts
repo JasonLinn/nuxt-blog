@@ -1,6 +1,8 @@
+import { requireAdmin } from '../../utils/admin-auth.js'
 import { defineEventHandler, readBody } from 'h3'
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     const config = useRuntimeConfig()
     const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
@@ -21,7 +23,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { name, sha } = body
 
-    if (!name || !sha) {
+    if (typeof name !== 'string' || !/^[a-zA-Z0-9_.-]+$/.test(name) || name.includes('..') || !sha) {
       return {
         success: false,
         error: '缺少必要參數'

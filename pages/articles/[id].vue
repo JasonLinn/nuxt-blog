@@ -312,63 +312,21 @@ const handleArchiveArticle = () => {
   }
 }
 
-const sendPatch = async () => {
-  if (!article.value || typeof article.value.amount !== 'number') {
-    console.log('article.value 或 amount 無效', article.value)
-    return
+const sendPatch = async () => {} // Inventory is part of the claim transaction.
+const patchUser = async () => {
+  iconLoading.value = true
+  try {
+    const result = await $fetch('/api/user/appendCoupon', {
+      method: 'PATCH', body: { articleId: article.value.id, referralCode: referralStore.value?.code }
+    })
+    article.value.amount = result.amount
+    store.recordClaim(result.coupon)
+    alert('領取成功!')
+    await navigateTo('/userInfo')
+    return result
+  } finally {
+    iconLoading.value = false
   }
-  await $fetch(`/api/cupon`, {
-      method: 'PATCH',
-        body: {
-          id: route.params.id,
-          amount: article.value.amount -1
-        }
-    })
-    .then((response) => {
-      if (response && typeof response.amount === 'number') {
-        article.value.amount = response.amount
-      } else {
-        console.log('PATCH 回傳 amount 無效', response)
-      }
-    })
-    .catch((error) => {
-      if (process.client) console.log(error)
-    })
-}
-
-const patchUser = async (profile) => {
-  if (!article.value) {
-    console.log('patchUser: article 不存在')
-    return
-  }
-  // 設定推薦店家
-  article.value.referral = referralStore.value
-  //增加領取時間
-  article.value.gotTime = new Date()
-  //增加條碼數據
-  article.value.qrCodeData = qrCodeData.value
-  //暫時填進已領優惠券
-  if (userData?.value?.coupons && Array.isArray(userData.value.coupons)) {
-    userData.value.coupons.push(JSON.stringify(article.value))
-  } else {
-    console.log('userData.value.coupons 無效', userData.value)
-  }
-  store.setUser(userData)
-  //打API更新資料庫
-  await $fetch(`/api/user/appendCoupon`, {
-      method: 'PATCH',
-        body: {
-          coupon: article.value,
-          user: profile,
-        }
-    })
-    .then((response) => {
-      if (process.client) alert('領取成功!')
-      navigateTo('/userInfo')
-    })
-    .catch((error) => {
-      if (process.client) console.log(error)
-    })
 }
 
 const checkReferral = async () => {
@@ -441,7 +399,7 @@ const getLineLoginUrl = (state) => {
   // 構建完整的回調 URL
   const redirectUri = encodeURIComponent(`${baseUrl}/line_callback`);
   
-  return `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2005661804&redirect_uri=${redirectUri}&state=${state}&bot_prompt=normal&scope=openid%20email%20profile`;
+  return `/api/line/login?returnTo=${encodeURIComponent(state)}`;
 };
 
 const handleHashRecive = async () => {
@@ -457,34 +415,9 @@ const handleHashRecive = async () => {
       return;
     }
 
-    // 從 API 獲取一組數字
-    const response = await $fetch('/api/hash/generate', {
-      method: 'POST',
-      body: {
-        articleId: route.params.id
-      }
-    })
-
-    qrCodeData.value = response.hash
+    const result = await patchUser()
+    qrCodeData.value = result.coupon.qrCodeData
     showQRCode.value = true
-    
-    // 確保只在客戶端生成條碼
-    if (process.client) {
-      // 在下一個 tick 生成條碼
-      nextTick(async () => {
-        // 確保 document 存在
-        if (typeof document !== 'undefined') {
-          const canvas = document.getElementById('barcode')
-          if (canvas) {
-            await generateBarcode(canvas, qrCodeData.value)
-          }
-        }
-      })
-    }
-
-    // 更新用戶優惠券資訊
-    await patchUser(userData.value)
-    await sendPatch()
 
   } catch (error) {
     console.error('Error:', error)
@@ -502,27 +435,17 @@ const handleHashRecive = async () => {
 }
 
 const getCupon = async () => {
-  iconLoading = true
-
+  if (iconLoading.value) return
   if (!userId.value) {
-    if (process.client) {
-      alert("請先登入");
-      // 使用函數生成 LINE 登錄 URL
-      navigateTo(getLineLoginUrl(route.path), { external: true });
-    }
+    alert('請先登入')
+    await navigateTo(getLineLoginUrl(route.path), { external: true })
     return
   }
-
-  if (userId.value) {
-    await patchUser(userData.value)
-    await sendPatch()
-  } else if (process.client) {
-    await liff.getProfile().then(profile => {
-      patchUser(profile)
-    })
-    await sendPatch()
+  try {
+    await patchUser()
+  } catch (error) {
+    alert(error.response?.status === 409 ? '此優惠券已領取或已無庫存，請重新整理。' : '領取失敗，請稍後再試。')
   }
-
   return
   // let checkIcon = referralStore?.value?.name ? "https://yilanpass.com/icon/check-circle-fill.svg" : "";
   let cupon = {

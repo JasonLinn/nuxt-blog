@@ -1,7 +1,9 @@
+import { requireAdmin } from '../../../utils/admin-auth.js'
 import { query } from '~/server/utils/db.js'
 import { sendActivityApprovalEmail } from '~/server/utils/emailService.js'
 
 export default defineEventHandler(async (event) => {
+  requireAdmin(event)
   try {
     // TODO: 驗證管理員權限
     // const session = await requireAdminAuth(event)

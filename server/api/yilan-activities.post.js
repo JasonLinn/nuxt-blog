@@ -1,8 +1,13 @@
+import { requireUploader } from '../utils/upload-auth.js'
+import { getAdmin } from '../utils/admin-auth.js'
+import { normalizeImage } from '../utils/safe-images.js'
+import { rm } from 'node:fs/promises'
 import { query } from '~/server/utils/db.js'
 import formidable from 'formidable'
 import { readFile } from 'fs/promises'
 
 export default defineEventHandler(async (event) => {
+  requireUploader(event)
   try {
     // 檢查內容類型
     const contentType = getHeader(event, 'content-type')
@@ -12,7 +17,9 @@ export default defineEventHandler(async (event) => {
     if (contentType && contentType.includes('multipart/form-data')) {
       // 處理包含檔案上傳的請求
       const form = formidable({
-        keepExtensions: true,
+        keepExtensions: false,
+        maxFieldsSize: 256 * 1024,
+        maxTotalFileSize: 25 * 1024 * 1024,
         maxFileSize: 5 * 1024 * 1024, // 5MB
         maxFiles: 5
       })
@@ -28,7 +35,7 @@ export default defineEventHandler(async (event) => {
           if (file.size > 0) {
             try {
               // 直接使用上傳 API 的內部邏輯
-              const uploadResult = await uploadFile(file)
+              const uploadResult = await uploadFile(file, true)
               if (uploadResult.success) {
                 imageUrls.push(uploadResult.url)
               }
@@ -170,13 +177,16 @@ export default defineEventHandler(async (event) => {
 })
 
 // 圖片上傳函式 - 複製自 upload.post.ts 的邏輯
-async function uploadFile(file) {
+async function uploadFile(file, allowGitHub) {
   try {
     const config = useRuntimeConfig()
     const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
 
+    const image = await normalizeImage(await readFile(file.filepath))
+    file.safeImage = image
+    file.mimetype = 'image/webp'
     // 驗證文件類型
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+    const allowedTypes = ['image/webp']
     if (!file.mimetype || !allowedTypes.includes(file.mimetype)) {
       throw new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.')
     }
@@ -190,7 +200,7 @@ async function uploadFile(file) {
     // 檢查 GitHub 配置是否完整
     const hasGitHubConfig = GITHUB_USERNAME && GITHUB_REPO && GITHUB_TOKEN
     
-    if (hasGitHubConfig) {
+    if (hasGitHubConfig && allowGitHub) {
       // 使用 GitHub 上傳
       return await uploadToGitHub(file, config)
     } else {
@@ -205,7 +215,7 @@ async function uploadFile(file) {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     }
-  }
+  } finally { await rm(file.filepath, { force: true }) }
 }
 
 // GitHub 上傳函數
@@ -214,10 +224,10 @@ async function uploadToGitHub(file, config) {
   
   // 生成唯一的檔案名稱
   const timestamp = new Date().getTime()
-  const fileName = `${timestamp}-${file.originalFilename || file.newFilename}`
+  const fileName = file.safeImage.filename
 
   // 讀取檔案並轉換為 base64
-  const fileData = await readFile(file.filepath)
+  const fileData = file.safeImage.data
   const base64Data = Buffer.from(fileData).toString('base64')
 
   // 上傳到 GitHub
@@ -259,7 +269,7 @@ async function uploadToLocal(file) {
   // 生成唯一的檔案名稱
   const timestamp = new Date().getTime()
   const extension = file.originalFilename?.split('.').pop() || 'jpg'
-  const fileName = `${timestamp}-${Math.random().toString(36).substr(2, 9)}.${extension}`
+  const fileName = file.safeImage.filename
 
   // 設定上傳目錄
   const uploadDir = join(process.cwd(), 'public', 'yilan-activities')
@@ -270,7 +280,7 @@ async function uploadToLocal(file) {
   }
 
   // 讀取並儲存文件
-  const fileData = await readFile(file.filepath)
+  const fileData = file.safeImage.data
   const filePath = join(uploadDir, fileName)
   await writeFile(filePath, fileData)
 

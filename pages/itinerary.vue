@@ -405,7 +405,7 @@
                 v-for="(photo, index) in placeDetails.photos.slice(0, 5)" 
                 :key="index"
                 :src="photo.photo_reference ? 
-                  `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${config.public.googleMapsApiKey}` :
+                  `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${encodeURIComponent(photo.photo_reference)}&key=${config.public.googleMapsApiKey}` :
                   getPlaceImage(placeDetails)"
                 :alt="`${placeDetails.name} 照片 ${index + 1}`"
                 class="place-photo"
@@ -792,6 +792,7 @@
 </template>
 
 <script setup>
+import { safeImageUrl } from '~/utils/safe-content.js'
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
 
 // 取得運行時配置
@@ -1056,11 +1057,12 @@ const getPlaceImage = (place) => {
   // 使用 Google Photos（目前資料庫中主要的圖片來源）
   if (place.photos && place.photos.length > 0) {
     const photo = place.photos[0];
+    if (typeof photo === 'string' && safeImageUrl(photo)) return safeImageUrl(photo);
     if (photo.photo_reference) {
       // 檢查是否有 API key
       const apiKey = config.public.GOOGLE_MAPS_API_KEY;
       if (apiKey) {
-        const googleImageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${apiKey}`;
+        const googleImageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${encodeURIComponent(photo.photo_reference)}&key=${apiKey}`;
         console.log('Using Google photo URL:', googleImageUrl);
         return googleImageUrl;
       } else {
@@ -1071,6 +1073,8 @@ const getPlaceImage = (place) => {
     }
   }
   
+  const storedImage = Array.isArray(place.images) && place.images.find(image => typeof image === 'string' && safeImageUrl(image));
+  if (storedImage) return safeImageUrl(storedImage);
   console.log('Using placeholder image for:', place.name);
   return '/placeholder-place.jpg';
 };
@@ -1789,7 +1793,7 @@ const createBasicPlaceInfoWindowContent = (place) => {
   const safeId = escapeHtml(place.id);
 
   // 基本照片
-  const basicImageHtml = `<img src="${getPlaceImage(place)}" alt="${safeName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
+  const basicImageHtml = `<img src="${escapeHtml(safeImageUrl(getPlaceImage(place)))}" alt="${safeName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
 
   return `
     <div style="max-width: 300px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
@@ -1936,11 +1940,11 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
   const photosHtml = placeDetails.photos && placeDetails.photos.length > 0 
     ? placeDetails.photos.slice(0, 3).map(photo => {
         const photoUrl = photo.photo_reference 
-          ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${photo.photo_reference}&key=${config.public.GOOGLE_MAPS_API_KEY}`
+          ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photo_reference=${encodeURIComponent(photo.photo_reference)}&key=${config.public.GOOGLE_MAPS_API_KEY}`
           : getPlaceImage(placeDetails);
-        return `<img src="${photoUrl}" alt="${safeName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 4px;">`;
+        return `<img src="${escapeHtml(safeImageUrl(photoUrl))}" alt="${safeName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 4px;">`;
       }).join('')
-    : `<img src="${getPlaceImage(placeDetails)}" alt="${safeName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
+    : `<img src="${escapeHtml(safeImageUrl(getPlaceImage(placeDetails)))}" alt="${safeName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
 
   // 生成評分 HTML
   const ratingHtml = placeDetails.rating 
@@ -1951,8 +1955,8 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
             `<span style="color: ${i < Math.floor(placeDetails.rating) ? '#fbbf24' : '#d1d5db'}; font-size: 14px;">★</span>`
           ).join('')}
         </div>
-        <span style="font-weight: 600; margin-right: 4px;">${placeDetails.rating}</span>
-        <span style="color: #6b7280; font-size: 12px;">(${placeDetails.user_ratings_total || 0} 則評價)</span>
+        <span style="font-weight: 600; margin-right: 4px;">${escapeHtml(placeDetails.rating)}</span>
+        <span style="color: #6b7280; font-size: 12px;">(${escapeHtml(placeDetails.user_ratings_total || 0)} 則評價)</span>
         ${hasGoogleData ? `<span style="color: #10b981; font-size: 10px; margin-left: 8px;">● 最新資料 ${timeString}</span>` : ''}
       </div>
     `
@@ -2017,7 +2021,7 @@ const createPlaceInfoWindowContent = async (place, forceRefresh = false) => {
     ? `
       <div style="margin: 8px 0; font-size: 11px;">
         ${placeDetails.formatted_phone_number ? `<div><strong>電話:</strong> ${escapeHtml(placeDetails.formatted_phone_number)}</div>` : ''}
-        ${placeDetails.website ? `<div><strong>網站:</strong> <a href="${encodeURI(placeDetails.website)}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6;">查看</a></div>` : ''}
+        ${placeDetails.website ? `<div><strong>網站:</strong> <a href="${escapeHtml(safeImageUrl(placeDetails.website))}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6;">查看</a></div>` : ''}
       </div>
     `
     : '';
