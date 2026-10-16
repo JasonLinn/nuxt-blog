@@ -67,12 +67,13 @@ const useHomestayStore = defineStore("homestayStore", {
         amenities = [],
         guest_count = null,
         sort_by = 'rating',
+        seed = '',
         forceRefresh = false
       } = params;
 
       // 檢查是否是相同的請求且快取有效 (如果不是強制刷新)
       // 注意：如果有篩選條件變更，則視為不同請求
-      const currentParams = JSON.stringify({ page, limit, search, location, themes, amenities, guest_count, sort_by });
+      const currentParams = JSON.stringify({ page, limit, search, location, themes, amenities, guest_count, sort_by, seed });
 
       if (!forceRefresh &&
         this.homestays.length > 0 &&
@@ -100,7 +101,8 @@ const useHomestayStore = defineStore("homestayStore", {
             themes,
             amenities,
             guest_count,
-            sort_by
+            sort_by,
+            seed: seed || undefined
           }
         });
 

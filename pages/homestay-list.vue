@@ -508,6 +508,13 @@ const selectedArea = ref(null)
 const guestCount = ref(null)
 const itemsPerPage = 12 // 與後端預設一致
 
+// 隨機排序：每位訪客一個種子（存在 cookie），翻頁時順序固定、不重複
+const listSeed = useCookie('homestay_list_seed', {
+  maxAge: 60 * 60 * 6,
+  default: () => Math.random().toString(36).slice(2, 10)
+})
+const sortParams = () => ({ sort_by: 'random', seed: listSeed.value })
+
 // 日期搜尋相關
 const checkInDate = ref('')
 const checkOutDate = ref('')
@@ -567,7 +574,7 @@ const filteredBnbs = computed(() => {
           ))
       return nameMatch && areaMatch && themeMatch && amenityMatch
     })
-    return shuffleArray(result)
+    return result
   }
 
   // 一般模式 (Server-side filtering) - 直接回傳 store 資料
@@ -813,7 +820,7 @@ const searchByDates = async () => {
     })
 
     if (response.success) {
-      availableHomestays.value = response.data.homestays
+      availableHomestays.value = shuffleArray(response.data.homestays)
       console.log('日期搜尋成功，找到', availableHomestays.value.length, '個可用民宿')
       // 注意：目前日期搜尋結果是前端分頁，如果需要 Server-Side Pagination 需要後端支援
       // 這裡暫時保持原樣，或者是將 available ID 傳給 fetchBnbs
@@ -842,7 +849,8 @@ const fetchBnbsData = async () => {
       location: selectedArea.value || '',
       guest_count: guestCount.value || null,
       themes: selectedThemeFeatures.value,
-      amenities: selectedServiceAmenities.value
+      amenities: selectedServiceAmenities.value,
+      ...sortParams()
       // 日期搜尋暫不整合到此，除非後端支援
     }
 
@@ -919,7 +927,11 @@ let searchDateTimeout = null
 const { error: initialError } = await useAsyncData(
   `homestay-list-${currentPage.value}`,
   async () => {
-    await homestayStore.fetchHomestays({ page: currentPage.value, limit: itemsPerPage })
+    await homestayStore.fetchHomestays({
+      page: currentPage.value,
+      limit: itemsPerPage,
+      ...sortParams()
+    })
     return true
   }
 )
@@ -937,6 +949,16 @@ onUnmounted(() => {
   clearTimeout(searchTimeout)
   clearTimeout(searchDateTimeout)
 })
+
+// 日期搜尋結果為前端分頁，取得時洗牌一次
+const shuffleArray = (items) => {
+  const result = [...items]
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
 
 // 格式化人數範圍顯示
 const getGuestRange = (bnb) => {

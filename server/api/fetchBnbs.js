@@ -54,6 +54,8 @@ export default defineEventHandler(async (event) => {
       location: query.location || '',
       type: query.type || '',
       sort_by: query.sort_by || 'rating',
+      // 隨機排序的種子：同一個種子在翻頁時順序固定，不會重複或漏掉民宿
+      seed: String(query.seed || '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 32),
       order: query.order || 'desc',
       featured_only: query.featured_only === 'true',
       is_package: query.is_package || '',
@@ -156,12 +158,21 @@ export default defineEventHandler(async (event) => {
       'rating': 'h.rating',
       'price': 'h.min_price',
       'name': 'h.name',
-      'view_count': 'h.view_count',
-      'random': 'RANDOM()' // 如果需要隨機
+      'view_count': 'h.view_count'
     };
 
-    const orderBy = orderMap[filters.sort_by] || 'h.rating';
-    const orderDirection = filters.order === 'asc' ? 'ASC' : 'DESC';
+    let orderClause;
+    const orderParams = [];
+    if (filters.sort_by === 'random') {
+      // 以種子雜湊排序；沒帶種子時以當天日期為種子
+      const seed = filters.seed || new Date().toISOString().slice(0, 10);
+      orderClause = `md5(h.id::text || $${paramIndex + 2}), h.id ASC`;
+      orderParams.push(seed);
+    } else {
+      const orderBy = orderMap[filters.sort_by] || 'h.rating';
+      const orderDirection = filters.order === 'asc' ? 'ASC' : 'DESC';
+      orderClause = `${orderBy} ${orderDirection} NULLS LAST, h.id ASC`;
+    }
 
     // 主查詢
     const mainQuery = `
@@ -191,14 +202,14 @@ export default defineEventHandler(async (event) => {
         h.view_count
       FROM homestays h
       WHERE ${whereConditions.join(' AND ')}
-      ORDER BY ${orderBy} ${orderDirection} NULLS LAST, h.id ASC
+      ORDER BY ${orderClause}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
     // 執行查詢 (並行)
     const [countResult, homestaysResult] = await Promise.all([
       pool.query(countQuery, params), // params 只有 where 條件
-      pool.query(mainQuery, [...params, limit, offset]) // 加上 limit 和 offset
+      pool.query(mainQuery, [...params, limit, offset, ...orderParams]) // 加上 limit、offset（隨機排序時再加種子）
     ]);
 
     const totalCount = parseInt(countResult.rows[0].total);

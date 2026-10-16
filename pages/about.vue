@@ -104,7 +104,7 @@ const features = [
     title: '智慧搜尋',
     text: '根據用戶需求推薦最適合的旅遊優惠與行程。'
   },
-  { icon: 'ri:devices-line', title: '多平台支援', text: '無論是手機、平板或電腦，都能輕鬆使用。' }
+  { icon: 'ri:device-line', title: '多平台支援', text: '無論是手機、平板或電腦，都能輕鬆使用。' }
 ]
 </script>
 
