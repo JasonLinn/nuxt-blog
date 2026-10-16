@@ -3,7 +3,7 @@
     <div class="yp-footer__inner">
       <div class="yp-footer__brand">
         <img src="/logo.png" alt="宜蘭旅遊通" width="140" height="37" />
-        <p>由宜蘭觀光民宿行銷協會發起，整合在地店家與合法民宿的數位旅遊優惠平台。</p>
+        <p>由宜蘭觀光民宿行銷協會發起，提供在地店家電子優惠券、合法民宿推薦與旅遊資訊。</p>
         <a href="https://lin.ee/6ymvmWV" class="btn btn-line btn-sm" target="_blank" rel="noopener">
           <Icon name="ri:line-fill" /> 加入官方 LINE
         </a>

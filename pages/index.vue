@@ -102,7 +102,7 @@
       <div class="yp-toolbar home-toolbar">
         <div class="yp-chips" role="tablist" aria-label="優惠類別">
           <button
-            v-for="cate in category"
+            v-for="cate in couponCategories"
             :key="cate.id"
             type="button"
             role="tab"
@@ -278,6 +278,9 @@
 import { category, township } from '~/utils/category'
 import { extractDeal, summarizeOffer } from '~/utils/coupon-deal'
 import useCouponStore from '~~/store/coupon'
+
+definePageMeta({ middleware: ['lodging-recommendation'] })
+const couponCategories = category.filter((cate) => cate.id !== 'live')
 
 // SEO 優化
 useSeoMeta({

@@ -66,7 +66,7 @@
     <div class="yp-toolbar cate-toolbar">
       <div class="yp-chips" role="tablist" aria-label="優惠類別">
         <button
-          v-for="cate in category"
+          v-for="cate in couponCategories"
           :key="cate.id"
           type="button"
           role="tab"
@@ -193,6 +193,9 @@ import { category, township } from '~/utils/category'
 import { extractDeal, summarizeOffer } from '~/utils/coupon-deal'
 import useCouponStore from '~~/store/coupon'
 
+definePageMeta({ middleware: ['lodging-recommendation'] })
+const couponCategories = category.filter((cate) => cate.id !== 'live')
+
 const route = useRoute()
 const currentPage = computed(() => parseInt(route?.query?.page) || 1)
 const currentCate = computed(() => route?.params?.id)
@@ -216,7 +219,7 @@ const pageNumbers = computed(() => {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i)
 })
 
-const cateTitles = { eat: '美食優惠', play: '玩樂優惠', live: '住宿優惠', traffic: '交通優惠' }
+const cateTitles = { eat: '美食優惠', play: '玩樂優惠', traffic: '交通優惠' }
 const cateTitle = computed(() => {
   const id = currentCate.value
   if (cateTitles[id]) return cateTitles[id]
