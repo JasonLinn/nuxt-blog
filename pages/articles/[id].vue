@@ -207,7 +207,7 @@
                         class="detail-ticket__icon"
                       />
                       <span class="detail-ticket__unit">{{
-                        deal ? deal.label : article.isonce ? '限量' : '免費'
+                        deal ? deal.label : article.isonce ? '限量' : '優惠'
                       }}</span>
                     </template>
                   </div>
@@ -216,7 +216,7 @@
                     <p class="detail-claim__offer">
                       {{
                         offerSummary ||
-                        (article.isonce ? '限量優惠，領完為止' : '免費領取，出示即可使用')
+                        (article.isonce ? '限量優惠，領完為止' : '領取後出示即可使用')
                       }}
                     </p>
                   </div>
