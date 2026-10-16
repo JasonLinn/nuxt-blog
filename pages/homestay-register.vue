@@ -33,6 +33,11 @@
       </div>
     </div>
 
+    <SubmissionLoginGate
+      v-else-if="loginRequired"
+      :login-url="loginUrl"
+      title="請先登入再申請民宿註冊"
+    />
     <template v-else>
       <!-- 進度指示器 -->
       <ol class="register-steps" aria-label="申請步驟">
@@ -580,7 +585,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { township } from '~/utils/category.js'
-useSubmissionLogin()
+const { loginRequired, loginUrl } = useSubmissionLogin()
 
 // SEO 設定
 useSeoMeta({

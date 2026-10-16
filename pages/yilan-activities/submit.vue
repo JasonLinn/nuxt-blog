@@ -15,7 +15,8 @@
       </div>
     </header>
 
-    <form novalidate @submit.prevent="submitActivity">
+    <SubmissionLoginGate v-if="loginRequired" :login-url="loginUrl" title="請先登入再投稿活動" />
+    <form v-else novalidate @submit.prevent="submitActivity">
       <!-- AI 自動填入區塊（僅管理員可見） -->
       <section v-if="isAdmin" class="yp-form-section ai-assist">
         <h2 class="yp-form-section__title">
@@ -464,7 +465,7 @@
 </template>
 
 <script setup>
-useSubmissionLogin()
+const { loginRequired, loginUrl } = useSubmissionLogin()
 
 // 檢查是否為管理員
 const isAdmin = ref(false)

@@ -24,7 +24,8 @@
       </div>
     </aside>
 
-    <form class="coupon-form" @submit.prevent="submitCoupon">
+    <SubmissionLoginGate v-if="loginRequired" :login-url="loginUrl" title="請先登入再刊登優惠券" />
+    <form v-else class="coupon-form" @submit.prevent="submitCoupon">
       <!-- 優惠資訊 -->
       <section class="yp-form-section">
         <h2 class="yp-form-section__title">優惠資訊</h2>
@@ -367,7 +368,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { category } from '~/utils/category'
-useSubmissionLogin()
+const { loginRequired, loginUrl } = useSubmissionLogin()
 
 // 設定頁面標題
 useHead({
