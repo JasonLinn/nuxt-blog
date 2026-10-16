@@ -4,7 +4,7 @@ import { dateOnly, taipeiToday } from '../../utils/activity-dates.js'
 const cultureUrl = category => `https://cloud.culture.tw/frontsite/opendata/activityOpenDataJsonAction.do?category=${category}&method=doFindActivitiesByCategory`
 export const activitySources = [
   ...[1, 6, 7].map(category => ({ id: `culture-${category}`, name: `文化部（${{ 1: '音樂', 6: '展覽', 7: '講座' }[category]}）`, official: true, url: 'https://data.gov.tw/dataset/10042', feed: cultureUrl(category), format: 'json' })),
-  { id: 'yilan-site', name: '宜蘭勁好玩', official: true, url: 'https://travel.yilan.gov.tw/zh-tw/events/', feed: 'https://travel.yilan.gov.tw/zh-tw/events/', format: 'yilan-calendar' }
+  { id: 'yilan-site', name: '宜蘭勁好玩', official: true, organizerOptional: true, url: 'https://travel.yilan.gov.tw/zh-tw/events/', feed: 'https://travel.yilan.gov.tw/zh-tw/events/', format: 'yilan-calendar' }
 ]
 export const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 export const plainText = value => String(value || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\\r\\n/g, '\n').trim()
@@ -16,6 +16,47 @@ export function safeSourceUrl(value) {
   } catch { return null }
 }
 const cleanTitle = value => plainText(value).normalize('NFKC').toLowerCase().replace(/[\p{P}\p{S}\s]/gu, '')
+export function safeActivityImage(value) {
+  const safe = safeSourceUrl(value)
+  if (!safe) return null
+  const { hostname, pathname } = new URL(safe)
+  if (hostname === 'travel.yilan.gov.tw' && pathname.startsWith('/_api/content/images/')) return safe
+  if (hostname === 'admin.px-sunmake.org.tw' && /^\/Public\/(exhibition|post)\/\d+\//.test(pathname)) return safe
+  if (['cloud.culture.tw', 'event.culture.tw', 'www.culture.tw'].includes(hostname) && /\.(jpg|jpeg|png|webp)(?:$)/i.test(pathname)) return safe
+  return null
+}
+
+export function parseExhibitionImages(html) {
+  if (!html.includes('舉人之力：蘭陽首舉百宅第常設展')) throw new Error('展覽頁內容不符')
+  const images = [...html.matchAll(/<img\b[^>]*\bsrc=["']([^"']+)["']/gi)]
+    .map(match => safeActivityImage(match[1]))
+    .filter(url => url && new URL(url).pathname.startsWith('/Public/exhibition/955/'))
+  if (!images.length) throw new Error('展覽頁找不到展間照片')
+  return [...new Set(images)].slice(0, 6)
+}
+
+// Explicitly reviewed identity mapping; fuzzy title similarity never copies photographs.
+export async function enrichOfficialMedia(sources, fetcher = fetch) {
+  const yilan = sources.find(s => s.source === 'yilan-site' && s.ok)
+  const culture = sources.find(s => s.source === 'culture-6' && s.ok)
+  if (!culture) return
+  const yang = culture.items.find(i => i.external_id.startsWith('697678ed26b32454e437c439:') && cleanTitle(i.title) === cleanTitle('世紀初戀－楊麗花歌仔戲特展'))
+  const direct = yilan?.items.find(i => i.external_id === '192' && cleanTitle(i.title) === cleanTitle('「世紀初戀．楊麗花」歌仔戲特展'))
+  if (yang && direct && yang.end_date === direct.end_date) {
+    if (!yang.images.length && direct.images.length) Object.assign(yang, { images: direct.images, image_source_name: '宜蘭勁好玩', image_source_url: direct.source_url })
+    direct.duplicate_of = { source: 'culture-6', external_id: yang.external_id }
+  }
+  const exhibition = culture.items.find(i => i.external_id.startsWith('6977d86a26b32454e437c46e:') && cleanTitle(i.title) === cleanTitle('舉人之力：蘭陽首舉百宅第常設展'))
+  if (exhibition && !exhibition.images.length && !exhibition.expired) {
+    const url = 'https://www.px-sunmake.org.tw/exhibition/955'
+    try {
+      const html = await fetchSourceBytes(url, fetcher, true)
+      Object.assign(exhibition, { images: parseExhibitionImages(html.toString('utf8')), image_source_name: '宜蘭傳藝園區／全聯善美的文化藝術基金會', image_source_url: url })
+    } catch {
+      culture.warnings = ['舉人之力官方圖片暫時無法更新，保留既有圖片']
+    }
+  }
+}
 export function sameEvent(a, b) {
   return cleanTitle(a.title) === cleanTitle(b.title) && dateOnly(a.event_date) === dateOnly(b.event_date)
     && cleanTitle(a.location) === cleanTitle(b.location)
@@ -48,15 +89,16 @@ export function normalizeYilanCalendar(html, expectedYear) {
       organizer_name: text(row.organizer), activity_type: '觀光旅遊',
       source_url: `https://travel.yilan.gov.tw/zh-tw/event/${row.id}/`, source_updated_at: row.date_modified || null,
       schedule_uncertain: row.undecided === true || places.length > 1 || /延期|取消|停辦/.test(row.title),
-      images: []
+      images: [...new Set([row.cover, ...(row.images || []).filter(i => !i.isSample).map(i => i.url)].map(safeActivityImage).filter(Boolean))].slice(0, 8),
+      image_source_name: '宜蘭勁好玩', image_source_url: `https://travel.yilan.gov.tw/zh-tw/event/${row.id}/`
     }
   })
 }
-export function reviewReasons(item, official = false) {
+export function reviewReasons(item, official = false, { organizerOptional = false } = {}) {
   const reasons = []
   if (!official) reasons.push('非已核可官方來源')
   for (const [key, label] of [['title', '活動名稱'], ['event_date', '開始日期'], ['end_date', '結束日期'], ['location', '活動地點'], ['organizer_name', '主辦單位'], ['description', '活動說明'], ['source_url', '來源連結']]) {
-    if (!item[key]) reasons.push(`缺少${label}`)
+    if (!item[key] && !(key === 'organizer_name' && official && organizerOptional)) reasons.push(`缺少${label}`)
   }
   if (item.event_date && item.end_date && item.end_date < item.event_date) reasons.push('結束日期早於開始日期')
   if (item.schedule_uncertain || /預計|暫定|待定|時間未定/.test(`${item.title} ${item.description}`)) reasons.push('日期或場次需確認')
@@ -84,7 +126,8 @@ export function normalizeCulture(data, source) {
         location, organizer_name: (row.masterUnit || []).map(plainText).filter(Boolean).join('、'),
         activity_type: source.id === 'culture-7' ? '教育講座' : '文化藝術',
         source_url: safeSourceUrl(row.sourceWebPromote) || source.feed,
-        source_updated_at: row.editModifyDate || null, images: [], schedule_uncertain: shows.length > 1,
+        source_updated_at: row.editModifyDate || null, images: [safeActivityImage(row.imageUrl)].filter(Boolean), schedule_uncertain: shows.length > 1,
+        image_source_name: source.name, image_source_url: safeSourceUrl(row.sourceWebPromote) || source.feed,
         schedule: shows.map(s => ({ start: s.time, end: s.endTime, price: plainText(s.price) }))
       })
     }
@@ -133,10 +176,11 @@ export async function collectActivities({ fetcher = fetch, now = new Date() } = 
     try {
       const items = await fetchSource(source, fetcher, now)
       const unique = [...new Map(items.filter(i => i.external_id).map(i => [i.external_id, i])).values()]
-      return { source: source.id, name: source.name, ok: true, items: unique.map(item => ({ ...item, reasons: reviewReasons(item, source.official), expired: !!item.end_date && item.end_date < today })) }
+      return { source: source.id, name: source.name, ok: true, items: unique.map(item => ({ ...item, reasons: reviewReasons(item, source.official, source), expired: !!item.end_date && item.end_date < today })) }
     } catch (error) {
       return { source: source.id, name: source.name, ok: false, error: error.name === 'TimeoutError' ? '來源逾時' : String(error.message).slice(0, 200), items: [] }
     }
   }))
+  await enrichOfficialMedia(sources, fetcher)
   return sources
 }

@@ -20,11 +20,12 @@ try {
   await client.query(`CREATE TABLE yilan_activities (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY, title varchar(255) NOT NULL, description text,
     event_date date NOT NULL, end_date date, location varchar(255), organizer_name varchar(255) NOT NULL,
-    activity_type varchar(50), is_multi_day boolean, submitter_name varchar(255) NOT NULL,
+    activity_type varchar(50), images text[], is_multi_day boolean, submitter_name varchar(255) NOT NULL,
     submitter_email varchar(255) NOT NULL, status varchar(20), approved_by text,
     created_at timestamp, updated_at timestamp, approved_at timestamp
   )`)
   await client.query(await readFile('migrations/20261016_activity_imports.sql', 'utf8'))
+  await client.query(await readFile('migrations/20261016_activity_images.sql', 'utf8'))
   await acquireImportLock(client)
   let summary = await applyCollection(client, collection([item('a'), item('b', { organizer_name: '' })]))
   assert.equal(summary[0].published, 1)
@@ -61,6 +62,23 @@ try {
   assert.equal(summary[0].ok, false)
   assert.equal(summary[1].published, 1)
   assert.equal((await client.query("SELECT COUNT(*) FROM activity_import_items WHERE source_id = 'broken-source'")).rows[0].count, '0')
+  // Changing only the publishing policy must re-evaluate an unchanged pending item.
+  const blankOrganizer = item('optional-organizer', { organizer_name: '' })
+  await applyCollection(client, collection([blankOrganizer], 'yilan-site'))
+  summary = await applyCollection(client, collection([{ ...blankOrganizer, reasons: [] }], 'yilan-site'))
+  assert.equal(summary[0].published, 1)
+  assert.equal((await client.query("SELECT organizer_name FROM yilan_activities WHERE title = '活動 optional-organizer'")).rows[0].organizer_name, '')
+  const photo = 'https://travel.yilan.gov.tw/_api/content/images/articles/1/event.jpg'
+  const withImage = item('photo', { images: [photo], image_source_name: '宜蘭勁好玩', image_source_url: 'https://travel.yilan.gov.tw/zh-tw/event/1/' })
+  await applyCollection(client, collection([withImage]))
+  assert.deepEqual((await client.query("SELECT images FROM yilan_activities WHERE title = '活動 photo'")).rows[0].images, [photo])
+  await applyCollection(client, collection([item('photo')]))
+  const kept = (await client.query("SELECT images, image_source_name FROM yilan_activities WHERE title = '活動 photo'")).rows[0]
+  assert.deepEqual(kept.images, [photo])
+  assert.equal(kept.image_source_name, '宜蘭勁好玩')
+  summary = await applyCollection(client, collection([item('photo-mirror', { duplicate_of: {source:'test-official',external_id:'photo'} })], 'yilan-site'))
+  assert.equal(summary[0].duplicate, 1)
+  assert.equal(summary[0].published, 0)
   // Verify current live feed records traverse real SQL, but never retain them.
   const live = JSON.parse(await readFile('.cache/activity-import/preview.json', 'utf8'))
   const realSummary = await applyCollection(client, live.sources)

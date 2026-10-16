@@ -14,6 +14,7 @@
         <strong>{{ row.name }}</strong>：
         <template v-if="row.ok">{{ row.fetched }} 筆宜蘭資料；{{ row.published ?? row.eligible ?? 0 }} 筆{{ preview ? '符合上架條件' : '新增上架' }}，{{ row.pending || 0 }} 筆待確認<span v-if="row.updated">，{{ row.updated }} 筆更新</span><span v-if="row.duplicate">，{{ row.duplicate }} 筆重複</span></template>
         <span v-else class="import-error">{{ row.error }}</span>
+        <small v-if="row.warnings?.length" class="d-block">{{ row.warnings.join('；') }}</small>
       </div>
     </div>
     <p v-if="runs[0]" class="import-muted">最近執行：{{ new Date(runs[0].started_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }) }} · {{ runStatus[runs[0].status] || runs[0].status }}</p>
@@ -31,7 +32,7 @@
             <label>結束日期<input v-model="item.candidate.end_date" type="date" required :min="item.candidate.event_date"></label>
           </div>
           <label>地點<input v-model="item.candidate.location" required maxlength="250"></label>
-          <label>主辦單位<input v-model="item.candidate.organizer_name" required maxlength="250"></label>
+          <label>主辦單位{{ item.source_id === 'yilan-site' ? '（可留空）' : '' }}<input v-model="item.candidate.organizer_name" :required="item.source_id !== 'yilan-site'" maxlength="250"></label>
           <label>活動說明<textarea v-model="item.candidate.description" required rows="4" maxlength="15000"></textarea></label>
           <p v-if="item.candidate.schedule?.length > 1" class="import-muted">請確認說明列出實際場次：{{ item.candidate.schedule.map(s => s.start).join('、') }}</p>
           <div class="import-actions">

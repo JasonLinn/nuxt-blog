@@ -26,7 +26,9 @@ export default defineEventHandler(async event => {
       location, activity_type, organizer_name, organizer_email, organizer_phone, contact_info,
       status, rejection_reason, submitter_name, submitter_email, admin_notes,
       created_at, updated_at, approved_at, approved_by,
-      to_jsonb(yilan_activities)->>'source_name' AS source_name,
+      to_jsonb(yilan_activities)->>'image_source_name' AS image_source_name,
+        to_jsonb(yilan_activities)->>'image_source_url' AS image_source_url,
+        to_jsonb(yilan_activities)->>'source_name' AS source_name,
       to_jsonb(yilan_activities)->>'source_url' AS source_url,
       to_jsonb(yilan_activities)->>'last_synced_at' AS last_synced_at
       FROM yilan_activities${where} ORDER BY ${order}, created_at DESC${pagination}`, params),

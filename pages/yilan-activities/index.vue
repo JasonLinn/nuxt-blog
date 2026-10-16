@@ -339,7 +339,7 @@
                     <span class="meta-icon">📍</span>
                     <span>{{ activity.location }}</span>
                   </div>
-                  <div class="meta-item">
+                  <div v-if="activity.organizer_name" class="meta-item">
                     <span class="meta-icon">🏢</span>
                     <span>{{ activity.organizer_name }}</span>
                   </div>

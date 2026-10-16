@@ -1,4 +1,4 @@
-import { collectActivities, digest, sameEvent, possiblySameEvent, reviewReasons, safeSourceUrl, plainText } from './activity-sources.js'
+import { collectActivities, digest, sameEvent, possiblySameEvent, reviewReasons, safeSourceUrl, safeActivityImage, plainText, activitySources } from './activity-sources.js'
 import { dateOnly, taipeiToday } from '../../utils/activity-dates.js'
 
 export function collectionSummary(sources) {
@@ -7,7 +7,13 @@ export function collectionSummary(sources) {
 
 export async function writeActivity(client, item, sourceName, activityId = null, managed = true) {
   const fields = ['title', 'description', 'event_date', 'end_date', 'location', 'organizer_name', 'activity_type']
-  const values = fields.map(key => item[key] || null)
+  const values = fields.map(key => key === 'organizer_name' ? (item[key] || '') : (item[key] || null))
+  const images = (item.images || []).map(safeActivityImage).filter(Boolean)
+  // A temporary missing image feed must not erase an existing published gallery.
+  if (images.length || !activityId) {
+    fields.push('images', 'image_source_name', 'image_source_url')
+    values.push(images, images.length ? item.image_source_name || sourceName : null, images.length ? safeSourceUrl(item.image_source_url || item.source_url) : null)
+  }
   fields.push('is_multi_day', 'source_name', 'source_url', 'import_managed', 'status')
   values.push(item.event_date !== item.end_date, sourceName, item.source_url, managed, 'approved')
   if (activityId) {
@@ -24,6 +30,7 @@ export async function applyCollection(client, sources) {
   const summaries = []
   for (const source of sources) {
     const counts = { source: source.source, name: source.name, ok: source.ok, fetched: source.items.length, published: 0, updated: 0, pending: 0, duplicate: 0, preserved: 0, expired: 0, unchanged: 0 }
+    if (source.warnings?.length) counts.warnings = source.warnings
     if (!source.ok) { summaries.push({ ...counts, error: source.error }); continue }
     await client.query('SAVEPOINT import_source')
     const before = existing.map(row => ({ ...row }))
@@ -50,7 +57,7 @@ export async function applyCollection(client, sources) {
           counts.duplicate++
         } else if (activity && (!activity.import_managed || activity.status === 'rejected')) {
           counts.preserved++
-        } else if (previous?.content_hash === hash && (activity || state === 'pending')) {
+        } else if (previous?.content_hash === hash && JSON.stringify(previous.reasons) === JSON.stringify(item.reasons) && (activity || state === 'pending')) {
           item.reasons = previous.reasons
           counts.unchanged++
         } else if (activity && (item.cancelled || item.reasons.length)) {
@@ -66,7 +73,8 @@ export async function applyCollection(client, sources) {
           }
           counts.expired++
         } else {
-          const duplicate = !activity && existing.find(a => sameEvent(a, item))
+          const canonical = item.duplicate_of && (await client.query('SELECT activity_id FROM activity_import_items WHERE source_id = $1 AND external_id = $2', [item.duplicate_of.source, item.duplicate_of.external_id])).rows[0]
+          const duplicate = !activity && (existing.find(a => a.id === canonical?.activity_id) || existing.find(a => sameEvent(a, item)))
           if (duplicate) {
             activity = duplicate; state = 'duplicate'; counts.duplicate++
           } else if (!activity && existing.some(a => possiblySameEvent(a, item))) {
@@ -140,7 +148,8 @@ export async function reviewImport(client, { source, externalId, action, data = 
   item.event_date = dateOnly(data.event_date ?? item.event_date)
   item.end_date = dateOnly(data.end_date ?? item.end_date)
   item.source_url = safeSourceUrl(item.source_url)
-  const missing = reviewReasons({ ...item, schedule_uncertain: false, cancelled: false, title: 'confirmed', description: 'confirmed' }, true).filter(r => r !== '日期或場次需確認')
+  const policy = activitySources.find(s => s.id === source) || {}
+  const missing = reviewReasons({ ...item, schedule_uncertain: false, cancelled: false, title: 'confirmed', description: 'confirmed' }, true, policy).filter(r => r !== '日期或場次需確認')
   if (!item.title || !item.description || missing.length || item.end_date < taipeiToday()) throw Object.assign(new Error('請補齊名稱、說明、日期、地點及主辦單位，且活動不可已結束'), { statusCode: 400 })
   const rows = (await client.query('SELECT * FROM yilan_activities')).rows
   const duplicate = rows.find(a => a.id !== entry.activity_id && sameEvent(a, item))

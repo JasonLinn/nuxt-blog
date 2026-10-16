@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { activityWindow, dateOnly, overlapsActivity, taipeiToday } from '../utils/activity-dates.js'
-import { normalizeCulture, normalizeYilanCalendar, collectActivities, reviewReasons, safeSourceUrl, sameEvent, possiblySameEvent, fetchSource, activitySources } from '../server/services/activity-sources.js'
+import { normalizeCulture, normalizeYilanCalendar, collectActivities, reviewReasons, safeSourceUrl, sameEvent, possiblySameEvent, fetchSource, activitySources, safeActivityImage, parseExhibitionImages, enrichOfficialMedia } from '../server/services/activity-sources.js'
 
 test('Taiwan boundaries include ongoing events and the final day', () => {
   const now = new Date('2026-10-15T16:01:00Z')
@@ -53,10 +53,44 @@ test('Yilan website extracts calendar JSON, keeps full descriptions and never in
   assert.equal(item.description, '活動資訊\n完整介紹 — 地方活動')
   assert.equal(item.source_url, 'https://travel.yilan.gov.tw/zh-tw/event/219/')
   assert.ok(reviewReasons(item, true).includes('缺少主辦單位'))
+  const policy = activitySources.find(s => s.id === 'yilan-site')
+  assert.deepEqual(reviewReasons(item, true, policy), [])
+  assert.ok(reviewReasons(item, false, policy).includes('缺少主辦單位'))
+  assert.ok(reviewReasons({ ...item, title: '暫定活動' }, true, policy).includes('日期或場次需確認'))
   assert.equal(normalizeYilanCalendar(calendarHtml(2026, [{ ...yilanRow, hide_address: true }]), 2026)[0].location, '')
   assert.deepEqual(normalizeYilanCalendar(calendarHtml(2027, []), 2027), [])
   assert.throws(() => normalizeYilanCalendar(calendarHtml(2025, []), 2026), /年份/)
   assert.throws(() => normalizeYilanCalendar('<html>Request Rejected</html>', 2026), /結構/)
+})
+
+test('official images exclude logos, unrelated hosts and mismatched exhibition pages', () => {
+  const url = 'https://admin.px-sunmake.org.tw/Public/exhibition/955/2.jpeg'
+  assert.equal(safeActivityImage(url), url)
+  assert.equal(safeActivityImage('https://127.0.0.1/pic.jpg'), null)
+  assert.equal(safeActivityImage('https://travel.yilan.gov.tw.evil.example/pic.jpg'), null)
+  assert.equal(safeActivityImage('https://www.px-sunmake.org.tw/images/logo.png'), null)
+  const html = `<h2>舉人之力：蘭陽首舉百宅第常設展</h2><img src="/images/logo.png"><img src="${url}"><img src="${url}">`
+  assert.deepEqual(parseExhibitionImages(html), [url])
+  assert.throws(() => parseExhibitionImages(html.replace('舉人之力', '別的展覽')), /不符/)
+  assert.throws(() => parseExhibitionImages('<h2>舉人之力：蘭陽首舉百宅第常設展</h2>'), /找不到/)
+  const [row] = normalizeYilanCalendar(calendarHtml(2026, [{ ...yilanRow, images: [{url:'https://travel.yilan.gov.tw/_api/content/images/articles/1/event.jpg'}, {url:'https://example.com/tracker.jpg'}] }]), 2026)
+  assert.equal(row.images.length, 1)
+})
+
+test('verified cross-source identity shares images but unrelated similar events do not', async () => {
+  const image = 'https://travel.yilan.gov.tw/_api/content/images/articles/27087/event.jpg'
+  const culture = { external_id: '697678ed26b32454e437c439:venue', title: '世紀初戀－楊麗花歌仔戲特展', end_date: '2026-10-25', images: [] }
+  const direct = { external_id: '192', title: '「世紀初戀．楊麗花」歌仔戲特展', end_date: '2026-10-25', images: [image], source_url: 'https://travel.yilan.gov.tw/zh-tw/event/192/' }
+  const sources = [{source:'culture-6',ok:true,items:[culture]}, {source:'yilan-site',ok:true,items:[direct]}]
+  await enrichOfficialMedia(sources, () => { throw new Error('no network expected') })
+  assert.deepEqual(culture.images, [image])
+  assert.equal(direct.duplicate_of.external_id, culture.external_id)
+  assert.equal(culture.image_source_url, direct.source_url)
+  const other = { ...direct, external_id: '193', duplicate_of: undefined }
+  culture.images = []
+  await enrichOfficialMedia([sources[0],{source:'yilan-site',ok:true,items:[other]}])
+  assert.deepEqual(culture.images, [])
+  assert.equal(other.duplicate_of, undefined)
 })
 test('Yilan fetch covers current and next Taiwan year with bounded requests', async () => {
   const urls = []
