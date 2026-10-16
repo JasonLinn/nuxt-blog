@@ -1028,6 +1028,12 @@ onUnmounted(() => {
 .map-chips {
   padding: 2px 2px 10px;
   margin-bottom: -8px;
+
+  // 桌機沒有觸控滑動，隱藏捲軸的橫向捲動拖不動 → 改為換行全部顯示
+  @media (min-width: $yp-bp-md) {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
 }
 
 .map-chip {
