@@ -4,7 +4,6 @@
     <section class="yp-hero">
       <div class="yp-hero__inner home-hero">
         <div class="home-hero__copy">
-          <span class="yp-hero__eyebrow">宜蘭觀光民宿行銷協會・官方平台</span>
           <h1 class="yp-hero__title">
             宜蘭吃喝玩樂，<br class="d-none d-md-inline" /><em>先領券</em>再出發
           </h1>
@@ -581,6 +580,12 @@ watch(
 .home-search {
   margin-top: 20px;
   max-width: 640px;
+
+  // Keep the labelled clear button instead of showing the browser's second X.
+  .yp-search__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    display: none;
+  }
 }
 
 .home-hot {
@@ -605,6 +610,11 @@ watch(
 
 .home-list {
   padding-top: 20px;
+
+  @media (min-width: $yp-bp-md) {
+    // Match the Hero's 1200px content width, plus the page's side padding.
+    max-width: $yp-container + 48px;
+  }
 }
 
 .home-toolbar {
@@ -621,6 +631,17 @@ watch(
 }
 
 .home-grid {
+  .yp-coupon__offer {
+    color: $yp-ink;
+    font-weight: 400;
+  }
+
+  .yp-coupon__deal {
+    background: $yp-deal-soft;
+    color: $yp-deal-ink;
+    font-weight: 600;
+  }
+
   @media (max-width: #{$yp-bp-sm - 1px}) {
     gap: 12px;
   }
