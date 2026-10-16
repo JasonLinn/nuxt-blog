@@ -300,7 +300,7 @@
                   領取限量優惠券
                 </button>
                 <button
-                  v-show="article.amount && !article.hash && isCheckReferral && !checkIsOnce()"
+                  v-show="article.amount && !article.hash && canClaim && !checkIsOnce()"
                   type="button"
                   class="btn btn-primary btn-lg w-100"
                   :disabled="iconLoading"
@@ -377,6 +377,10 @@ const liffUrl = 'https://liff.line.me/2005661804-zld9QenV/'
 /*  lightbox  */
 const referralStore = ref(null)
 const isCheckReferral = ref(false)
+// 可領取：需推薦碼的券要先驗證代碼；限領一次但不需推薦碼的券可直接領取
+const canClaim = computed(
+  () => isCheckReferral.value || Boolean(article.value?.isonce && !article.value?.isReferral)
+)
 const visibleRef = ref(false)
 const indexRef = ref(0)
 
@@ -512,7 +516,7 @@ const actionFlags = computed(() => {
   const needReferral = Boolean(a.isReferral && !isCheckReferral.value)
   const onceLimited = once && Boolean(a.isonce)
   const claimHash = Boolean(a.amount && a.hash && !once)
-  const claim = Boolean(a.amount && !a.hash && isCheckReferral.value && !once)
+  const claim = Boolean(a.amount && !a.hash && canClaim.value && !once)
   const soldOut = Boolean(
     !a.amount && (a.isonce || a.isReferral || a.hash) && !needReferral && !onceLimited
   )

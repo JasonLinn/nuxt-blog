@@ -150,7 +150,7 @@
           </button>
           <!-- 領券按鈕 -->
           <button
-            v-show="checkIsOnce() && article.isonce && isCheckReferral"
+            v-show="checkIsOnce() && article.isonce && canClaim"
             type="button"
             class="btn btn-light w-100"
             disabled
@@ -166,7 +166,7 @@
             領取限量優惠券
           </button>
           <button
-            v-show="article.amount && !article.hash && isCheckReferral && !checkIsOnce()"
+            v-show="article.amount && !article.hash && canClaim && !checkIsOnce()"
             type="button"
             class="btn btn-primary w-100"
             :disabled="iconLoading"
@@ -255,6 +255,10 @@ const onHide = () => (visibleRef.value = false)
 
 const couponObject = computed(() => couponStore.getCouponData)
 const article = computed(() => couponObject.value.data.items.find((i) => i.id == couponId))
+// 可領取：需推薦碼的券要先驗證代碼；限領一次但不需推薦碼的券可直接領取
+const canClaim = computed(
+  () => isCheckReferral.value || Boolean(article.value?.isonce && !article.value?.isReferral)
+)
 // article.value.referral = referralStore
 //   if (error.value) {
 //     console.log(error.value)
