@@ -1,5 +1,5 @@
 <template>
-  <div class="yp-page yp-page--narrow">
+  <div class="yp-page">
     <header class="yp-page-head">
       <div>
         <span class="yp-page-head__eyebrow">更新時間表</span>

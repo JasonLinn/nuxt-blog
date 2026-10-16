@@ -1,5 +1,5 @@
 <template>
-  <div class="yp-page yp-page--narrow">
+  <div class="yp-page">
     <nav class="yp-breadcrumb" aria-label="breadcrumb">
       <NuxtLink to="/">首頁</NuxtLink><span>推薦代碼使用規範</span>
     </nav>

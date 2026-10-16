@@ -2661,10 +2661,6 @@ $itin-sidebar-w: 380px;
 $itin-success-ink: darken($yp-success, 10%);
 $itin-warning-ink: darken($yp-warning, 8%);
 
-.itin-page {
-  max-width: 1360px;
-}
-
 .loading-spinner {
   animation: itin-spin 1s linear infinite;
 }

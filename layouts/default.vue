@@ -1,5 +1,5 @@
 <template>
-  <div class="yp-app" :class="{ 'yp-app--wide': route.path === '/' }">
+  <div class="yp-app" :class="{ 'yp-app--wide': !chromeless }">
     <LayoutHeader v-if="!chromeless" />
     <main class="yp-app__main">
       <slot />
@@ -32,6 +32,7 @@ useHead({
 
   &--wide {
     --yp-content-width: clamp(1200px, 90vw, 1560px);
+    --yp-page-width: calc(var(--yp-content-width) + 48px);
   }
 
   &__main {

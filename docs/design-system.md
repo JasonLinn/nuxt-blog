@@ -60,7 +60,7 @@ SCSS 變數已自動注入每個 SFC（`assets/scss/_color.scss`、`_variables.s
 
 ```html
 <!-- 一般前台頁 -->
-<div class="yp-page">            <!-- max 1200，內距已含手機 / 桌機 -->
+<div class="yp-page">            <!-- 前台與首頁共用自適應寬度，內距已含手機 / 桌機 -->
   <nav class="yp-breadcrumb"><NuxtLink to="/">首頁</NuxtLink><span>民宿</span></nav>
   <header class="yp-page-head">
     <div>
@@ -74,7 +74,8 @@ SCSS 變數已自動注入每個 SFC（`assets/scss/_color.scss`、`_variables.s
 </div>
 ```
 
-- 窄版內容（文章、說明）：`.yp-page.yp-page--narrow`（880px）；表單頁：`.yp-page.yp-page--form`（760px）。
+- 一般前台頁面、說明頁、導覽列與頁尾共用 `--yp-content-width: clamp(1200px, 90vw, 1560px)`，桌機容器另含左右各 24px 內距；手機維持左右各 16px。關於我們、使用規範與優惠詳情等頁面均與首頁內容邊界對齊。
+- 表單頁保留 `.yp-page.yp-page--form`（760px）方便填寫；`.yp-page--narrow`（880px）僅供明確需要窄版的特殊內容使用，不套用於一般說明頁。
 - 大型 Hero（列表頁首屏可用）：`.yp-hero > .yp-hero__inner` + `__eyebrow` / `__title`（`<em>` 會變主色）/ `__desc`。
 - 詳情頁：`.yp-detail`（左內容、右側欄 340px，桌機側欄 sticky）+ `.yp-detail__aside`。
 
