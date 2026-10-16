@@ -35,7 +35,7 @@
             >
           </div>
           <div class="bulk-actions">
-            <button @click="addItem" class="btn-add">
+            <button @click="addItem" :disabled="loading || !dataLoaded || saving" class="btn-add">
               + 新增單筆
             </button>
             <button @click="showBulkAddModal = true" class="btn-bulk-add">
@@ -206,7 +206,11 @@ definePageMeta({
 
 const list = ref([])
 const searchQuery = ref('')
-const loading = ref(false)
+const loading = ref(true)
+const dataLoaded = ref(false)
+const availableCodes = ref([])
+const loadedCodes = ref([])
+const revision = ref('')
 const saving = ref(false)
 const selectedItems = ref([])
 const showBulkAddModal = ref(false)
@@ -282,6 +286,10 @@ const fetchData = async () => {
     if (res.success) {
       list.value = res.data.map(item => ({...item, isNew: false, isEdited: false}))
       selectedItems.value = []
+      availableCodes.value = res.availableCodes || []
+      loadedCodes.value = res.data.map(item => item.code)
+      revision.value = res.revision
+      dataLoaded.value = true
     } else {
       alert('載入失敗: ' + res.message)
     }
@@ -294,7 +302,21 @@ const fetchData = async () => {
 }
 
 const saveData = async () => {
-  if (!confirm('確定要儲存所有變更嗎？這將會覆寫伺服器上的檔案。')) return
+  if (loading.value || !dataLoaded.value || saving.value) return
+  const seen = new Set()
+  for (const item of list.value) {
+    const code = item.code.trim().toUpperCase()
+    if (!code || seen.has(code)) {
+      alert(code ? `推薦代碼重複：${item.code}，請修改後再儲存。` : '推薦代碼不可空白。')
+      return
+    }
+    seen.add(code)
+  }
+  if (list.value.some(item => item.isNew && !item.name.trim())) {
+    alert('請填寫新增推薦代碼的店家名稱後再儲存。')
+    return
+  }
+  if (!confirm('確定要儲存所有推薦代碼變更嗎？')) return
 
   saving.value = true
   try {
@@ -302,12 +324,12 @@ const saveData = async () => {
     
     const res = await $fetch('/api/referral-manage', {
       method: 'POST',
-      body: activeData
+      body: { items: activeData, revision: revision.value }
     })
     
     if (res.success) {
       alert('儲存成功！')
-      fetchData()
+      await fetchData()
     } else {
       alert('儲存失敗: ' + res.message)
     }
@@ -320,8 +342,45 @@ const saveData = async () => {
 }
 
 const addItem = () => {
+  if (loading.value || !dataLoaded.value || saving.value) return
+
+  const year = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric', timeZone: 'Asia/Taipei'
+  }).format(new Date())
+  const usedCodes = new Set([
+    ...loadedCodes.value,
+    ...list.value.map(item => item.code)
+  ].map(code => code.trim().toUpperCase()))
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const combinations = alphabet.length ** 3
+  const start = Math.floor(Math.random() * combinations)
+  let code = availableCodes.value.find(candidate =>
+    candidate.startsWith(year) && !usedCodes.has(candidate.toUpperCase())
+  ) || ''
+
+  // Scan from a random starting point so collisions cannot cause an endless retry.
+  for (let offset = 0; !code && offset < combinations; offset++) {
+    let value = (start + offset) % combinations
+    let suffix = ''
+    for (let digit = 0; digit < 3; digit++) {
+      suffix = alphabet[value % alphabet.length] + suffix
+      value = Math.floor(value / alphabet.length)
+    }
+    const candidate = `${year}${suffix}`
+    if (!usedCodes.has(candidate)) {
+      code = candidate
+      break
+    }
+  }
+
+  if (!code) {
+    alert('本年度的三碼推薦代碼已用完，請使用批量新增輸入自訂代碼。')
+    return
+  }
+
+  searchQuery.value = ''
   list.value.unshift({
-    code: '',
+    code,
     name: '',
     isNew: true,
     isEdited: true
