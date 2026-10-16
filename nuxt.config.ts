@@ -136,6 +136,7 @@ export default defineNuxtConfig({
     transpile: ['utils/hashDatabase.cjs']
   },
   nitro: {
+    vercel: { functions: { maxDuration: 60 } },
     experimental: {
       wasm: true
     }

@@ -16,6 +16,10 @@
     "images:web": "node -e \"import('./scripts/processImages.js').then(m => m.main())\"",
     "images:backup": "node -e \"console.log('手動備份功能，請使用 images:process 選擇備份選項')\"",
     "test:security": "node --test tests/security*.test.mjs",
+    "activities:preview": "node scripts/sync-activities.mjs",
+    "activities:sync": "node --env-file=.env scripts/sync-activities.mjs --apply",
+    "test:activities": "node --test tests/activity-import.test.mjs",
+    "test:activities:db": "node --env-file=.env scripts/test-activity-import-db.mjs",
     "test:security:build": "node scripts/test-security-built.mjs"
   },
   "devDependencies": {

@@ -230,6 +230,13 @@
                     </a>
                   </div>
                 </div>
+                <div v-if="activity.source_url" class="info-row">
+                  <div class="info-label">資料來源</div>
+                  <div class="info-value">
+                    <a :href="activity.source_url" target="_blank" rel="noopener noreferrer" class="contact-link">{{ activity.source_name }} ↗</a>
+                    <small v-if="activity.last_synced_at" class="d-block">更新於 {{ new Date(activity.last_synced_at).toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' }) }}，異動以主辦單位公告為準。</small>
+                  </div>
+                </div>
                 <div v-if="activity.contact_info" class="info-row contact-info-row">
                   <div class="info-label">其他聯絡資訊</div>
                   <div class="info-value">{{ activity.contact_info }}</div>

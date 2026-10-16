@@ -146,6 +146,8 @@ export default defineEventHandler(async (event) => {
     
     // 添加更新時間
     updateFields.push(`updated_at = CURRENT_TIMESTAMP`)
+    // Preserve human edits on subsequent automated refreshes.
+    if (existingActivity.import_managed !== undefined) updateFields.push('import_managed = false')
     
     const sql = `
       UPDATE yilan_activities 

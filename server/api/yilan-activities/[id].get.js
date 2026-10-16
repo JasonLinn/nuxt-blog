@@ -20,7 +20,10 @@ export default defineEventHandler(async (event) => {
         id, title, description, images, event_date, event_time, end_date, end_time, is_multi_day,
         location, activity_type, organizer_name, organizer_email, organizer_phone, contact_info,
         status, rejection_reason, submitter_name, submitter_email, admin_notes,
-        created_at, updated_at, approved_at, approved_by
+        created_at, updated_at, approved_at, approved_by,
+        to_jsonb(yilan_activities)->>'source_name' AS source_name,
+        to_jsonb(yilan_activities)->>'source_url' AS source_url,
+        to_jsonb(yilan_activities)->>'last_synced_at' AS last_synced_at
       FROM yilan_activities 
       WHERE id = $1 ${admin ? '' : "AND status = 'approved'"}
     `

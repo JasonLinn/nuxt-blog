@@ -45,9 +45,9 @@
           </div>
           <div class="col-12 col-md-2">
             <select v-model="dateFilter" class="form-select">
-              <option value="">所有時間</option>
-              <option value="upcoming">即將開始</option>
-              <option value="thisWeek">本週</option>
+              <option value="">近期活動</option>
+              <option value="upcoming">進行中與即將開始</option>
+              <option value="thisWeek">未來七天</option>
               <option value="thisMonth">本月</option>
               <option value="nextMonth">下個月</option>
             </select>
@@ -167,7 +167,7 @@
                   id="onlyUpcoming"
                 />
                 <label class="form-check-label" for="onlyUpcoming">
-                  只顯示未開始的活動
+                  只顯示進行中與即將開始的活動
                 </label>
               </div>
               <div class="form-check">
@@ -244,7 +244,7 @@
           <div class="col-3 col-md-3">
             <div class="stat-card">
               <div class="stat-number text-info">{{ thisWeekCount }}</div>
-              <p class="stat-label">本週活動</p>
+              <p class="stat-label">未來七天</p>
             </div>
           </div>
           <div class="col-3 col-md-3">
@@ -385,6 +385,7 @@
 </template>
 
 <script setup>
+import { activityWindow, overlapsActivity, taipeiToday } from '~/utils/activity-dates.js'
 // SEO 設定
 useSeoMeta({
   title: '宜蘭活動總匯 | 探索宜蘭精彩活動',
@@ -436,7 +437,7 @@ const filteredActivities = computed(() => {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(activity => 
       activity.title.toLowerCase().includes(query) ||
-      activity.organizer_name.toLowerCase().includes(query) ||
+      (activity.organizer_name || '').toLowerCase().includes(query) ||
       (activity.description && activity.description.toLowerCase().includes(query))
     )
   }
@@ -446,29 +447,10 @@ const filteredActivities = computed(() => {
     filtered = filtered.filter(activity => activity.activity_type === typeFilter.value)
   }
 
-  // 時間範圍篩選 (交集)
+  // Use the same Taiwan date boundaries as the API, including ongoing events.
   if (dateFilter.value) {
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    
-    filtered = filtered.filter(activity => {
-      const eventDate = new Date(activity.event_date)
-      
-      switch (dateFilter.value) {
-        case 'upcoming':
-          return eventDate >= today
-        case 'thisWeek':
-          const weekEnd = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-          return eventDate >= today && eventDate <= weekEnd
-        case 'thisMonth':
-          return eventDate.getMonth() === now.getMonth() && eventDate.getFullYear() === now.getFullYear()
-        case 'nextMonth':
-          const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-          return eventDate.getMonth() === nextMonth.getMonth() && eventDate.getFullYear() === nextMonth.getFullYear()
-        default:
-          return true
-      }
-    })
+    const [start, end] = activityWindow(dateFilter.value)
+    filtered = filtered.filter(activity => overlapsActivity(activity, start, end))
   }
 
   // 進階搜尋篩選 (所有條件都是交集)
@@ -485,7 +467,7 @@ const filteredActivities = computed(() => {
   if (advancedFilters.value.organizer) {
     const organizerQuery = advancedFilters.value.organizer.toLowerCase()
     filtered = filtered.filter(activity => 
-      activity.organizer_name.toLowerCase().includes(organizerQuery)
+      (activity.organizer_name || '').toLowerCase().includes(organizerQuery)
     )
   }
 
@@ -511,13 +493,8 @@ const filteredActivities = computed(() => {
     })
   }
 
-  // 只顯示未開始活動 (交集)
   if (advancedFilters.value.onlyUpcoming) {
-    const today = new Date()
-    filtered = filtered.filter(activity => {
-      const endDateToCheck = activity.end_date ? new Date(activity.end_date) : new Date(activity.event_date)
-      return endDateToCheck >= today
-    })
+    filtered = filtered.filter(activity => overlapsActivity(activity, taipeiToday(), null))
   }
 
   // 只顯示有圖片的活動 (交集)
@@ -527,25 +504,8 @@ const filteredActivities = computed(() => {
     )
   }
 
-  // 自定義日期範圍 (交集)
   if (advancedFilters.value.startDate || advancedFilters.value.endDate) {
-    filtered = filtered.filter(activity => {
-      const eventDate = new Date(activity.event_date)
-      
-      let withinRange = true
-      
-      if (advancedFilters.value.startDate) {
-        const startDate = new Date(advancedFilters.value.startDate)
-        withinRange = withinRange && eventDate >= startDate
-      }
-      
-      if (advancedFilters.value.endDate) {
-        const endDate = new Date(advancedFilters.value.endDate)
-        withinRange = withinRange && eventDate <= endDate
-      }
-      
-      return withinRange
-    })
+    filtered = filtered.filter(activity => overlapsActivity(activity, advancedFilters.value.startDate, advancedFilters.value.endDate))
   }
 
   return filtered.sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
@@ -561,31 +521,16 @@ const paginatedActivities = computed(() => {
 
 const totalActivities = computed(() => activities.value.length)
 
-const upcomingCount = computed(() => {
-  const today = new Date()
-  return activities.value.filter(activity => {
-    const endDateToCheck = activity.end_date ? new Date(activity.end_date) : new Date(activity.event_date)
-    return endDateToCheck >= today
-  }).length
+const upcomingCount = computed(() => activities.value.filter(activity => overlapsActivity(activity, taipeiToday(), null)).length)
+const thisWeekCount = computed(() => {
+  const [start, end] = activityWindow('thisWeek')
+  return activities.value.filter(activity => overlapsActivity(activity, start, end)).length
 })
 
-const thisWeekCount = computed(() => {
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const weekEnd = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-  
-  return activities.value.filter(activity => {
-    const eventDate = new Date(activity.event_date)
-    return eventDate >= today && eventDate <= weekEnd
-  }).length
-})
 
 const thisMonthCount = computed(() => {
-  const now = new Date()
-  return activities.value.filter(activity => {
-    const eventDate = new Date(activity.event_date)
-    return eventDate.getMonth() === now.getMonth() && eventDate.getFullYear() === now.getFullYear()
-  }).length
+  const [start, end] = activityWindow('thisMonth')
+  return activities.value.filter(activity => overlapsActivity(activity, start, end)).length
 })
 
 // 檢查是否有任何篩選條件

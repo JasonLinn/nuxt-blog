@@ -55,7 +55,8 @@ test('sensitive real route handlers reject anonymous and fake cookies before dat
     'activities/[id].patch.js', 'yilan-activities/[id].patch.js', 'images/list.get.ts', 'images/delete.post.ts', 'upload.post.ts',
     'upload-local.post.ts', 'ai/extract-activity-info.post.ts', 'sendMsg.post.js', 'cupon.patch.js', 'user/[id].get.js',
     'user/user.post.js', 'user/appendCoupon.patch.js', 'user/updateCoupon.patch.js', 'received.post.js', 'hash/generate.post.ts',
-    'activities.post.js', 'yilan-activities.post.js'
+    'activities.post.js', 'yilan-activities.post.js',
+    'admin/activity-imports.get.js', 'admin/activity-imports/sync.post.js', 'admin/activity-imports/review.post.js', 'cron/activity-import.get.js'
   ]
   for (const file of routes) {
     const handler = await load(`server/api/${file}`)

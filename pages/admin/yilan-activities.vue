@@ -25,6 +25,8 @@
         </div>
       </div>
 
+      <ActivityImportPanel @updated="fetchActivities" />
+
       <!-- 美麗的篩選器 -->
       <div class="filter-section">
         <div class="filter-card">
@@ -385,7 +387,7 @@ const formatDateTime = (dateTimeString) => {
 const fetchActivities = async () => {
   try {
     loading.value = true
-    const response = await $fetch('/api/yilan-activities')
+    const response = await $fetch('/api/yilan-activities', { query: { dateFilter: 'all' } })
     activities.value = response.data || []
   } catch (error) {
     console.error('Failed to fetch activities:', error)
@@ -396,11 +398,11 @@ const fetchActivities = async () => {
 }
 
 const viewActivity = (id) => {
-  navigateTo(`/admin/activities/${id}`)
+  navigateTo(`/admin/yilan-activities/${id}`)
 }
 
 const editActivity = (id) => {
-  navigateTo(`/admin/activities/edit/${id}`)
+  navigateTo(`/admin/yilan-activities/edit/${id}`)
 }
 
 const approveActivity = async (id) => {
