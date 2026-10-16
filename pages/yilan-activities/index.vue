@@ -237,8 +237,8 @@
           </div>
           <div class="col-3 col-md-3">
             <div class="stat-card">
-              <div class="stat-number text-success">{{ upcomingCount }}</div>
-              <p class="stat-label">即將開始</p>
+              <div class="stat-number text-success">{{ ongoingCount }}</div>
+              <p class="stat-label">進行中</p>
             </div>
           </div>
           <div class="col-3 col-md-3">
@@ -521,7 +521,7 @@ const paginatedActivities = computed(() => {
 
 const totalActivities = computed(() => activities.value.length)
 
-const upcomingCount = computed(() => activities.value.filter(activity => overlapsActivity(activity, taipeiToday(), null)).length)
+const ongoingCount = computed(() => activities.value.filter(activity => overlapsActivity(activity, taipeiToday(), taipeiToday())).length)
 const thisWeekCount = computed(() => {
   const [start, end] = activityWindow('thisWeek')
   return activities.value.filter(activity => overlapsActivity(activity, start, end)).length
@@ -584,8 +584,8 @@ const applyAdvancedFilters = () => {
 
 const getDateFilterText = (value) => {
   const dateTexts = {
-    'upcoming': '即將開始',
-    'thisWeek': '本週',
+    'upcoming': '進行中與即將開始',
+    'thisWeek': '未來七天',
     'thisMonth': '本月',
     'nextMonth': '下個月'
   }
