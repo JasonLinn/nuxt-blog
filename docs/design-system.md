@@ -60,7 +60,7 @@ SCSS 變數已自動注入每個 SFC（`assets/scss/_color.scss`、`_variables.s
 
 ```html
 <!-- 一般前台頁 -->
-<div class="yp-page">            <!-- max 1200，內距已含手機 / 桌機 -->
+<div class="yp-page">            <!-- 前台與首頁共用自適應寬度，內距已含手機 / 桌機 -->
   <nav class="yp-breadcrumb"><NuxtLink to="/">首頁</NuxtLink><span>民宿</span></nav>
   <header class="yp-page-head">
     <div>
@@ -74,7 +74,8 @@ SCSS 變數已自動注入每個 SFC（`assets/scss/_color.scss`、`_variables.s
 </div>
 ```
 
-- 窄版內容（文章、說明）：`.yp-page.yp-page--narrow`（880px）；表單頁：`.yp-page.yp-page--form`（760px）。
+- 一般前台頁面、說明頁、導覽列與頁尾共用 `--yp-content-width: clamp(1200px, 90vw, 1560px)`，桌機容器另含左右各 24px 內距；手機維持左右各 16px。關於我們、使用規範與優惠詳情等頁面均與首頁內容邊界對齊。
+- 表單頁保留 `.yp-page.yp-page--form`（760px）方便填寫；`.yp-page--narrow`（880px）僅供明確需要窄版的特殊內容使用，不套用於一般說明頁。
 - 大型 Hero（列表頁首屏可用）：`.yp-hero > .yp-hero__inner` + `__eyebrow` / `__title`（`<em>` 會變主色）/ `__desc`。
 - 詳情頁：`.yp-detail`（左內容、右側欄 340px，桌機側欄 sticky）+ `.yp-detail__aside`。
 
@@ -85,7 +86,7 @@ SCSS 變數已自動注入每個 SFC（`assets/scss/_color.scss`、`_variables.s
 | 主要按鈕 | `btn btn-primary`；次要 `btn btn-outline-primary`；柔和 `btn btn-soft`；文字 `btn btn-ghost`；LINE `btn btn-line`；危險 `btn btn-outline-danger` / `btn-danger`；圓角膠囊加 `btn-pill`；含圖示加 `btn-icon` |
 | 卡片容器 | `.yp-card`（可加 `--flat` 無陰影有框、`--hover` 浮起）；內部 `__media`（16:10 圖）、`__body`、`__title`、`__meta`、`__footer`、`__head` + `__head-title`、`__section` |
 | 卡片網格 | `.yp-grid`（1 → 2 → 3 → 4 欄），三欄上限加 `.yp-grid--3`；也可用 Bootstrap `row g-3` + `col-*` |
-| 優惠券卡 | `.yp-coupon`（見 `pages/index.vue`），手機橫式加 `.yp-coupon--row`；折扣值用 `utils/coupon-deal.js` 的 `extractDeal()` |
+| 優惠券卡 | `.yp-coupon`（見 `pages/index.vue`），圖片固定 2:1、以 cover 置中填滿，手機維持上圖下文；折扣值用 `utils/coupon-deal.js` 的 `extractDeal()` |
 | 搜尋框 | `.yp-search` > `.yp-search__field`（`__icon` + `__input` + `__clear`）+ 可選 `select.form-select.yp-search__select` + `.btn` |
 | 類別篩選 | `.yp-chips` > `button.yp-chip`（選取 `.is-active`；小尺寸 `--sm`；數量 `__count`）— **取代下拉選單** |
 | 排序 / 切換 | `.yp-seg` > `button.yp-seg__btn.is-active` |

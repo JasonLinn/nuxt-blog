@@ -248,7 +248,7 @@ const handleLogout = () => {
   }
 
   &__inner {
-    max-width: $yp-container + 48px;
+    max-width: calc(var(--yp-content-width, #{$yp-container}) + 48px);
     margin: 0 auto;
     height: 60px;
     padding: 0 16px;

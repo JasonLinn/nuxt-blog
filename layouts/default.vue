@@ -1,5 +1,5 @@
 <template>
-  <div class="yp-app">
+  <div class="yp-app" :class="{ 'yp-app--wide': !chromeless }">
     <LayoutHeader v-if="!chromeless" />
     <main class="yp-app__main">
       <slot />
@@ -29,6 +29,11 @@ useHead({
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  &--wide {
+    --yp-content-width: clamp(1200px, 90vw, 1560px);
+    --yp-page-width: calc(var(--yp-content-width) + 48px);
+  }
 
   &__main {
     flex: 1;

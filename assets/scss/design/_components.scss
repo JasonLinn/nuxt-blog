@@ -71,7 +71,7 @@
 
 // ───── Page shell ─────
 .yp-page {
-  max-width: $yp-container;
+  max-width: var(--yp-page-width, #{$yp-container});
   margin: 0 auto;
   padding: 24px 16px 56px;
 
@@ -177,7 +177,7 @@
   &__inner {
     position: relative;
     z-index: 1;
-    max-width: $yp-container;
+    max-width: var(--yp-content-width, #{$yp-container});
     margin: 0 auto;
   }
 
