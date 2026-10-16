@@ -1,414 +1,326 @@
 <template>
-  <div class="flex container">
-    <div class="selectWrapper">
-      <select class="category flex col-4 form-select" v-model="selectedCate" @change="clickCate">
-        <!-- <option class="category-item active" value="index" defalut>
-          全
-        </option> -->
-        <option
-          v-for="cate in category" class="category-item"
-          :id="cate.id"
-          :value="cate.id"
+  <div class="yp-page cate-page">
+    <nav class="yp-breadcrumb" aria-label="目前位置">
+      <NuxtLink to="/">首頁</NuxtLink>
+      <span>{{ cateTitle }}</span>
+    </nav>
+
+    <header class="yp-page-head">
+      <div>
+        <span class="yp-page-head__eyebrow">優惠分類</span>
+        <h1 class="yp-page-head__title">{{ cateTitle }}</h1>
+        <p class="yp-page-head__desc">宜蘭在地店家的免費電子優惠券，手機出示就能用。</p>
+      </div>
+    </header>
+
+    <!-- 搜尋 -->
+    <form class="yp-search cate-search" role="search" @submit.prevent>
+      <div class="yp-search__field">
+        <Icon name="ri:search-line" class="yp-search__icon" />
+        <input
+          v-model="searchText"
+          type="search"
+          class="yp-search__input"
+          maximum-scale="1"
+          placeholder="請輸入優惠券名稱"
+          aria-label="搜尋優惠券"
+        />
+        <button
+          v-if="searchText"
+          type="button"
+          class="yp-search__clear"
+          aria-label="清除搜尋"
+          @click="cleanText"
         >
-          {{ cate.name }}
+          <Icon name="ri:close-line" />
+        </button>
+      </div>
+      <select
+        id="township"
+        v-model="selectedTown"
+        class="form-select yp-search__select"
+        name="township"
+        aria-label="選擇地區"
+      >
+        <option :value="null">全部地區</option>
+        <option v-for="town in township" :key="town.name" :value="town.name">
+          {{ town.name }}
         </option>
       </select>
-      <select class="form-select col-4 category" name="township" id="township"  v-model="selectedTown">
-        <option :value = null>選擇地區</option>
-        <option v-for="town in township" :value="town.name">{{town.name}}</option>
-      </select>
-    </div>
-    <div class="search">
-        <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText">
-        <svg
-          v-if="searchText"
-          @click="cleanText"
-          xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-x cancel-icon" viewBox="0 0 16 16">
-          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search search-icon" viewBox="0 0 16 16">
-          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-        </svg>
-      </div>
-    <div class="col-12">
-      <div class="tag-list">
-        <h2 class="tag-title">
-          熱門:
-        </h2>
-        <span class="hot-tag" v-for="tag in hotTag" @click="clickTag">
-          {{ tag }}
-        </span>
-      </div>
-    </div>
-    <div class="my-8 flex w-full max-w-4xl flex-col">
-      <div v-if="couponObject.pending">
-        <Icon class="h-6 w-6 text-gray-500" name="eos-icons:loading" />
-      </div>
-      <template v-else>
-        <div v-if="couponObject.error">
-          <span class="text-gray-500">發生了一點錯誤，請稍後再嘗試</span>
-          <p class="my-2 text-rose-500">{{ couponObject.error }}</p>
-        </div>
-        <div v-else-if="!couponObject.data || couponObject?.data?.items.length === 0">
-          <span class="text-gray-500">目前尚無最新優惠券</span>
-        </div>
-        <div v-else class="md:border-l md:border-gray-100">
-          <div class="row">
-            <article
-              v-for="article in couponObject.data.items"
-              :key="article.id"
-              class="cupon col-md-3"
-            >
-            <div class="cupon-wrapper">
-              <NuxtLink
-                class=""
-                :to="{
-                  name: 'articles-id',
-                  params: {
-                    id: article.id
-                  }
-                }"
-              >
-                <Carousel>
-                  <Slide v-for="(img, index) in article.cover" :key="img">
-                    <img :src="img" :alt="article.title" class="cupon-img" height="165"/>
-                  </Slide>
+    </form>
 
-                  <template #addons="{ slidesCount }">
-                    <Pagination v-if="slidesCount > 1" />
-                  </template>
-                </Carousel>
-                <!-- <div class="cupon-img-wrapper">
-                </div> -->
-                <div class="cupon-info">
-                  <h2 class="cupon-title">
-                    <span class="">{{ article.title }}</span>
-                  </h2>
-                  <span class="cupon-category">
-                    {{ hadleCategory(article.category) }}
-                  </span>
-                  <span class="cupon-category">
-                    {{ article.isReferral ? '推薦代碼' : '免費' }}
-                  </span>
-                  <span class="cupon-category coupon-township">
-                    {{ article.township[0] }}
-                  </span>
-                  <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
-                    {{ date2LocaleString(article.updated_at) }}
-                  </time> -->
-                  <p class="index-cupon-text">
-                    {{ article.content.replace(/\n/g, ' ').substring(0, 300) }}
-                  </p>
-                </div>
-                <!-- <span
-                  aria-hidden="true"
-                  class="mt-4 flex items-center text-sm font-medium text-emerald-500"
-                >
-                  看更多
-                  <Icon name="ri:arrow-right-s-line" />
-                </span> -->
-              </NuxtLink>
-            </div>
-              <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
-                {{ date2LocaleString(article.updated_at) }}
-              </time> -->
-            </article>
-          </div>
-        </div>
-      </template>
-
-      <!-- @@@@@分頁功能在此@@@@ -->
-      <nav
-        v-if="couponObject?.data?.items.length"
-        class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
+    <div class="cate-hot">
+      <span class="cate-hot__label">熱門搜尋</span>
+      <button
+        v-for="tag in hotTag"
+        :key="tag"
+        type="button"
+        class="yp-chip yp-chip--sm"
+        @click="clickTag"
       >
-        <div class="next-page flex flex-1 justify-center sm:justify">
-          <NuxtLink
-            v-if="currentPage > 1"
-            class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-            :to="{
-              name: 'index',
-              query: {
-                page: currentPage - 1
-              }
-            }"
-          >
-            <Icon name="ri:arrow-left-s-line" />
-          </NuxtLink>
-          <label class="mx-2 text-sm text-gray-600">第 {{ couponObject.data?.page }} 頁</label>
-          <NuxtLink
-            class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-            :to="{
-              name: 'cate-id', params: { id: selectedCate },
-              query: {
-                page: currentPage + 1
-              }
-            }"
-          >
-            <Icon name="ri:arrow-right-s-line" />
-          </NuxtLink>
-        </div>
-      </nav>
+        {{ tag }}
+      </button>
     </div>
+
+    <!-- 類別篩選 -->
+    <div class="yp-toolbar cate-toolbar">
+      <div class="yp-chips" role="tablist" aria-label="優惠類別">
+        <button
+          v-for="cate in category"
+          :key="cate.id"
+          type="button"
+          role="tab"
+          class="yp-chip"
+          :class="{ 'is-active': cate.id === currentCate }"
+          :aria-selected="cate.id === currentCate"
+          @click="selectCate(cate.id)"
+        >
+          {{ cate.id === '' ? '全部' : cate.name }}
+        </button>
+      </div>
+      <span v-if="totalCount" class="text-secondary small ms-auto">共 {{ totalCount }} 張</span>
+    </div>
+
+    <!-- 載入中 -->
+    <div v-if="couponObject.pending" class="yp-grid cate-grid" aria-busy="true">
+      <div v-for="n in 8" :key="`skeleton-${n}`" class="yp-coupon yp-coupon--row">
+        <div class="yp-coupon__media yp-skeleton" />
+        <div class="yp-coupon__body">
+          <span class="yp-skeleton mb-2" style="width: 70%; height: 18px" />
+          <span class="yp-skeleton mb-2" style="width: 45%" />
+          <span class="yp-skeleton" style="width: 85%" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 錯誤 -->
+    <div v-else-if="couponObject.error" class="yp-card yp-empty yp-empty--error">
+      <div class="yp-empty__icon"><Icon name="ri:wifi-off-line" /></div>
+      <p class="yp-empty__title">載入優惠券時發生問題</p>
+      <p class="yp-empty__text">請檢查網路連線後再試一次。</p>
+      <button type="button" class="btn btn-primary" @click="fetchList">重新載入</button>
+    </div>
+
+    <!-- 無資料 -->
+    <div
+      v-else-if="!couponObject.data || couponObject?.data?.items.length === 0"
+      class="yp-card yp-empty"
+    >
+      <div class="yp-empty__icon"><Icon name="ri:coupon-3-line" /></div>
+      <p class="yp-empty__title">目前尚無最新優惠券</p>
+      <p class="yp-empty__text">試試其他關鍵字或地區，或回首頁看看全部優惠。</p>
+      <NuxtLink to="/" class="btn btn-soft">回首頁</NuxtLink>
+    </div>
+
+    <!-- 優惠券列表 -->
+    <template v-else>
+      <div class="yp-grid cate-grid">
+        <NuxtLink
+          v-for="(article, index) in couponObject.data.items"
+          :key="article.id"
+          :to="{ name: 'articles-id', params: { id: article.id } }"
+          class="yp-coupon yp-coupon--row"
+        >
+          <div class="yp-coupon__media">
+            <img
+              v-if="article.cover?.length"
+              :src="processImageSrc(article.cover[0])"
+              :alt="article.title"
+              width="366"
+              height="229"
+              :loading="index < 4 ? 'eager' : 'lazy'"
+            />
+            <span v-if="dealOf(article)" class="yp-coupon__deal">{{ dealOf(article).label }}</span>
+          </div>
+          <div class="yp-coupon__body">
+            <h3 class="yp-coupon__title yp-clamp-1">{{ article.title }}</h3>
+            <p class="yp-coupon__meta">
+              {{ hadleCategory(article.category) }}・{{ article.township?.[0] || '宜蘭' }}
+              <span v-if="article.isonce" class="yp-tag yp-tag--deal ms-1">限量</span>
+            </p>
+            <p
+              class="yp-clamp-2 mb-0"
+              :class="dealOf(article) ? 'yp-coupon__offer' : 'yp-coupon__desc'"
+            >
+              {{ offerOf(article) }}
+            </p>
+            <div class="yp-coupon__footer">
+              <span v-if="article.view_count"
+                ><Icon name="ri:eye-line" /> {{ formatCount(article.view_count) }}</span
+              >
+              <span v-else />
+              <span class="yp-coupon__cta">領取</span>
+            </div>
+          </div>
+        </NuxtLink>
+      </div>
+
+      <!-- 分頁 -->
+      <nav v-if="totalPages > 1" class="yp-pager" aria-label="分頁">
+        <NuxtLink
+          :to="getPaginationLink(currentPage - 1)"
+          class="yp-pager__btn"
+          :class="{ 'is-disabled': currentPage <= 1 }"
+          aria-label="上一頁"
+        >
+          <Icon name="ri:arrow-left-s-line" />
+        </NuxtLink>
+        <NuxtLink
+          v-for="page in pageNumbers"
+          :key="page"
+          :to="getPaginationLink(page)"
+          class="yp-pager__btn"
+          :class="{ 'is-active': page === currentPage }"
+          :aria-current="page === currentPage ? 'page' : undefined"
+        >
+          {{ page }}
+        </NuxtLink>
+        <NuxtLink
+          :to="getPaginationLink(currentPage + 1)"
+          class="yp-pager__btn"
+          :class="{ 'is-disabled': currentPage >= totalPages }"
+          aria-label="下一頁"
+        >
+          <Icon name="ri:arrow-right-s-line" />
+        </NuxtLink>
+      </nav>
+    </template>
   </div>
 </template>
 
-<style lang="scss" scoped>
-.active {
-  background-color: #ffefd2;
-}
-.selectWrapper {
-  display: flex;
-}
-.category {
-  display: flex;
-  flex-direction: row;
-  font-size: 16px;
-  margin: 10px 10px 10px 0;
-  background-color: #fff;
-  width: fit-content;
-}
-.category-item {
-  padding: 10px;
-}
-.next-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.cupon {
-}
-.cupon-wrapper {
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-.cupon-wrapper:hover {
-  // box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-}
-.cupon-title {
-  font-size: 16px;
-  font-weight: 800;
-}
-.cupon-info {
-  padding: 13px 8px 15px 8px;
-  background-color: #fff;
-}
-.cupon-info:hover {
-  box-shadow: #000;
-}
-.cupon-img-wrapper {
-  overflow: hidden;
-}
-.cupon-img {
-  display: inline-block;
-  width: 100%;
-  object-fit: cover;
-  border-radius: 10px;
-}
-.cupon-category {
-  display: inline-block;
-  font-size: 14px;
-  padding: 3px;
-  // color: rgb(117, 117, 117);
-  color: #36a1fa;
-  background-color: rgba(100,179,244,.1);
-  margin: 10px 0;
-  margin-left: -2px;
-  margin-right: 10px;
-}
-.coupon-township {
-  background-color: #ffdcdc8a;
-  color: #ff9246;
-}
-.index-cupon-text {
-  color: #272727;
-  font-size: 14px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.search {
-  position: relative;
-}
-.searchInput {
-  font-size: 16px;
-  width: 100%;
-}
-.cancel-icon {
-  position: absolute;
-  right: 3px;
-  top: 6px;
-}
-.search-icon {
-  position: absolute;
-  right: 8px;
-  top: 8px;
-}
-.tag-title {
-  display: inline-block;
-  font-size: 14px;
-  font-weight: bold;
-}
-.tag-list {
-  display: flex;
-  align-items: center;
-}
-.hot-tag {
-  background-color: #ffe9ac69;
-  border-radius: 6px;
-  padding: 5px;
-  margin: 10px 3px;
-  font-size: 12px;
-  display: inline-block;
-  color: #222222;
-}
-.carousel__slide {
-  height: 165px;
-}
-</style>
-<style>
-.carousel__pagination {
-    position: absolute;
-    right: 0;
-    left: 0;
-    bottom: 10px;
-}
-</style>
-
 <script setup>
-import { category, township } from '~/utils/category';
-import useCouponStore from "~~/store/coupon";
-// const handleLogout = store.resetUser;
+import { category, township } from '~/utils/category'
+import { extractDeal, summarizeOffer } from '~/utils/coupon-deal'
+import useCouponStore from '~~/store/coupon'
 
 const route = useRoute()
 const currentPage = computed(() => parseInt(route?.query?.page) || 1)
 const currentCate = computed(() => route?.params?.id)
 const searchText = ref('')
 const selectedTown = ref(null)
-let selectedCate = ref(route?.params?.id)
+const selectedCate = ref(route?.params?.id)
 
-const store = useCouponStore();
-store.fetchAndSetCoupon({cate: route?.params?.id,currentPage, selectedTown})
-const hotTag = [
-  '伴手禮',
-  '租車',
-  '湯屋'
-]
-// await useFetch('/api/articles', {
-//   query: {
-//     category: currentCate,
-//     page: currentPage,
-//     pageSize: 10
-//     }
-//   }).then(res => {
-//     let obj = {
-//       data: {
-//         items: []
-//       }
-//     }
+const store = useCouponStore()
 
-//     obj.data = res.data.value
-//     store.setCoupon(obj.data)
-//   })
-
-// const {
-//   pending,
-//   data,
-//   error
-// } = computed(() => JSON.parse(JSON.stringify(store.getCouponData)));
-
+const hotTag = ['伴手禮', '租車', '湯屋']
 
 const couponObject = computed(() => store.getCouponData)
 
-console.log(couponObject, 'eeeeeeefffff')
-watch(searchText, ()=>{
-  store.fetchAndSetCoupon({currentPage, selectedTown, searchText: searchText.value})
+const totalPages = computed(() => couponObject.value?.data?.pagination?.totalPages || 1)
+const totalCount = computed(() => couponObject.value?.data?.pagination?.total || 0)
+const pageNumbers = computed(() => {
+  const total = totalPages.value
+  const current = currentPage.value
+  const start = Math.max(1, Math.min(current - 2, total - 4))
+  const end = Math.min(total, start + 4)
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
 })
-// watch(currentCate, ()=>{
-//   // 重新抓取資料
-//   useFetch('/api/articles', {
-//   query: {
-//     category: currentCate,
-//     page: currentPage,
-//     pageSize: 10
-//     }
-//   }).then(res => {
-//     let obj = {
-//       data: {
-//         items: []
-//       }
-//     }
 
-//     obj.data = res.data.value
-//     store.setCoupon(obj.data)
-//   })
+const cateTitles = { eat: '美食優惠', play: '玩樂優惠', live: '住宿優惠', traffic: '交通優惠' }
+const cateTitle = computed(() => {
+  const id = currentCate.value
+  if (cateTitles[id]) return cateTitles[id]
+  const found = category.find((c) => c.id === id)
+  return found ? `${found.name}類優惠` : '優惠券'
+})
 
-  //sort 改變資料
-//   const items = [
-//     {
-//         "id": 35,
-//         "title": "農場",
-//         "category": "buy",
-//         "content": "GOOD",
-//         "cover": "https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg",
-//         "amount": 9952,
-//         "used_times": 0,
-//         "hash": [""],
-//         "updated_at": "2024-07-24T06:05:16.617Z"
-//     },
-//     {
-//         "id": 35,
-//         "title": "農場",
-//         "category": "buy",
-//         "content": "GOOD",
-//         "cover": "https://cc.tvbs.com.tw/img/program/upload/2021/12/29/20211229112130-d5a65e50.jpg",
-//         "amount": 9951,
-//         "used_times": 0,
-//         "hash": [""],
-//         "updated_at": "2024-07-24T06:21:04.378Z"
-//     }
-// ]
-// const sortCouponObject = JSON.parse(JSON.stringify(couponObject))
-// console.log(sortCouponObject, 'sssssssss')
-//   sortCouponObject.data.items = sortCouponObject.data.items.filter((item)=> {
-//     console.log(item.category, currentCate.value, 'ooooooooooooo')
-//     return item.category == currentCate.value
-//   })
+const fetchList = () =>
+  store.fetchAndSetCoupon({
+    selectedCate: selectedCate.value,
+    selectedTown: selectedTown.value,
+    currentPage: currentPage.value,
+    searchText: searchText.value
+  })
 
-//   console.log(sortCouponObject, 'tttttt')
-//   store.setCoupon(sortCouponObject.data)
-//   console.log(couponObject, 'eeeeeee')
-// })
+fetchList()
 
-
-const date2LocaleString = (date) => {
-  return new Date(date).toLocaleString('zh-TW')
-}
+// 搜尋 / 地區 / 頁碼 / 類別改變時重新取得資料
+watch([searchText, selectedTown, currentPage], () => {
+  fetchList()
+})
+watch(currentCate, (id) => {
+  selectedCate.value = id
+  fetchList()
+})
 
 const hadleCategory = (cate) => {
-  const oringal = category.find((item) => item.id == cate)
+  const oringal = category.find((item) => String(item.id) === String(cate))
 
   return oringal ? oringal.name : '未分類'
 }
 
+const dealCache = new Map()
+const dealOf = (article) => {
+  if (!dealCache.has(article.id)) {
+    dealCache.set(article.id, extractDeal(article.title, article.content))
+  }
+  return dealCache.get(article.id)
+}
+
+const offerOf = (article) =>
+  summarizeOffer(article.content, 44) || (article.isonce ? '限量優惠' : '免費領取')
+
+const formatCount = (n) =>
+  n >= 10000 ? `${(n / 10000).toFixed(1)} 萬` : Number(n).toLocaleString('zh-TW')
+
+const processImageSrc = (img) => img.replace('https://yilanpass.com', '.')
+
+const getPaginationLink = (page) => ({
+  name: 'cate-id',
+  params: { id: currentCate.value },
+  query: {
+    ...route.query,
+    page: Math.min(Math.max(page, 1), totalPages.value)
+  }
+})
+
 const clickTag = (e) => {
-  searchText.value = e.target.textContent
+  searchText.value = e.target.textContent.trim()
 }
 
 const cleanText = () => {
   searchText.value = ''
 }
 
-const clickCate = (e) => {
-  console.log(e.target, selectedCate, 'eeeee', currentCate)
-  if (selectedCate.value == 'index') {
-    navigateTo({
-      name: 'index'
-    })
+const selectCate = (id) => {
+  if (id === '') {
+    navigateTo({ name: 'index' })
     return
   }
-  navigateTo({
-    name: 'cate-id', params: { id: selectedCate.value }
-  })
+  if (id === currentCate.value) return
+  selectedCate.value = id
+  navigateTo({ name: 'cate-id', params: { id } })
 }
 </script>
+
+<style lang="scss" scoped>
+.cate-search {
+  max-width: 640px;
+}
+
+.cate-hot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 20px;
+
+  &__label {
+    font-size: 0.8125rem;
+    color: $yp-muted;
+    margin-right: 4px;
+  }
+}
+
+.cate-toolbar {
+  .yp-chips {
+    max-width: 100%;
+  }
+}
+
+.cate-grid {
+  @media (max-width: #{$yp-bp-sm - 1px}) {
+    gap: 12px;
+  }
+}
+</style>

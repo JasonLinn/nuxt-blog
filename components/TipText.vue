@@ -1,36 +1,43 @@
 <template>
-    <div class="tip-text-wrapper">
-        <p class="tip-text-title">
-            【旅遊通提醒】
-        </p>
-        <div class="tip-text-content">
-            <p>
-                1.店家有權修改優惠方案權利，本券不得與其他優惠方案合併使用。
-            </p>
-        <p>
-                2.請務必於入場或使用時，出示電子票券的最新畫面（即時顯示）。截圖或非即時畫面將無法驗證或使用。
-            </p>
-        </div>
-    </div>
+  <div class="tip-text-wrapper">
+    <p class="tip-text-title"><Icon name="ri:alert-line" />旅遊通提醒</p>
+    <ol class="tip-text-content">
+      <li>店家有權修改優惠方案權利，本券不得與其他優惠方案合併使用。</li>
+      <li>
+        請務必於入場或使用時，出示電子票券的最新畫面（即時顯示）。截圖或非即時畫面將無法驗證或使用。
+      </li>
+    </ol>
+  </div>
 </template>
-<style>
+
+<style scoped lang="scss">
 .tip-text-wrapper {
-    text-align: left;
-    margin-top: 5px;
-    margin-bottom: 15px;
-    line-height: 1.3;
-    padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+  text-align: left;
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  background: $yp-warning-soft;
+  border-radius: $yp-radius;
+  line-height: 1.6;
 }
-.tip-text-content {
-    font-size: 14px;
-}
+
 .tip-text-title {
-    margin-bottom: 5px;
-    color: rgb(255, 58, 58);
-    font-weight: bold;
-    font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.tip-text-content {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: $yp-muted;
+
+  li + li {
+    margin-top: 4px;
+  }
 }
 </style>

@@ -1,11 +1,24 @@
 <template>
-<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-asterisk" viewBox="0 0 16 16">
-  <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1"/>
-</svg>
+  <!-- 必填標記（紅色星號）。新表單請優先使用 label.required。 -->
+  <svg
+    class="tip-icon"
+    xmlns="http://www.w3.org/2000/svg"
+    width="10"
+    height="10"
+    fill="currentColor"
+    viewBox="0 0 16 16"
+    aria-hidden="true"
+  >
+    <path
+      d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1"
+    />
+  </svg>
 </template>
-<style scoped>
-.bi-asterisk {
-    color: #ff8c0d;
-    vertical-align: baseline;
+
+<style scoped lang="scss">
+.tip-icon {
+  color: $yp-danger;
+  vertical-align: baseline;
+  margin-right: 2px;
 }
 </style>

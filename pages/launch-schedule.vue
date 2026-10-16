@@ -1,123 +1,92 @@
 <template>
-  <div class="page-container">
-    <!-- 頁面標題 -->
-    <div class="header">
-      <div class="header-content">
-        <div class="title-section">
-          <h1 class="page-title">優惠券列表</h1>
-          <p class="page-description">瀏覽所有優惠券和代訂服務</p>
-        </div>
+  <div class="yp-page yp-page--narrow">
+    <header class="yp-page-head">
+      <div>
+        <span class="yp-page-head__eyebrow">更新時間表</span>
+        <h1 class="yp-page-head__title">優惠券列表</h1>
+        <p class="yp-page-head__desc">瀏覽所有優惠券和代訂服務</p>
+      </div>
+    </header>
+
+    <!-- 載入中 -->
+    <div v-if="loading" class="yp-card schedule-card" aria-busy="true">
+      <div v-for="n in 8" :key="`skeleton-${n}`" class="schedule-skeleton">
+        <span class="yp-skeleton" style="width: 55%; height: 18px" />
+        <span class="yp-skeleton" style="width: 90px" />
       </div>
     </div>
 
-    <!-- 主要內容 -->
-    <div class="main-content">
-      <!-- 載入中 - 骨架屏效果 -->
-      <div v-if="loading" class="content-section">
-        <div class="cards-grid">
-          <div
-            v-for="n in 8"
-            :key="`skeleton-${n}`"
-            class="card skeleton-card"
+    <!-- 錯誤訊息 -->
+    <div v-else-if="error" class="yp-card yp-empty yp-empty--error">
+      <div class="yp-empty__icon"><Icon name="ri:error-warning-line" /></div>
+      <p class="yp-empty__title">載入失敗</p>
+      <p class="yp-empty__text">{{ error }}</p>
+      <button type="button" class="btn btn-primary" @click="fetchData">重試</button>
+    </div>
+
+    <!-- 資料列表 -->
+    <template v-else-if="data.items && data.items.length > 0">
+      <div class="yp-toolbar">
+        <div class="yp-seg" role="tablist" aria-label="類型">
+          <button
+            v-for="tab in filterTabs"
+            :key="tab.value"
+            type="button"
+            role="tab"
+            class="yp-seg__btn"
+            :class="{ 'is-active': activeFilter === tab.value }"
+            :aria-selected="activeFilter === tab.value"
+            @click="activeFilter = tab.value"
           >
-            <div class="card-content">
-              <div class="card-header">
-                <div class="skeleton skeleton-title"></div>
-                <div class="skeleton skeleton-btn"></div>
-              </div>
-              
-              <div class="tags-container">
-                <div class="skeleton skeleton-tag"></div>
-                <div class="skeleton skeleton-tag-small"></div>
-              </div>
-
-              <div class="info-section">
-                <div class="skeleton skeleton-time"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 錯誤訊息 -->
-      <div v-else-if="error" class="error-container">
-        <Icon name="ri:error-warning-line" class="error-icon" />
-        <h3 class="error-title">載入失敗</h3>
-        <p class="error-message">{{ error }}</p>
-        <div class="error-actions">
-          <button @click="fetchData" class="retry-btn">
-            重試
+            {{ tab.label }}<span class="schedule-count yp-num">{{ tab.count }}</span>
           </button>
         </div>
+        <span class="text-secondary small">共 {{ filteredItems.length }} 筆</span>
       </div>
 
-      <!-- 資料列表 -->
-      <div v-else-if="data.items && data.items.length > 0" class="content-section">
-        <!-- 優惠券列表 -->
-        <div class="cards-grid">
-          <div
-            v-for="item in data.items"
-            :key="item.id"
-            class="card"
-            @click="navigateToItem(item)"
-          >
-            <!-- 內容 -->
-            <div class="card-content">
-              <div class="card-header">
-                <!-- 標題 -->
-                <h3 class="card-title">
-                  {{ item.title }}
-                </h3>
-                
-                <!-- 操作按鈕 -->
-                <button
-                  class="detail-btn"
-                  @click.stop="navigateToItem(item)"
-                >
-                  詳情
-                </button>
-              </div>
-              
-              <!-- 標籤 -->
-              <div class="tags-container">
-                <span
-                  v-if="item.source === 'relative'"
-                  class="tag tag-referral"
-                >
-                  代訂
-                </span>
-                <span
-                  v-if="item.isonce"
-                  class="tag tag-once"
-                >
-                  限一次
-                </span>
-              </div>
-
-              <!-- 基本資訊 -->
-              <div class="info-section">
-                <div class="time-info">
-                  更新時間: {{ formatDate(item.updated_at) }}
+      <div class="yp-card schedule-card">
+        <section v-for="group in groups" :key="group.label" class="timeline-group">
+          <h2 class="timeline-group__label">
+            {{ group.label }}<span class="yp-num">{{ group.items.length }}</span>
+          </h2>
+          <ul class="timeline-list">
+            <li v-for="item in group.items" :key="`${item.source || 'coupon'}-${item.id}`">
+              <NuxtLink :to="itemPath(item)" class="timeline-item">
+                <div class="timeline-item__main">
+                  <span class="timeline-item__title yp-clamp-1">{{ item.title }}</span>
+                  <span v-if="item.source === 'relative' || item.isonce" class="yp-tags">
+                    <span v-if="item.source === 'relative'" class="yp-tag yp-tag--primary"
+                      >代訂</span
+                    >
+                    <span v-if="item.isonce" class="yp-tag yp-tag--warning">限一次</span>
+                  </span>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                <time class="timeline-item__time yp-num" :datetime="item.updated_at">
+                  {{ formatTime(item.updated_at) }}
+                </time>
+                <Icon name="ri:arrow-right-s-line" class="timeline-item__arrow" />
+              </NuxtLink>
+            </li>
+          </ul>
+        </section>
 
-      <!-- 空狀態 -->
-      <div v-else class="empty-state">
-        <Icon name="ri:coupon-line" class="empty-icon" />
-        <h3 class="empty-title">沒有優惠券</h3>
-        <p class="empty-description">目前沒有任何優惠券或代訂服務</p>
+        <p v-if="!filteredItems.length" class="schedule-none">這個類型目前沒有項目。</p>
       </div>
+    </template>
+
+    <!-- 空狀態 -->
+    <div v-else class="yp-card yp-empty">
+      <div class="yp-empty__icon"><Icon name="ri:coupon-3-line" /></div>
+      <p class="yp-empty__title">沒有優惠券</p>
+      <p class="yp-empty__text">目前沒有任何優惠券或代訂服務</p>
+      <NuxtLink to="/" class="btn btn-soft">回首頁</NuxtLink>
     </div>
   </div>
 </template>
 
 <script setup>
 import { $fetch } from 'ofetch'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 // 響應式資料
 const loading = ref(false)
@@ -133,7 +102,7 @@ const userInfo = ref(null)
 const fetchData = async () => {
   loading.value = true
   error.value = null
-  
+
   try {
     const response = await $fetch('/api/articles/launch-schedule')
     data.value = response
@@ -145,22 +114,20 @@ const fetchData = async () => {
   }
 }
 
-const navigateToItem = (item) => {
-  const path = item.source === 'relative' ? `/relative_shop/${item.id}` : `/articles/${item.id}`
-  navigateTo(path)
-}
+const itemPath = (item) =>
+  item.source === 'relative' ? `/relative_shop/${item.id}` : `/articles/${item.id}`
 
 const formatDate = (dateString) => {
   if (!dateString) return '未知時間'
-  
+
   try {
     const date = new Date(dateString)
     if (isNaN(date.getTime())) return '無效時間'
-    
+
     const now = new Date()
     const diffTime = Math.abs(now - date)
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays === 1) {
       return '今天'
     } else if (diffDays === 2) {
@@ -179,6 +146,48 @@ const formatDate = (dateString) => {
     return '時間錯誤'
   }
 }
+
+const formatTime = (dateString) => {
+  const date = new Date(dateString)
+  if (!dateString || isNaN(date.getTime())) return ''
+  return date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })
+}
+
+// 類型篩選：全部 / 優惠券 / 代訂
+const activeFilter = ref('all')
+const items = computed(() => data.value?.items || [])
+const isRelative = (item) => item.source === 'relative'
+const filterTabs = computed(() => {
+  const relativeCount = items.value.filter(isRelative).length
+  const tabs = [{ value: 'all', label: '全部', count: items.value.length }]
+  if (relativeCount) {
+    tabs.push(
+      { value: 'coupon', label: '優惠券', count: items.value.length - relativeCount },
+      { value: 'relative', label: '代訂', count: relativeCount }
+    )
+  }
+  return tabs
+})
+const filteredItems = computed(() => {
+  if (activeFilter.value === 'relative') return items.value.filter(isRelative)
+  if (activeFilter.value === 'coupon') return items.value.filter((item) => !isRelative(item))
+  return items.value
+})
+
+// 依日期分組（維持 API 回傳的排序）
+const groups = computed(() => {
+  const result = []
+  filteredItems.value.forEach((item) => {
+    const label = formatDate(item.updated_at)
+    let group = result[result.length - 1]
+    if (!group || group.label !== label) {
+      group = { label, items: [] }
+      result.push(group)
+    }
+    group.items.push(item)
+  })
+  return result
+})
 
 // 獲取用戶資訊
 const fetchUserInfo = async () => {
@@ -203,371 +212,125 @@ definePageMeta({
 })
 </script>
 
-<style scoped>
-.page-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+<style scoped lang="scss">
+.schedule-card {
+  padding: 4px 0;
 }
 
-.header {
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid #e9ecef;
+.schedule-count {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  opacity: 0.7;
 }
 
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 16px;
-}
-
-.title-section {
-  text-align: center;
-}
-
-.page-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #343a40;
-  margin: 0 0 8px 0;
-}
-
-.page-description {
-  font-size: 14px;
-  color: #6c757d;
-  margin: 0;
-}
-
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 16px;
-}
-
-/* 載入狀態 */
-.loading-container {
+.schedule-skeleton {
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 48px 0;
-}
-
-.loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 2px solid #e9ecef;
-  border-top: 2px solid #28a745;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-text {
-  margin-left: 12px;
-  font-size: 14px;
-  color: #6c757d;
-}
-
-/* 錯誤狀態 */
-.error-container {
-  text-align: center;
-  padding: 48px 0;
-}
-
-.error-icon {
-  width: 48px;
-  height: 48px;
-  color: #dc3545;
-  margin: 0 auto 16px auto;
-}
-
-.error-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #343a40;
-  margin: 0 0 8px 0;
-}
-
-.error-message {
-  font-size: 14px;
-  color: #6c757d;
-  margin: 0 0 24px 0;
-}
-
-.retry-btn {
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  color: white;
-  background-color: #28a745;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.retry-btn:hover {
-  background-color: #218838;
-}
-
-/* 卡片網格 */
-.cards-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-@media (min-width: 640px) {
-  .cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-}
-
-@media (min-width: 768px) {
-  .cards-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .cards-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 1280px) {
-  .cards-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-
-  .page-title {
-    font-size: 32px;
-  }
-
-  .page-description {
-    font-size: 16px;
-  }
-
-  .main-content {
-    padding: 24px;
-  }
-
-  .header-content {
-    padding: 24px;
-  }
-}
-
-/* 卡片樣式 */
-.card {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e9ecef;
-  overflow: hidden;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
-
-
-.card-content {
-  padding: 12px;
-}
-
-.card-header {
-  display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 10px;
-  gap: 8px;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid $yp-line;
+
+  &:last-child {
+    border-bottom: 0;
+  }
 }
 
-.card-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #343a40;
+.schedule-none {
   margin: 0;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-align: left;
-  flex: 1;
-}
-
-/* 標籤 */
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 8px;
-  justify-content: flex-start;
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.tag-referral {
-  background-color: #e7e3ff;
-  color: #6f42c1;
-}
-
-.tag-once {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-/* 資訊區塊 */
-.info-section {
-  margin-bottom: 12px;
-}
-
-.meta-item {
-  color: #6c757d;
-}
-
-.time-info {
-  font-size: 12px;
-  color: #adb5bd;
-}
-
-/* 按鈕 */
-.detail-btn {
-  padding: 4px 8px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.detail-btn:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
-}
-
-/* 空狀態 */
-.empty-state {
+  padding: 32px 20px;
   text-align: center;
-  padding: 48px 0;
+  color: $yp-muted;
 }
 
-.empty-icon {
-  width: 48px;
-  height: 48px;
-  color: #adb5bd;
-  margin: 0 auto 16px auto;
-}
+// 時間軸
+.timeline-group {
+  position: relative;
 
-.empty-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #343a40;
-  margin: 0 0 8px 0;
-}
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 14px 20px 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $yp-primary-ink;
 
-.empty-description {
-  font-size: 14px;
-  color: #6c757d;
-  margin: 0;
-}
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: $yp-primary;
+      box-shadow: 0 0 0 4px $yp-primary-soft;
+    }
 
-/* 骨架屏動畫效果 */
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-  border-radius: 4px;
-}
-
-@keyframes skeleton-loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
+    span {
+      padding: 0 8px;
+      border-radius: $yp-radius-pill;
+      background: $yp-surface-2;
+      color: $yp-muted;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
   }
 }
 
-.skeleton-card {
-  pointer-events: none;
-  cursor: default;
-}
+.timeline-list {
+  list-style: none;
+  margin: 0 0 4px 24px;
+  padding: 0;
+  border-left: 2px solid $yp-line;
 
-.skeleton-card:hover {
-  transform: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* 骨架屏元素尺寸 */
-.skeleton-title {
-  height: 16px;
-  width: 70%;
-  margin-bottom: 4px;
-}
-
-.skeleton-btn {
-  height: 20px;
-  width: 40px;
-  border-radius: 4px;
-}
-
-.skeleton-tag {
-  height: 20px;
-  width: 50px;
-  border-radius: 16px;
-}
-
-.skeleton-tag-small {
-  height: 20px;
-  width: 35px;
-  border-radius: 16px;
-}
-
-.skeleton-time {
-  height: 12px;
-  width: 60%;
-}
-
-/* 響應式骨架屏調整 */
-@media (max-width: 639px) {
-  .skeleton-title {
-    width: 85%;
-  }
-  
-  .skeleton-time {
-    width: 75%;
+  li {
+    margin-left: -2px;
   }
 }
 
-@media (min-width: 1024px) {
-  .skeleton-title {
-    width: 65%;
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px 12px 18px;
+  min-height: 52px;
+  color: $yp-ink;
+  border-left: 2px solid transparent;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    color: $yp-ink;
+    background: $yp-primary-soft;
+    border-left-color: $yp-primary;
   }
-  
-  .skeleton-time {
-    width: 55%;
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+  }
+
+  &__title {
+    font-weight: 700;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  &__time {
+    flex: none;
+    font-size: 0.8125rem;
+    color: $yp-muted;
+  }
+
+  &__arrow {
+    flex: none;
+    font-size: 20px;
+    color: $yp-subtle;
   }
 }
 </style>

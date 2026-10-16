@@ -1,157 +1,178 @@
 <!-- pages/map.vue -->
 <template>
-  <div class="map-container" :class="{ 'hide-pin-labels': !showLabels }">
+  <div
+    class="map-container"
+    :class="{ 'hide-pin-labels': !showLabels, 'is-panel-open': isInfoPanelOpen }"
+  >
     <!-- 載入狀態 -->
-    <div v-if="isMapLoading" class="loading-overlay">
-      <div class="loading-content">
-        <Icon class="h-8 w-8 animate-spin text-blue-500" name="eos-icons:loading" />
-        <span class="ml-2 text-gray-600">載入地圖中...</span>
-      </div>
-    </div>
-
-    <!-- 民宿資料載入狀態 -->
-    <div
-      v-else-if="isLoadingHomestay && activeCategoriesMap.housing"
-      class="loading-overlay-partial"
-    >
-      <div class="loading-content">
-        <Icon class="h-6 w-6 animate-spin text-green-500" name="eos-icons:loading" />
-        <span class="ml-2 text-gray-600">載入民宿資料中...</span>
+    <div v-if="isMapLoading" class="map-overlay" role="status" aria-live="polite">
+      <div class="map-overlay__card">
+        <span class="spinner-border text-primary" aria-hidden="true"></span>
+        <p class="map-overlay__text">載入地圖中...</p>
       </div>
     </div>
 
     <!-- 錯誤狀態 -->
-    <div v-else-if="mapError" class="error-overlay">
-      <div class="error-content">
-        <span class="text-red-600">地圖載入失敗</span>
-        <p class="mt-2 text-gray-600">{{ mapError }}</p>
-        <button class="retry-btn" @click="retryLoadMap">重試</button>
+    <div v-else-if="mapError" class="map-overlay">
+      <div class="map-overlay__card yp-empty yp-empty--error">
+        <div class="yp-empty__icon"><Icon name="ri:error-warning-line" /></div>
+        <h2 class="yp-empty__title">地圖載入失敗</h2>
+        <p class="yp-empty__text">{{ mapError }}</p>
+        <button type="button" class="btn btn-primary" @click="retryLoadMap">重試</button>
       </div>
     </div>
 
+    <!-- 民宿資料載入狀態（不阻擋操作） -->
+    <div
+      v-if="isLoadingHomestay && activeCategoriesMap.housing && !isMapLoading"
+      class="map-pill map-pill--loading"
+      role="status"
+      aria-live="polite"
+    >
+      <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+      載入民宿資料中...
+    </div>
+
     <section v-show="!isMapLoading && !mapError" class="control-bar" aria-label="地圖探索工具">
-      <div class="control-heading">
-        <div>
-          <p class="control-eyebrow">YILAN DISCOVERY</p>
-          <h1 class="control-title">探索宜蘭好去處</h1>
+      <h1 class="visually-hidden">探索宜蘭好去處</h1>
+
+      <!-- 搜尋 -->
+      <div class="yp-search map-search">
+        <div class="yp-search__field">
+          <Icon name="ri:search-line" class="yp-search__icon" aria-hidden="true" />
+          <label class="visually-hidden" for="map-place-search">搜尋地點</label>
+          <input
+            id="map-place-search"
+            v-model="searchQuery"
+            type="text"
+            placeholder="搜尋店家、景點或住宿"
+            class="yp-search__input"
+            autocomplete="off"
+            spellcheck="false"
+            :aria-expanded="searchResults.length > 0"
+            aria-controls="map-search-results"
+            @input="handleSearchInput"
+          />
+          <button
+            v-if="searchQuery"
+            type="button"
+            class="yp-search__clear"
+            aria-label="清除搜尋"
+            @click="clearSearch"
+          >
+            <Icon name="ri:close-line" />
+          </button>
         </div>
-        <span class="place-count" aria-live="polite">
-          {{ isMapLoading ? '載入中' : `${couponData.length} 個地點` }}
-        </span>
+
+        <div
+          v-if="searchResults && searchResults.length > 0"
+          id="map-search-results"
+          class="yp-card map-results"
+        >
+          <button
+            v-for="(result, index) in searchResults"
+            :key="result.id || index"
+            class="map-result"
+            type="button"
+            @click="navigateToLocation(result)"
+          >
+            <span
+              class="map-result__pin"
+              :style="{ backgroundColor: getCategoryMeta(result.category).color }"
+            >
+              <Icon :name="getCategoryMeta(result.category).icon" aria-hidden="true" />
+            </span>
+            <span class="map-result__copy">
+              <strong class="yp-clamp-1">{{ result.title }}</strong>
+              <small>{{ getCategoryMeta(result.category).label }}</small>
+            </span>
+            <Icon name="ri:arrow-right-s-line" class="map-result__arrow" aria-hidden="true" />
+          </button>
+        </div>
+        <div v-else-if="hasSearched && searchQuery.trim()" class="yp-card map-results">
+          <p class="map-results__empty">
+            <Icon name="ri:map-pin-line" aria-hidden="true" />
+            找不到符合的地點，換個關鍵字試試
+          </p>
+        </div>
       </div>
 
-      <div class="control-buttons">
+      <!-- 類別篩選 -->
+      <div class="yp-chips map-chips" role="group" aria-label="地點類別">
         <button
           v-for="(category, index) in categories"
           :key="index"
-          :class="{
-            active: activeCategoriesMap[category.key],
-            loading: category.key === 'housing' && isLoadingHomestay
-          }"
+          class="yp-chip map-chip"
+          :class="{ 'is-active': activeCategoriesMap[category.key] }"
+          :style="{ '--chip-color': category.color }"
           :disabled="category.key === 'housing' && isLoadingHomestay"
-          class="category-btn"
           type="button"
           :aria-pressed="activeCategoriesMap[category.key]"
           :aria-label="`${activeCategoriesMap[category.key] ? '隱藏' : '顯示'}${category.label}`"
           @click="toggleCategory(category.key)"
         >
-          <span v-if="category.key === 'housing' && isLoadingHomestay" class="loading-spinner">
-            <Icon name="eos-icons:loading" />
-          </span>
-          <Icon v-else :name="category.icon" class="category-icon" aria-hidden="true" />
-          <span class="category-copy">
-            <strong>{{ category.name }}</strong>
-            <small>{{ category.label }}</small>
-          </span>
+          <span
+            v-if="category.key === 'housing' && isLoadingHomestay"
+            class="spinner-border spinner-border-sm"
+            aria-hidden="true"
+          ></span>
+          <Icon v-else :name="category.icon" class="map-chip__icon" aria-hidden="true" />
+          {{ category.label }}
         </button>
-      </div>
-
-      <div class="search-container">
-        <Icon name="ri:search-line" class="search-icon" aria-hidden="true" />
-        <label class="visually-hidden" for="map-place-search">搜尋地點</label>
-        <input
-          id="map-place-search"
-          v-model="searchQuery"
-          type="text"
-          placeholder="搜尋店家、景點或住宿"
-          class="search-input"
-          autocomplete="off"
-          spellcheck="false"
-          :aria-expanded="searchResults.length > 0"
-          aria-controls="map-search-results"
-          @input="handleSearchInput"
-        />
         <button
-          v-if="searchQuery"
-          type="button"
-          class="search-clear"
-          aria-label="清除搜尋"
-          @click="clearSearch"
-        >
-          <Icon name="ri:close-line" />
-        </button>
-        <div
-          v-if="searchResults && searchResults.length > 0"
-          id="map-search-results"
-          class="search-results"
-        >
-          <button
-            v-for="(result, index) in searchResults"
-            :key="result.id || index"
-            class="search-result-item"
-            type="button"
-            @click="navigateToLocation(result)"
-          >
-            <span
-              class="result-pin"
-              :style="{ backgroundColor: getCategoryMeta(result.category).color }"
-            >
-              <Icon :name="getCategoryMeta(result.category).icon" aria-hidden="true" />
-            </span>
-            <span class="result-copy">
-              <strong>{{ result.title }}</strong>
-              <small>{{ getCategoryMeta(result.category).label }}</small>
-            </span>
-            <Icon name="ri:arrow-right-s-line" class="result-arrow" aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-
-      <div class="control-options">
-        <span class="option-copy">
-          <Icon name="ri:price-tag-3-line" aria-hidden="true" />
-          顯示地點名稱
-        </span>
-        <button
-          :class="{ active: showLabels }"
-          class="option-btn"
+          class="yp-chip map-chip map-chip--toggle"
+          :class="{ 'is-active': showLabels }"
           type="button"
           role="switch"
           :aria-checked="showLabels"
           @click="toggleLabels"
         >
-          <span class="switch-knob"></span>
-          <span class="visually-hidden">{{ showLabels ? '隱藏店名' : '顯示店名' }}</span>
+          <Icon name="ri:price-tag-3-line" class="map-chip__icon" aria-hidden="true" />
+          顯示店名
         </button>
       </div>
+
+      <!-- 地點數量 / 狀態 -->
+      <div class="map-status" aria-live="polite">
+        <template v-if="isDataLoading">
+          <span class="yp-skeleton" style="width: 72px; height: 12px"></span>
+          載入地點中...
+        </template>
+        <template v-else-if="dataError">
+          <Icon name="ri:error-warning-line" class="map-status__icon--error" aria-hidden="true" />
+          地點資料載入失敗
+          <button type="button" class="map-status__action" @click="reloadPlaces">重新載入</button>
+        </template>
+        <template v-else-if="couponData.length === 0">
+          <Icon name="ri:map-pin-line" aria-hidden="true" />
+          此分類目前沒有地點，試試其他類別
+        </template>
+        <template v-else>
+          <b class="yp-num">{{ couponData.length }}</b> 個地點
+        </template>
+      </div>
     </section>
+
     <div id="map" ref="mapRef"></div>
+
     <button
       v-show="!isMapLoading && !mapError"
       class="location-btn"
       type="button"
       aria-label="移動到我的目前位置"
+      :disabled="isLocating"
       @click="getCurrentLocation"
     >
-      <Icon name="ri:crosshair-2-line" class="location-icon" />
+      <span v-if="isLocating" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      <Icon v-else name="ri:crosshair-2-line" class="location-icon" aria-hidden="true" />
       <span class="location-label">我的位置</span>
     </button>
 
-    <!-- 地標資訊面板 -->
+    <!-- 地標資訊面板（手機為底部抽屜，位於 Tab Bar 之上） -->
     <div
       ref="infoPanelRef"
       class="map-info-panel"
-      :class="{ 'map-info-panel-open': isInfoPanelOpen }"
+      :class="{ 'map-info-panel-open': isInfoPanelOpen, 'is-empty': !selectedCoupon }"
     >
       <button
         class="map-info-toggle"
@@ -169,78 +190,89 @@
       </button>
       <div v-if="selectedCoupon && selectedCoupon.id" class="map-info-wrapper">
         <!-- 民宿資訊顯示 -->
-        <div
+        <article
           v-if="selectedCoupon.detailUrl && selectedCoupon.detailUrl.includes('/homestays/')"
-          class="homestay-info"
+          class="map-place"
         >
-          <div class="homestay-header">
-            <h3 class="homestay-title">{{ selectedCoupon.title }}</h3>
+          <div v-if="selectedCoupon.image_url" class="yp-card__media map-place__media">
+            <img :src="selectedCoupon.image_url" :alt="selectedCoupon.title" loading="lazy" />
           </div>
 
-          <div v-if="selectedCoupon.image_url" class="homestay-image">
-            <img :src="selectedCoupon.image_url" :alt="selectedCoupon.title" />
-          </div>
-
-          <div class="homestay-details">
-            <div v-if="selectedCoupon.description" class="detail-item">
-              <span class="detail-label"><Icon name="ri:map-pin-line" />位置：</span>
-              <span class="detail-value">{{ selectedCoupon.description }}</span>
+          <div class="map-place__body">
+            <div class="yp-tags">
+              <span class="yp-tag yp-tag--primary">住宿</span>
             </div>
+            <h2 class="map-place__title">{{ selectedCoupon.title }}</h2>
 
-            <div v-if="selectedCoupon.price" class="detail-item">
-              <span class="detail-label"><Icon name="ri:money-dollar-circle-line" />價格：</span>
-              <span class="detail-value">{{ selectedCoupon.price }}</span>
-            </div>
+            <ul class="yp-info-list">
+              <li v-if="selectedCoupon.description">
+                <span class="yp-info-list__label"><Icon name="ri:map-pin-line" /> 位置</span>
+                <span class="yp-info-list__value">{{ selectedCoupon.description }}</span>
+              </li>
+              <li v-if="selectedCoupon.price">
+                <span class="yp-info-list__label">
+                  <Icon name="ri:money-dollar-circle-line" /> 價格
+                </span>
+                <span class="yp-info-list__value">{{ selectedCoupon.price }}</span>
+              </li>
+              <li v-if="selectedCoupon.min_guests || selectedCoupon.max_guests">
+                <span class="yp-info-list__label"><Icon name="ri:group-line" /> 人數</span>
+                <span class="yp-info-list__value">
+                  {{ selectedCoupon.min_guests || 1 }} -
+                  {{ selectedCoupon.max_guests || '不限' }} 人
+                </span>
+              </li>
+              <li v-if="selectedCoupon.content">
+                <span class="yp-info-list__label"><Icon name="ri:file-text-line" /> 描述</span>
+                <span class="yp-info-list__value">{{ selectedCoupon.content }}</span>
+              </li>
+            </ul>
 
-            <div v-if="selectedCoupon.min_guests || selectedCoupon.max_guests" class="detail-item">
-              <span class="detail-label"><Icon name="ri:group-line" />人數：</span>
-              <span class="detail-value">
-                {{ selectedCoupon.min_guests || 1 }} - {{ selectedCoupon.max_guests || '不限' }} 人
-              </span>
-            </div>
-
-            <div v-if="selectedCoupon.content" class="detail-item">
-              <span class="detail-label"><Icon name="ri:file-text-line" />描述：</span>
-              <span class="detail-value">{{ selectedCoupon.content }}</span>
-            </div>
-
-            <div v-if="selectedCoupon.phone || selectedCoupon.website" class="homestay-contact">
-              <div v-if="selectedCoupon.phone" class="contact-item">
-                <a :href="`tel:${selectedCoupon.phone}`" class="contact-link">
-                  <Icon name="ri:phone-line" />{{ selectedCoupon.phone }}
-                </a>
-              </div>
-              <div v-if="selectedCoupon.website" class="contact-item">
-                <a :href="selectedCoupon.website" target="_blank" class="contact-link">
-                  <Icon name="ri:global-line" />官方網站
-                </a>
-              </div>
-            </div>
-
-            <div class="homestay-actions">
-              <nuxt-link :to="selectedCoupon.detailUrl" class="view-detail-btn">
+            <div class="map-place__actions">
+              <a
+                v-if="selectedCoupon.phone"
+                :href="`tel:${selectedCoupon.phone}`"
+                class="btn btn-soft btn-icon"
+              >
+                <Icon name="ri:phone-line" />{{ selectedCoupon.phone }}
+              </a>
+              <a
+                v-if="selectedCoupon.website"
+                :href="selectedCoupon.website"
+                target="_blank"
+                rel="noopener"
+                class="btn btn-soft btn-icon"
+              >
+                <Icon name="ri:global-line" />官方網站
+              </a>
+              <nuxt-link :to="selectedCoupon.detailUrl" class="btn btn-primary map-place__cta">
                 查看詳細資訊
               </nuxt-link>
             </div>
           </div>
-        </div>
+        </article>
 
         <!-- 原有的優惠券資訊 -->
         <CouponInfo v-else :key="selectedCoupon.id" :coupon-id="selectedCoupon.id"></CouponInfo>
       </div>
       <div v-else-if="selectedCoupon && !selectedCoupon.id" class="map-info-wrapper">
-        <div class="debug-info">
-          <h3>除錯資訊</h3>
-          <p>選中的優惠券沒有 ID</p>
-          <pre>{{ JSON.stringify(selectedCoupon, null, 2) }}</pre>
+        <div class="yp-empty yp-empty--error map-info-empty">
+          <div class="yp-empty__icon"><Icon name="ri:information-line" /></div>
+          <h2 class="yp-empty__title">這個地點暫無詳細資訊</h2>
+          <p class="yp-empty__text">請改選地圖上的其他地點。</p>
         </div>
       </div>
       <div v-else-if="isInfoPanelOpen" class="map-info-wrapper">
-        <div class="debug-info">
-          <p>面板已開啟但沒有選中的優惠券</p>
+        <div class="yp-empty map-info-empty">
+          <div class="yp-empty__icon"><Icon name="ri:map-pin-2-line" /></div>
+          <h2 class="yp-empty__title">點選地圖上的地點</h2>
+          <p class="yp-empty__text">查看店家資訊與優惠內容。</p>
         </div>
       </div>
     </div>
+
+    <!-- 輕提示 -->
+    <div v-if="toastMessage" class="yp-toast" role="status">{{ toastMessage }}</div>
   </div>
 </template>
 
@@ -270,6 +302,21 @@ useHead({
 
 const store = useCouponMapStore()
 const couponObject = computed(() => store.getCouponData)
+// 地點資料載入 / 錯誤狀態（給浮動狀態列使用）
+const isDataLoading = computed(() => couponObject.value?.pending === true)
+const dataError = computed(() => !!couponObject.value?.error)
+const reloadPlaces = () => store.fetchAndSetCoupon({ pageSize: 150 })
+
+// 輕提示（取代 alert）
+const toastMessage = ref('')
+let toastTimeout = null
+const showToast = (message) => {
+  toastMessage.value = message
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toastMessage.value = ''
+  }, 3500)
+}
 // 民宿資料狀態
 const homestayData = ref([])
 const isLoadingHomestay = ref(false)
@@ -393,8 +440,11 @@ const searchResults = ref([])
 let searchTimeout = null
 const searchCache = new Map()
 
+const hasSearched = ref(false)
+
 const handleSearchInput = () => {
   if (searchTimeout) clearTimeout(searchTimeout)
+  hasSearched.value = false
 
   if (!searchQuery.value.trim()) {
     searchResults.value = []
@@ -409,6 +459,7 @@ const handleSearchInput = () => {
 const clearSearch = () => {
   searchQuery.value = ''
   searchResults.value = []
+  hasSearched.value = false
 }
 
 const performSearch = () => {
@@ -421,6 +472,7 @@ const performSearch = () => {
 
   if (searchCache.has(query)) {
     searchResults.value = searchCache.get(query)
+    hasSearched.value = true
     return
   }
 
@@ -451,6 +503,7 @@ const performSearch = () => {
   }
 
   searchResults.value = results
+  hasSearched.value = true
 }
 
 // 導航到選擇的位置
@@ -475,6 +528,7 @@ const navigateToLocation = (location) => {
 
   searchQuery.value = ''
   searchResults.value = []
+  hasSearched.value = false
 
   highlightMarker(location)
 
@@ -622,17 +676,15 @@ const updateMarkers = () => {
 }
 
 // 取得當前位置
+const isLocating = ref(false)
+
 const getCurrentLocation = () => {
   if (!navigator.geolocation) {
-    alert('您的瀏覽器不支援地理位置功能。')
+    showToast('您的瀏覽器不支援地理位置功能。')
     return
   }
 
-  const locationBtn = document.querySelector('.location-btn')
-  if (locationBtn) {
-    locationBtn.style.opacity = '0.6'
-    locationBtn.style.pointerEvents = 'none'
-  }
+  isLocating.value = true
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -658,19 +710,12 @@ const getCurrentLocation = () => {
         }
       }
 
-      if (locationBtn) {
-        locationBtn.style.opacity = '1'
-        locationBtn.style.pointerEvents = 'auto'
-      }
+      isLocating.value = false
     },
     (error) => {
       console.error('獲取位置失敗:', error)
-      alert('無法獲取您的位置，請確保已授予位置權限。')
-
-      if (locationBtn) {
-        locationBtn.style.opacity = '1'
-        locationBtn.style.pointerEvents = 'auto'
-      }
+      showToast('無法獲取您的位置，請確保已授予位置權限。')
+      isLocating.value = false
     },
     {
       enableHighAccuracy: true,
@@ -767,6 +812,7 @@ const handleClickOutside = (event) => {
 const cleanup = () => {
   if (searchTimeout) clearTimeout(searchTimeout)
   if (updateTimeout) clearTimeout(updateTimeout)
+  if (toastTimeout) clearTimeout(toastTimeout)
 
   if (map) {
     map.remove()
@@ -801,217 +847,334 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+// 地圖撐滿 Header 與（手機）Tab Bar 之間的可視區
 .map-container {
   position: relative;
   width: 100%;
-  height: calc(100vh - 70px);
-}
+  overflow: hidden;
+  background: $yp-surface-2;
+  min-height: 420px;
+  height: calc(100vh - 60px - var(--yp-tabbar-h));
+  height: calc(100dvh - 60px - var(--yp-tabbar-h) - env(safe-area-inset-bottom));
 
-.loading-overlay,
-.error-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.loading-content,
-.error-content {
-  text-align: center;
-  padding: 20px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.retry-btn {
-  margin-top: 12px;
-  padding: 8px 16px;
-  background-color: #4285f4;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.retry-btn:hover {
-  background-color: #3367d6;
+  @media (min-width: $yp-bp-md) {
+    min-height: 520px;
+    height: calc(100vh - #{$yp-header-h});
+    height: calc(100dvh - #{$yp-header-h});
+  }
 }
 
 #map {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   z-index: 1;
 }
 
-.control-bar {
+// ───── 載入 / 錯誤覆蓋層 ─────
+.map-overlay {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 60%;
-  max-width: 400px;
-  z-index: 10;
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 10px;
-  border-radius: 5px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(5px);
-}
-
-.control-title {
-  font-weight: bold;
-  margin-bottom: 8px;
-  text-align: center;
-}
-
-.control-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.search-container {
-  position: relative;
-  margin: 10px 0;
-  width: 100%;
-}
-
-.search-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #4285f4;
-}
-
-.search-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 0 0 4px 4px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 20;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.search-result-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.search-result-item:last-child {
-  border-bottom: none;
-}
-
-.search-result-item:hover {
-  background-color: #f5f5f5;
-}
-
-.control-options {
-  display: flex;
-  justify-content: center;
-  margin-top: 8px;
-  border-top: 1px solid #eee;
-  padding-top: 8px;
-}
-
-.category-btn,
-.option-btn {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.option-btn {
-  width: 100%;
-  font-size: 12px;
-}
-
-.category-btn.active,
-.option-btn.active {
-  background-color: #4285f4;
-  color: white;
-  border-color: #4285f4;
-}
-
-.category-btn:hover:not(.active),
-.option-btn:hover:not(.active) {
-  background-color: #f1f1f1;
-}
-
-.category-btn.active:hover,
-.option-btn.active:hover {
-  background-color: #3367d6;
-}
-
-.location-btn {
-  position: absolute;
-  bottom: 160px;
-  right: 6px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background-color: white;
-  border: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
+  inset: 0;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 16px;
+  background: rgba($yp-bg, 0.88);
+
+  &__card {
+    width: 100%;
+    max-width: 340px;
+    padding: 28px 24px;
+    text-align: center;
+    background: $yp-surface;
+    border-radius: $yp-radius-lg;
+    box-shadow: $yp-shadow-lg;
+  }
+
+  &__text {
+    margin: 12px 0 0;
+    color: $yp-muted;
+  }
+}
+
+.map-pill {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: $yp-radius-pill;
+  background: $yp-surface;
+  box-shadow: $yp-shadow-lg;
+  color: $yp-ink;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+// ───── 左上浮動控制區 ─────
+.control-bar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
   z-index: 10;
-  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+
+  @media (min-width: $yp-bp-md) {
+    top: 16px;
+    left: 16px;
+    right: auto;
+    width: 420px;
+  }
 }
 
-.location-btn:hover {
-  background-color: #f1f1f1;
-  transform: scale(1.05);
+.map-search {
+  // 搜尋框本身已有陰影，結果清單浮在其下
+  .yp-search__input {
+    min-height: 44px;
+  }
 }
 
-.location-btn:active {
-  transform: scale(0.95);
+.map-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 6px;
+  box-shadow: $yp-shadow-lg;
+
+  &__empty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 14px 12px;
+    color: $yp-muted;
+    font-size: 0.9375rem;
+  }
+}
+
+.map-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: $yp-radius;
+  background: transparent;
+  color: $yp-ink;
+  text-align: left;
+  transition: background-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    background: $yp-primary-soft;
+  }
+
+  &__pin {
+    display: grid;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 18px;
+  }
+
+  &__copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    line-height: 1.35;
+
+    strong {
+      font-size: 0.9375rem;
+      font-weight: 700;
+    }
+
+    small {
+      color: $yp-muted;
+      font-size: 0.75rem;
+    }
+  }
+
+  &__arrow {
+    flex: none;
+    color: $yp-subtle;
+    font-size: 20px;
+  }
+}
+
+// 類別 chips：白底 + 陰影，浮在地圖上
+.map-chips {
+  padding: 2px 2px 10px;
+  margin-bottom: -8px;
+}
+
+.map-chip {
+  box-shadow: $yp-shadow-sm;
+  border-color: transparent;
+  min-height: 40px;
+  padding-left: 14px;
+  padding-right: 14px;
+
+  &__icon {
+    color: var(--chip-color, #{$yp-primary});
+    font-size: 18px;
+  }
+
+  &--toggle &__icon {
+    color: $yp-primary;
+  }
+
+  &.is-active &__icon {
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: wait;
+  }
+}
+
+.map-status {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: $yp-radius-pill;
+  background: rgba(#fff, 0.95);
+  box-shadow: $yp-shadow-sm;
+  color: $yp-muted;
+  font-size: 0.8125rem;
+
+  b {
+    color: $yp-ink;
+    font-size: 0.9375rem;
+  }
+
+  &__icon--error {
+    color: $yp-danger;
+  }
+
+  &__action {
+    padding: 0 0 0 4px;
+    border: 0;
+    background: transparent;
+    color: $yp-primary-ink;
+    font-weight: 700;
+    text-decoration: underline;
+  }
+}
+
+// ───── 我的位置 ─────
+.location-btn {
+  position: absolute;
+  right: 6px;
+  bottom: 124px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: $yp-radius-pill;
+  background: $yp-surface;
+  color: $yp-ink;
+  box-shadow: $yp-shadow-lg;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover:not(:disabled) {
+    color: $yp-primary-ink;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  @media (min-width: $yp-bp-md) {
+    right: 10px;
+    width: auto;
+    padding: 0 16px;
+  }
 }
 
 .location-icon {
-  font-size: 24px;
+  color: $yp-primary;
+  font-size: 22px;
 }
 
+.location-label {
+  display: none;
+
+  @media (min-width: $yp-bp-md) {
+    display: inline;
+  }
+}
+
+// 手機：資訊面板展開時，隱藏被遮住的定位鈕
+@media (max-width: #{$yp-bp-md - 1px}) {
+  .is-panel-open .location-btn {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+// ───── 地點資訊面板（底部抽屜） ─────
 .map-info-panel {
-  position: fixed;
-  bottom: 0;
+  position: absolute;
   left: 0;
   right: 0;
-  background-color: white;
-  border-radius: 12px 12px 0 0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
-  transform: translateY(calc(100% - 30px));
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  bottom: 0;
   z-index: 20;
-  max-height: 60vh;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 64%;
+  margin: 0 auto;
+  background: $yp-surface;
+  border-radius: $yp-radius-lg $yp-radius-lg 0 0;
+  box-shadow: 0 -12px 32px rgba($yp-ink, 0.16);
+  transform: translateY(calc(100% - 40px));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.is-empty:not(.map-info-panel-open) {
+    visibility: hidden;
+    transform: translateY(100%);
+  }
+
+  @media (min-width: $yp-bp-md) {
+    width: min(680px, calc(100% - 32px));
+    max-height: 70%;
+  }
 }
 
 .map-info-panel-open {
@@ -1019,19 +1182,32 @@ onUnmounted(() => {
 }
 
 .map-info-toggle {
-  height: 30px;
+  position: relative;
   display: flex;
-  justify-content: center;
+  flex: none;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: $yp-radius-lg $yp-radius-lg 0 0;
+  background: transparent;
   cursor: pointer;
-  background-color: rgba(249, 249, 249, 0.8);
-  border-radius: 12px 12px 0 0;
-  backdrop-filter: blur(5px);
+}
+
+.panel-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: $yp-radius-pill;
+  background: $yp-line;
 }
 
 .map-toggle {
-  font-size: 24px;
-  color: #666;
+  position: absolute;
+  right: 12px;
+  color: $yp-muted;
+  font-size: 22px;
   transition: transform 0.3s ease;
 }
 
@@ -1040,651 +1216,78 @@ onUnmounted(() => {
 }
 
 .map-info-wrapper {
-  padding: 15px;
+  flex: 1;
+  min-height: 0;
+  padding: 0 16px 20px;
   overflow-y: auto;
-  max-height: calc(60vh - 30px);
+  overscroll-behavior: contain;
 }
 
-/* 響應式設計 */
-@media (max-width: 768px) {
-  .control-bar {
-    top: 5px;
-    left: 5px;
-    right: 5px;
-    padding: 8px;
+.map-info-empty {
+  padding: 24px 16px;
+}
+
+// ───── 民宿資訊卡 ─────
+.map-place {
+  display: grid;
+  gap: 14px;
+
+  &__media {
+    border-radius: $yp-radius;
+    aspect-ratio: 16 / 9;
+    max-height: 200px;
+    width: 100%;
   }
 
-  .control-buttons {
+  &__title {
+    margin: 8px 0 4px;
+    color: $yp-ink;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  &__actions {
+    display: flex;
     flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  &__cta {
+    flex: 1 1 100%;
+  }
+
+  .yp-info-list__label {
+    display: inline-flex;
+    align-items: flex-start;
     gap: 4px;
+    flex-basis: 76px;
+
+    :deep(svg) {
+      flex: none;
+      margin-top: 4px;
+      color: $yp-primary;
+    }
   }
 
-  .category-btn {
-    flex: 1;
-    min-width: calc(25% - 3px);
-    font-size: 12px;
-    padding: 6px 8px;
-  }
+  @media (min-width: $yp-bp-md) {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 20px;
 
-  .location-btn {
-    bottom: 120px;
-    right: 10px;
-    width: 44px;
-    height: 44px;
-  }
+    &__media {
+      aspect-ratio: 4 / 3;
+      max-height: none;
+    }
 
-  .location-icon {
-    font-size: 20px;
-  }
-}
-
-/* 滾動條樣式優化 */
-.search-results::-webkit-scrollbar,
-.map-info-wrapper::-webkit-scrollbar {
-  width: 4px;
-}
-
-.search-results::-webkit-scrollbar-track,
-.map-info-wrapper::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.search-results::-webkit-scrollbar-thumb,
-.map-info-wrapper::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 2px;
-}
-
-.search-results::-webkit-scrollbar-thumb:hover,
-.map-info-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-/* 除錯資訊樣式 */
-.debug-info {
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  margin: 10px;
-}
-
-.debug-info h3 {
-  color: #dc3545;
-  margin-bottom: 10px;
-}
-
-.debug-info p {
-  color: #6c757d;
-  margin-bottom: 10px;
-}
-
-.debug-info pre {
-  background-color: #e9ecef;
-  padding: 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  overflow-x: auto;
-}
-
-/* 民宿資訊樣式 */
-.homestay-info {
-  padding: 15px;
-}
-
-.homestay-header {
-  margin-bottom: 15px;
-}
-
-.homestay-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.homestay-image {
-  margin-bottom: 15px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.homestay-image img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-.homestay-details {
-  margin-bottom: 15px;
-}
-
-.detail-item {
-  display: flex;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.detail-label {
-  font-weight: bold;
-  color: #555;
-  min-width: 60px;
-  flex-shrink: 0;
-}
-
-.detail-value {
-  color: #666;
-  flex: 1;
-}
-
-.homestay-contact {
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-}
-
-.contact-item {
-  margin-bottom: 5px;
-}
-
-.contact-item:last-child {
-  margin-bottom: 0;
-}
-
-.contact-link {
-  color: #007bff;
-  text-decoration: none;
-  font-size: 14px;
-  display: inline-block;
-  transition: color 0.2s;
-}
-
-.contact-link:hover {
-  color: #0056b3;
-  text-decoration: underline;
-}
-
-.homestay-actions {
-  text-align: center;
-}
-
-.view-detail-btn {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  text-decoration: none;
-  border-radius: 6px;
-  font-weight: bold;
-  transition: background-color 0.2s;
-}
-
-.view-detail-btn:hover {
-  background-color: #45a049;
-}
-
-/* 載入狀態樣式 */
-.loading-overlay-partial {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  color: white;
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.loading-spinner {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.loading-spinner svg {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+    &__cta {
+      flex: 0 0 auto;
+      margin-left: auto;
+    }
   }
 }
 
-/* 按鈕載入狀態 */
-.category-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.category-btn:disabled .loading-spinner {
-  color: #666;
-}
-
-/* 2026 map experience refresh */
-.map-container {
-  --map-ink: #173b36;
-  --map-muted: #667085;
-  --map-accent: #168c7b;
-  --map-accent-dark: #0e6b5e;
-  --map-surface: rgba(255, 255, 255, 0.94);
-  height: calc(100dvh - 84px);
-  min-height: 560px;
-  overflow: hidden;
-  background: #dce9e5;
-}
-
-.control-bar {
-  top: 18px;
-  left: 18px;
-  width: min(420px, calc(100% - 36px));
-  max-width: none;
-  padding: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-radius: 20px;
-  background: var(--map-surface);
-  box-shadow:
-    0 18px 44px rgba(23, 59, 54, 0.16),
-    0 2px 8px rgba(23, 59, 54, 0.08);
-  backdrop-filter: blur(16px) saturate(1.15);
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
-  z-index: 10;
-}
-
-.control-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 14px;
-}
-
-.control-eyebrow {
-  margin: 0 0 2px;
-  color: var(--map-accent);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-}
-
-.control-title {
-  margin: 0;
-  color: var(--map-ink);
-  font-size: 20px;
-  font-weight: 800;
-  line-height: 1.3;
-  text-align: left;
-}
-
-.place-count {
-  flex: 0 0 auto;
-  margin-top: 4px;
-  padding: 5px 9px;
-  border-radius: 999px;
-  color: var(--map-accent-dark);
-  background: #e6f5f1;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.control-buttons {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0 0 12px;
-}
-
-.category-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-width: 0;
-  min-height: 52px;
-  padding: 7px 6px;
-  border: 1px solid #e2e8e6;
-  border-radius: 13px;
-  color: #52615f;
-  background: #f8faf9;
-  box-shadow: none;
-  transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.category-btn:hover:not(.active) {
-  border-color: #b9d7d1;
-  background: #f0f7f5;
-  transform: translateY(-1px);
-}
-
-.category-btn.active,
-.category-btn.active:hover {
-  border-color: var(--map-accent);
-  color: white;
-  background: linear-gradient(145deg, #1a9b88, #117466);
-  box-shadow: 0 7px 16px rgba(22, 140, 123, 0.22);
-}
-
-.category-btn:focus-visible,
-.option-btn:focus-visible,
-.location-btn:focus-visible,
-.search-result-item:focus-visible,
-.search-clear:focus-visible,
-.map-info-toggle:focus-visible {
-  outline: 3px solid rgba(22, 140, 123, 0.28);
-  outline-offset: 2px;
-}
-
-.category-icon {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.category-copy {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1.05;
-}
-
-.category-copy strong {
-  font-size: 14px;
-}
-
-.category-copy small {
-  margin-top: 3px;
-  font-size: 10px;
-  font-weight: 500;
-  opacity: 0.78;
-}
-
-.search-container {
-  margin: 0;
-}
-
-.search-icon {
-  position: absolute;
-  top: 50%;
-  left: 14px;
-  z-index: 1;
-  color: #6f7f7c;
-  font-size: 19px;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.search-input {
-  height: 46px;
-  padding: 10px 42px;
-  border: 1px solid #dce5e2;
-  border-radius: 13px;
-  color: var(--map-ink);
-  background: #fff;
-  font-size: 14px;
-  box-shadow: inset 0 1px 2px rgba(23, 59, 54, 0.03);
-}
-
-.search-input::placeholder {
-  color: #98a3a1;
-}
-
-.search-input:focus {
-  border-color: var(--map-accent);
-  box-shadow: 0 0 0 4px rgba(22, 140, 123, 0.1);
-}
-
-.search-clear {
-  position: absolute;
-  top: 7px;
-  right: 7px;
-  display: grid;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  place-items: center;
-  border: 0;
-  border-radius: 9px;
-  color: #667085;
-  background: #eef3f1;
-}
-
-.search-results {
-  top: calc(100% + 8px);
-  padding: 6px;
-  border: 1px solid #e2e9e7;
-  border-radius: 14px;
-  box-shadow: 0 18px 40px rgba(23, 59, 54, 0.18);
-}
-
-.search-result-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 10px;
-  padding: 9px;
-  border: 0;
-  border-bottom: 1px solid #edf1f0;
-  border-radius: 9px;
-  color: var(--map-ink);
-  background: transparent;
-  text-align: left;
-}
-
-.search-result-item:hover {
-  background: #f0f7f5;
-}
-
-.result-pin {
-  display: grid;
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border-radius: 10px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
-  color: #fff;
-  font-size: 17px;
-}
-
-.result-copy {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-}
-
-.result-copy strong {
-  overflow: hidden;
-  font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.result-copy small {
-  color: var(--map-muted);
-  font-size: 11px;
-}
-
-.result-arrow {
-  color: #98a3a1;
-  font-size: 20px;
-}
-
-.control-options {
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 12px;
-  padding: 11px 2px 0;
-  border-top-color: #e7eceb;
-}
-
-.option-copy {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #4f625f;
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.option-copy svg {
-  color: var(--map-accent);
-  font-size: 17px;
-}
-
-.option-btn {
-  position: relative;
-  width: 42px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: #cbd5d2;
-}
-
-.option-btn:hover:not(.active) {
-  background: #b8c5c2;
-}
-
-.option-btn.active,
-.option-btn.active:hover {
-  background: var(--map-accent);
-}
-
-.switch-knob {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
-  transition: transform 180ms ease;
-}
-
-.option-btn.active .switch-knob {
-  transform: translateX(18px);
-}
-
-
-.location-btn {
-  right: 18px;
-  bottom: 44px;
-  width: auto;
-  height: 46px;
-  gap: 7px;
-  padding: 0 15px;
-  border: 1px solid rgba(23, 59, 54, 0.12);
-  border-radius: 14px;
-  color: var(--map-ink);
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 9px 24px rgba(23, 59, 54, 0.18);
-  font-weight: 700;
-  z-index: 10;
-}
-
-.location-btn:hover {
-  color: var(--map-accent-dark);
-  background: #fff;
-  transform: translateY(-2px);
-}
-
-.location-icon {
-  color: var(--map-accent);
-  font-size: 22px;
-}
-
-.location-label {
-  font-size: 13px;
-}
-
-.detail-label,
-.contact-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.detail-label svg,
-.contact-link svg {
-  flex: 0 0 auto;
-  color: var(--map-accent);
-  font-size: 17px;
-}
-
-.map-info-panel {
-  left: 50%;
-  right: auto;
-  width: min(680px, calc(100% - 32px));
-  border: 1px solid rgba(23, 59, 54, 0.09);
-  border-bottom: 0;
-  border-radius: 22px 22px 0 0;
-  box-shadow: 0 -16px 40px rgba(23, 59, 54, 0.16);
-  transform: translate(-50%, calc(100% - 24px));
-}
-
-.map-info-panel-open {
-  transform: translate(-50%, 0);
-}
-
-.map-info-toggle {
-  position: relative;
-  width: 100%;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  border-radius: 22px 22px 0 0;
-  background: rgba(255, 255, 255, 0.96);
-}
-
-.panel-handle {
-  width: 42px;
-  height: 4px;
-  border-radius: 999px;
-  background: #c8d4d1;
-}
-
-.map-toggle {
-  position: absolute;
-  right: 16px;
-  font-size: 20px;
-}
-
-.loading-content,
-.error-content {
-  max-width: min(360px, calc(100% - 32px));
-  padding: 24px;
-  border: 1px solid #e4ebe9;
-  border-radius: 18px;
-  box-shadow: 0 18px 44px rgba(23, 59, 54, 0.14);
-}
-
-.retry-btn,
-.view-detail-btn {
-  border-radius: 10px;
-  background: var(--map-accent);
-}
-
-.retry-btn:hover,
-.view-detail-btn:hover {
-  background: var(--map-accent-dark);
-}
-
-/* 自訂 Leaflet 標記與動畫樣式 - 簡約清新風格 */
+// ───── Leaflet 標記與控制項 ─────
 :deep(.custom-map-pin-wrapper) {
   background: transparent;
   border: none;
@@ -1703,33 +1306,39 @@ onUnmounted(() => {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    border: 3px solid #ffffff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 6px rgba($yp-ink, 0.35);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   &:hover {
     z-index: 100;
+
     .pin-circle {
       transform: scale(1.35);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 12px rgba($yp-ink, 0.4);
     }
+
     .pin-title {
-      background-color: rgba(0, 0, 0, 0.9);
+      background-color: rgba($yp-ink, 0.95);
       transform: translate(-50%, -8px) scale(1.03);
     }
   }
 
   &.highlighted {
     z-index: 200;
+
     .pin-circle {
       transform: scale(1.6);
-      box-shadow: 0 0 0 5px rgba(231, 111, 81, 0.4);
+      box-shadow: 0 0 0 5px rgba($yp-primary, 0.4);
     }
+
     .pin-title {
-      background-color: rgba(0, 0, 0, 0.95);
+      background-color: $yp-ink;
       font-weight: 700;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 16px rgba($yp-ink, 0.5);
     }
   }
 
@@ -1738,12 +1347,12 @@ onUnmounted(() => {
     bottom: 100%;
     left: 50%;
     transform: translate(-50%, -6px);
-    background-color: rgba(0, 0, 0, 0.75);
-    color: #ffffff;
+    background-color: rgba($yp-ink, 0.82);
+    color: #fff;
     font-weight: 700;
     font-size: 12px;
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     text-align: center;
     min-width: 80px;
     max-width: 150px;
@@ -1751,7 +1360,7 @@ onUnmounted(() => {
     text-overflow: ellipsis;
     white-space: nowrap;
     pointer-events: none;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 4px rgba($yp-ink, 0.3);
     transition: all 0.2s ease;
   }
 }
@@ -1762,35 +1371,39 @@ onUnmounted(() => {
 
 :deep(.leaflet-bar) {
   border: none !important;
-  border-radius: 12px !important;
+  border-radius: $yp-radius !important;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(23, 59, 54, 0.14) !important;
+  box-shadow: $yp-shadow-lg !important;
+
   a {
-    background-color: rgba(255, 255, 255, 0.96) !important;
-    color: #334155 !important;
-    border-bottom: 1px solid #f1f5f9 !important;
     width: 36px !important;
     height: 36px !important;
     line-height: 36px !important;
     font-size: 18px !important;
+    background-color: $yp-surface !important;
+    color: $yp-ink !important;
+    border-bottom: 1px solid $yp-line !important;
     transition: all 0.15s ease;
+
     &:hover {
-      background-color: #ffffff !important;
-      color: var(--map-accent) !important;
+      background-color: $yp-primary-soft !important;
+      color: $yp-primary-ink !important;
     }
   }
 }
 
 :deep(.leaflet-control-attribution) {
-  background: rgba(255, 255, 255, 0.78) !important;
+  background: rgba(#fff, 0.8) !important;
   backdrop-filter: blur(6px);
   font-size: 10px !important;
-  color: #94a3b8 !important;
+  color: $yp-muted !important;
   padding: 2px 8px !important;
   border-top-left-radius: 8px;
+
   a {
-    color: #64748b !important;
+    color: $yp-muted !important;
     text-decoration: none;
+
     &:hover {
       text-decoration: underline;
     }
@@ -1805,141 +1418,35 @@ onUnmounted(() => {
 :deep(.user-pulse-dot) {
   width: 16px;
   height: 16px;
-  background-color: #4285f4;
-  border: 3px solid #ffffff;
+  background-color: $yp-primary;
+  border: 3px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 0 0 rgba(66, 133, 244, 0.7);
+  box-shadow: 0 0 0 rgba($yp-primary, 0.7);
   animation: user-pulse 2s infinite;
 }
 
 @keyframes user-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7);
+    box-shadow: 0 0 0 0 rgba($yp-primary, 0.6);
   }
   70% {
-    box-shadow: 0 0 0 12px rgba(66, 133, 244, 0);
+    box-shadow: 0 0 0 12px rgba($yp-primary, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
-  }
-}
-
-@media (max-width: 768px) {
-  .map-container {
-    height: calc(100dvh - 64px);
-  }
-
-  .control-bar {
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    width: auto;
-    padding: 13px;
-    border-radius: 17px;
-  }
-
-  .control-heading {
-    align-items: center;
-    margin-bottom: 10px;
-  }
-
-  .control-eyebrow {
-    display: none;
-  }
-
-  .control-title {
-    font-size: 16px;
-  }
-
-  .place-count {
-    margin-top: 0;
-    font-size: 11px;
-  }
-
-  .control-buttons {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 6px;
-  }
-
-  .category-btn {
-    min-width: 0;
-    min-height: 42px;
-    padding: 5px;
-  }
-
-  .category-icon {
-    font-size: 16px;
-  }
-
-  .category-copy strong {
-    font-size: 12px;
-  }
-
-  .category-copy small {
-    display: none;
-  }
-
-  .search-input {
-    height: 42px;
-    font-size: 13px;
-  }
-
-  .search-clear {
-    top: 5px;
-  }
-
-  .control-options {
-    margin-top: 9px;
-    padding-top: 8px;
-  }
-
-  .location-btn {
-    right: 12px;
-    bottom: 38px;
-    width: 46px;
-    height: 46px;
-    padding: 0;
-    border-radius: 50%;
-  }
-
-  .location-label {
-    display: none;
-  }
-
-  .map-info-panel {
-    width: 100%;
-    border-right: 0;
-    border-left: 0;
-    border-radius: 20px 20px 0 0;
-  }
-
-  .map-info-wrapper {
-    padding: 10px;
-  }
-}
-
-@media (max-width: 380px) {
-  .control-bar {
-    padding: 11px;
-  }
-
-  .category-btn {
-    gap: 3px;
-  }
-
-  .category-icon {
-    display: none;
+    box-shadow: 0 0 0 0 rgba($yp-primary, 0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .category-btn,
   .location-btn,
-  .switch-knob,
   .map-info-panel,
-  .map-toggle {
+  .map-toggle,
+  :deep(.pin-circle) {
     transition: none;
+  }
+
+  :deep(.user-pulse-dot) {
+    animation: none;
   }
 }
 </style>

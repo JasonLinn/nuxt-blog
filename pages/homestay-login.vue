@@ -1,63 +1,74 @@
 <template>
-  <div class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <h1 class="login-title">民宿會員登入</h1>
-        <p class="login-subtitle">使用您的民宿編號登入管理後台</p>
+  <div class="yp-auth login-page">
+    <div class="yp-auth__card">
+      <div class="login-icon">
+        <Icon name="ri:home-heart-line" />
       </div>
+      <h1 class="yp-auth__title">民宿會員登入</h1>
+      <p class="yp-auth__desc">使用您的民宿編號登入管理後台</p>
 
-      <form @submit.prevent="handleLogin" class="login-form">
-        <div class="form-group">
+      <form class="login-form" @submit.prevent="handleLogin">
+        <div class="mb-3">
           <label for="account" class="form-label">民宿編號</label>
           <input
             id="account"
             v-model="form.account"
             type="text"
+            autocomplete="username"
             placeholder="請輸入您的民宿編號"
-            class="form-input"
+            class="form-control"
             :disabled="loading"
             required
           />
         </div>
 
-        <div class="form-group">
+        <div class="mb-3">
           <label for="password" class="form-label">密碼</label>
           <input
             id="password"
             v-model="form.password"
             type="password"
+            autocomplete="current-password"
             placeholder="請輸入密碼"
-            class="form-input"
+            class="form-control"
             :disabled="loading"
             required
           />
         </div>
 
-        <div v-if="error" class="error-message">
-          {{ error }}
+        <div
+          v-if="error"
+          class="alert alert-danger d-flex align-items-start gap-2 py-2"
+          role="alert"
+        >
+          <Icon name="ri:error-warning-line" class="mt-1 flex-shrink-0" />
+          <span>{{ error }}</span>
         </div>
 
-        <button
-          type="submit"
-          class="login-button"
-          :disabled="loading"
-        >
+        <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="loading">
+          <span
+            v-if="loading"
+            class="spinner-border spinner-border-sm me-2"
+            aria-hidden="true"
+          ></span>
           {{ loading ? '登入中...' : '登入管理後台' }}
         </button>
       </form>
 
       <div class="login-footer">
-        <div class="back-link">
-          <NuxtLink to="/homestay-list" class="link">返回民宿列表</NuxtLink>
-        </div>
+        <NuxtLink to="/homestay-list" class="btn btn-ghost btn-sm btn-icon">
+          <Icon name="ri:arrow-left-line" />
+          返回民宿列表
+        </NuxtLink>
+        <NuxtLink to="/homestay-register" class="btn btn-ghost btn-sm">尚未加入？申請註冊</NuxtLink>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { navigateTo } from 'nuxt/app';
+import { ref, watch } from 'vue'
+import { navigateTo } from 'nuxt/app'
 
 // SEO設定
 useSeoMeta({
@@ -73,26 +84,26 @@ useHead({
       href: 'https://yilanpass.com/homestay-login'
     }
   ]
-});
+})
 
 // 表單狀態
 const form = ref({
   account: '',
   password: ''
-});
+})
 
-const loading = ref(false);
-const error = ref('');
+const loading = ref(false)
+const error = ref('')
 
 // 處理登入
 const handleLogin = async () => {
   try {
-    loading.value = true;
-    error.value = '';
+    loading.value = true
+    error.value = ''
 
     if (!form.value.account.trim() || !form.value.password.trim()) {
-      error.value = '請輸入民宿編號和密碼';
-      return;
+      error.value = '請輸入民宿編號和密碼'
+      return
     }
 
     const response = await $fetch('/api/homestay-login', {
@@ -101,183 +112,65 @@ const handleLogin = async () => {
         account: form.value.account.trim(),
         password: form.value.password.trim()
       }
-    });
+    })
 
     if (response.success) {
       // 登入成功，跳轉到管理後台
-      await navigateTo('/homestay-admin');
+      await navigateTo('/homestay-admin')
     }
-
   } catch (err) {
-    console.error('登入錯誤:', err);
-    error.value = err.data?.message || err.message || '登入失敗，請檢查帳號密碼';
+    console.error('登入錯誤:', err)
+    error.value = err.data?.message || err.message || '登入失敗，請檢查帳號密碼'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 // 自動填入密碼提示
-watch(() => form.value.account, (newAccount) => {
-  if (newAccount && !form.value.password.startsWith('B')) {
-    // 當輸入民宿編號時，自動提示密碼格式
-    if (newAccount.length > 0) {
-      // 可以選擇性地自動填入密碼前綴
-      // form.value.password = `B${newAccount}`;
+watch(
+  () => form.value.account,
+  (newAccount) => {
+    if (newAccount && !form.value.password.startsWith('B')) {
+      // 當輸入民宿編號時，自動提示密碼格式
+      if (newAccount.length > 0) {
+        // 可以選擇性地自動填入密碼前綴
+        // form.value.password = `B${newAccount}`;
+      }
     }
   }
-});
+)
 </script>
 
 <style lang="scss" scoped>
-.login-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-}
+// 保留在 default layout（有前台 Header），所以不佔滿整個 viewport
+.login-page {
+  min-height: calc(100vh - #{$yp-header-h} - #{$yp-tabbar-h});
+  padding: 32px 16px;
 
-.login-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  padding: 40px;
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-}
-
-.login-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.login-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1a202c;
-  margin-bottom: 8px;
-}
-
-.login-subtitle {
-  color: #718096;
-  font-size: 16px;
-  margin: 0;
-}
-
-.login-form {
-  .form-group {
-    margin-bottom: 24px;
-  }
-
-  .form-label {
-    display: block;
-    margin-bottom: 8px;
-    color: #2d3748;
-    font-weight: 600;
-    font-size: 14px;
-  }
-
-  .form-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    background: #f7fafc;
-
-    &:focus {
-      outline: none;
-      border-color: #667eea;
-      background: white;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    &:disabled {
-      background: #f7fafc;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    &::placeholder {
-      color: #a0aec0;
-    }
-  }
-
-  .password-hint {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #718096;
-    background: #f7fafc;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border-left: 3px solid #667eea;
+  @media (min-width: $yp-bp-md) {
+    min-height: calc(100vh - #{$yp-header-h});
   }
 }
 
-.error-message {
-  color: #e53e3e;
-  background: #fed7d7;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 24px;
-  border-left: 4px solid #e53e3e;
-}
-
-.login-button {
-  width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 14px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-  }
-
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
+.login-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  border-radius: $yp-radius;
+  background: $yp-primary-soft;
+  color: $yp-primary;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
 }
 
 .login-footer {
-  margin-top: 32px;
-  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid $yp-line;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px;
 }
-
-.back-link .link {
-  color: #718096;
-  text-decoration: none;
-  font-size: 14px;
-  transition: color 0.3s ease;
-
-  &:hover {
-    color: #667eea;
-  }
-}
-
-// 響應式設計
-@media (max-width: 480px) {
-  .login-container {
-    padding: 16px;
-  }
-
-  .login-card {
-    padding: 24px;
-  }
-
-  .login-title {
-    font-size: 24px;
-  }
-}
-</style> 
+</style>
