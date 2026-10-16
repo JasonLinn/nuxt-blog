@@ -1,0 +1,39 @@
+// CSS custom properties：給 scoped style、inline style、第三方元件使用
+:root {
+  --yp-primary: #{$yp-primary};
+  --yp-primary-ink: #{$yp-primary-ink};
+  --yp-primary-soft: #{$yp-primary-soft};
+  --yp-deal: #{$yp-deal};
+  --yp-deal-soft: #{$yp-deal-soft};
+  --yp-deal-ink: #{$yp-deal-ink};
+  --yp-line-green: #{$yp-line-green};
+
+  --yp-ink: #{$yp-ink};
+  --yp-muted: #{$yp-muted};
+  --yp-subtle: #{$yp-subtle};
+  --yp-line: #{$yp-line};
+  --yp-bg: #{$yp-bg};
+  --yp-surface: #{$yp-surface};
+  --yp-surface-2: #{$yp-surface-2};
+
+  --yp-success: #{$yp-success};
+  --yp-success-soft: #{$yp-success-soft};
+  --yp-warning: #{$yp-warning};
+  --yp-warning-soft: #{$yp-warning-soft};
+  --yp-danger: #{$yp-danger};
+  --yp-danger-soft: #{$yp-danger-soft};
+
+  --yp-radius-sm: #{$yp-radius-sm};
+  --yp-radius: #{$yp-radius};
+  --yp-radius-lg: #{$yp-radius-lg};
+  --yp-radius-xl: #{$yp-radius-xl};
+
+  --yp-shadow-sm: #{$yp-shadow-sm};
+  --yp-shadow: #{$yp-shadow};
+  --yp-shadow-lg: #{$yp-shadow-lg};
+
+  --yp-font-sans: #{$yp-font-sans};
+  --yp-font-num: #{$yp-font-num};
+  --yp-header-h: #{$yp-header-h};
+  --yp-tabbar-h: #{$yp-tabbar-h};
+}

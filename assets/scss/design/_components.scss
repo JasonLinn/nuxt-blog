@@ -1,0 +1,928 @@
+// ═══════════════════════════════════════════════
+// 共用元件（前台 + 後台共用）— 命名一律 .yp-*
+// 文件：docs/design-system.md
+// ═══════════════════════════════════════════════
+
+// ───── Buttons ─────
+.btn {
+  letter-spacing: 0.02em;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-hover-bg: #{$yp-primary-ink};
+  --bs-btn-hover-border-color: #{$yp-primary-ink};
+  --bs-btn-active-bg: #{$yp-primary-ink};
+  --bs-btn-active-border-color: #{$yp-primary-ink};
+}
+
+.btn-outline-primary {
+  --bs-btn-color: #{$yp-primary-ink};
+  --bs-btn-border-color: #{$yp-primary};
+  --bs-btn-hover-color: #fff;
+}
+
+.btn-soft {
+  --bs-btn-color: #{$yp-primary-ink};
+  --bs-btn-bg: #{$yp-primary-soft};
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: #{$yp-primary-ink};
+  --bs-btn-hover-bg: #{darken($yp-primary-soft, 5%)};
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-bg: #{darken($yp-primary-soft, 8%)};
+  --bs-btn-active-color: #{$yp-primary-ink};
+}
+
+.btn-ghost {
+  --bs-btn-color: #{$yp-muted};
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: #{$yp-ink};
+  --bs-btn-hover-bg: #{$yp-surface-2};
+  --bs-btn-hover-border-color: transparent;
+}
+
+.btn-line {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #{$yp-line-green};
+  --bs-btn-border-color: #{$yp-line-green};
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #{darken($yp-line-green, 5%)};
+  --bs-btn-hover-border-color: #{darken($yp-line-green, 5%)};
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #{darken($yp-line-green, 8%)};
+  border-radius: $yp-radius-pill;
+}
+
+.btn-pill {
+  border-radius: $yp-radius-pill;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+}
+
+// ───── Page shell ─────
+.yp-page {
+  max-width: $yp-container;
+  margin: 0 auto;
+  padding: 24px 16px 56px;
+
+  @media (min-width: $yp-bp-md) {
+    padding: 32px 24px 72px;
+  }
+
+  &--narrow {
+    max-width: 880px;
+  }
+
+  &--form {
+    max-width: 760px;
+  }
+}
+
+.yp-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 24px;
+
+  &__eyebrow {
+    display: inline-block;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: $yp-primary-ink;
+    margin-bottom: 6px;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+    margin: 0;
+
+    @media (min-width: $yp-bp-md) {
+      font-size: 1.875rem;
+    }
+  }
+
+  &__desc {
+    color: $yp-muted;
+    margin: 6px 0 0;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+.yp-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: $yp-muted;
+  margin-bottom: 12px;
+
+  a {
+    color: $yp-muted;
+
+    &:hover {
+      color: $yp-primary-ink;
+    }
+  }
+
+  > * + *::before {
+    content: '/';
+    margin-right: 6px;
+    color: $yp-subtle;
+  }
+}
+
+// ───── Hero ─────
+.yp-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(120deg, #ddf3f8 0%, #f2fafc 60%, #fff1ec 100%);
+  padding: 28px 16px 24px;
+
+  @media (min-width: $yp-bp-md) {
+    padding: 48px 24px 40px;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: -80px;
+    top: -120px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba($yp-primary, 0.14), transparent 70%);
+    pointer-events: none;
+  }
+
+  &__inner {
+    position: relative;
+    z-index: 1;
+    max-width: $yp-container;
+    margin: 0 auto;
+  }
+
+  &__eyebrow {
+    display: inline-block;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: $yp-primary-ink;
+    background: #fff;
+    padding: 4px 12px;
+    border-radius: $yp-radius-pill;
+    border: 1px solid $yp-line;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+    margin: 12px 0 8px;
+
+    em {
+      font-style: normal;
+      color: $yp-primary;
+    }
+
+    @media (min-width: $yp-bp-md) {
+      font-size: 2.25rem;
+      line-height: 1.3;
+    }
+  }
+
+  &__desc {
+    color: $yp-muted;
+    margin: 0;
+  }
+}
+
+// ───── Section head ─────
+.yp-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 16px;
+
+  &__title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0;
+
+    @media (min-width: $yp-bp-md) {
+      font-size: 1.25rem;
+    }
+  }
+
+  &__link {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $yp-primary-ink;
+    white-space: nowrap;
+  }
+}
+
+// ───── Search ─────
+.yp-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: $yp-radius-lg;
+  box-shadow: $yp-shadow-lg;
+  padding: 6px;
+  gap: 6px;
+
+  &__field {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $yp-subtle;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 10px 36px 10px 40px;
+    font-size: 1rem;
+    color: $yp-ink;
+    outline: none;
+
+    &::placeholder {
+      color: $yp-subtle;
+    }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: $yp-surface-2;
+    color: $yp-muted;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    padding: 0;
+  }
+
+  &__select {
+    flex: 0 0 auto;
+    max-width: 150px;
+    border: 0;
+    border-left: 1px solid $yp-line;
+    border-radius: 0;
+    background-color: transparent;
+    font-weight: 500;
+    box-shadow: none !important;
+  }
+
+  .btn {
+    border-radius: $yp-radius;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+// ───── Chips（類別篩選）─────
+.yp-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.yp-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
+  border-radius: $yp-radius-pill;
+  border: 1px solid $yp-line;
+  background: #fff;
+  color: #33515a;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: $yp-primary;
+    color: $yp-primary-ink;
+  }
+
+  &.is-active,
+  &.active {
+    background: $yp-ink;
+    border-color: $yp-ink;
+    color: #fff;
+  }
+
+  &--sm {
+    padding: 4px 12px;
+    font-size: 0.8125rem;
+  }
+
+  &__count {
+    font-family: $yp-font-num;
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+}
+
+// ───── Segmented（排序 / 檢視切換）─────
+.yp-seg {
+  display: inline-flex;
+  background: $yp-surface-2;
+  border-radius: 10px;
+  padding: 4px;
+  gap: 2px;
+
+  &__btn {
+    border: 0;
+    background: transparent;
+    padding: 6px 14px;
+    border-radius: 7px;
+    font-size: 0.875rem;
+    color: $yp-muted;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &.is-active,
+    &.active {
+      background: #fff;
+      color: $yp-ink;
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// ───── Toolbar（篩選列）─────
+.yp-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  &__group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+// ───── Card ─────
+.yp-card {
+  background: $yp-surface;
+  border-radius: $yp-radius-lg;
+  box-shadow: $yp-shadow;
+  overflow: hidden;
+
+  &--flat {
+    box-shadow: none;
+    border: 1px solid $yp-line;
+  }
+
+  &--hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 2px 4px rgba(19, 48, 58, 0.06), 0 16px 32px -16px rgba(19, 48, 58, 0.35);
+    }
+  }
+
+  &__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: $yp-surface-2;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__body {
+    padding: 14px 16px 16px;
+  }
+
+  &__title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 0;
+    color: $yp-ink;
+  }
+
+  &__meta {
+    font-size: 0.8125rem;
+    color: $yp-muted;
+    margin: 4px 0 0;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid $yp-line;
+    font-size: 0.8125rem;
+    color: $yp-muted;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid $yp-line;
+  }
+
+  &__head-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  &__section {
+    padding: 20px;
+  }
+}
+
+.yp-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @media (min-width: $yp-bp-sm) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: $yp-bp-lg) {
+    gap: 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (min-width: $yp-bp-xl) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  &--3 {
+    @media (min-width: $yp-bp-xl) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+}
+
+.yp-clamp-1,
+.yp-clamp-2,
+.yp-clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.yp-clamp-1 { -webkit-line-clamp: 1; line-clamp: 1; }
+.yp-clamp-2 { -webkit-line-clamp: 2; line-clamp: 2; }
+.yp-clamp-3 { -webkit-line-clamp: 3; line-clamp: 3; }
+
+// ───── Tag（資訊標籤）─────
+.yp-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  background: $yp-surface-2;
+  color: $yp-muted;
+  white-space: nowrap;
+
+  &--primary { background: $yp-primary-soft; color: $yp-primary-ink; }
+  &--deal { background: $yp-deal-soft; color: $yp-deal-ink; }
+  &--success { background: $yp-success-soft; color: #15803d; }
+  &--warning { background: $yp-warning-soft; color: #b45309; }
+  &--danger { background: $yp-danger-soft; color: #b91c1c; }
+}
+
+.yp-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+// 狀態徽章（審核流程）
+.yp-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: $yp-radius-pill;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+  background: $yp-surface-2;
+  color: $yp-muted;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &--pending { background: $yp-warning-soft; color: #b45309; }
+  &--approved, &--active, &--success { background: $yp-success-soft; color: #15803d; }
+  &--rejected, &--danger { background: $yp-danger-soft; color: #b91c1c; }
+  &--info { background: $yp-primary-soft; color: $yp-primary-ink; }
+  &--draft, &--inactive { background: $yp-surface-2; color: $yp-muted; }
+}
+
+// ───── Stats ─────
+.yp-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 0.875rem;
+  color: $yp-muted;
+
+  b {
+    font-family: $yp-font-num;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: $yp-ink;
+    margin-right: 4px;
+  }
+}
+
+.yp-stat-card {
+  background: $yp-surface;
+  border-radius: $yp-radius-lg;
+  box-shadow: $yp-shadow;
+  padding: 16px 18px;
+
+  &__label {
+    font-size: 0.8125rem;
+    color: $yp-muted;
+    margin: 0;
+  }
+
+  &__value {
+    font-family: $yp-font-num;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 4px 0 0;
+    color: $yp-ink;
+  }
+
+  &__hint {
+    font-size: 0.75rem;
+    color: $yp-subtle;
+    margin: 2px 0 0;
+  }
+
+  &--primary .yp-stat-card__value { color: $yp-primary-ink; }
+  &--warning .yp-stat-card__value { color: #b45309; }
+  &--success .yp-stat-card__value { color: #15803d; }
+  &--danger .yp-stat-card__value { color: #b91c1c; }
+}
+
+// ───── Empty / Error state ─────
+.yp-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: $yp-muted;
+
+  &__icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: $yp-primary-soft;
+    color: $yp-primary;
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+  }
+
+  &--error &__icon {
+    background: $yp-danger-soft;
+    color: $yp-danger;
+  }
+
+  &__title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: $yp-ink;
+    margin: 0 0 6px;
+  }
+
+  &__text {
+    margin: 0 0 18px;
+  }
+}
+
+// ───── Skeleton ─────
+.yp-skeleton {
+  display: block;
+  background: linear-gradient(90deg, #edf3f5 25%, #f6fafb 50%, #edf3f5 75%);
+  background-size: 200% 100%;
+  animation: yp-skeleton 1.4s ease-in-out infinite;
+  border-radius: 6px;
+  min-height: 12px;
+}
+
+@keyframes yp-skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ───── Pager ─────
+.yp-pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 32px;
+
+  &__btn {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border-radius: 10px;
+    border: 1px solid $yp-line;
+    background: #fff;
+    color: $yp-ink;
+    font-family: $yp-font-num;
+    font-weight: 600;
+
+    &:hover {
+      border-color: $yp-primary;
+      color: $yp-primary-ink;
+    }
+
+    &.is-active {
+      background: $yp-ink;
+      border-color: $yp-ink;
+      color: #fff;
+    }
+
+    &.is-disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  }
+}
+
+// ───── Forms ─────
+.yp-form-section {
+  background: $yp-surface;
+  border-radius: $yp-radius-lg;
+  box-shadow: $yp-shadow;
+  padding: 20px;
+  margin-bottom: 16px;
+
+  @media (min-width: $yp-bp-md) {
+    padding: 28px;
+  }
+
+  &__title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+
+  &__desc {
+    font-size: 0.875rem;
+    color: $yp-muted;
+    margin: 0 0 20px;
+  }
+}
+
+.form-control,
+.form-select {
+  min-height: 44px;
+}
+
+.form-control-sm,
+.form-select-sm {
+  min-height: 34px;
+}
+
+.form-text {
+  color: $yp-muted;
+}
+
+.required::after,
+.form-label.required::after {
+  content: ' *';
+  color: $yp-danger;
+}
+
+.yp-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+
+  @media (max-width: #{$yp-bp-md - 1px}) {
+    position: sticky;
+    bottom: calc(#{$yp-tabbar-h} + env(safe-area-inset-bottom));
+    background: rgba($yp-bg, 0.94);
+    backdrop-filter: blur(8px);
+    padding: 12px 0;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    z-index: 5;
+
+    .btn {
+      flex: 1;
+    }
+  }
+}
+
+.yp-upload {
+  border: 2px dashed $yp-line;
+  border-radius: $yp-radius;
+  background: $yp-bg;
+  padding: 28px 16px;
+  text-align: center;
+  color: $yp-muted;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &:hover,
+  &.is-dragover {
+    border-color: $yp-primary;
+    background: $yp-primary-soft;
+  }
+}
+
+// ───── Detail page ─────
+.yp-detail {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @media (min-width: $yp-bp-lg) {
+    gap: 24px;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+  }
+
+  &__aside {
+    @media (min-width: $yp-bp-lg) {
+      position: sticky;
+      top: calc(#{$yp-header-h} + 16px);
+    }
+  }
+}
+
+.yp-info-list {
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+
+  li {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid $yp-line;
+    font-size: 0.9375rem;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  &__label {
+    flex: 0 0 88px;
+    color: $yp-muted;
+  }
+
+  &__value {
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+  }
+}
+
+.yp-prose {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: #24434c;
+  word-break: break-word;
+
+  p { margin: 0 0 1em; }
+  h2, h3 { font-weight: 700; margin: 1.4em 0 0.6em; color: $yp-ink; }
+  img { border-radius: $yp-radius; }
+  a { text-decoration: underline; }
+}
+
+// ───── Modal ─────
+.modal-content {
+  box-shadow: 0 24px 48px -16px rgba(19, 48, 58, 0.4);
+}
+
+.modal-title {
+  font-weight: 700;
+}
+
+// ───── Table ─────
+.table {
+  --bs-table-bg: transparent;
+  vertical-align: middle;
+
+  > thead th {
+    font-size: 0.8125rem;
+    color: $yp-muted;
+    background: $yp-surface-2;
+    border-bottom-width: 1px;
+    white-space: nowrap;
+  }
+}
+
+// ───── Alert ─────
+.alert {
+  border-width: 0;
+}
+
+// ───── Toast（輕量回饋）─────
+.yp-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(#{$yp-tabbar-h} + 16px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  background: $yp-ink;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: $yp-radius-pill;
+  font-size: 0.9375rem;
+  box-shadow: $yp-shadow-lg;
+  z-index: 1080;
+
+  @media (min-width: $yp-bp-md) {
+    bottom: 32px;
+  }
+}

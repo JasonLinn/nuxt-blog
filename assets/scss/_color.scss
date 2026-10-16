@@ -1,2 +1,40 @@
-$primary: #49240F;
-$secondary: #E4A79D;
+// 宜蘭旅遊通 Design System — Style A「蘭陽清新 Fresh Coast」
+// 這個檔案會被注入到每個 SFC 的 <style lang="scss">，只能放變數，不可輸出 CSS。
+
+// Brand
+$yp-primary: #0A9EC0;        // 主色：Logo 水藍（按鈕、連結、選取狀態）
+$yp-primary-ink: #076F87;    // 深水藍：文字連結、hover
+$yp-primary-soft: #E3F6FA;   // 淺水藍：背景塊、選取底色
+$yp-deal: #F2553D;           // 珊瑚紅：只用在「折扣 / 優惠值」
+$yp-deal-soft: #FFEDEA;
+$yp-deal-ink: #C9402B;      // 折扣文字（白底上可讀）
+$yp-line-green: #06C755;     // LINE 登入
+
+// Neutrals
+$yp-ink: #13303A;            // 主要文字
+$yp-muted: #5E7780;          // 次要文字
+$yp-subtle: #8BA1A8;         // placeholder、停用
+$yp-line: #DCEBEF;           // 邊框、分隔線
+$yp-bg: #F6FAFB;             // 頁面底色
+$yp-surface: #FFFFFF;        // 卡片底色
+$yp-surface-2: #EEF5F7;      // 次要底色（segmented、表頭）
+
+// Status
+$yp-success: #16A34A;
+$yp-success-soft: #E7F6EC;
+$yp-warning: #D97706;
+$yp-warning-soft: #FEF3DC;
+$yp-danger: #E5484D;
+$yp-danger-soft: #FDECEC;
+$yp-info: $yp-primary;
+$yp-info-soft: $yp-primary-soft;
+
+// Bootstrap theme colors
+$primary: $yp-primary;
+$secondary: $yp-muted;
+$success: $yp-success;
+$info: $yp-primary;
+$warning: $yp-warning;
+$danger: $yp-danger;
+$light: $yp-surface-2;
+$dark: $yp-ink;

@@ -1,79 +1,67 @@
-body {
-	// background-color: #fafafa;
-}
-
 .vue-map-container {
     height: calc(100vh - 100px);
 }
 
-/* Quill 編輯器格式樣式 */
-strong {
-    font-weight: bold !important;
-}
+/* Quill 富文字內容（只套用在內容容器，不影響全站列表與導覽） */
+$rich-text: '.yp-prose, .cupon-text, .index-cupon-text, .description-content, .ql-editor';
 
-em {
-    font-style: italic !important;
-}
+#{$rich-text} {
+    strong {
+        font-weight: bold;
+    }
 
-u {
-    // text-decoration: underline !important;
-}
+    em {
+        font-style: italic;
+    }
 
-ol {
-    // list-style-type: decimal !important;
-    padding-left: 1.5em !important;
-}
+    u {
+        text-decoration: underline;
+    }
 
-ul {
-    // list-style-type: disc !important;
-    padding-left: 1.5em !important;
-}
+    ol {
+        list-style-type: decimal;
+        padding-left: 1.5em;
+    }
 
-blockquote {
-    border-left: 3px solid #ccc !important;
-    padding-left: 1em !important;
-    margin-left: 0 !important;
-    color: #666 !important;
+    ul {
+        list-style-type: disc;
+        padding-left: 1.5em;
+    }
+
+    blockquote {
+        border-left: 3px solid $yp-line;
+        padding-left: 1em;
+        margin-left: 0;
+        color: $yp-muted;
+    }
+
+    .ql-size-small {
+        font-size: 0.75em;
+    }
+
+    .ql-size-large {
+        font-size: 1.5em;
+    }
+
+    .ql-size-huge {
+        font-size: 2.5em;
+    }
+
+    .ql-align-center {
+        text-align: center;
+    }
+
+    .ql-align-right {
+        text-align: right;
+    }
+
+    .ql-align-justify {
+        text-align: justify;
+    }
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: bold;
-    // margin: 1em 0 0.5em !important;
-}
-
-/* Quill 文字大小類 */
-.ql-size-small {
-    font-size: 0.75em !important;
-}
-
-.ql-size-large {
-    font-size: 1.5em !important;
-}
-
-.ql-size-huge {
-    font-size: 2.5em !important;
-}
-
-/* Quill 對齊方式 */
-.ql-align-center {
-    text-align: center !important;
-}
-
-.ql-align-right {
-    text-align: right !important;
-}
-
-.ql-align-justify {
-    text-align: justify !important;
-}
-
-/* 確保內容區域的格式正確 */
-.cupon-text {
-    // white-space: normal !important;
-}
-
-.cupon-text p {
-    // margin-bottom: 1em !important;
 }
 
 .carousel__slide {
