@@ -1,291 +1,256 @@
 <template>
-  <div class="admin-panel">
-    <div class="container">
-      <AdminHeader />
-
-      <!-- 美麗的標題區 -->
-      <div class="hero-header">
-        <div class="hero-content">
-          <h1 class="hero-title">宜蘭活動總匯管理</h1>
-          <p class="hero-subtitle">管理活動投稿審核、編輯與發布</p>
-          <div class="hero-stats">
-            <div class="stat-item">
-              <div class="stat-number">{{ activities.filter(a => a.status === 'pending').length }}</div>
-              <div class="stat-label">待審核</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number">{{ activities.filter(a => a.status === 'approved').length }}</div>
-              <div class="stat-label">已上架</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number">{{ activities.filter(a => a.status === 'rejected').length }}</div>
-              <div class="stat-label">已退回</div>
-            </div>
-          </div>
-        </div>
+  <div class="yilan-admin">
+    <header class="yp-admin-head">
+      <div>
+        <h1 class="yp-admin-head__title">宜蘭活動總匯管理</h1>
+        <p class="yp-admin-head__desc">管理活動投稿審核、編輯與發布</p>
       </div>
+      <div class="yp-admin-head__actions">
+        <NuxtLink to="/yilan-activities" target="_blank" class="btn btn-soft btn-icon">
+          <Icon name="ri:external-link-line" /> 前台活動頁
+        </NuxtLink>
+      </div>
+    </header>
 
-      <ActivityImportPanel @updated="fetchActivities" />
+    <div class="yp-admin-stats">
+      <div class="yp-stat-card yp-stat-card--warning">
+        <p class="yp-stat-card__label">待審核</p>
+        <p class="yp-stat-card__value">{{ statusCounts.pending }}</p>
+        <p class="yp-stat-card__hint">等待你處理</p>
+      </div>
+      <div class="yp-stat-card yp-stat-card--success">
+        <p class="yp-stat-card__label">已上架</p>
+        <p class="yp-stat-card__value">{{ statusCounts.approved }}</p>
+        <p class="yp-stat-card__hint">前台可見</p>
+      </div>
+      <div class="yp-stat-card yp-stat-card--danger">
+        <p class="yp-stat-card__label">已退回</p>
+        <p class="yp-stat-card__value">{{ statusCounts.rejected }}</p>
+        <p class="yp-stat-card__hint">需投稿者修改</p>
+      </div>
+      <div class="yp-stat-card">
+        <p class="yp-stat-card__label">活動總數</p>
+        <p class="yp-stat-card__value">{{ activities.length }}</p>
+        <p class="yp-stat-card__hint">含所有狀態</p>
+      </div>
+    </div>
 
-      <!-- 美麗的篩選器 -->
-      <div class="filter-section">
-        <div class="filter-card">
-          <div class="filter-header">
-            <h3 class="filter-title">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
-              </svg>
-              篩選與搜尋
-            </h3>
-          </div>
-          <div class="filter-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <div class="search-wrapper">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="search-icon" viewBox="0 0 16 16">
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                  </svg>
-                  <input 
-                    v-model="searchQuery" 
-                    type="text" 
-                    placeholder="搜尋活動標題或提交人..." 
-                    class="search-input"
-                  />
+    <ActivityImportPanel @updated="fetchActivities" />
+
+    <!-- 狀態篩選 -->
+    <div class="yp-chips mb-3" role="group" aria-label="活動狀態">
+      <button
+        v-for="chip in statusChips"
+        :key="chip.value"
+        type="button"
+        class="yp-chip"
+        :class="{ 'is-active': statusFilter === chip.value }"
+        @click="statusFilter = chip.value"
+      >
+        {{ chip.label }}
+        <span class="yp-chip__count">{{ chip.count }}</span>
+      </button>
+    </div>
+
+    <div class="yp-filter-bar">
+      <input
+        v-model="searchQuery"
+        type="search"
+        class="form-control yp-filter-bar__search"
+        placeholder="搜尋活動標題或提交人..."
+        aria-label="搜尋活動"
+      />
+      <select v-model="dateFilter" class="form-select" aria-label="提交時間">
+        <option value="">所有時間</option>
+        <option value="today">今天</option>
+        <option value="week">本週</option>
+        <option value="month">本月</option>
+      </select>
+    </div>
+
+    <!-- 載入狀態 -->
+    <div v-if="loading" class="yp-table-wrap">
+      <div v-for="n in 5" :key="n" class="yilan-admin__skeleton-row">
+        <span class="yp-skeleton" style="width: 40%; height: 16px"></span>
+        <span class="yp-skeleton" style="width: 70%; height: 12px"></span>
+      </div>
+    </div>
+
+    <!-- 錯誤狀態 -->
+    <div v-else-if="loadError" class="yp-table-wrap">
+      <div class="yp-empty yp-empty--error">
+        <div class="yp-empty__icon"><Icon name="ri:error-warning-line" /></div>
+        <h3 class="yp-empty__title">活動資料載入失敗</h3>
+        <p class="yp-empty__text">請檢查網路連線後再試一次</p>
+        <button type="button" class="btn btn-primary" @click="fetchActivities">重新載入</button>
+      </div>
+    </div>
+
+    <!-- 空狀態 -->
+    <div v-else-if="filteredActivities.length === 0" class="yp-table-wrap">
+      <div class="yp-empty">
+        <div class="yp-empty__icon"><Icon name="ri:calendar-event-line" /></div>
+        <h3 class="yp-empty__title">沒有找到符合條件的活動</h3>
+        <p class="yp-empty__text">試試調整搜尋條件或等待新的活動投稿</p>
+      </div>
+    </div>
+
+    <!-- 活動列表 -->
+    <div v-else class="yp-table-wrap">
+      <div class="table-responsive">
+        <table class="table-hover yp-table-stack table">
+          <thead>
+            <tr>
+              <th>活動</th>
+              <th>狀態</th>
+              <th>活動日期</th>
+              <th>提交人</th>
+              <th>提交時間</th>
+              <th class="text-end">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="activity in paginatedActivities" :key="activity.id">
+              <td class="yilan-admin__title-cell">
+                <a href="#" class="yilan-admin__title" @click.prevent="viewActivity(activity.id)">{{
+                  activity.title
+                }}</a>
+                <p v-if="activity.description" class="yilan-admin__desc yp-clamp-2">
+                  {{ activity.description }}
+                </p>
+              </td>
+              <td data-label="狀態">
+                <span class="yp-status" :class="getStatusClass(activity.status)">{{
+                  getStatusText(activity.status)
+                }}</span>
+              </td>
+              <td data-label="活動日期" class="yp-num">{{ formatDate(activity.event_date) }}</td>
+              <td data-label="提交人">{{ activity.submitter_name || '—' }}</td>
+              <td data-label="提交時間" class="yp-num">
+                {{ formatDateTime(activity.created_at) }}
+              </td>
+              <td>
+                <div class="yp-row-actions yilan-admin__actions">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-soft"
+                    @click="viewActivity(activity.id)"
+                  >
+                    <Icon name="ri:eye-line" /> 查看
+                  </button>
+                  <button
+                    v-if="activity.status === 'pending'"
+                    type="button"
+                    class="btn btn-sm btn-primary"
+                    @click="approveActivity(activity.id)"
+                  >
+                    <Icon name="ri:checkbox-circle-line" /> 通過
+                  </button>
+                  <button
+                    v-if="activity.status === 'pending'"
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    @click="rejectActivity(activity.id)"
+                  >
+                    <Icon name="ri:close-circle-line" /> 退回
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-soft"
+                    @click="editActivity(activity.id)"
+                  >
+                    <Icon name="ri:edit-line" /> 編輯
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    title="刪除活動"
+                    aria-label="刪除活動"
+                    @click="deleteActivity(activity)"
+                  >
+                    <Icon name="ri:delete-bin-line" />
+                  </button>
                 </div>
-              </div>
-              <div class="col-md-3">
-                <select v-model="statusFilter" class="filter-select">
-                  <option value="">所有狀態</option>
-                  <option value="pending">待審核</option>
-                  <option value="approved">已上架</option>
-                  <option value="rejected">已退回</option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <select v-model="dateFilter" class="filter-select">
-                  <option value="">所有時間</option>
-                  <option value="today">今天</option>
-                  <option value="week">本週</option>
-                  <option value="month">本月</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <!-- 載入狀態 -->
-      <div v-if="loading" class="loading-section">
-        <div class="loading-card">
-          <div class="loading-spinner"></div>
-          <p class="loading-text">載入活動資料中...</p>
-        </div>
-      </div>
-
-      <!-- 空狀態 -->
-      <div v-else-if="filteredActivities.length === 0" class="empty-section">
-        <div class="empty-card">
-          <div class="empty-icon">🎨</div>
-          <h3 class="empty-title">沒有找到符合條件的活動</h3>
-          <p class="empty-message">試試調整搜尋條件或等待新的活動投稿</p>
-        </div>
-      </div>
-
-      <!-- 活動列表 -->
-      <div v-else class="activities-grid">
-        <div 
-          v-for="activity in paginatedActivities" 
-          :key="activity.id"
-          class="activity-card"
-        >
-          <!-- 活動狀態標籤 -->
-          <div class="activity-status">
-            <span :class="getStatusClass(activity.status)" class="status-badge">
-              <svg v-if="activity.status === 'pending'" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                <path d="M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
-              </svg>
-              <svg v-else-if="activity.status === 'approved'" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01zm.287 5.984-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-              </svg>
-              {{ getStatusText(activity.status) }}
-            </span>
-          </div>
-
-          <!-- 活動內容 -->
-          <div class="activity-content">
-            <h4 class="activity-title">{{ activity.title }}</h4>
-            <p class="activity-description">{{ activity.description }}</p>
-            
-            <div class="activity-meta">
-              <div class="meta-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
-                </svg>
-                <span>{{ activity.submitter_name }}</span>
-              </div>
-              <div class="meta-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5 0M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
-                </svg>
-                <span>{{ formatDate(activity.event_date) }}</span>
-              </div>
-              <div class="meta-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/>
-                  <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
-                </svg>
-                <span>{{ formatDateTime(activity.created_at) }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 操作按鈕 -->
-          <div class="activity-actions">
-            <button 
-              @click="viewActivity(activity.id)"
-              class="action-btn view-btn"
-              type="button"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
-                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-              </svg>
-              查看
-            </button>
-            <button 
-              v-if="activity.status === 'pending'"
-              @click="approveActivity(activity.id)"
-              class="action-btn approve-btn"
-              type="button"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01zm.287 5.984-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
-              </svg>
-              通過
-            </button>
-            <button 
-              @click="editActivity(activity.id)"
-              class="action-btn edit-btn"
-              type="button"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708L1.707 13.001 0 16l2.999-1.707L12.146.146zM4.161 13.489l-.065.065c-.096-.096-.194-.197-.289-.289a1 1 0 0 1-.289-.289l.065-.065L3.207 13 4.161 13.489z"/>
-              </svg>
-              編輯
-            </button>
-            <button 
-              v-if="activity.status === 'pending'"
-              @click="rejectActivity(activity.id)"
-              class="action-btn reject-btn"
-              type="button"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-              </svg>
-              退回
-            </button>
-            <button 
-              @click="deleteActivity(activity)"
-              class="action-btn delete-btn"
-              type="button"
-              title="刪除活動"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-              </svg>
-              刪除
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 美麗的分頁 -->
-      <div v-if="totalPages > 1" class="pagination-section">
-        <div class="pagination-card">
-          <div class="pagination-info">
-            <span class="info-text">
-              顯示第 {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredActivities.length) }} 項，共 {{ filteredActivities.length }} 項
-            </span>
-          </div>
-          <div class="pagination-controls">
-            <button 
-              @click="currentPage--" 
-              :disabled="currentPage === 1"
-              class="pagination-btn"
-              :class="{ disabled: currentPage === 1 }"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
-              </svg>
-              上一頁
-            </button>
-            <span class="page-indicator">第 {{ currentPage }} / {{ totalPages }} 頁</span>
-            <button 
-              @click="currentPage++" 
-              :disabled="currentPage === totalPages"
-              class="pagination-btn"
-              :class="{ disabled: currentPage === totalPages }"
-            >
-              下一頁
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
-              </svg>
-            </button>
-          </div>
+      <div class="yp-table-wrap__footer">
+        <span>
+          第 {{ (currentPage - 1) * itemsPerPage + 1 }} -
+          {{ Math.min(currentPage * itemsPerPage, filteredActivities.length) }} 項，共
+          {{ filteredActivities.length }} 項
+        </span>
+        <div v-if="totalPages > 1" class="yp-pager yilan-admin__pager">
+          <button
+            type="button"
+            class="yp-pager__btn"
+            :class="{ 'is-disabled': currentPage === 1 }"
+            :disabled="currentPage === 1"
+            aria-label="上一頁"
+            @click="currentPage--"
+          >
+            <Icon name="ri:arrow-left-s-line" />
+          </button>
+          <span class="yp-num">{{ currentPage }} / {{ totalPages }}</span>
+          <button
+            type="button"
+            class="yp-pager__btn"
+            :class="{ 'is-disabled': currentPage === totalPages }"
+            :disabled="currentPage === totalPages"
+            aria-label="下一頁"
+            @click="currentPage++"
+          >
+            <Icon name="ri:arrow-right-s-line" />
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- 美麗的退回對話框 -->
-    <div v-if="showRejectModal" class="modal-overlay">
-      <div class="reject-modal">
-        <div class="modal-header">
-          <h3 class="modal-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-            </svg>
-            退回活動投稿
-          </h3>
-          <button class="modal-close" @click="showRejectModal = false">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-            </svg>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="rejectionReason" class="form-label">退回原因</label>
-            <textarea 
+    <!-- 退回對話框 -->
+    <div
+      v-if="showRejectModal"
+      class="modal fade show d-block yilan-admin__backdrop"
+      tabindex="-1"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">退回活動投稿</h5>
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="關閉"
+              @click="showRejectModal = false"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <label for="rejectionReason" class="form-label required">退回原因</label>
+            <textarea
               id="rejectionReason"
-              v-model="rejectionReason" 
-              class="reason-textarea" 
+              v-model="rejectionReason"
+              class="form-control"
               rows="4"
               placeholder="請詳細說明退回的原因，以便提交者了解如何改進..."
             ></textarea>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button 
-            class="modal-btn cancel-btn" 
-            @click="showRejectModal = false"
-          >
-            取消
-          </button>
-          <button 
-            class="modal-btn confirm-btn" 
-            :disabled="!rejectionReason.trim()"
-            @click="confirmReject"
-          >
-            確認退回
-          </button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-soft" @click="showRejectModal = false">
+              取消
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              :disabled="!rejectionReason.trim()"
+              @click="confirmReject"
+            >
+              確認退回
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -295,11 +260,12 @@
 <script setup>
 definePageMeta({
   middleware: 'admin-auth',
-  layout: 'default'
+  layout: 'admin'
 })
 
 const activities = ref([])
 const loading = ref(true)
+const loadError = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref('')
 const dateFilter = ref('')
@@ -314,33 +280,36 @@ const filteredActivities = computed(() => {
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(activity => 
-      activity.title.toLowerCase().includes(query) ||
-      activity.submitter_name.toLowerCase().includes(query) ||
-      activity.submitter_email.toLowerCase().includes(query)
+    filtered = filtered.filter(
+      (activity) =>
+        (activity.title || '').toLowerCase().includes(query) ||
+        (activity.submitter_name || '').toLowerCase().includes(query) ||
+        (activity.submitter_email || '').toLowerCase().includes(query)
     )
   }
 
   if (statusFilter.value) {
-    filtered = filtered.filter(activity => activity.status === statusFilter.value)
+    filtered = filtered.filter((activity) => activity.status === statusFilter.value)
   }
 
   if (dateFilter.value) {
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    
-    filtered = filtered.filter(activity => {
+
+    filtered = filtered.filter((activity) => {
       const createdDate = new Date(activity.created_at)
-      
+
       switch (dateFilter.value) {
         case 'today':
           return createdDate >= today
-        case 'week':
+        case 'week': {
           const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
           return createdDate >= weekAgo
-        case 'month':
+        }
+        case 'month': {
           const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate())
           return createdDate >= monthAgo
+        }
         default:
           return true
       }
@@ -358,21 +327,42 @@ const paginatedActivities = computed(() => {
   return filteredActivities.value.slice(start, end)
 })
 
+const statusCounts = computed(() => ({
+  pending: activities.value.filter((a) => a.status === 'pending').length,
+  approved: activities.value.filter((a) => a.status === 'approved').length,
+  rejected: activities.value.filter((a) => a.status === 'rejected').length
+}))
+
+const statusChips = computed(() => [
+  { value: '', label: '全部', count: activities.value.length },
+  { value: 'pending', label: '待審核', count: statusCounts.value.pending },
+  { value: 'approved', label: '已上架', count: statusCounts.value.approved },
+  { value: 'rejected', label: '已退回', count: statusCounts.value.rejected }
+])
+
 const getStatusClass = (status) => {
   switch (status) {
-    case 'pending': return 'status-pending'
-    case 'approved': return 'status-approved'
-    case 'rejected': return 'status-rejected'
-    default: return 'status-unknown'
+    case 'pending':
+      return 'yp-status--pending'
+    case 'approved':
+      return 'yp-status--approved'
+    case 'rejected':
+      return 'yp-status--rejected'
+    default:
+      return 'yp-status--draft'
   }
 }
 
 const getStatusText = (status) => {
   switch (status) {
-    case 'pending': return '待審核'
-    case 'approved': return '已上架'
-    case 'rejected': return '已退回'
-    default: return '未知'
+    case 'pending':
+      return '待審核'
+    case 'approved':
+      return '已上架'
+    case 'rejected':
+      return '已退回'
+    default:
+      return '未知'
   }
 }
 
@@ -387,11 +377,13 @@ const formatDateTime = (dateTimeString) => {
 const fetchActivities = async () => {
   try {
     loading.value = true
+    loadError.value = false
     const response = await $fetch('/api/yilan-activities', { query: { dateFilter: 'all' } })
     activities.value = response.data || []
   } catch (error) {
     console.error('Failed to fetch activities:', error)
     activities.value = []
+    loadError.value = true
   } finally {
     loading.value = false
   }
@@ -407,21 +399,21 @@ const editActivity = (id) => {
 
 const approveActivity = async (id) => {
   if (!confirm('確定要通過這個活動投稿嗎？')) return
-  
+
   try {
     const response = await $fetch(`/api/yilan-activities/${id}/approve`, { method: 'POST' })
-    
+
     // 根據郵件發送狀態顯示不同的訊息
     if (response.emailSent) {
-      alert('✅ 活動已通過審核，通知郵件已發送給提交者')
+      alert('活動已通過審核，通知郵件已發送給提交者')
     } else {
-      alert('✅ 活動已通過審核，但無法發送通知郵件（提交者未提供郵件地址）')
+      alert('活動已通過審核，但無法發送通知郵件（提交者未提供郵件地址）')
     }
-    
+
     await fetchActivities()
   } catch (error) {
     console.error('Failed to approve activity:', error)
-    alert('❌ 操作失敗，請稍後再試')
+    alert('操作失敗，請稍後再試')
   }
 }
 
@@ -436,7 +428,7 @@ const confirmReject = async () => {
     alert('請輸入退回原因')
     return
   }
-  
+
   try {
     await $fetch(`/api/yilan-activities/${activityToReject.value}/reject`, {
       method: 'POST',
@@ -452,7 +444,7 @@ const confirmReject = async () => {
 
 const deleteActivity = async (activity) => {
   if (!confirm(`確定要刪除活動「${activity.title}」嗎？此操作無法復原。`)) return
-  
+
   try {
     await $fetch(`/api/yilan-activities/${activity.id}`, { method: 'DELETE' })
     await fetchActivities()
@@ -473,5 +465,67 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@import '~/assets/scss/yilan-activities-admin.scss';
+.yilan-admin {
+  &__title {
+    font-weight: 700;
+    color: $yp-ink;
+
+    &:hover {
+      color: $yp-primary-ink;
+    }
+  }
+
+  &__title-cell {
+    min-width: 240px;
+    max-width: 420px;
+  }
+
+  &__desc {
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: $yp-muted;
+  }
+
+  &__actions {
+    flex-wrap: wrap;
+    min-width: 200px;
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+  }
+
+  &__skeleton-row {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    border-bottom: 1px solid $yp-line;
+  }
+
+  &__pager {
+    margin-top: 0;
+  }
+
+  &__backdrop {
+    background: rgba(19, 48, 58, 0.45);
+  }
+}
+
+@media (max-width: #{$yp-bp-md - 1px}) {
+  .yilan-admin {
+    &__title-cell {
+      max-width: none;
+      padding-bottom: 8px !important;
+    }
+
+    &__actions {
+      justify-content: flex-start;
+      min-width: 0;
+      padding-top: 8px;
+    }
+  }
+}
 </style>

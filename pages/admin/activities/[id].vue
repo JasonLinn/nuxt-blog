@@ -1,215 +1,269 @@
 <template>
-  <div class="activity-detail-admin">
-    <div class="container">
-      <!-- 簡潔導航 -->
-      <div class="mb-4">
-        <button @click="$router.back()" class="btn btn-outline-primary mb-3">
-          <i class="bi bi-arrow-left me-2"></i>返回列表
-        </button>
-        <h1 class="h3 mb-0">活動詳情</h1>
+  <div class="activity-detail">
+    <nav class="yp-breadcrumb" aria-label="麵包屑">
+      <NuxtLink to="/admin/yilan-activities">宜蘭活動管理</NuxtLink>
+      <span>活動詳情</span>
+    </nav>
+
+    <!-- 載入狀態 -->
+    <div v-if="loading" class="yp-detail">
+      <div class="yp-card yp-card__section">
+        <span class="yp-skeleton mb-3" style="width: 55%; height: 28px"></span>
+        <span class="yp-skeleton mb-2" style="width: 100%; height: 14px"></span>
+        <span class="yp-skeleton mb-2" style="width: 90%; height: 14px"></span>
+        <span class="yp-skeleton" style="width: 70%; height: 14px"></span>
       </div>
-
-      <!-- 載入狀態 -->
-      <div v-if="loading" class="text-center py-5">
-        <div class="spinner-border text-primary"></div>
-        <p class="mt-3">載入中...</p>
-      </div>
-
-      <!-- 找不到活動 -->
-      <div v-else-if="!activity" class="text-center py-5">
-        <i class="bi bi-exclamation-triangle display-4 text-warning"></i>
-        <p class="mt-3">找不到此活動</p>
-      </div>
-
-      <!-- 活動內容 -->
-      <div v-else class="row">
-        <!-- 主要內容 -->
-        <div class="col-lg-8">
-          <!-- 標題和狀態 -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>{{ activity.title }}</h2>
-            <span :class="getStatusBadgeClass(activity.status)">
-              <i :class="getStatusIcon(activity.status)" class="me-1"></i>
-              {{ getStatusText(activity.status) }}
-            </span>
-          </div>
-          
-          <!-- 活動資訊 -->
-          <div class="mb-4">
-            <p v-if="activity.description" class="text-muted">{{ activity.description }}</p>
-            
-            <!-- 基本資訊表格 -->
-            <table class="table table-borderless">
-              <tbody>
-                <tr>
-                  <td class="fw-bold">活動日期</td>
-                  <td>{{ formatDate(activity.event_date) }}</td>
-                </tr>
-                <tr v-if="activity.event_time">
-                  <td class="fw-bold">活動時間</td>
-                  <td>{{ activity.event_time }}</td>
-                </tr>
-                <tr v-if="activity.location">
-                  <td class="fw-bold">活動地點</td>
-                  <td>{{ activity.location }}</td>
-                </tr>
-                <tr v-if="activity.activity_type">
-                  <td class="fw-bold">活動類型</td>
-                  <td>{{ activity.activity_type }}</td>
-                </tr>
-                <tr>
-                  <td class="fw-bold">主辦單位</td>
-                  <td>{{ activity.organizer_name }}</td>
-                </tr>
-                <tr>
-                  <td class="fw-bold">聯絡信箱</td>
-                  <td>{{ activity.organizer_email }}</td>
-                </tr>
-                <tr v-if="activity.organizer_phone">
-                  <td class="fw-bold">聯絡電話</td>
-                  <td>{{ activity.organizer_phone }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- 活動圖片 -->
-          <div v-if="activity.images && activity.images.length" class="mb-4">
-            <h5>活動圖片</h5>
-            <div class="row g-2">
-              <div v-for="(image, index) in activity.images" :key="index" class="col-md-6">
-                <img 
-                  :src="image" 
-                  :alt="`活動圖片 ${index + 1}`"
-                  class="img-fluid rounded"
-                  style="cursor: pointer;"
-                  @click="openImageModal(image)"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- 其他資訊 -->
-          <div v-if="activity.contact_info" class="mb-4">
-            <h6>其他聯絡資訊</h6>
-            <p class="text-muted">{{ activity.contact_info }}</p>
-          </div>
-
-          <!-- 退回原因 -->
-          <div v-if="activity.status === 'rejected' && activity.rejection_reason" class="alert alert-danger">
-            <h6>退回原因</h6>
-            <p class="mb-0">{{ activity.rejection_reason }}</p>
-          </div>
-
-          <!-- 管理員備註 -->
-          <div v-if="activity.admin_notes" class="alert alert-info">
-            <h6>管理員備註</h6>
-            <p class="mb-0">{{ activity.admin_notes }}</p>
-          </div>
-        </div>
-
-        <!-- 側邊操作區 -->
-        <div class="col-lg-4">
-          <!-- 操作按鈕 -->
-          <div class="mb-4">
-            <h5>管理操作</h5>
-            <div class="d-grid gap-2">
-              <button 
-                v-if="activity.status === 'pending'"
-                @click="approveActivity"
-                class="btn btn-success"
-              >
-                <i class="bi bi-check-circle me-2"></i>通過審核
-              </button>
-              
-              <button @click="editActivity" class="btn btn-warning">
-                <i class="bi bi-pencil me-2"></i>編輯活動
-              </button>
-              
-              <button 
-                v-if="activity.status === 'pending'"
-                @click="showRejectModal = true"
-                class="btn btn-danger"
-              >
-                <i class="bi bi-x-circle me-2"></i>退回投稿
-              </button>
-            </div>
-          </div>
-
-          <!-- 提交資訊 -->
-          <div class="border rounded p-3">
-            <h6>提交資訊</h6>
-            <small class="text-muted d-block">提交人：{{ activity.submitter_name }}</small>
-            <small class="text-muted d-block">信箱：{{ activity.submitter_email }}</small>
-            <small class="text-muted d-block">提交時間：{{ formatDateTime(activity.created_at) }}</small>
-            <small v-if="activity.updated_at !== activity.created_at" class="text-muted d-block">
-              更新時間：{{ formatDateTime(activity.updated_at) }}
-            </small>
-            <small v-if="activity.approved_at" class="text-muted d-block">
-              通過時間：{{ formatDateTime(activity.approved_at) }}
-            </small>
-            <small v-if="activity.approved_by" class="text-muted d-block">
-              審核人員：{{ activity.approved_by }}
-            </small>
-          </div>
-        </div>
+      <div class="yp-card yp-card__section">
+        <span class="yp-skeleton mb-2" style="width: 40%; height: 18px"></span>
+        <span class="yp-skeleton" style="width: 100%; height: 40px"></span>
       </div>
     </div>
 
-    <!-- 圖片放大模態框 -->
-    <div v-if="selectedImage" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.8);" @click="selectedImage = null">
-      <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content bg-transparent border-0">
-          <div class="modal-body p-0 text-center">
-            <img :src="selectedImage" class="img-fluid rounded" style="max-height: 90vh;" />
-            <button 
-              @click="selectedImage = null"
-              class="btn btn-light position-absolute top-0 end-0 m-3 rounded-circle"
-              style="width: 40px; height: 40px;"
-            >
-              <i class="bi bi-x"></i>
-            </button>
+    <!-- 找不到活動 -->
+    <div v-else-if="!activity" class="yp-card">
+      <div class="yp-empty yp-empty--error">
+        <div class="yp-empty__icon"><Icon name="ri:error-warning-line" /></div>
+        <h3 class="yp-empty__title">找不到此活動</h3>
+        <p class="yp-empty__text">活動可能已被刪除，或網址有誤</p>
+        <NuxtLink to="/admin/yilan-activities" class="btn btn-primary">返回活動列表</NuxtLink>
+      </div>
+    </div>
+
+    <template v-else>
+      <header class="yp-admin-head">
+        <div>
+          <h1 class="yp-admin-head__title">{{ activity.title }}</h1>
+          <p class="yp-admin-head__desc">活動詳情與審核狀態</p>
+        </div>
+        <div class="yp-admin-head__actions">
+          <span class="yp-status" :class="getStatusClass(activity.status)">{{
+            getStatusText(activity.status)
+          }}</span>
+        </div>
+      </header>
+
+      <div class="yp-detail">
+        <!-- 左側內容區 -->
+        <div class="activity-detail__main">
+          <section class="yp-card">
+            <div class="yp-card__head">
+              <h2 class="yp-card__head-title">活動資訊</h2>
+            </div>
+            <div class="yp-card__section">
+              <ul class="yp-info-list">
+                <li>
+                  <span class="yp-info-list__label">活動日期</span>
+                  <span class="yp-info-list__value">{{ formatDate(activity.event_date) }}</span>
+                </li>
+                <li v-if="activity.event_time">
+                  <span class="yp-info-list__label">活動時間</span>
+                  <span class="yp-info-list__value">{{ activity.event_time }}</span>
+                </li>
+                <li v-if="activity.location">
+                  <span class="yp-info-list__label">活動地點</span>
+                  <span class="yp-info-list__value">{{ activity.location }}</span>
+                </li>
+                <li v-if="activity.activity_type">
+                  <span class="yp-info-list__label">活動類型</span>
+                  <span class="yp-info-list__value">{{ activity.activity_type }}</span>
+                </li>
+                <li>
+                  <span class="yp-info-list__label">主辦單位</span>
+                  <span class="yp-info-list__value">{{ activity.organizer_name || '—' }}</span>
+                </li>
+                <li>
+                  <span class="yp-info-list__label">聯絡信箱</span>
+                  <span class="yp-info-list__value">{{ activity.organizer_email || '—' }}</span>
+                </li>
+                <li v-if="activity.organizer_phone">
+                  <span class="yp-info-list__label">聯絡電話</span>
+                  <span class="yp-info-list__value">{{ activity.organizer_phone }}</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section v-if="activity.description" class="yp-card">
+            <div class="yp-card__head">
+              <h2 class="yp-card__head-title">活動簡介</h2>
+            </div>
+            <div class="yp-card__section">
+              <div class="yp-prose activity-detail__pre">{{ activity.description }}</div>
+            </div>
+          </section>
+
+          <section v-if="activity.images && activity.images.length" class="yp-card">
+            <div class="yp-card__head">
+              <h2 class="yp-card__head-title">活動圖片</h2>
+              <span class="yp-tag">{{ activity.images.length }} 張</span>
+            </div>
+            <div class="yp-card__section">
+              <div class="activity-detail__images">
+                <button
+                  v-for="(image, index) in activity.images"
+                  :key="index"
+                  type="button"
+                  class="activity-detail__image"
+                  :aria-label="`放大活動圖片 ${index + 1}`"
+                  @click="openImageModal(image)"
+                >
+                  <img :src="image" :alt="`活動圖片 ${index + 1}`" loading="lazy" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section v-if="activity.organizer_phone || activity.contact_info" class="yp-card">
+            <div class="yp-card__head">
+              <h2 class="yp-card__head-title">聯絡資訊</h2>
+            </div>
+            <div class="yp-card__section">
+              <ul class="yp-info-list">
+                <li v-if="activity.organizer_phone">
+                  <span class="yp-info-list__label">電話</span>
+                  <span class="yp-info-list__value">{{ activity.organizer_phone }}</span>
+                </li>
+                <li v-if="activity.contact_info">
+                  <span class="yp-info-list__label">其他方式</span>
+                  <span class="yp-info-list__value activity-detail__pre">{{
+                    activity.contact_info
+                  }}</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <div
+            v-if="activity.status === 'rejected' && activity.rejection_reason"
+            class="alert alert-danger mb-0"
+          >
+            <h3 class="h6 fw-bold">退回原因</h3>
+            <p class="activity-detail__pre mb-0">{{ activity.rejection_reason }}</p>
+          </div>
+
+          <div v-if="activity.admin_notes" class="alert alert-info mb-0">
+            <h3 class="h6 fw-bold">管理員備註</h3>
+            <p class="activity-detail__pre mb-0">{{ activity.admin_notes }}</p>
           </div>
         </div>
+
+        <!-- 右側操作區 -->
+        <aside class="yp-detail__aside activity-detail__aside">
+          <section class="yp-card">
+            <div class="yp-card__head">
+              <h2 class="yp-card__head-title">管理員操作</h2>
+            </div>
+            <div class="yp-card__section d-grid gap-2">
+              <button
+                v-if="activity.status === 'pending'"
+                type="button"
+                class="btn btn-primary btn-icon"
+                @click="approveActivity"
+              >
+                <Icon name="ri:checkbox-circle-line" /> 通過審核
+              </button>
+
+              <button type="button" class="btn btn-soft btn-icon" @click="editActivity">
+                <Icon name="ri:edit-line" /> 編輯活動
+              </button>
+
+              <button
+                v-if="activity.status === 'pending'"
+                type="button"
+                class="btn btn-outline-danger btn-icon"
+                @click="showRejectModal = true"
+              >
+                <Icon name="ri:close-circle-line" /> 退回投稿
+              </button>
+            </div>
+          </section>
+
+          <section class="yp-card">
+            <div class="yp-card__head">
+              <h2 class="yp-card__head-title">提交人資訊</h2>
+            </div>
+            <div class="yp-card__section">
+              <ul class="yp-info-list">
+                <li>
+                  <span class="yp-info-list__label">姓名</span>
+                  <span class="yp-info-list__value">{{ activity.submitter_name || '—' }}</span>
+                </li>
+                <li>
+                  <span class="yp-info-list__label">信箱</span>
+                  <span class="yp-info-list__value">{{ activity.submitter_email || '—' }}</span>
+                </li>
+                <li>
+                  <span class="yp-info-list__label">提交時間</span>
+                  <span class="yp-info-list__value">{{ formatDateTime(activity.created_at) }}</span>
+                </li>
+                <li v-if="activity.updated_at !== activity.created_at">
+                  <span class="yp-info-list__label">最後更新</span>
+                  <span class="yp-info-list__value">{{ formatDateTime(activity.updated_at) }}</span>
+                </li>
+                <li v-if="activity.approved_at">
+                  <span class="yp-info-list__label">通過時間</span>
+                  <span class="yp-info-list__value">{{
+                    formatDateTime(activity.approved_at)
+                  }}</span>
+                </li>
+                <li v-if="activity.approved_by">
+                  <span class="yp-info-list__label">審核人員</span>
+                  <span class="yp-info-list__value">{{ activity.approved_by }}</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </aside>
       </div>
+    </template>
+
+    <!-- 圖片放大模態框 -->
+    <div v-if="selectedImage" class="activity-detail__lightbox" @click="selectedImage = null">
+      <img :src="selectedImage" alt="活動圖片放大" @click.stop />
+      <button
+        type="button"
+        class="activity-detail__lightbox-close"
+        aria-label="關閉圖片"
+        @click="selectedImage = null"
+      >
+        <Icon name="ri:close-line" />
+      </button>
     </div>
 
     <!-- 退回原因輸入對話框 -->
-    <div v-if="showRejectModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div
+      v-if="showRejectModal"
+      class="modal fade show d-block activity-detail__backdrop"
+      tabindex="-1"
+      role="dialog"
+      aria-modal="true"
+    >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">退回活動投稿</h5>
-            <button type="button" class="btn-close" @click="showRejectModal = false"></button>
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="關閉"
+              @click="showRejectModal = false"
+            ></button>
           </div>
           <div class="modal-body">
-            <div class="mb-3">
-              <label for="rejectionReason" class="form-label">退回原因</label>
-              <textarea 
-                id="rejectionReason"
-                v-model="rejectionReason" 
-                class="form-control" 
-                rows="4"
-                placeholder="請輸入退回原因..."
-              ></textarea>
-            </div>
+            <label for="rejectionReason" class="form-label required">退回原因</label>
+            <textarea
+              id="rejectionReason"
+              v-model="rejectionReason"
+              placeholder="請輸入退回原因..."
+              class="form-control"
+              rows="4"
+            ></textarea>
           </div>
           <div class="modal-footer">
-            <button 
-              type="button" 
-              class="btn btn-secondary" 
-              @click="showRejectModal = false"
-            >
+            <button type="button" class="btn btn-soft" @click="showRejectModal = false">
               取消
             </button>
-            <button 
-              type="button" 
-              class="btn btn-danger" 
-              @click="confirmReject"
-              :disabled="!rejectionReason.trim()"
-            >
-              確認退回
-            </button>
+            <button type="button" class="btn btn-danger" @click="confirmReject">確認退回</button>
           </div>
         </div>
       </div>
@@ -220,7 +274,7 @@
 <script setup>
 definePageMeta({
   middleware: 'admin-auth',
-  layout: 'default'
+  layout: 'admin'
 })
 
 const route = useRoute()
@@ -234,37 +288,27 @@ const rejectionReason = ref('')
 
 const getStatusClass = (status) => {
   switch (status) {
-    case 'pending': return 'bg-warning text-dark'
-    case 'approved': return 'bg-success text-white'
-    case 'rejected': return 'bg-danger text-white'
-    default: return 'bg-secondary text-white'
-  }
-}
-
-const getStatusBadgeClass = (status) => {
-  switch (status) {
-    case 'pending': return 'badge bg-warning text-dark'
-    case 'approved': return 'badge bg-success'
-    case 'rejected': return 'badge bg-danger'
-    default: return 'badge bg-secondary'
-  }
-}
-
-const getStatusIcon = (status) => {
-  switch (status) {
-    case 'pending': return 'bi bi-clock'
-    case 'approved': return 'bi bi-check-circle'
-    case 'rejected': return 'bi bi-x-circle'
-    default: return 'bi bi-question-circle'
+    case 'pending':
+      return 'yp-status--pending'
+    case 'approved':
+      return 'yp-status--approved'
+    case 'rejected':
+      return 'yp-status--rejected'
+    default:
+      return 'yp-status--draft'
   }
 }
 
 const getStatusText = (status) => {
   switch (status) {
-    case 'pending': return '待審核'
-    case 'approved': return '已上架'
-    case 'rejected': return '已退回'
-    default: return '未知'
+    case 'pending':
+      return '待審核'
+    case 'approved':
+      return '已上架'
+    case 'rejected':
+      return '已退回'
+    default:
+      return '未知'
   }
 }
 
@@ -295,7 +339,7 @@ const fetchActivity = async () => {
 
 const approveActivity = async () => {
   if (!confirm('確定要通過這個活動投稿嗎？')) return
-  
+
   try {
     await $fetch(`/api/activities/${route.params.id}/approve`, { method: 'POST' })
     await fetchActivity()
@@ -314,7 +358,7 @@ const confirmReject = async () => {
     alert('請輸入退回原因')
     return
   }
-  
+
   try {
     await $fetch(`/api/activities/${route.params.id}/reject`, {
       method: 'POST',
@@ -334,62 +378,80 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-// 注意：這是 SCSS/Bootstrap 專案，請勿使用 Tailwind CSS 類別
+.activity-detail {
+  &__main,
+  &__aside {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
 
-.activity-detail-admin {
-  background-color: #f8f9fa;
-  min-height: 100vh;
-  padding: 2rem 0;
+  &__pre {
+    white-space: pre-wrap;
+  }
 
-  .table {
-    td:first-child {
-      width: 120px;
-      color: #6c757d;
+  &__images {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  &__image {
+    padding: 0;
+    border: 0;
+    border-radius: $yp-radius;
+    overflow: hidden;
+    background: $yp-surface-2;
+    aspect-ratio: 16 / 10;
+    cursor: zoom-in;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.04);
     }
   }
 
-  .badge {
-    font-size: 0.875rem;
-    padding: 0.5rem 0.75rem;
-  }
+  &__lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1080;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(19, 48, 58, 0.8);
 
-  .btn {
-    border-radius: 6px;
-
-    i {
-      font-size: 1rem;
+    img {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: $yp-radius;
     }
   }
 
-  .border {
-    border-color: #dee2e6 !important;
+  &__lightbox-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: $yp-surface;
+    color: $yp-ink;
+    font-size: 1.25rem;
   }
 
-  .spinner-border {
-    width: 2rem;
-    height: 2rem;
-  }
-
-  img {
-    border-radius: 8px;
-    transition: opacity 0.2s ease;
-
-    &:hover {
-      opacity: 0.8;
-    }
-  }
-}
-
-// Modal 樣式保持簡潔
-.modal {
-  .modal-content {
-    border-radius: 8px;
-    border: none;
-  }
-
-  .modal-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+  &__backdrop {
+    background: rgba(19, 48, 58, 0.45);
   }
 }
 </style>
