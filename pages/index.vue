@@ -7,7 +7,7 @@
           <h1 class="yp-hero__title">
             宜蘭吃喝玩樂，<br class="d-none d-md-inline" /><em>先領券</em>再出發
           </h1>
-          <p class="yp-hero__desc">在地店家、合法旅宿的免費電子優惠券，手機出示就能用。</p>
+          <p class="yp-hero__desc">在地店家的免費電子優惠券，搭配合法民宿推薦，輕鬆規劃宜蘭旅程。</p>
 
           <form class="yp-search home-search" role="search" @submit.prevent="submitSearch">
             <div class="yp-search__field">
