@@ -137,6 +137,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     vercel: { functions: { maxDuration: 60 } },
+    // 專案根目錄 utils/ 的共用模組一律打包進 server bundle，避免本機 dev 產生錯誤的相對路徑
+    externals: {
+      inline: [/^(?!.*node_modules).*[\\/]utils[\\/][^\\/]+\.(cjs|mjs|js|ts)$/]
+    },
     experimental: {
       wasm: true
     }
