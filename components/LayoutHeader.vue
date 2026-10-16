@@ -235,12 +235,20 @@ const handleLogout = () => {
   position: sticky;
   top: 0;
   z-index: 1020;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid transparent;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
+
+  // 毛玻璃放在偽元素：header 本身若有 backdrop-filter，會變成 fixed 子元素（手機抽屜）的定位基準，抽屜高度變 0
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: saturate(1.4) blur(10px);
+  }
 
   &.is-scrolled {
     border-bottom-color: $yp-line;
