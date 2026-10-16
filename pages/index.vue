@@ -146,7 +146,7 @@
 
       <!-- 載入中 -->
       <div v-if="couponObject.pending" class="yp-grid home-grid">
-        <div v-for="n in 8" :key="`skeleton-${n}`" class="yp-coupon yp-coupon--row">
+        <div v-for="n in 8" :key="`skeleton-${n}`" class="yp-coupon">
           <div class="yp-coupon__media yp-skeleton" />
           <div class="yp-coupon__body">
             <span class="yp-skeleton mb-2" style="width: 70%; height: 18px" />
@@ -182,7 +182,7 @@
             v-for="(article, index) in couponObject.data.items"
             :key="article.id"
             :to="{ name: 'articles-id', params: { id: article.id } }"
-            class="yp-coupon yp-coupon--row"
+            class="yp-coupon"
             @click="trackCouponView(article.id)"
           >
             <div class="yp-coupon__media">
@@ -191,7 +191,7 @@
                 :src="processImageSrc(article.cover[0])"
                 :alt="article.title"
                 width="366"
-                height="229"
+                height="183"
                 :loading="index < 4 ? 'eager' : 'lazy'"
               />
               <span
