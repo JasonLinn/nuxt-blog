@@ -39,7 +39,7 @@ const year = new Date().getFullYear()
   font-size: 0.875rem;
 
   &__inner {
-    max-width: $yp-container + 48px;
+    max-width: calc(var(--yp-content-width, #{$yp-container}) + 48px);
     margin: 0 auto;
     padding: 36px 16px 24px;
     display: grid;

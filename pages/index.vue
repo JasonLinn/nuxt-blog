@@ -222,7 +222,9 @@
                   ><Icon name="ri:eye-line" /> {{ formatCount(article.view_count) }}</span
                 >
                 <span v-else />
-                <span class="yp-coupon__cta">領取</span>
+                <span class="yp-coupon__cta">
+                  領取優惠<Icon name="ri:arrow-right-s-line" aria-hidden="true" />
+                </span>
               </div>
             </div>
           </NuxtLink>
@@ -538,6 +540,7 @@ watch(
 
 <style lang="scss" scoped>
 .home-hero {
+  max-width: var(--yp-content-width, #{$yp-container});
   display: flex;
   align-items: center;
   gap: 48px;
@@ -553,7 +556,7 @@ watch(
 
   &__mosaic {
     display: none;
-    flex: 0 0 400px;
+    flex: 0 0 clamp(400px, 28vw, 480px);
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 120px 120px;
     gap: 12px;
@@ -612,8 +615,8 @@ watch(
   padding-top: 20px;
 
   @media (min-width: $yp-bp-md) {
-    // Match the Hero's 1200px content width, plus the page's side padding.
-    max-width: $yp-container + 48px;
+    // Share the Hero and site shell's content width, including page padding.
+    max-width: calc(var(--yp-content-width, #{$yp-container}) + 48px);
   }
 }
 
@@ -631,6 +634,34 @@ watch(
 }
 
 .home-grid {
+  @media (min-width: 1600px) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .yp-coupon__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: $yp-radius-sm;
+    background: $yp-surface-2;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .yp-coupon:hover .yp-coupon__cta,
+  .yp-coupon:focus-visible .yp-coupon__cta {
+    background: $yp-primary-soft;
+  }
+
+  .yp-coupon:focus-visible {
+    outline: 2px solid $yp-primary-ink;
+    outline-offset: 3px;
+  }
+
   .yp-coupon__offer {
     color: $yp-ink;
     font-weight: 400;
