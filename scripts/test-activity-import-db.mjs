@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { pool } from '../server/utils/db.js'
 import { applyCollection, reviewImport, acquireImportLock } from '../server/services/activity-import.js'
-import { reviewReasons } from '../server/services/activity-sources.js'
+import { reviewReasons, activitySources } from '../server/services/activity-sources.js'
 
 const client = await pool.connect()
 const schema = `activity_test_${Date.now()}`
@@ -68,6 +68,17 @@ try {
   summary = await applyCollection(client, collection([{ ...blankOrganizer, reasons: [] }], 'yilan-site'))
   assert.equal(summary[0].published, 1)
   assert.equal((await client.query("SELECT organizer_name FROM yilan_activities WHERE title = '活動 optional-organizer'")).rows[0].organizer_name, '')
+  const blankDetails = item('optional-details', { description: '', organizer_name: '' })
+  await applyCollection(client, collection([blankDetails], 'culture-1'))
+  blankDetails.reasons = reviewReasons(blankDetails, true, activitySources[0])
+  summary = await applyCollection(client, collection([blankDetails], 'culture-1'))
+  assert.equal(summary[0].published, 1)
+  const optionalRow = (await client.query("SELECT organizer_name, description FROM yilan_activities WHERE title = '活動 optional-details'")).rows[0]
+  assert.equal(optionalRow.organizer_name, '')
+  assert.equal(optionalRow.description, null)
+  const manualOptional = item('manual-optional-details', { description: '', organizer_name: '', schedule_uncertain: true })
+  await applyCollection(client, collection([manualOptional], 'culture-1'))
+  assert.equal((await reviewImport(client, { source: 'culture-1', externalId: manualOptional.external_id, action: 'publish' })).state, 'published')
   const photo = 'https://travel.yilan.gov.tw/_api/content/images/articles/1/event.jpg'
   const withImage = item('photo', { images: [photo], image_source_name: '宜蘭勁好玩', image_source_url: 'https://travel.yilan.gov.tw/zh-tw/event/1/' })
   await applyCollection(client, collection([withImage]))

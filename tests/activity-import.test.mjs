@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { activityWindow, dateOnly, overlapsActivity, taipeiToday } from '../utils/activity-dates.js'
-import { normalizeCulture, normalizeYilanCalendar, collectActivities, reviewReasons, safeSourceUrl, sameEvent, possiblySameEvent, fetchSource, activitySources, safeActivityImage, parseExhibitionImages, enrichOfficialMedia } from '../server/services/activity-sources.js'
+import { normalizeCulture, normalizeYilanCalendar, collectActivities, reviewReasons, safeSourceUrl, sameEvent, possiblySameEvent, fetchSource, activitySources, safeActivityImage, parseExhibitionImages, enrichOfficialMedia, opentixEventUrl, parseProgramDetails, enrichCulturePrograms } from '../server/services/activity-sources.js'
 
 test('Taiwan boundaries include ongoing events and the final day', () => {
   const now = new Date('2026-10-15T16:01:00Z')
@@ -115,4 +115,47 @@ test('only approved sources are fetched and Yilan failures remain visible', asyn
   assert.equal(sources.find(s => s.source === 'yilan-site').items.length, 1)
   sources = await collectActivities({ fetcher: fetcher(true), now })
   assert.equal(sources.find(s => s.source === 'yilan-site').ok, false)
+})
+
+const programItem = { title: '宜蘭音樂會', event_date: '2026-11-01', end_date: '2026-11-01', location: '宜蘭縣宜蘭市中山路 宜蘭演藝廳', source_url: 'https://www.opentix.life/program/123', images: [], description: '', organizer_name: '' }
+const programEvent = { '@type': 'Event', name: programItem.title, startDate: '2026-11-01T19:00:00', endDate: '2026-11-01T21:00:00', description: '官方簡介', organizer: [{ name: '音樂團' }], image: 'https://s3.resource.opentix.life/upload/program/poster.png', location: { name: '宜蘭演藝廳', address: { addressLocality: '宜蘭縣' } } }
+const programHtml = event => `<script type="application/ld+json">${JSON.stringify(event)}</script>`
+
+test('approved official sources tolerate blank details but still require confirmed core fields', () => {
+  for (const policy of activitySources) {
+    assert.deepEqual(reviewReasons(programItem, true, policy), [])
+    assert.ok(reviewReasons(programItem, false, policy).includes('缺少活動說明'))
+    assert.ok(reviewReasons({ ...programItem, location: '' }, true, policy).includes('缺少活動地點'))
+    assert.ok(reviewReasons({ ...programItem, schedule_uncertain: true }, true, policy).includes('日期或場次需確認'))
+  }
+})
+
+test('program enrichment validates title, dates and venue before borrowing any photo', () => {
+  const details = parseProgramDetails(programHtml(programEvent), programItem)
+  assert.deepEqual(details.images, [programEvent.image])
+  assert.equal(details.organizer_name, '音樂團')
+  assert.throws(() => parseProgramDetails(programHtml({ ...programEvent, name: '別場音樂會' }), programItem), /相符/)
+  for (const override of [{ startDate: '2026-12-01' }, { location: { name: '別的場館', address: { addressLocality: '宜蘭縣' } } }]) {
+    assert.deepEqual(parseProgramDetails(programHtml({ ...programEvent, ...override }), programItem), { source_conflict: true })
+  }
+  assert.equal(parseProgramDetails(programHtml({ ...programEvent, eventStatus: 'https://schema.org/EventCancelled' }), programItem).cancelled, true)
+  assert.deepEqual(parseProgramDetails(programHtml({ ...programEvent, image: 'https://s3.resource.opentix.life/logo.png' }), programItem).images, [])
+})
+
+test('program fetch only accepts exact host numeric URLs and retains feed content on failures', async () => {
+  assert.equal(opentixEventUrl(programItem.source_url), 'https://www.opentix.life/event/123')
+  for (const url of ['https://www.opentix.life.evil.example/event/123', 'https://www.opentix.life/event/123?redirect=evil', 'https://www.opentix.life/admin', 'http://www.opentix.life/event/123']) assert.equal(opentixEventUrl(url), null)
+  const item = structuredClone(programItem)
+  const sources = [{ source: 'culture-1', ok: true, items: [item] }]
+  await enrichCulturePrograms(sources, async (url, options) => {
+    assert.equal(url, 'https://www.opentix.life/event/123')
+    assert.equal(options.redirect, 'error')
+    return new Response(programHtml(programEvent))
+  })
+  assert.deepEqual(item.images, [programEvent.image])
+  assert.equal(item.description, '官方簡介')
+  assert.equal(item.image_source_name, 'OPENTIX 官方活動頁')
+  await enrichCulturePrograms(sources, async () => { throw new Error('timeout') })
+  assert.deepEqual(item.images, [programEvent.image])
+  assert.equal(sources[0].warnings.length, 1)
 })

@@ -152,7 +152,7 @@
         <!-- 活動詳細資訊 -->
         <div class="activity-details">
           <!-- 活動描述 -->
-          <div class="description-section">
+          <div v-if="activity.description" class="description-section">
             <h2 class="section-title">活動介紹</h2>
             <div class="description-content" v-html="formatDescription(activity.description)"></div>
           </div>

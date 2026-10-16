@@ -3,8 +3,8 @@ import { dateOnly, taipeiToday } from '../../utils/activity-dates.js'
 
 const cultureUrl = category => `https://cloud.culture.tw/frontsite/opendata/activityOpenDataJsonAction.do?category=${category}&method=doFindActivitiesByCategory`
 export const activitySources = [
-  ...[1, 6, 7].map(category => ({ id: `culture-${category}`, name: `文化部（${{ 1: '音樂', 6: '展覽', 7: '講座' }[category]}）`, official: true, url: 'https://data.gov.tw/dataset/10042', feed: cultureUrl(category), format: 'json' })),
-  { id: 'yilan-site', name: '宜蘭勁好玩', official: true, organizerOptional: true, url: 'https://travel.yilan.gov.tw/zh-tw/events/', feed: 'https://travel.yilan.gov.tw/zh-tw/events/', format: 'yilan-calendar' }
+  ...[1, 6, 7].map(category => ({ id: `culture-${category}`, name: `文化部（${{ 1: '音樂', 6: '展覽', 7: '講座' }[category]}）`, official: true, organizerOptional: true, descriptionOptional: true, url: 'https://data.gov.tw/dataset/10042', feed: cultureUrl(category), format: 'json' })),
+  { id: 'yilan-site', name: '宜蘭勁好玩', official: true, organizerOptional: true, descriptionOptional: true, url: 'https://travel.yilan.gov.tw/zh-tw/events/', feed: 'https://travel.yilan.gov.tw/zh-tw/events/', format: 'yilan-calendar' }
 ]
 export const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 export const plainText = value => String(value || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\\r\\n/g, '\n').trim()
@@ -22,6 +22,7 @@ export function safeActivityImage(value) {
   const { hostname, pathname } = new URL(safe)
   if (hostname === 'travel.yilan.gov.tw' && pathname.startsWith('/_api/content/images/')) return safe
   if (hostname === 'admin.px-sunmake.org.tw' && /^\/Public\/(exhibition|post)\/\d+\//.test(pathname)) return safe
+  if (hostname === 's3.resource.opentix.life' && /^\/upload\/program\/[^/]+\.(jpg|jpeg|png|webp)$/i.test(pathname)) return safe
   if (['cloud.culture.tw', 'event.culture.tw', 'www.culture.tw'].includes(hostname) && /\.(jpg|jpeg|png|webp)(?:$)/i.test(pathname)) return safe
   return null
 }
@@ -94,15 +95,17 @@ export function normalizeYilanCalendar(html, expectedYear) {
     }
   })
 }
-export function reviewReasons(item, official = false, { organizerOptional = false } = {}) {
+export function reviewReasons(item, official = false, { organizerOptional = false, descriptionOptional = false } = {}) {
   const reasons = []
   if (!official) reasons.push('非已核可官方來源')
   for (const [key, label] of [['title', '活動名稱'], ['event_date', '開始日期'], ['end_date', '結束日期'], ['location', '活動地點'], ['organizer_name', '主辦單位'], ['description', '活動說明'], ['source_url', '來源連結']]) {
-    if (!item[key] && !(key === 'organizer_name' && official && organizerOptional)) reasons.push(`缺少${label}`)
+    const optional = official && ((key === 'organizer_name' && organizerOptional) || (key === 'description' && descriptionOptional))
+    if (!item[key] && !optional) reasons.push(`缺少${label}`)
   }
   if (item.event_date && item.end_date && item.end_date < item.event_date) reasons.push('結束日期早於開始日期')
   if (item.schedule_uncertain || /預計|暫定|待定|時間未定/.test(`${item.title} ${item.description}`)) reasons.push('日期或場次需確認')
   if (item.cancelled) reasons.push('來源公告取消或延期')
+  if (item.source_conflict) reasons.push('來源日期或場地不一致')
   return reasons
 }
 
@@ -135,9 +138,9 @@ export function normalizeCulture(data, source) {
   return result
 }
 
-async function fetchSourceBytes(url, fetcher, allowHtml = false) {
-  // Only code-reviewed registry URLs are fetched; never accept URLs from request bodies or feed records.
-  const response = await fetcher(url, { redirect: 'error', signal: AbortSignal.timeout(20000) })
+async function fetchSourceBytes(url, fetcher, allowHtml = false, timeoutMs = 20000) {
+  // Callers use registry URLs or a canonical URL with an exact host and numeric event ID.
+  const response = await fetcher(url, { redirect: 'error', signal: AbortSignal.timeout(timeoutMs) })
   if (!response.ok) throw new Error(`來源 HTTP ${response.status}`)
   if (!allowHtml && /text\/html/i.test(response.headers.get('content-type') || '')) throw new Error('來源回傳 HTML 而非活動資料，請檢查來源服務')
   const reader = response.body.getReader()
@@ -181,6 +184,66 @@ export async function collectActivities({ fetcher = fetch, now = new Date() } = 
       return { source: source.id, name: source.name, ok: false, error: error.name === 'TimeoutError' ? '來源逾時' : String(error.message).slice(0, 200), items: [] }
     }
   }))
-  await enrichOfficialMedia(sources, fetcher)
+  await Promise.all([enrichOfficialMedia(sources, fetcher), enrichCulturePrograms(sources, fetcher)])
+  for (const source of sources) {
+    const policy = activitySources.find(s => s.id === source.source)
+    for (const item of source.items) item.reasons = reviewReasons(item, policy.official, policy)
+  }
   return sources
+}
+
+export function opentixEventUrl(value) {
+  const safe = safeSourceUrl(value)
+  if (!safe) return null
+  const url = new URL(safe)
+  const match = url.pathname.match(/^\/(?:program|event)\/(\d+)\/?$/)
+  return url.hostname === 'www.opentix.life' && !url.search && !url.hash && match
+    ? `https://www.opentix.life/event/${match[1]}` : null
+}
+
+export function parseProgramDetails(html, item) {
+  const events = []
+  for (const match of html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
+    try {
+      const data = JSON.parse(match[1])
+      events.push(...(Array.isArray(data) ? data : data['@graph'] || [data]))
+    } catch { /* Other page metadata need not be valid event data. */ }
+  }
+  const event = events.find(e => e['@type'] === 'Event' && cleanTitle(e.name) === cleanTitle(item.title))
+  if (!event) throw new Error('找不到相符的活動資料')
+  const venue = cleanTitle(event.location?.name)
+  if (dateOnly(event.startDate) !== item.event_date || dateOnly(event.endDate) !== item.end_date || !venue || !cleanTitle(item.location).includes(venue) || event.location?.address?.addressLocality !== '宜蘭縣') return { source_conflict: true }
+  const images = [event.image].flat().map(safeActivityImage).filter(Boolean).slice(0, 8)
+  const organizers = [event.organizer].flat().filter(Boolean).map(o => plainText(o.name)).filter(Boolean)
+  return {
+    images, description: plainText(plainText(event.description)), organizer_name: organizers.join('、'),
+    cancelled: /EventCancelled|EventPostponed|EventRescheduled/.test(event.eventStatus || '')
+  }
+}
+
+export async function enrichCulturePrograms(sources, fetcher = fetch) {
+  const jobs = sources.filter(s => s.ok && s.source.startsWith('culture-')).flatMap(source => source.items
+    .filter(item => !item.expired && opentixEventUrl(item.source_url))
+    .map(item => ({ source, item })))
+  // Keep the scheduled import within its runtime budget even if a provider stalls.
+  const queue = jobs.slice(0, 12)
+  if (jobs.length > queue.length) for (const source of new Set(jobs.slice(12).map(j => j.source))) (source.warnings ||= []).push('部分活動圖片超過本次抓取上限，保留既有圖片')
+  await Promise.all(Array.from({ length: Math.min(4, queue.length) }, async () => {
+    while (queue.length) {
+      const { source, item } = queue.shift()
+      const url = opentixEventUrl(item.source_url)
+      try {
+        const html = await fetchSourceBytes(url, fetcher, true, 8000)
+        const details = parseProgramDetails(html.toString('utf8'), item)
+        if (details.source_conflict) { item.source_conflict = true; continue }
+        item.cancelled = details.cancelled
+        if (!item.description) item.description = details.description
+        if (!item.organizer_name) item.organizer_name = details.organizer_name
+        if (!item.images.length && details.images.length) Object.assign(item, { images: details.images, image_source_name: 'OPENTIX 官方活動頁', image_source_url: url })
+        if (!item.images.length) (source.warnings ||= []).push(`${item.title}：官方頁尚無可用照片`)
+      } catch {
+        (source.warnings ||= []).push(`${item.title}：官方圖片暫時無法更新，保留既有圖片`)
+      }
+    }
+  }))
 }

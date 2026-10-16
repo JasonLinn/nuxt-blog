@@ -1,7 +1,7 @@
 <template>
   <section class="import-panel" aria-labelledby="import-title">
     <div class="import-heading">
-      <div><h2 id="import-title">官方活動自動更新</h2><p>資料完整就上架；缺少資訊或場次待確認的活動留在這裡。</p></div>
+      <div><h2 id="import-title">官方活動自動更新</h2><p>官方活動確認名稱、日期、地點與來源後即可上架，優先補上照片；主辦與簡介可留空。</p></div>
       <div class="import-actions">
         <button :disabled="busy" @click="sync(true)">預覽抓取</button>
         <button :disabled="busy" class="primary" @click="sync(false)">{{ busy ? '處理中…' : '立即更新' }}</button>
@@ -32,8 +32,8 @@
             <label>結束日期<input v-model="item.candidate.end_date" type="date" required :min="item.candidate.event_date"></label>
           </div>
           <label>地點<input v-model="item.candidate.location" required maxlength="250"></label>
-          <label>主辦單位{{ item.source_id === 'yilan-site' ? '（可留空）' : '' }}<input v-model="item.candidate.organizer_name" :required="item.source_id !== 'yilan-site'" maxlength="250"></label>
-          <label>活動說明<textarea v-model="item.candidate.description" required rows="4" maxlength="15000"></textarea></label>
+          <label>主辦單位{{ optionalField(item, 'organizerOptional') ? '（可留空）' : '' }}<input v-model="item.candidate.organizer_name" :required="!optionalField(item, 'organizerOptional')" maxlength="250"></label>
+          <label>活動說明{{ optionalField(item, 'descriptionOptional') ? '（可留空）' : '' }}<textarea v-model="item.candidate.description" :required="!optionalField(item, 'descriptionOptional')" rows="4" maxlength="15000"></textarea></label>
           <p v-if="item.candidate.schedule?.length > 1" class="import-muted">請確認說明列出實際場次：{{ item.candidate.schedule.map(s => s.start).join('、') }}</p>
           <div class="import-actions">
             <button type="submit" class="primary" :disabled="busy">確認並上架</button>
@@ -47,7 +47,8 @@
 
 <script setup>
 const emit = defineEmits(['updated'])
-const items = ref([]), runs = ref([]), summary = ref([])
+const items = ref([]), runs = ref([]), summary = ref([]), sources = ref([])
+const optionalField = (item, key) => sources.value.some(source => source.id === item.source_id && source.official && source[key])
 const busy = ref(false), preview = ref(false), error = ref(''), message = ref('')
 const showPending = ref(false)
 const runStatus = { success: '全部來源完成', partial: '部分來源失敗', failed: '更新失敗' }
@@ -55,7 +56,7 @@ const errorText = e => e.data?.statusMessage || e.data?.message || e.message || 
 async function refresh() {
   try {
     const data = await $fetch('/api/admin/activity-imports')
-    items.value = data.items; runs.value = data.runs
+    items.value = data.items; runs.value = data.runs; sources.value = data.sources || []
     if (!summary.value.length && runs.value[0]) summary.value = runs.value[0].summary
   } catch (e) { error.value = errorText(e) }
 }

@@ -328,7 +328,7 @@
               <!-- 活動資訊 -->
               <div class="card-body">
                 <h5 class="activity-title">{{ activity.title }}</h5>
-                <p class="activity-description">{{ activity.description }}</p>
+                <p v-if="activity.description" class="activity-description">{{ activity.description }}</p>
                 
                 <div class="activity-meta">
                   <div class="meta-item">

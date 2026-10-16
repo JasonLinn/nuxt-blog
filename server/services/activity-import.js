@@ -149,8 +149,8 @@ export async function reviewImport(client, { source, externalId, action, data = 
   item.end_date = dateOnly(data.end_date ?? item.end_date)
   item.source_url = safeSourceUrl(item.source_url)
   const policy = activitySources.find(s => s.id === source) || {}
-  const missing = reviewReasons({ ...item, schedule_uncertain: false, cancelled: false, title: 'confirmed', description: 'confirmed' }, true, policy).filter(r => r !== '日期或場次需確認')
-  if (!item.title || !item.description || missing.length || item.end_date < taipeiToday()) throw Object.assign(new Error('請補齊名稱、說明、日期、地點及主辦單位，且活動不可已結束'), { statusCode: 400 })
+  const missing = reviewReasons({ ...item, schedule_uncertain: false, cancelled: false, source_conflict: false }, true, policy).filter(r => r !== '日期或場次需確認')
+  if (missing.length || item.end_date < taipeiToday()) throw Object.assign(new Error('請補齊必要資訊（名稱、日期、地點、來源連結），且活動不可已結束'), { statusCode: 400 })
   const rows = (await client.query('SELECT * FROM yilan_activities')).rows
   const duplicate = rows.find(a => a.id !== entry.activity_id && sameEvent(a, item))
   if (duplicate) throw Object.assign(new Error('已有同名、同日、同地點活動，請退回此筆'), { statusCode: 409 })
