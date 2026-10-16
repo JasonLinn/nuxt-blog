@@ -1,207 +1,279 @@
 <template>
-  <div class="flex container">
-    <div class="selectWrapper">
-      <select class="category flex col-4 form-select" v-model="selectedCate" @change="clickCate">
-        <option
-          v-for="cate in category"
-          class="category-item"
-          :key="cate.id"
-          :id="cate.id"
-          :value="cate.id"
-        >
-          {{ cate.name }}
-        </option>
-      </select>
-      <select class="form-select col-4 category" name="township" id="township" v-model="selectedTown" @change="clickTown">
-        <option :value="null">選擇地區</option>
-        <option v-for="town in township" :key="town.name" :value="town.name">{{ town.name }}</option>
-      </select>
-      <select class="form-select col-4 category" v-model="selectedSort" @change="clickSort">
-        <option value="popular">熱門優惠</option>
-        <option value="newest">最新上架</option>
-        <option value="random">隨機排序</option>
-      </select>
-    </div>
-    <div class="search">
-        <input type="text" class="searchInput form-control" maximum-scale="1" placeholder="請輸入優惠券名稱" v-model="searchText" @input="handleSearchInput">
-        <svg
-          v-if="searchText"
-          @click="cleanText"
-          xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-x cancel-icon" viewBox="0 0 16 16">
-          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search search-icon" viewBox="0 0 16 16">
-          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-        </svg>
-      </div>
-    <div class="col-12">
-      <div class="tag-list">
-        <h2 class="tag-title">
-          熱門:
-        </h2>
-        <template v-if="couponObject.pending">
-          <span class="hot-tag skeleton skeleton-hot-tag" v-for="n in 3" :key="`skeleton-tag-${n}`">&nbsp;</span>
-        </template>
-        <template v-else>
-          <span class="hot-tag" v-for="tag in hotTag" :key="tag" @click="clickTag(tag)">
-            {{ tag }}
-          </span>
-        </template>
-      </div>
-    </div>
-    <div class="my-8 flex w-full max-w-4xl flex-col">
-      <div v-if="couponObject.pending" class="md:border-l md:border-gray-100">
-        <div class="row">
-          <article
-            v-for="n in 8"
-            :key="`skeleton-${n}`"
-            class="cupon col-md-3"
-          >
-            <div class="cupon-wrapper skeleton-card">
-              <div class="skeleton-carousel">
-                <div class="skeleton skeleton-image"></div>
-              </div>
-              <div class="cupon-info">
-                <h2 class="cupon-title">
-                  <div class="skeleton skeleton-title"></div>
-                </h2>
-                <div class="skeleton-tags">
-                  <div class="skeleton skeleton-category"></div>
-                  <div class="skeleton skeleton-category-small"></div>
-                  <div class="skeleton skeleton-category-once"></div>
-                </div>
-                <div class="skeleton skeleton-content"></div>
-                <div class="skeleton skeleton-content-line2"></div>
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
-      <div v-else-if="couponObject.error" class="error-container">
-        <span class="text-gray-500">發生了一點錯誤，請稍後再嘗試</span>
-        <p class="my-2 text-rose-500">{{ couponObject.error }}</p>
-        <button @click="retryFetch" class="retry-btn">重試</button>
-      </div>
-      <div v-else-if="!couponObject.data || couponObject?.data?.items.length === 0" class="no-data-container">
-        <span class="text-gray-500">目前尚無相關優惠券</span>
-      </div>
-      <div v-else class="md:border-l md:border-gray-100">
-        <div class="row">
-          <article
-            v-for="(article, index) in couponObject.data.items"
-            :key="article.id"
-            class="cupon col-md-3 relative"
-          >
-            <!-- 排名標籤 Top 3 (僅在第一頁顯示) -->
-            <div v-if="selectedSort === 'popular' && currentPage === 1 && index < 3" class="ranking-badge" :class="'rank-' + (index + 1)">
-              <Icon v-if="index === 0" name="ph:crown-fill" class="crown-icon" />
-              <span>TOP {{ index + 1 }}</span>
-            </div>
-            
-            <div class="cupon-wrapper" :class="{
-                'top-1-card': selectedSort === 'popular' && currentPage === 1 && index === 0,
-                'top-2-card': selectedSort === 'popular' && currentPage === 1 && index === 1,
-                'top-3-card': selectedSort === 'popular' && currentPage === 1 && index === 2
-              }">
-              <NuxtLink
-                class=""
-                :to="{
-                  name: 'articles-id',
-                  params: {
-                    id: article.id
-                  }
-                }"
-                @click="trackCouponView(article.id)"
-              >
-                <Carousel>
-                  <Slide v-for="(img, index) in article.cover" :key="`${article.id}-${index}`">
-                    <img
-                      :alt="article.title"
-                      height="165"
-                      width="366"
-                      format="webp"
-                      :src="processImageSrc(img)"
-                      class="cupon-img"
-                      placeholder-class="card"
-                      loading="lazy"
-                    />
-                  </Slide>
+  <div class="home">
+    <!-- Hero：價值主張 + 搜尋 -->
+    <section class="yp-hero">
+      <div class="yp-hero__inner home-hero">
+        <div class="home-hero__copy">
+          <h1 class="yp-hero__title">
+            宜蘭吃喝玩樂，<br class="d-none d-md-inline" /><em>先領券</em>再出發
+          </h1>
+          <p class="yp-hero__desc">在地店家、合法旅宿的免費電子優惠券，手機出示就能用。</p>
 
-                  <template #addons="{ slidesCount }">
-                    <Pagination v-if="slidesCount > 1" />
-                  </template>
-                </Carousel>
-                <!-- <div class="cupon-img-wrapper">
-                </div> -->
-                <div class="cupon-info">
-                  <h2 class="cupon-title">
-                    <span class="">{{ article.title }}</span>
-                  </h2>
-                  <div class="cupon-tags">
-                    <span class="cupon-category">
-                      {{ getCategoryName(article.category) }}
-                    </span>
-                    <span class="cupon-category">
-                      {{ article.township[0] }}
-                    </span>
-                    <span class="cupon-category" :class="{'cupon-once': article.isonce}">
-                      {{ article.isonce ? '限量' : '免費' }}
-                    </span>
-                  </div>
-                  <!-- <time class="order-first mb-3 flex items-center text-sm text-gray-400 md:hidden">
-                    {{ date2LocaleString(article.updated_at) }}
-                  </time> -->
-                  <p class="index-cupon-text">
-                    {{ truncateContent(article.content) }}
-                  </p>
-                </div>
-                <!-- <span
-                  aria-hidden="true"
-                  class="mt-4 flex items-center text-sm font-medium text-emerald-500"
-                >
-                  看更多
-                  <Icon name="ri:arrow-right-s-line" />
-                </span> -->
-              </NuxtLink>
+          <form class="yp-search home-search" role="search" @submit.prevent="submitSearch">
+            <div class="yp-search__field">
+              <Icon name="ri:search-line" class="yp-search__icon" />
+              <input
+                v-model="searchText"
+                type="search"
+                class="yp-search__input"
+                placeholder="搜尋店家、景點或優惠…"
+                aria-label="搜尋優惠券"
+                @input="handleSearchInput"
+              />
+              <button
+                v-if="searchText"
+                type="button"
+                class="yp-search__clear"
+                aria-label="清除搜尋"
+                @click="cleanText"
+              >
+                <Icon name="ri:close-line" />
+              </button>
             </div>
-              <!-- <time class="order-first mb-3 mt-1 hidden items-center text-sm text-gray-400 md:flex">
-                {{ date2LocaleString(article.updated_at) }}
-              </time> -->
-          </article>
-        </div>
-        <nav
-          class="mt-12 flex items-center justify-between px-4 py-3 sm:px-6"
-          v-if="totalPages > 1"
-        >
-          <div class="next-page flex flex-1 justify-center sm:justify">
-            <NuxtLink
-              v-if="currentPage > 1"
-              class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-              :to="getPaginationLink(currentPage - 1)"
+            <select
+              v-model="selectedTown"
+              class="form-select yp-search__select d-none d-sm-block"
+              aria-label="選擇鄉鎮"
+              @change="clickTown"
             >
-              <Icon name="ri:arrow-left-s-line" />
-              {{ currentPage -1 }}
-            </NuxtLink>
-            <label class="now-page">{{ currentPage }}</label>
-            <NuxtLink
-              v-if="currentPage < totalPages"
-              class="flex items-center text-xl font-medium text-gray-600 hover:text-emerald-500"
-              :to="getPaginationLink(currentPage + 1)"
+              <option :value="null">全部鄉鎮</option>
+              <option v-for="town in township" :key="town.name" :value="town.name">
+                {{ town.name }}
+              </option>
+            </select>
+            <button type="submit" class="btn btn-primary d-none d-sm-inline-block">搜尋優惠</button>
+          </form>
+
+          <div class="home-hot">
+            <span class="home-hot__label">熱門搜尋</span>
+            <template v-if="hotTagsLoading">
+              <span
+                v-for="n in 3"
+                :key="`hot-skeleton-${n}`"
+                class="yp-skeleton home-hot__skeleton"
+              />
+            </template>
+            <button
+              v-for="tag in hotTag"
+              v-else
+              :key="tag"
+              type="button"
+              class="yp-chip yp-chip--sm"
+              @click="clickTag(tag)"
             >
-              {{ currentPage +1 }}
-              <Icon name="ri:arrow-right-s-line" />
-            </NuxtLink>
+              {{ tag }}
+            </button>
           </div>
 
-        </nav>
+          <ClientOnly>
+            <div class="yp-stats home-hero__stats d-none d-md-flex">
+              <span v-if="displayVisitorCount !== '0'"
+                ><b>{{ displayVisitorCount }}</b
+                >人次造訪</span
+              >
+              <span v-if="partnerStores"
+                ><b>{{ partnerStores }}</b
+                >家店家優惠</span
+              >
+              <span v-if="partnerHotels"
+                ><b>{{ partnerHotels }}</b
+                >間合作旅宿</span
+              >
+            </div>
+          </ClientOnly>
+        </div>
+
+        <div v-if="heroImages.length >= 3" class="home-hero__mosaic" aria-hidden="true">
+          <img
+            v-for="(src, i) in heroImages"
+            :key="src"
+            :src="src"
+            :alt="''"
+            :loading="i ? 'lazy' : 'eager'"
+          />
+        </div>
       </div>
+    </section>
+
+    <div class="yp-page home-list">
+      <!-- 篩選列 -->
+      <div class="yp-toolbar home-toolbar">
+        <div class="yp-chips" role="tablist" aria-label="優惠類別">
+          <button
+            v-for="cate in category"
+            :key="cate.id"
+            type="button"
+            role="tab"
+            class="yp-chip"
+            :class="{ 'is-active': selectedCate === cate.id }"
+            :aria-selected="selectedCate === cate.id"
+            @click="selectCate(cate.id)"
+          >
+            {{ cate.id === '' ? '全部' : cate.name }}
+          </button>
+        </div>
+        <div class="d-flex align-items-center ms-auto gap-2">
+          <select
+            v-model="selectedTown"
+            class="form-select form-select-sm d-sm-none home-toolbar__town"
+            aria-label="選擇鄉鎮"
+            @change="clickTown"
+          >
+            <option :value="null">全部鄉鎮</option>
+            <option v-for="town in township" :key="town.name" :value="town.name">
+              {{ town.name }}
+            </option>
+          </select>
+          <div class="yp-seg" role="group" aria-label="排序">
+            <button
+              v-for="opt in sortOptions"
+              :key="opt.value"
+              type="button"
+              class="yp-seg__btn"
+              :class="{ 'is-active': selectedSort === opt.value }"
+              @click="selectSort(opt.value)"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="yp-section-head">
+        <h2 class="yp-section-head__title">{{ listTitle }}</h2>
+        <span v-if="totalCount" class="text-secondary small">共 {{ totalCount }} 張</span>
+      </div>
+
+      <!-- 載入中 -->
+      <div v-if="couponObject.pending" class="yp-grid home-grid">
+        <div v-for="n in 8" :key="`skeleton-${n}`" class="yp-coupon yp-coupon--row">
+          <div class="yp-coupon__media yp-skeleton" />
+          <div class="yp-coupon__body">
+            <span class="yp-skeleton mb-2" style="width: 70%; height: 18px" />
+            <span class="yp-skeleton mb-2" style="width: 45%" />
+            <span class="yp-skeleton" style="width: 85%" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 錯誤 -->
+      <div v-else-if="couponObject.error" class="yp-card yp-empty yp-empty--error">
+        <div class="yp-empty__icon"><Icon name="ri:wifi-off-line" /></div>
+        <p class="yp-empty__title">載入優惠券時發生問題</p>
+        <p class="yp-empty__text">請檢查網路連線後再試一次。</p>
+        <button type="button" class="btn btn-primary" @click="retryFetch">重新載入</button>
+      </div>
+
+      <!-- 無資料 -->
+      <div
+        v-else-if="!couponObject.data || couponObject?.data?.items.length === 0"
+        class="yp-card yp-empty"
+      >
+        <div class="yp-empty__icon"><Icon name="ri:coupon-3-line" /></div>
+        <p class="yp-empty__title">找不到符合條件的優惠券</p>
+        <p class="yp-empty__text">試試其他關鍵字，或清除篩選條件。</p>
+        <button type="button" class="btn btn-soft" @click="resetFilters">清除篩選</button>
+      </div>
+
+      <!-- 優惠券列表 -->
+      <template v-else>
+        <div class="yp-grid home-grid">
+          <NuxtLink
+            v-for="(article, index) in couponObject.data.items"
+            :key="article.id"
+            :to="{ name: 'articles-id', params: { id: article.id } }"
+            class="yp-coupon yp-coupon--row"
+            @click="trackCouponView(article.id)"
+          >
+            <div class="yp-coupon__media">
+              <img
+                v-if="article.cover?.length"
+                :src="processImageSrc(article.cover[0])"
+                :alt="article.title"
+                width="366"
+                height="229"
+                :loading="index < 4 ? 'eager' : 'lazy'"
+              />
+              <span
+                v-if="showRanking && index < 3"
+                class="yp-coupon__rank"
+                :class="{ 'yp-coupon__rank--1': index === 0 }"
+              >
+                <Icon v-if="index === 0" name="ph:crown-fill" />TOP {{ index + 1 }}
+              </span>
+              <span v-if="dealOf(article)" class="yp-coupon__deal">{{
+                dealOf(article).label
+              }}</span>
+            </div>
+            <div class="yp-coupon__body">
+              <h3 class="yp-coupon__title yp-clamp-1">{{ article.title }}</h3>
+              <p class="yp-coupon__meta">
+                {{ getCategoryName(article.category) }}・{{ article.township?.[0] || '宜蘭' }}
+                <span v-if="article.isonce" class="yp-tag yp-tag--deal ms-1">限量</span>
+              </p>
+              <p
+                class="yp-clamp-2 mb-0"
+                :class="dealOf(article) ? 'yp-coupon__offer' : 'yp-coupon__desc'"
+              >
+                {{ offerOf(article) }}
+              </p>
+              <div class="yp-coupon__footer">
+                <span v-if="article.view_count"
+                  ><Icon name="ri:eye-line" /> {{ formatCount(article.view_count) }}</span
+                >
+                <span v-else />
+                <span class="yp-coupon__cta">領取</span>
+              </div>
+            </div>
+          </NuxtLink>
+        </div>
+
+        <nav v-if="totalPages > 1" class="yp-pager" aria-label="分頁">
+          <NuxtLink
+            :to="getPaginationLink(currentPage - 1)"
+            class="yp-pager__btn"
+            :class="{ 'is-disabled': currentPage <= 1 }"
+            aria-label="上一頁"
+          >
+            <Icon name="ri:arrow-left-s-line" />
+          </NuxtLink>
+          <NuxtLink
+            v-for="page in pageNumbers"
+            :key="page"
+            :to="getPaginationLink(page)"
+            class="yp-pager__btn"
+            :class="{ 'is-active': page === currentPage }"
+            :aria-current="page === currentPage ? 'page' : undefined"
+          >
+            {{ page }}
+          </NuxtLink>
+          <NuxtLink
+            :to="getPaginationLink(currentPage + 1)"
+            class="yp-pager__btn"
+            :class="{ 'is-disabled': currentPage >= totalPages }"
+            aria-label="下一頁"
+          >
+            <Icon name="ri:arrow-right-s-line" />
+          </NuxtLink>
+        </nav>
+      </template>
+
+      <!-- 店家招募 -->
+      <section class="home-cta">
+        <div>
+          <h2 class="home-cta__title">你是宜蘭在地店家嗎？</h2>
+          <p class="home-cta__desc">免費刊登優惠券，讓入住合法民宿的旅客找到你。</p>
+        </div>
+        <NuxtLink to="/coupons/submit" class="btn btn-primary btn-pill">免費刊登優惠</NuxtLink>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
 import { category, township } from '~/utils/category'
-import useCouponStore from "~~/store/coupon"
+import { extractDeal, summarizeOffer } from '~/utils/coupon-deal'
+import useCouponStore from '~~/store/coupon'
 
 // SEO 優化
 useSeoMeta({
@@ -230,11 +302,20 @@ useHead({
 const route = useRoute()
 const router = useRouter()
 
+const PAGE_SIZE = 12
 
 const searchText = ref('')
 const selectedTown = ref(null)
 const selectedCate = ref('')
 const selectedSort = ref('popular')
+
+const sortOptions = [
+  { value: 'popular', label: '熱門' },
+  { value: 'newest', label: '最新' },
+  { value: 'random', label: '隨機' }
+]
+
+const { partnerStores, partnerHotels, displayVisitorCount } = useSiteStats()
 
 const currentPage = computed(() => {
   return Math.max(parseInt(route.query.page) || 1, 1)
@@ -254,12 +335,13 @@ const store = useCouponStore()
 
 // 熱門標籤
 const hotTag = ref(['伴手禮', '租車', '湯屋'])
+const hotTagsLoading = ref(true)
 
 // 從 API 獲取熱門標籤
 const fetchHotTags = async () => {
   try {
     const response = await $fetch('/api/hot-tags', {
-      query: { limit: 3 }
+      query: { limit: 5 }
     })
     if (response?.hotTags?.length) {
       hotTag.value = response.hotTags
@@ -267,6 +349,8 @@ const fetchHotTags = async () => {
   } catch (error) {
     console.error('獲取熱門標籤失敗:', error)
     // 保持預設值
+  } finally {
+    hotTagsLoading.value = false
   }
 }
 
@@ -288,6 +372,37 @@ const totalPages = computed(() => {
   return couponObject.value?.data?.pagination?.totalPages || 1
 })
 
+const totalCount = computed(() => couponObject.value?.data?.pagination?.total || 0)
+
+const pageNumbers = computed(() => {
+  const total = totalPages.value
+  const current = currentPage.value
+  const start = Math.max(1, Math.min(current - 2, total - 4))
+  const end = Math.min(total, start + 4)
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+})
+
+const showRanking = computed(
+  () => selectedSort.value === 'popular' && currentPage.value === 1 && !searchText.value
+)
+
+const listTitle = computed(() => {
+  if (searchText.value) return `「${searchText.value}」的搜尋結果`
+  const cate = category.find((c) => c.id === selectedCate.value)
+  const prefix = selectedTown.value ? `${selectedTown.value}・` : ''
+  const cateName = cate && cate.id ? `${cate.name}類` : ''
+  if (selectedSort.value === 'newest') return `${prefix}${cateName}最新上架`
+  return `${prefix}${cateName}${selectedSort.value === 'popular' ? '熱門優惠' : '優惠券'}`
+})
+
+const heroImages = computed(() => {
+  const items = couponObject.value?.data?.items || []
+  return items
+    .filter((item) => item.cover?.length)
+    .slice(0, 3)
+    .map((item) => processImageSrc(item.cover[0]))
+})
+
 let searchTimeout = null
 const handleSearchInput = () => {
   if (searchTimeout) clearTimeout(searchTimeout)
@@ -296,21 +411,36 @@ const handleSearchInput = () => {
   }, 500)
 }
 
+const submitSearch = () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  updateRoute({ search: searchText.value, page: 1 })
+}
+
 const categoryCache = new Map()
 const getCategoryName = (cateId) => {
   if (!categoryCache.has(cateId)) {
-    const found = category.find((item) => item.id == cateId)
+    const found = category.find((item) => String(item.id) === String(cateId))
     categoryCache.set(cateId, found ? found.name : '未分類')
   }
   return categoryCache.get(cateId)
 }
 
-const processImageSrc = (img) => {
-  return img.replace('https://yilanpass.com', '.')
+const dealCache = new Map()
+const dealOf = (article) => {
+  if (!dealCache.has(article.id)) {
+    dealCache.set(article.id, extractDeal(article.title, article.content))
+  }
+  return dealCache.get(article.id)
 }
 
-const truncateContent = (content) => {
-  return content.replace(/\n/g, ' ').substring(0, 300)
+const offerOf = (article) =>
+  summarizeOffer(article.content, 44) || (article.isonce ? '限量優惠' : '免費領取')
+
+const formatCount = (n) =>
+  n >= 10000 ? `${(n / 10000).toFixed(1)} 萬` : Number(n).toLocaleString('zh-TW')
+
+const processImageSrc = (img) => {
+  return img.replace('https://yilanpass.com', '.')
 }
 
 const updateRoute = (queryUpdates) => {
@@ -322,13 +452,13 @@ const updateRoute = (queryUpdates) => {
     page: currentPage.value || undefined,
     ...queryUpdates
   }
-  
-  Object.keys(newQuery).forEach(key => {
+
+  Object.keys(newQuery).forEach((key) => {
     if (newQuery[key] === undefined || newQuery[key] === null || newQuery[key] === '') {
       delete newQuery[key]
     }
   })
-  
+
   router.push({ name: 'index', query: newQuery })
 }
 
@@ -337,7 +467,7 @@ const getPaginationLink = (page) => {
     name: 'index',
     query: {
       ...route.query,
-      page: page
+      page: Math.min(Math.max(page, 1), totalPages.value)
     }
   }
 }
@@ -352,16 +482,25 @@ const cleanText = () => {
   updateRoute({ search: undefined, page: 1 })
 }
 
-const clickCate = () => {
-  updateRoute({ cate: selectedCate.value, page: 1 })
+const selectCate = (id) => {
+  selectedCate.value = id
+  updateRoute({ cate: id, page: 1 })
+}
+
+const selectSort = (value) => {
+  selectedSort.value = value
+  updateRoute({ sort: value, page: 1 })
 }
 
 const clickTown = () => {
   updateRoute({ town: selectedTown.value, page: 1 })
 }
 
-const clickSort = () => {
-  updateRoute({ sort: selectedSort.value, page: 1 })
+const resetFilters = () => {
+  searchText.value = ''
+  selectedTown.value = null
+  selectedCate.value = ''
+  router.push({ name: 'index' })
 }
 
 const retryFetch = () => {
@@ -375,369 +514,159 @@ const fetchData = async () => {
       selectedTown: selectedTown.value,
       currentPage: currentPage.value,
       searchText: searchText.value,
-      sort: selectedSort.value
+      sort: selectedSort.value,
+      pageSize: PAGE_SIZE
     })
   } catch (error) {
     console.error('載入優惠券失敗:', error)
   }
 }
 
-watch(() => route.query, async (newQuery) => {
-  selectedCate.value = newQuery.cate || ''
-  selectedTown.value = newQuery.town || null
-  searchText.value = newQuery.search || ''
-  selectedSort.value = newQuery.sort || 'popular'
-  
-  await fetchData()
-}, { immediate: true })
+watch(
+  () => route.query,
+  async (newQuery) => {
+    selectedCate.value = newQuery.cate || ''
+    selectedTown.value = newQuery.town || null
+    searchText.value = newQuery.search || ''
+    selectedSort.value = newQuery.sort || 'popular'
 
-const date2LocaleString = (date) => {
-  return new Date(date).toLocaleString('zh-TW')
-}
+    await fetchData()
+  },
+  { immediate: true }
+)
 </script>
+
 <style lang="scss" scoped>
-.active {
-  background-color: #ffefd2;
-}
-.selectWrapper {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-.category {
-  display: flex;
-  flex-direction: row;
-  font-size: 16px;
-  margin: 10px 0;
-  background-color: #fff;
-  width: fit-content;
-  min-width: 150px;
-}
-.category-item {
-  padding: 10px;
-}
-.loading-container {
+.home-hero {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 40px;
-}
-.error-container {
-  text-align: center;
-  padding: 40px;
-}
-.retry-btn {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.retry-btn:hover {
-  background-color: #2563eb;
-}
-.no-data-container {
-  text-align: center;
-  padding: 40px;
-}
-.next-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 16px;
-}
-.now-page {
-  padding: 8px 12px;
-  margin: 0 10px;
-  background-color: #f1f1f1;
-  border-radius: 4px;
-  font-weight: bold;
-}
+  gap: 48px;
 
-.cupon {
-  position: relative;
-}
-
-.cupon-wrapper {
-  overflow: hidden;
-  margin-bottom: 20px;
-  border-radius: 12px; /* Add base radius */
-  transition: all 0.3s ease;
-  height: calc(100% - 20px);
-  display: flex;
-  flex-direction: column;
-}
-.cupon-wrapper > a {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-.top-1-card {
-  box-shadow: 0 0 0 3px #fbbf24;
-  transform: translateY(-4px);
-}
-.top-2-card {
-  box-shadow: 0 0 0 3px #94a3b8;
-  transform: translateY(-2px);
-}
-.top-3-card {
-  box-shadow: 0 0 0 3px #b45309;
-}
-
-.ranking-badge {
-  position: absolute;
-  top: -12px;
-  left: 20px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  color: white;
-  font-weight: 800;
-  font-size: 14px;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-.rank-1 { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
-.rank-2 { background: linear-gradient(135deg, #64748b, #94a3b8); }
-.rank-3 { background: linear-gradient(135deg, #92400e, #b45309); }
-.crown-icon { font-size: 18px; }
-
-.cupon-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: #613030;
-  line-height: 1.4;
-  margin-bottom: 8px;
-}
-.cupon-info {
-  padding: 13px 8px 15px 8px;
-  background-color: #fff;
-  flex: 1; /* 讓資訊區塊填滿剩餘高度以達到高度統一 */
-}
-.cupon-info:hover {
-  box-shadow: #000;
-}
-.cupon-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin: 5px 0 10px 0;
-}
-.cupon-category {
-  display: inline-block;
-  font-size: 14px;
-  padding: 4px 8px;
-  color: #5db0be;
-  background-color: rgba(100,179,244,.1);
-  border-radius: 4px;
-}
-.cupon-img {
-  object-fit: cover;
-}
-.cupon-once {
-  background-color: #ffdcdc8a;
-  color: #ff9246;
-}
-.index-cupon-text {
-  color: #272727;
-  font-size: 14px;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.search {
-  position: relative;
-  margin-bottom: 15px;
-}
-.searchInput {
-  font-size: 16px;
-  width: 100%;
-  padding-right: 35px;
-}
-
-.cancel-icon, .search-icon {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-}
-.tag-title {
-  display: inline-block;
-  font-size: 14px;
-  font-weight: bold;
-  margin-right: 10px;
-}
-.tag-list {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-.hot-tag {
-  background-color: #ffe9ac69;
-  border-radius: 6px;
-  padding: 6px 10px;
-  margin: 5px 5px 5px 0;
-  font-size: 12px;
-  display: inline-block;
-  color: #222222;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.skeleton-hot-tag {
-  min-width: 40px;
-  min-height: 24px;
-  color: transparent;
-  pointer-events: none;
-}
-.hot-tag:hover {
-  background-color: #ffe9ac;
-  transform: translateY(-1px);
-}
-
-/* 骨架屏動畫效果 */
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-  border-radius: 4px;
-}
-
-@keyframes skeleton-loading {
-  0% {
-    background-position: 200% 0;
+  &__copy {
+    flex: 1;
+    min-width: 0;
   }
-  100% {
-    background-position: -200% 0;
+
+  &__stats {
+    margin-top: 18px;
+  }
+
+  &__mosaic {
+    display: none;
+    flex: 0 0 400px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 120px 120px;
+    gap: 12px;
+
+    @media (min-width: $yp-bp-lg) {
+      display: grid;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 14px;
+      box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.3);
+      background: $yp-surface-2;
+    }
+
+    img:first-child {
+      grid-row: span 2;
+    }
   }
 }
 
-.skeleton-card {
-  pointer-events: none;
-  cursor: default;
-}
+.home-search {
+  margin-top: 20px;
+  max-width: 640px;
 
-.skeleton-carousel {
-  height: 165px;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 0;
-}
-
-.skeleton-image {
-  width: 100%;
-  height: 100%;
-  border-radius: 10px;
-}
-
-.skeleton-title {
-  height: 20px;
-  width: 80%;
-  margin-bottom: 8px;
-}
-
-.skeleton-tags {
-  margin: 10px 0;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.skeleton-category {
-  height: 22px;
-  width: 50px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.skeleton-category-small {
-  height: 22px;
-  width: 35px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.skeleton-category-once {
-  height: 22px;
-  width: 40px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.skeleton-content {
-  height: 16px;
-  width: 100%;
-  margin-bottom: 4px;
-}
-
-.skeleton-content-line2 {
-  height: 16px;
-  width: 75%;
-}
-
-/* 響應式骨架屏調整 */
-@media (max-width: 768px) {
-  .skeleton-title {
-    width: 90%;
-  }
-  
-  .skeleton-carousel {
-    height: 140px;
-  }
-  
-  .skeleton-tags {
-    gap: 5px;
-  }
-}
-
-// 響應式設計優化
-@media (max-width: 768px) {
-  .selectWrapper {
-    flex-direction: column;
-  }
-  
-  .category {
-    width: 100%;
-    margin: 5px 0 -5px 0;
-  }
-  
-  .pagination-info {
+  // Keep the labelled clear button instead of showing the browser's second X.
+  .yp-search__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
     display: none;
   }
-  
-  .cupon {
-    margin-bottom: 15px;
+}
+
+.home-hot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+
+  &__label {
+    font-size: 0.8125rem;
+    color: $yp-muted;
+    margin-right: 4px;
   }
-  
-  .next-page {
-    font-size: 14px;
+
+  &__skeleton {
+    width: 48px;
+    height: 26px;
+    border-radius: $yp-radius-pill;
   }
 }
 
-// 移除不必要的 will-change 屬性
+.home-list {
+  padding-top: 20px;
 
-// 提升點擊體驗
-.hot-tag, .retry-btn {
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+  @media (min-width: $yp-bp-md) {
+    // Match the Hero's 1200px content width, plus the page's side padding.
+    max-width: $yp-container + 48px;
+  }
 }
-.carousel__slide {
-  height: 165px;
+
+.home-toolbar {
+  &__town {
+    width: auto;
+    max-width: 120px;
+  }
+
+  @media (max-width: #{$yp-bp-md - 1px}) {
+    .yp-chips {
+      width: 100%;
+    }
+  }
 }
-</style>
-<style>
-.carousel__pagination {
-    position: absolute;
-    right: 0;
-    left: 0;
-    bottom: 10px;
+
+.home-grid {
+  .yp-coupon__offer {
+    color: $yp-ink;
+    font-weight: 400;
+  }
+
+  .yp-coupon__deal {
+    background: $yp-deal-soft;
+    color: $yp-deal-ink;
+    font-weight: 600;
+  }
+
+  @media (max-width: #{$yp-bp-sm - 1px}) {
+    gap: 12px;
+  }
+}
+
+.home-cta {
+  margin-top: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  border-radius: $yp-radius-lg;
+  background: linear-gradient(120deg, $yp-primary-soft, #fff1ec);
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+
+  &__desc {
+    color: $yp-muted;
+    margin: 0;
+  }
 }
 </style>

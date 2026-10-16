@@ -1,0 +1,205 @@
+// 優惠券卡片（首頁、分類、我的優惠券共用）
+.yp-coupon {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $yp-surface;
+  border-radius: $yp-radius-lg;
+  box-shadow: $yp-shadow;
+  overflow: hidden;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    color: inherit;
+    transform: translateY(-3px);
+    box-shadow: 0 2px 4px rgba(19, 48, 58, 0.06), 0 16px 32px -16px rgba(19, 48, 58, 0.35);
+  }
+
+  &__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: $yp-surface-2;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .carousel,
+    .carousel__viewport,
+    .carousel__track,
+    .carousel__slide {
+      height: 100% !important;
+    }
+
+    .carousel__pagination {
+      position: absolute;
+      bottom: 6px;
+      left: 0;
+      right: 0;
+      margin: 0;
+      padding: 0 !important;
+    }
+
+    .carousel__pagination-button::after {
+      background-color: rgba(255, 255, 255, 0.6);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .carousel__pagination-button--active::after {
+      background-color: #fff;
+      width: 14px;
+      border-radius: 3px;
+    }
+  }
+
+  &__rank {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba($yp-ink, 0.82);
+    color: #fff;
+    font-family: $yp-font-num;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: $yp-radius-pill;
+
+    &--1 {
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
+      color: #3b2500;
+    }
+  }
+
+  &__deal {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 2;
+    background: $yp-deal;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 14px 16px 16px;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  &__meta {
+    font-size: 0.8125rem;
+    color: $yp-muted;
+    margin: 4px 0 8px;
+  }
+
+  &__offer {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $yp-deal-ink;
+    line-height: 1.5;
+  }
+
+  &__desc {
+    font-size: 0.875rem;
+    color: $yp-muted;
+    line-height: 1.55;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 0.8125rem;
+    color: $yp-muted;
+  }
+
+  &__cta {
+    border: 1.5px solid $yp-primary;
+    color: $yp-primary-ink;
+    font-weight: 700;
+    padding: 3px 14px;
+    border-radius: $yp-radius-pill;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  // 手機橫式列表卡
+  @media (max-width: #{$yp-bp-sm - 1px}) {
+    &--row {
+      flex-direction: row;
+      padding: 10px;
+      gap: 12px;
+      border-radius: 14px;
+
+      .yp-coupon__media {
+        flex: 0 0 104px;
+        width: 104px;
+        height: 104px;
+        aspect-ratio: auto;
+        border-radius: 10px;
+      }
+
+      .yp-coupon__deal {
+        left: 6px;
+        bottom: 6px;
+        font-size: 0.75rem;
+        padding: 2px 7px;
+      }
+
+      .yp-coupon__rank {
+        left: 6px;
+        top: 6px;
+        font-size: 0.6875rem;
+        padding: 2px 7px;
+      }
+
+      .yp-coupon__body {
+        padding: 0;
+        min-width: 0;
+      }
+
+      .yp-coupon__title {
+        font-size: 1rem;
+      }
+
+      .yp-coupon__meta {
+        margin: 2px 0 4px;
+      }
+
+      .yp-coupon__offer {
+        font-size: 0.875rem;
+      }
+
+      .yp-coupon__footer {
+        padding-top: 6px;
+      }
+    }
+  }
+}

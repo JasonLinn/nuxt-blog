@@ -21,21 +21,40 @@
 /** 6. 引入需要的 bootstrap components */
 @import "bootstrap/scss/reboot";
 @import "bootstrap/scss/type";
+@import "bootstrap/scss/images";
 @import "bootstrap/scss/containers";
 @import "bootstrap/scss/grid";
 @import "bootstrap/scss/tables";
 @import "bootstrap/scss/forms";
 @import "bootstrap/scss/buttons";
-@import "bootstrap/scss/helpers";
+@import "bootstrap/scss/transitions";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/button-group";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/breadcrumb";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/progress";
+@import "bootstrap/scss/list-group";
+@import "bootstrap/scss/close";
 @import "bootstrap/scss/modal";
-/** ... */
+@import "bootstrap/scss/spinners";
+@import "bootstrap/scss/placeholders";
+@import "bootstrap/scss/helpers";
 
 @import "./reset";
 
 /** 7. 使用 utilities 需引入 utilities api（將 sass map 轉換為 utility classes） */
 @import "bootstrap/scss/utilities/api";
 
-/** 8. 客製樣式置於最後，覆蓋前面的樣式 */
+/** 8. Design System（Style A 蘭陽清新）*/
+@import "./design/tokens";
+@import "./design/base";
+@import "./design/components";
+@import "./design/coupon";
+@import "./design/admin";
+
+/** 9. 客製樣式置於最後，覆蓋前面的樣式 */
 @import "./style";
-@import "./activities-admin";
-@import "./activities-detail";

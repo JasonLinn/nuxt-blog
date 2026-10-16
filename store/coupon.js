@@ -47,7 +47,7 @@ const useCouponStore = defineStore("useCouponStore", {
 
         return { pending: false, data, error: null };
       } catch (error) {
-        this.couponData.error = error;
+        this.couponData.error = error?.data?.message || error?.message || String(error);
         this.couponData.pending = false;
 
         return { pending: false, data: null, error };

@@ -80,6 +80,7 @@ export default defineNuxtConfig({
         { name: 'keywords', content: '宜蘭民宿,合法民宿,親子民宿,寵物民宿,海景民宿,包棟民宿,戲水池民宿,KTV民宿,烤肉民宿,宜蘭住宿,宜蘭旅遊,民宿推薦,游泳池民宿,唱歌民宿,BBQ民宿' },
         { name: 'author', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會' },
         { name: 'robots', content: 'index, follow' },
+        { name: 'theme-color', content: '#0A9EC0' },
         
         // Open Graph
         { property: 'og:site_name', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會' },
@@ -101,7 +102,10 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
         { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
-        { rel: 'manifest', href: '/site.webmanifest' }
+        { rel: 'manifest', href: '/site.webmanifest' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Rubik:wght@500;600;700&display=swap' }
       ],
       script: [
         {
@@ -137,6 +141,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     vercel: { functions: { maxDuration: 60 } },
+    // 專案根目錄 utils/ 的共用模組一律打包進 server bundle，避免本機 dev 產生錯誤的相對路徑
+    externals: {
+      inline: [/^(?!.*node_modules).*[\\/]utils[\\/][^\\/]+\.(cjs|mjs|js|ts)$/]
+    },
     experimental: {
       wasm: true
     }

@@ -1,0 +1,64 @@
+// 全站基礎排版
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: $yp-font-sans;
+  color: $yp-ink;
+  background-color: $yp-bg;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba($yp-primary, 0.2);
+}
+
+a {
+  color: $yp-primary-ink;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $yp-primary;
+  }
+}
+
+img {
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid $yp-primary;
+  outline-offset: 2px;
+}
+
+// 數字字體（統計數、折扣值）
+.yp-num {
+  font-family: $yp-font-num;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-deal {
+  color: $yp-deal-ink !important;
+}
+
+.text-ink {
+  color: $yp-ink !important;
+}
+
+.bg-soft {
+  background-color: $yp-primary-soft !important;
+}
+
+.bg-surface-2 {
+  background-color: $yp-surface-2 !important;
+}
+
+// 手機底部 Tab Bar 預留空間
+@media (max-width: #{$yp-bp-md - 1px}) {
+  body.has-tabbar {
+    padding-bottom: calc(#{$yp-tabbar-h} + env(safe-area-inset-bottom));
+  }
+}

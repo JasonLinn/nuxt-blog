@@ -1,0 +1,119 @@
+// 這個檔案會被注入到每個 SFC 的 <style lang="scss">，只能放變數，不可輸出 CSS。
+// 也不可使用 Bootstrap functions（SFC 內未載入）。
+
+// Typography
+$yp-font-sans: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+$yp-font-num: 'Rubik', $yp-font-sans;
+
+// Radius
+$yp-radius-sm: 8px;
+$yp-radius: 12px;
+$yp-radius-lg: 16px;
+$yp-radius-xl: 24px;
+$yp-radius-pill: 999px;
+
+// Shadow
+$yp-shadow-sm: 0 1px 2px rgba(19, 48, 58, 0.06);
+$yp-shadow: 0 1px 2px rgba(19, 48, 58, 0.04), 0 6px 20px -12px rgba(19, 48, 58, 0.16);
+$yp-shadow-lg: 0 10px 28px -14px rgba(7, 111, 135, 0.28);
+
+// Layout
+$yp-container: 1200px;
+$yp-header-h: 68px;
+$yp-tabbar-h: 64px;
+$yp-admin-sidebar-w: 240px;
+
+// Breakpoints (= Bootstrap)
+$yp-bp-sm: 576px;
+$yp-bp-md: 768px;
+$yp-bp-lg: 992px;
+$yp-bp-xl: 1200px;
+
+// ───── Bootstrap overrides ─────
+$body-bg: $yp-bg;
+$body-color: $yp-ink;
+$secondary-color: $yp-muted;
+$border-color: $yp-line;
+$link-color: $yp-primary-ink;
+$link-hover-color: $yp-primary;
+$link-decoration: none;
+
+$font-family-sans-serif: $yp-font-sans;
+$font-size-base: 1rem;
+$line-height-base: 1.6;
+$headings-font-weight: 600;
+$headings-color: $yp-ink;
+
+$border-radius: $yp-radius-sm;
+$border-radius-sm: 6px;
+$border-radius-lg: $yp-radius;
+$border-radius-xl: $yp-radius-lg;
+$border-radius-pill: $yp-radius-pill;
+
+$box-shadow-sm: $yp-shadow-sm;
+$box-shadow: $yp-shadow;
+$box-shadow-lg: $yp-shadow-lg;
+
+$btn-font-weight: 600;
+$btn-padding-x: 1.125rem;
+$btn-border-radius: $yp-radius-sm;
+$btn-border-radius-sm: 6px;
+$btn-border-radius-lg: $yp-radius;
+$btn-focus-width: 0.2rem;
+
+$input-border-color: $yp-line;
+$input-placeholder-color: $yp-subtle;
+$input-focus-border-color: $yp-primary;
+$input-border-radius: $yp-radius-sm;
+$input-border-radius-lg: $yp-radius;
+$form-select-border-radius: $yp-radius-sm;
+$form-label-font-weight: 700;
+$form-label-color: $yp-ink;
+
+$card-border-color: $yp-line;
+$card-border-radius: $yp-radius-lg;
+$card-cap-bg: $yp-surface;
+$card-spacer-y: 1.25rem;
+$card-spacer-x: 1.25rem;
+
+$table-cell-padding-y: 0.75rem;
+$table-cell-padding-x: 0.875rem;
+$table-th-font-weight: 700;
+$table-border-color: $yp-line;
+$table-striped-bg: rgba(10, 158, 192, 0.03);
+$table-hover-bg: rgba(10, 158, 192, 0.05);
+
+$badge-font-weight: 700;
+$badge-border-radius: 6px;
+$badge-padding-y: 0.35em;
+$badge-padding-x: 0.6em;
+
+$modal-content-border-radius: $yp-radius-lg;
+$modal-content-border-color: transparent;
+$modal-header-border-color: $yp-line;
+$modal-footer-border-color: $yp-line;
+
+$dropdown-border-color: $yp-line;
+$dropdown-border-radius: $yp-radius;
+$dropdown-link-hover-bg: $yp-primary-soft;
+$dropdown-link-active-bg: $yp-primary;
+
+$pagination-border-color: $yp-line;
+$pagination-color: $yp-ink;
+$pagination-hover-bg: $yp-primary-soft;
+$pagination-border-radius: $yp-radius-sm;
+
+$nav-link-color: $yp-muted;
+$nav-link-hover-color: $yp-primary-ink;
+$nav-tabs-border-color: $yp-line;
+$nav-tabs-link-active-color: $yp-primary-ink;
+$nav-pills-border-radius: $yp-radius-pill;
+$nav-pills-link-active-bg: $yp-ink;
+
+$alert-border-radius: $yp-radius;
+$list-group-border-color: $yp-line;
+$list-group-border-radius: $yp-radius;
+$progress-border-radius: $yp-radius-pill;
+
+// 主色水藍搭白字（Bootstrap 預設 4.5 會讓按鈕變黑字）
+$min-contrast-ratio: 2.8;

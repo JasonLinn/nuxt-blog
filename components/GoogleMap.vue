@@ -1,6 +1,6 @@
 <template>
   <div class="open-map-wrapper">
-    <div ref="mapContainer" id="map" class="map-view"></div>
+    <div id="map" ref="mapContainer" class="map-view"></div>
   </div>
 </template>
 
@@ -21,7 +21,8 @@ onMounted(async () => {
     })
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
     }).addTo(mapInstance)
 
@@ -39,15 +40,25 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .open-map-wrapper {
   width: 100%;
   height: 100%;
+  min-height: 320px;
+  overflow: hidden;
+  background: $yp-surface-2;
+  border-radius: $yp-radius-lg;
 }
 
 .map-view {
-  height: 600px;
   width: 100%;
-  margin: auto;
+  height: 100%;
+  min-height: 320px;
+}
+
+@media (min-width: $yp-bp-md) {
+  .map-view {
+    min-height: 480px;
+  }
 }
 </style>

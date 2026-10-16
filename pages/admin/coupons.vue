@@ -1,47 +1,78 @@
 <template>
   <div class="admin-coupons-page">
-    <AdminHeader />
-
-    <main class="admin-coupons-content">
-      <header class="page-header">
-        <div>
-          <h1>優惠券管理</h1>
-          <p>封存後優惠券會從前台列表、地圖、搜尋與 Line 優惠券列表隱藏。</p>
-        </div>
-        <NuxtLink to="/articles/create" class="create-link">
+    <header class="yp-admin-head">
+      <div>
+        <h1 class="yp-admin-head__title">優惠券管理</h1>
+        <p class="yp-admin-head__desc">
+          封存後優惠券會從前台列表、地圖、搜尋與 Line 優惠券列表隱藏。
+        </p>
+      </div>
+      <div class="yp-admin-head__actions">
+        <NuxtLink to="/articles/create" class="btn btn-primary btn-icon">
           <Icon name="ri:add-line" />
           新增優惠券
         </NuxtLink>
-      </header>
+      </div>
+    </header>
 
-      <section class="toolbar-panel">
-        <div class="tabs">
-          <button
-            :class="['tab-button', { active: selectedStatus === 'active' }]"
-            @click="changeStatus('active')"
-          >
-            上架中
-          </button>
-          <button
-            :class="['tab-button', { active: selectedStatus === 'archived' }]"
-            @click="changeStatus('archived')"
-          >
-            已封存
-          </button>
-        </div>
-        <div class="search-box">
-          <Icon name="ri:search-line" />
-          <input v-model="searchText" type="search" placeholder="搜尋優惠券" @input="handleSearchInput">
-        </div>
-      </section>
+    <section class="yp-filter-bar">
+      <div class="yp-chips">
+        <button
+          type="button"
+          :class="['yp-chip', { 'is-active': selectedStatus === 'active' }]"
+          @click="changeStatus('active')"
+        >
+          上架中
+        </button>
+        <button
+          type="button"
+          :class="['yp-chip', { 'is-active': selectedStatus === 'archived' }]"
+          @click="changeStatus('archived')"
+        >
+          已封存
+        </button>
+      </div>
+      <div class="yp-filter-bar__search search-field">
+        <Icon name="ri:search-line" class="search-field__icon" />
+        <input
+          v-model="searchText"
+          type="search"
+          class="form-control"
+          placeholder="搜尋優惠券"
+          @input="handleSearchInput"
+        />
+      </div>
+    </section>
 
-      <section v-if="pending" class="state-message">載入中...</section>
-      <section v-else-if="errorMessage" class="state-message error">{{ errorMessage }}</section>
-      <section v-else-if="!coupons.length" class="state-message">
-        {{ selectedStatus === 'archived' ? '目前沒有封存優惠券' : '目前沒有上架中的優惠券' }}
-      </section>
-      <section v-else class="table-wrap">
-        <table>
+    <section v-if="pending" class="yp-table-wrap p-4">
+      <span
+        v-for="n in 5"
+        :key="n"
+        class="yp-skeleton mb-3"
+        style="height: 20px"
+        :style="{ width: `${90 - n * 8}%` }"
+      />
+    </section>
+    <section v-else-if="errorMessage" class="yp-table-wrap">
+      <div class="yp-empty yp-empty--error">
+        <div class="yp-empty__icon"><Icon name="ri:error-warning-line" /></div>
+        <p class="yp-empty__title">{{ errorMessage }}</p>
+        <button type="button" class="btn btn-outline-primary" @click="fetchCoupons">
+          重新載入
+        </button>
+      </div>
+    </section>
+    <section v-else-if="!coupons.length" class="yp-table-wrap">
+      <div class="yp-empty">
+        <div class="yp-empty__icon"><Icon name="ri:coupon-3-line" /></div>
+        <p class="yp-empty__title">
+          {{ selectedStatus === 'archived' ? '目前沒有封存優惠券' : '目前沒有上架中的優惠券' }}
+        </p>
+      </div>
+    </section>
+    <section v-else class="yp-table-wrap">
+      <div class="table-responsive">
+        <table class="table-hover yp-table-stack table align-middle">
           <thead>
             <tr>
               <th>名稱</th>
@@ -49,26 +80,39 @@
               <th>地區</th>
               <th>數量</th>
               <th>{{ selectedStatus === 'archived' ? '封存時間' : '更新時間' }}</th>
-              <th>操作</th>
+              <th class="text-end">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="coupon in coupons" :key="coupon.id">
-              <td>
+              <td data-label="名稱">
                 <div class="coupon-title">{{ coupon.title }}</div>
-                <div class="coupon-id">#{{ coupon.id }}</div>
+                <div class="coupon-id yp-num">#{{ coupon.id }}</div>
               </td>
-              <td>{{ coupon.category || '-' }}</td>
-              <td>{{ formatTownship(coupon.township) }}</td>
-              <td>{{ coupon.amount ?? '-' }}</td>
-              <td>{{ formatDate(selectedStatus === 'archived' ? coupon.archived_at : coupon.updated_at) }}</td>
-              <td>
-                <div class="actions">
-                  <NuxtLink class="action-link" :to="`/articles/${coupon.id}`">查看</NuxtLink>
-                  <NuxtLink v-if="selectedStatus === 'active'" class="action-link" :to="{ name: 'articles-edit', query: { id: coupon.id } }">編輯</NuxtLink>
+              <td data-label="分類">{{ coupon.category || '-' }}</td>
+              <td data-label="地區">{{ formatTownship(coupon.township) }}</td>
+              <td data-label="數量" class="yp-num">{{ coupon.amount ?? '-' }}</td>
+              <td data-label="時間" class="text-muted small">
+                {{
+                  formatDate(selectedStatus === 'archived' ? coupon.archived_at : coupon.updated_at)
+                }}
+              </td>
+              <td data-label="操作">
+                <div class="yp-row-actions">
+                  <NuxtLink class="btn btn-sm btn-soft" :to="`/articles/${coupon.id}`"
+                    >查看</NuxtLink
+                  >
+                  <NuxtLink
+                    v-if="selectedStatus === 'active'"
+                    class="btn btn-sm btn-soft"
+                    :to="{ name: 'articles-edit', query: { id: coupon.id } }"
+                  >
+                    編輯
+                  </NuxtLink>
                   <button
                     v-if="selectedStatus === 'active'"
-                    class="archive-button"
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
                     :disabled="busyId === coupon.id"
                     @click="archiveCoupon(coupon)"
                   >
@@ -76,7 +120,8 @@
                   </button>
                   <button
                     v-else
-                    class="restore-button"
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
                     :disabled="busyId === coupon.id"
                     @click="restoreCoupon(coupon)"
                   >
@@ -87,37 +132,41 @@
             </tr>
           </tbody>
         </table>
-      </section>
-
-      <nav
-        v-if="!pending && !errorMessage && pagination.totalPages > 1"
-        class="pagination-bar"
-        aria-label="優惠券分頁"
-      >
-        <button
-          class="pagination-button"
-          :disabled="!pagination.hasPrev"
-          @click="changePage(pagination.page - 1)"
-        >
-          上一頁
-        </button>
-        <span class="pagination-summary">
-          第 {{ pagination.page }} / {{ pagination.totalPages }} 頁，共 {{ pagination.total }} 筆
+      </div>
+      <div class="yp-table-wrap__footer">
+        <span>
+          共 <b class="yp-num">{{ pagination.total }}</b> 筆
+          <template v-if="pagination.totalPages > 1">
+            ，第 <span class="yp-num">{{ pagination.page }}</span> /
+            <span class="yp-num">{{ pagination.totalPages }}</span> 頁
+          </template>
         </span>
-        <button
-          class="pagination-button"
-          :disabled="!pagination.hasNext"
-          @click="changePage(pagination.page + 1)"
-        >
-          下一頁
-        </button>
-      </nav>
-    </main>
+        <nav v-if="pagination.totalPages > 1" class="yp-pager" aria-label="優惠券分頁">
+          <button
+            type="button"
+            :class="['yp-pager__btn', { 'is-disabled': !pagination.hasPrev }]"
+            :disabled="!pagination.hasPrev"
+            @click="changePage(pagination.page - 1)"
+          >
+            <Icon name="ri:arrow-left-s-line" /> 上一頁
+          </button>
+          <button
+            type="button"
+            :class="['yp-pager__btn', { 'is-disabled': !pagination.hasNext }]"
+            :disabled="!pagination.hasNext"
+            @click="changePage(pagination.page + 1)"
+          >
+            下一頁 <Icon name="ri:arrow-right-s-line" />
+          </button>
+        </nav>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
 definePageMeta({
+  layout: 'admin',
   middleware: 'admin-auth'
 })
 
@@ -246,259 +295,51 @@ const formatDate = (value) => {
   return new Date(value).toLocaleString('zh-TW')
 }
 
-watch(() => route.query, async (query) => {
-  selectedStatus.value = query.status === 'archived' ? 'archived' : 'active'
-  searchText.value = query.search || ''
-  pagination.value.page = parsePage(query.page)
-  await fetchCoupons()
-})
+watch(
+  () => route.query,
+  async (query) => {
+    selectedStatus.value = query.status === 'archived' ? 'archived' : 'active'
+    searchText.value = query.search || ''
+    pagination.value.page = parsePage(query.page)
+    await fetchCoupons()
+  }
+)
 
 await fetchCoupons()
 </script>
 
-<style scoped>
-.admin-coupons-page {
-  min-height: 100vh;
-  background: #f8fafc;
-}
+<style scoped lang="scss">
+.search-field {
+  position: relative;
 
-.admin-coupons-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px 48px;
-}
+  &__icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $yp-subtle;
+    pointer-events: none;
+  }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.page-header h1 {
-  margin: 0 0 6px;
-  color: #111827;
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.page-header p {
-  margin: 0;
-  color: #64748b;
-  font-size: 14px;
-}
-
-.create-link,
-.action-link,
-.archive-button,
-.restore-button,
-.tab-button {
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  border: 1px solid transparent;
-  cursor: pointer;
-}
-
-.create-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  background: #2563eb;
-  color: white;
-}
-
-.toolbar-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px;
-  margin-bottom: 16px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-}
-
-.tabs {
-  display: inline-flex;
-  gap: 6px;
-}
-
-.tab-button {
-  padding: 8px 14px;
-  background: #f8fafc;
-  color: #475569;
-  border-color: #e2e8f0;
-}
-
-.tab-button.active {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-color: #bfdbfe;
-}
-
-.search-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: min(320px, 100%);
-  padding: 8px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: white;
-}
-
-.search-box input {
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size: 14px;
-}
-
-.state-message {
-  padding: 28px;
-  text-align: center;
-  color: #64748b;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-}
-
-.state-message.error {
-  color: #b91c1c;
-  background: #fef2f2;
-  border-color: #fecaca;
-}
-
-.table-wrap {
-  overflow-x: auto;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 14px 16px;
-  border-bottom: 1px solid #e2e8f0;
-  text-align: left;
-  vertical-align: middle;
-}
-
-th {
-  color: #475569;
-  background: #f8fafc;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-td {
-  color: #334155;
-  font-size: 14px;
-}
-
-tbody tr:last-child td {
-  border-bottom: none;
+  .form-control {
+    width: 100%;
+    padding-left: 36px;
+  }
 }
 
 .coupon-title {
   max-width: 420px;
-  color: #0f172a;
   font-weight: 600;
   line-height: 1.4;
 }
 
 .coupon-id {
-  margin-top: 4px;
-  color: #94a3b8;
-  font-size: 12px;
+  margin-top: 2px;
+  color: $yp-subtle;
+  font-size: 0.75rem;
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.action-link {
-  padding: 7px 10px;
-  color: #1d4ed8;
-  background: #eff6ff;
-  border-color: #bfdbfe;
-}
-
-.archive-button {
-  padding: 7px 10px;
-  color: #92400e;
-  background: #fffbeb;
-  border-color: #fde68a;
-}
-
-.restore-button {
-  padding: 7px 10px;
-  color: #166534;
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-}
-
-.pagination-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 14px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-}
-
-.pagination-button {
-  min-width: 86px;
-  padding: 8px 12px;
-  color: #1d4ed8;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.pagination-summary {
-  color: #475569;
-  font-size: 14px;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-@media (max-width: 768px) {
-  .admin-coupons-content {
-    padding: 0 12px 32px;
-  }
-
-  .page-header,
-  .toolbar-panel,
-  .pagination-bar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .create-link {
-    justify-content: center;
-  }
+.yp-table-wrap__footer .yp-pager {
+  margin-top: 0;
 }
 </style>

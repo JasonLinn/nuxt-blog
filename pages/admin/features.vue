@@ -1,192 +1,161 @@
 <template>
-  <div class="admin-features-container">
-    <AdminHeader />
-    
-    <!-- 頁面標題 -->
-    <div class="page-header">
-      <h1>特色項目管理</h1>
-    </div>
+  <div>
+    <header class="yp-admin-head">
+      <div>
+        <h1 class="yp-admin-head__title">特色項目管理</h1>
+        <p class="yp-admin-head__desc">維護民宿的主題特色與服務設施選項</p>
+      </div>
+    </header>
 
-    <div class="features-section">
-      <!-- 主題特色管理 -->
-      <div class="feature-category">
-        <div class="category-header">
-          <h2>🏠 主題特色管理</h2>
-          <button @click="showAddModal('theme')" class="add-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-            </svg>
-            新增主題特色
+    <div class="d-grid gap-4">
+      <section v-for="section in sections" :key="section.type">
+        <div class="yp-section-head">
+          <h2 class="yp-section-head__title d-flex align-items-center gap-2">
+            <Icon :name="section.icon" class="text-primary" />
+            {{ section.title }}
+          </h2>
+          <button
+            type="button"
+            class="btn btn-primary btn-icon"
+            @click="showAddModal(section.type)"
+          >
+            <Icon name="ri:add-line" /> {{ section.addLabel }}
           </button>
         </div>
-        
-        <div class="features-grid">
-          <div 
-            v-for="feature in themeFeatures" 
-            :key="feature.id" 
-            class="feature-item"
-            :class="{ disabled: !feature.is_active }"
-          >
-            <div class="feature-content">
-              <span class="feature-name">{{ feature.name }}</span>
-              <span class="feature-status" :class="feature.is_active ? 'active' : 'inactive'">
-                {{ feature.is_active ? '啟用' : '停用' }}
-              </span>
-            </div>
-            <div class="feature-actions">
-              <button 
-                @click="editFeature(feature)" 
-                class="edit-btn"
-                title="編輯"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708L8.5 11.207l-3 1.5a.5.5 0 0 1-.64-.64l1.5-3L13.708.854a.5.5 0 0 1 .708 0z"/>
-                </svg>
-              </button>
-              <button 
-                @click="toggleFeatureStatus(feature)" 
-                class="toggle-btn"
-                :class="feature.is_active ? 'disable' : 'enable'"
-                :title="feature.is_active ? '停用' : '啟用'"
-              >
-                <svg v-if="feature.is_active" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0zM8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m2 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8"/>
-                </svg>
-              </button>
-              <button 
-                @click="deleteFeature(feature)" 
-                class="delete-btn"
-                title="刪除"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        <p class="text-muted small mb-3">{{ section.desc }}</p>
 
-      <!-- 服務設施管理 -->
-      <div class="feature-category">
-        <div class="category-header">
-          <h2>🎯 服務設施管理</h2>
-          <button @click="showAddModal('service')" class="add-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-            </svg>
-            新增服務設施
-          </button>
-        </div>
-        
-        <div class="features-grid">
-          <div 
-            v-for="feature in serviceAmenities" 
-            :key="feature.id" 
-            class="feature-item"
-            :class="{ disabled: !feature.is_active }"
-          >
-            <div class="feature-content">
-              <span class="feature-name">{{ feature.name }}</span>
-              <span class="feature-status" :class="feature.is_active ? 'active' : 'inactive'">
-                {{ feature.is_active ? '啟用' : '停用' }}
-              </span>
-            </div>
-            <div class="feature-actions">
-              <button 
-                @click="editFeature(feature)" 
-                class="edit-btn"
-                title="編輯"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708L8.5 11.207l-3 1.5a.5.5 0 0 1-.64-.64l1.5-3L13.708.854a.5.5 0 0 1 .708 0z"/>
-                </svg>
-              </button>
-              <button 
-                @click="toggleFeatureStatus(feature)" 
-                class="toggle-btn"
-                :class="feature.is_active ? 'disable' : 'enable'"
-                :title="feature.is_active ? '停用' : '啟用'"
-              >
-                <svg v-if="feature.is_active" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0zM8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m2 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8"/>
-                </svg>
-              </button>
-              <button 
-                @click="deleteFeature(feature)" 
-                class="delete-btn"
-                title="刪除"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1z"/>
-                </svg>
-              </button>
-            </div>
+        <div class="yp-table-wrap">
+          <div v-if="loading" class="d-grid gap-2 p-3">
+            <span v-for="n in 3" :key="n" class="yp-skeleton" style="height: 40px"></span>
           </div>
+
+          <div v-else-if="!section.items.length" class="yp-empty">
+            <div class="yp-empty__icon"><Icon :name="section.icon" /></div>
+            <h3 class="yp-empty__title">尚未建立{{ section.title }}</h3>
+            <p class="yp-empty__text">點擊上方按鈕新增第一個項目。</p>
+          </div>
+
+          <template v-else>
+            <div class="table-responsive">
+              <table class="table-hover yp-table-stack table align-middle">
+                <thead>
+                  <tr>
+                    <th>名稱</th>
+                    <th style="width: 120px">狀態</th>
+                    <th class="text-end" style="width: 200px">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="feature in section.items" :key="feature.id">
+                    <td
+                      data-label="名稱"
+                      class="fw-bold"
+                      :class="{ 'text-muted': !feature.is_active }"
+                    >
+                      {{ feature.name }}
+                    </td>
+                    <td data-label="狀態">
+                      <span
+                        class="yp-status"
+                        :class="feature.is_active ? 'yp-status--active' : 'yp-status--inactive'"
+                      >
+                        {{ feature.is_active ? '啟用' : '停用' }}
+                      </span>
+                    </td>
+                    <td data-label="操作">
+                      <div class="yp-row-actions">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-soft btn-icon"
+                          title="編輯"
+                          @click="editFeature(feature)"
+                        >
+                          <Icon name="ri:edit-line" /> 編輯
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-secondary btn-icon"
+                          :title="feature.is_active ? '停用' : '啟用'"
+                          @click="toggleFeatureStatus(feature)"
+                        >
+                          <Icon :name="feature.is_active ? 'ri:eye-off-line' : 'ri:eye-line'" />
+                          {{ feature.is_active ? '停用' : '啟用' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger btn-icon"
+                          title="刪除"
+                          aria-label="刪除"
+                          @click="deleteFeature(feature)"
+                        >
+                          <Icon name="ri:delete-bin-line" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="yp-table-wrap__footer">
+              <span>共 {{ section.items.length }} 項</span>
+            </div>
+          </template>
         </div>
-      </div>
+      </section>
     </div>
 
     <!-- 新增/編輯模態框 -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>{{ editingFeature ? '編輯' : '新增' }}{{ modalType === 'theme' ? '主題特色' : '服務設施' }}</h3>
-          <button @click="closeModal" class="close-btn">×</button>
+    <div v-if="showModal" class="yp-modal-overlay" @click="closeModal">
+      <div class="yp-modal" role="dialog" aria-modal="true" @click.stop>
+        <div class="yp-modal__header">
+          <h3 class="yp-modal__title">
+            {{ editingFeature ? '編輯' : '新增'
+            }}{{ modalType === 'theme' ? '主題特色' : '服務設施' }}
+          </h3>
+          <button type="button" class="btn-close" aria-label="關閉" @click="closeModal"></button>
         </div>
-        
-        <form @submit.prevent="saveFeature" class="modal-form">
-          <div class="form-group">
-            <label class="form-label">名稱</label>
+
+        <form class="yp-modal__body d-grid gap-3" @submit.prevent="saveFeature">
+          <div>
+            <label class="form-label required" for="feature-name">名稱</label>
             <input
+              id="feature-name"
               v-model="featureForm.name"
               type="text"
-              class="form-input"
+              class="form-control"
               placeholder="請輸入特色名稱"
               required
             />
           </div>
-          
-          <div class="form-group">
-            <label class="checkbox-item">
-              <input
-                v-model="featureForm.is_active"
-                type="checkbox"
-              />
-              <span class="checkbox-text">啟用此項目</span>
-            </label>
+
+          <div class="form-check form-switch">
+            <input
+              id="feature-active"
+              v-model="featureForm.is_active"
+              type="checkbox"
+              class="form-check-input"
+              role="switch"
+            />
+            <label class="form-check-label" for="feature-active">啟用此項目</label>
           </div>
-          
-          <div class="modal-actions">
-            <button type="button" @click="closeModal" class="cancel-btn">取消</button>
-            <button type="submit" class="save-btn" :disabled="processing">
+
+          <div class="d-flex justify-content-end gap-2 pt-2">
+            <button type="button" class="btn btn-ghost" @click="closeModal">取消</button>
+            <button type="submit" class="btn btn-primary" :disabled="processing">
               {{ processing ? '儲存中...' : '儲存' }}
             </button>
           </div>
         </form>
       </div>
     </div>
-
-    <!-- 載入中遮罩 -->
-    <div v-if="loading" class="loading-overlay">
-      <div class="loading-spinner"></div>
-      <p>載入中...</p>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 definePageMeta({
+  layout: 'admin',
   middleware: ['admin-auth']
 })
 
@@ -248,13 +217,13 @@ const editFeature = (feature) => {
 const saveFeature = async () => {
   try {
     processing.value = true
-    
-    const url = editingFeature.value 
+
+    const url = editingFeature.value
       ? `/api/admin/features/${editingFeature.value.id}`
       : '/api/admin/features'
-    
+
     const method = editingFeature.value ? 'PUT' : 'POST'
-    
+
     const response = await $fetch(url, {
       method,
       body: {
@@ -262,7 +231,7 @@ const saveFeature = async () => {
         type: modalType.value
       }
     })
-    
+
     if (response.success) {
       await loadFeatures()
       closeModal()
@@ -286,7 +255,7 @@ const toggleFeatureStatus = async (feature) => {
         is_active: !feature.is_active
       }
     })
-    
+
     if (response.success) {
       await loadFeatures()
     }
@@ -299,12 +268,12 @@ const toggleFeatureStatus = async (feature) => {
 // 刪除特色項目
 const deleteFeature = async (feature) => {
   if (!confirm(`確定要刪除「${feature.name}」嗎？此操作不可復原。`)) return
-  
+
   try {
     const response = await $fetch(`/api/admin/features/${feature.id}`, {
       method: 'DELETE'
     })
-    
+
     if (response.success) {
       await loadFeatures()
       alert('刪除成功！')
@@ -325,388 +294,64 @@ const closeModal = () => {
 onMounted(() => {
   loadFeatures()
 })
+
+// 兩個分類區塊（僅用於 template 渲染）
+const sections = computed(() => [
+  {
+    type: 'theme',
+    title: '主題特色',
+    desc: '民宿主題標籤，例如親子、寵物友善',
+    icon: 'ri:home-heart-line',
+    addLabel: '新增主題特色',
+    items: themeFeatures.value
+  },
+  {
+    type: 'service',
+    title: '服務設施',
+    desc: '民宿提供的服務與設施',
+    icon: 'ri:service-line',
+    addLabel: '新增服務設施',
+    items: serviceAmenities.value
+  }
+])
 </script>
 
 <style scoped lang="scss">
-.admin-features-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #e2e8f0;
-
-  h1 {
-    color: #2d3748;
-    font-size: 28px;
-    font-weight: bold;
-    margin: 0;
-  }
-}
-
-.features-section {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-.feature-category {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.category-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-
-  h2 {
-    color: #2d3748;
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
-  }
-}
-
-.add-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
-  }
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
-}
-
-.feature-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: #cbd5e0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  &.disabled {
-    opacity: 0.6;
-    background: #f7fafc;
-  }
-}
-
-.feature-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.feature-name {
-  font-weight: 600;
-  color: #2d3748;
-  font-size: 16px;
-}
-
-.feature-status {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-weight: 500;
-
-  &.active {
-    background: #c6f6d5;
-    color: #22543d;
-  }
-
-  &.inactive {
-    background: #fed7d7;
-    color: #742a2a;
-  }
-}
-
-.feature-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.edit-btn, .toggle-btn, .delete-btn {
-  padding: 8px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    transform: scale(1.1);
-  }
-}
-
-.edit-btn {
-  background: #4299e1;
-  color: white;
-
-  &:hover {
-    background: #3182ce;
-  }
-}
-
-.toggle-btn {
-  &.enable {
-    background: #48bb78;
-    color: white;
-
-    &:hover {
-      background: #38a169;
-    }
-  }
-
-  &.disable {
-    background: #ed8936;
-    color: white;
-
-    &:hover {
-      background: #dd6b20;
-    }
-  }
-}
-
-.delete-btn {
-  background: #e53e3e;
-  color: white;
-
-  &:hover {
-    background: #c53030;
-  }
-}
-
-// 模態框樣式
-.modal-overlay {
+.yp-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  inset: 0;
+  z-index: 1050;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(19, 48, 58, 0.45);
 }
 
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
+.yp-modal {
+  width: 100%;
+  max-width: 440px;
   max-height: 90vh;
   overflow-y: auto;
-}
+  background: $yp-surface;
+  border-radius: $yp-radius-lg;
+  box-shadow: $yp-shadow-lg;
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
-
-  h3 {
-    margin: 0;
-    color: #2d3748;
-    font-size: 18px;
-    font-weight: 600;
-  }
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #a0aec0;
-  cursor: pointer;
-  line-height: 1;
-
-  &:hover {
-    color: #2d3748;
-  }
-}
-
-.modal-form {
-  padding: 24px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #2d3748;
-}
-
-.form-input {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.3s ease;
-
-  &:focus {
-    outline: none;
-    border-color: #667eea;
-  }
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-
-  input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #667eea;
-  }
-
-  .checkbox-text {
-    font-size: 16px;
-    color: #2d3748;
-  }
-}
-
-.modal-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 24px;
-}
-
-.cancel-btn, .save-btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.cancel-btn {
-  background: #e2e8f0;
-  color: #4a5568;
-
-  &:hover {
-    background: #cbd5e0;
-  }
-}
-
-.save-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-// 載入中樣式
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-
-  p {
-    margin-top: 16px;
-    color: #4a5568;
-    font-size: 16px;
-  }
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #e2e8f0;
-  border-top: 3px solid #667eea;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-// 響應式設計
-@media (max-width: 768px) {
-  .admin-header {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .category-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .feature-item {
-    flex-direction: column;
-    align-items: flex-start;
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
+    padding: 18px 20px 0;
   }
 
-  .feature-actions {
-    align-self: flex-end;
+  &__title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  &__body {
+    padding: 16px 20px 20px;
   }
 }
 </style>

@@ -1,220 +1,213 @@
 <template>
-  <header class="flex w-full justify-center container relative z-50">
-    <div id="sidemenu">
-      <button class="sidemenu__btn" v-on:click="navOpen=!navOpen" v-bind:class="{active:navOpen}">
-        <span class="top"></span>
-        <span class="mid"></span>
-        <span class="bottom"></span>
-      </button>
-      <transition name="translateX">
-        <nav v-show="navOpen">
-          <div class="sidemenu__wrapper">
-            <ul class="sidemenu__list">
-              <li v-for="(item, index) in menuItems" :key="index" class="sidemenu__item">
-                <div class="sidemenu__title" @click="toggleMobileSubmenu(index)">
-                  <span>{{ item.title }}</span>
-                  <Icon name="ri:arrow-down-s-line" class="transition-transform duration-300" :class="{ 'rotate-180': item.isOpen }" v-if="item.children" />
-                </div>
-                <transition name="slide-down">
-                  <ul v-show="item.isOpen" class="sidemenu__sublist">
-                     <li v-for="(child, cIndex) in item.children" :key="cIndex" class="sidemenu__subitem">
-                        <NuxtLink :to="child.path" @click="navOpen = false">
-                           {{ child.title }}
-                        </NuxtLink>
-                     </li>
-                     <li v-if="item.title === '探索優惠' && userData?.userId" class="sidemenu__subitem">
-                        <NuxtLink to="/userInfo" @click="navOpen = false">
-                          查看已領
-                        </NuxtLink>
-                     </li>
-                  </ul>
-                </transition>
-              </li>
-              
-               <ClientOnly>
-                <li v-if="!userData?.userId" class="sidemenu__item" @click="navOpen = false">
-                <NuxtLink
-                  class="sidemenu__link"
-                  :to="`/api/line/login?returnTo=${encodeURIComponent(route.path)}`"
-                  external
-                >
-                  登入LINE
-                </NuxtLink>
-              </li>
-               </ClientOnly>
-            </ul>
+  <header class="yp-header" :class="{ 'is-scrolled': scrolled }">
+    <div class="yp-header__inner">
+      <NuxtLink :to="{ name: 'index' }" class="yp-header__logo" aria-label="宜蘭旅遊通 首頁">
+        <img src="/logo.png" width="158" height="46" alt="宜蘭旅遊通" />
+      </NuxtLink>
 
-            <!-- 站點數據 -->
-            <div class="sidemenu__stats" aria-label="站點數據">
-              <div class="ss-row">
-                <span class="ss-num">{{ displayVisitorCount }}</span>
-                <span class="ss-label">人次造訪</span>
-              </div>
-              <div class="ss-row">
-                <span class="ss-num">{{ partnerStores }}</span>
-                <span class="ss-label">店家優惠</span>
-              </div>
-              <div class="ss-row">
-                <span class="ss-num">{{ partnerHotels }}</span>
-                <span class="ss-label">合作旅宿</span>
-              </div>
-            </div>
+      <!-- 桌機導覽 -->
+      <nav class="yp-header__nav" aria-label="主選單">
+        <div
+          v-for="item in menuItems"
+          :key="item.title"
+          class="yp-nav-group"
+          :class="{ 'is-current': isGroupActive(item) }"
+        >
+          <NuxtLink :to="item.path" class="yp-nav-group__btn">
+            {{ item.title }}
+            <Icon name="ri:arrow-down-s-line" class="yp-nav-group__caret" />
+          </NuxtLink>
+          <div class="yp-nav-group__menu">
+            <NuxtLink
+              v-for="child in item.children"
+              :key="child.path"
+              :to="child.path"
+              class="yp-nav-group__link"
+            >
+              <Icon :name="child.icon" class="yp-nav-group__icon" />
+              <span>
+                <b>{{ child.title }}</b>
+                <small v-if="child.desc">{{ child.desc }}</small>
+              </span>
+            </NuxtLink>
+            <NuxtLink
+              v-if="item.title === '探索優惠' && userData?.userId"
+              to="/userInfo"
+              class="yp-nav-group__link"
+            >
+              <Icon name="ri:coupon-3-line" class="yp-nav-group__icon" />
+              <span><b>我的優惠券</b><small>查看已領取的優惠</small></span>
+            </NuxtLink>
           </div>
-        </nav>
-      </transition>
+        </div>
+      </nav>
+
+      <div class="yp-header__actions">
+        <!-- 編輯者（GitHub 登入）選單 -->
+        <div
+          v-if="userInfo"
+          class="yp-user"
+          @mouseenter="showEdit = true"
+          @mouseleave="showEdit = false"
+        >
+          <button
+            class="yp-user__btn"
+            type="button"
+            :aria-expanded="showEdit"
+            @click="showEdit = !showEdit"
+          >
+            <img class="yp-user__avatar" :src="userInfo.avatar" alt="" />
+            <span class="yp-user__name d-none d-lg-inline">{{ userInfo.nickname }}</span>
+          </button>
+          <transition name="yp-fade">
+            <div v-show="showEdit" class="yp-user__menu">
+              <div class="yp-user__head">
+                <p class="yp-user__title">{{ userInfo.nickname }}</p>
+                <p class="yp-user__email">{{ userInfo.email }}</p>
+              </div>
+              <NuxtLink to="/articles/create" class="yp-user__item">
+                <Icon name="ri:add-circle-line" /> 新增優惠券
+              </NuxtLink>
+              <button type="button" class="yp-user__item is-danger" @click="handleLogout">
+                <Icon name="ri:logout-box-r-line" /> 登出
+              </button>
+            </div>
+          </transition>
+        </div>
+
+        <ClientOnly>
+          <NuxtLink
+            v-if="userData?.userId"
+            to="/userInfo"
+            class="yp-line-user"
+            aria-label="我的優惠券"
+          >
+            <img v-if="userData.pictureUrl" :src="userData.pictureUrl" alt="" />
+            <span v-else>{{ (userData.displayName || '我').slice(0, 1) }}</span>
+          </NuxtLink>
+          <a
+            v-else-if="!userInfo"
+            :href="lineLoginUrl"
+            class="btn btn-line btn-sm yp-header__login"
+          >
+            LINE 登入
+          </a>
+        </ClientOnly>
+
+        <button
+          class="yp-header__burger"
+          type="button"
+          :aria-expanded="navOpen"
+          aria-label="開啟選單"
+          @click="navOpen = !navOpen"
+        >
+          <Icon :name="navOpen ? 'ri:close-line' : 'ri:menu-line'" />
+        </button>
+      </div>
     </div>
 
-    <nav class="index-nav flex w-full max-w-7xl items-center justify-between px-6 py-2">
-      <div class="nav-wrapper flex items-center">
-        <NuxtLink :to="{ name: 'index' }">
-          <img src="/logo.jpg" width="200" alt="宜蘭旅遊通">
-        </NuxtLink>
-        <!-- 站點數據徽章（桌機顯示，手機改於側選單顯示） -->
-        <div class="nav-stats" aria-label="站點數據">
-          <span class="ns-item"><b>{{ displayVisitorCount }}</b><i>人次造訪</i></span>
-          <span class="ns-item"><b>{{ partnerStores }}</b><i>店家優惠</i></span>
-          <span class="ns-item"><b>{{ partnerHotels }}</b><i>合作旅宿</i></span>
-        </div>
-      </div>
+    <!-- 手機抽屜選單 -->
+    <transition name="yp-drawer">
+      <div v-show="navOpen" class="yp-drawer" @click.self="navOpen = false">
+        <nav class="yp-drawer__panel" aria-label="手機選單">
+          <section v-for="item in menuItems" :key="item.title" class="yp-drawer__group">
+            <h2 class="yp-drawer__title">{{ item.title }}</h2>
+            <NuxtLink
+              v-for="child in item.children"
+              :key="child.path"
+              :to="child.path"
+              class="yp-drawer__link"
+              @click="navOpen = false"
+            >
+              <Icon :name="child.icon" />
+              {{ child.title }}
+              <Icon name="ri:arrow-right-s-line" class="text-secondary ms-auto" />
+            </NuxtLink>
+          </section>
 
-      <!-- Desktop Navigation Links -->
-      <div class="nav-links">
-        <div v-for="(item, index) in menuItems" :key="index" class="nav-item-group">
-          <div class="nav-link-btn">
-            {{ item.title }}
-            <Icon name="ri:arrow-down-s-line" class="nav-icon" />
+          <div class="yp-drawer__stats" aria-label="站點數據">
+            <div>
+              <b>{{ displayVisitorCount }}</b
+              ><span>人次造訪</span>
+            </div>
+            <div>
+              <b>{{ partnerStores }}</b
+              ><span>店家優惠</span>
+            </div>
+            <div>
+              <b>{{ partnerHotels }}</b
+              ><span>合作旅宿</span>
+            </div>
           </div>
-          
-          <!-- Dropdown Menu -->
-          <div class="nav-dropdown">
-             <div class="dropdown-content">
-                <NuxtLink 
-                  v-for="(child, cIndex) in item.children" 
-                  :key="cIndex" 
-                  :to="child.path"
-                  class="dropdown-link"
-                >
-                  {{ child.title }}
-                </NuxtLink>
-                 <NuxtLink 
-                  v-if="item.title === '探索優惠' && userData?.userId" 
-                  to="/userInfo"
-                  class="dropdown-link"
-                >
-                  查看已領
-                </NuxtLink>
-             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- User Info / Login -->
-      <div class="flex items-center gap-4">
-        <!-- User Avatar Dropdown -->
-        <div v-if="userInfo" class="user-info group relative z-50">
-          <div class="avatar cursor-pointer py-2 flex items-center gap-2" @mouseenter="showEdit = true" @mouseleave="showEdit = false">
-             <img
-              class="user-img"
-              :src="userInfo.avatar"
-              alt="使用者選單"
-            />
-            <span class="user-nickname hidden lg:block">{{ userInfo.nickname }}</span>
-            
-            <transition name="fade">
-              <div v-show="showEdit" class="user-info-list">
-                 <div class="user-menu">
-                    <div class="user-header">
-                       <p class="user-name">{{ userInfo.nickname }}</p>
-                       <p class="user-email">{{ userInfo.email }}</p>
-                    </div>
-                    <NuxtLink to="/articles/create" class="menu-item">
-                      <Icon name="ri:pencil-line" class="menu-icon" />
-                      新增優惠券
-                    </NuxtLink>
-                    <button @click="handleLogout" class="menu-item logout">
-                      <Icon name="ri:logout-box-line" class="menu-icon" />
-                      登出
-                    </button>
-                 </div>
-              </div>
-            </transition>
-          </div>
-        </div>
+          <ClientOnly>
+            <a v-if="!userData?.userId" :href="lineLoginUrl" class="btn btn-line w-100 mt-3">
+              使用 LINE 登入領取優惠
+            </a>
+          </ClientOnly>
+        </nav>
       </div>
-    </nav>
+    </transition>
   </header>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import useStore from "~~/store";
-import useReferralStore from '~~/store/referral';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import useStore from '~~/store'
+import useReferralStore from '~~/store/referral'
+import { mainMenu } from '~/utils/site-nav'
 
 const { data } = await useFetch('/api/whoami')
 const userInfo = useState('userInfo')
 const showEdit = ref(false)
 const route = useRoute()
-const { host } = useRequestURL()
 
-const store = useStore();
-const userData = computed(() => store.getUserData);
-const referral = useReferralStore();
+const store = useStore()
+const userData = computed(() => store.getUserData)
+const referral = useReferralStore()
 const navOpen = ref(false)
+const scrolled = ref(false)
 
-// 站點統計
 const { partnerStores, partnerHotels, displayVisitorCount, animateVisitor } = useSiteStats()
 
-// Menu Items Configuration
-const menuItems = ref([
-  {
-    title: '探索優惠',
-    path: '/',
-    isOpen: false,
-    children: [
-      { title: '優惠券列表', path: '/' },
-      { title: '優惠券地圖', path: '/map' },
-      { title: '提交優惠券', path: '/coupons/submit' },
-      { title: '更新時間列表', path: '/launch-schedule' },
-    ]
-  },
-  {
-    title: '住宿服務',
-    path: '/homestay-list',
-    isOpen: false,
-    children: [
-      { title: '合法民宿推薦', path: '/homestay-list' },
-      { title: '民宿業者登入', path: '/homestay-login' },
-    ]
-  },
-  {
-    title: '旅遊資訊',
-    path: '/yilan-activities',
-    isOpen: false,
-    children: [
-      { title: '宜蘭活動總匯', path: '/yilan-activities' },
-      { title: '代訂服務', path: '/relative' },
-    ]
-  },
-  {
-    title: '關於平台',
-    path: '/about',
-    isOpen: false,
-    children: [
-      { title: '關於我們', path: '/about' },
-      { title: '使用規範', path: '/rule' },
-    ]
-  }
-])
+const menuItems = mainMenu
 
-const toggleMobileSubmenu = (index) => {
-  menuItems.value[index].isOpen = !menuItems.value[index].isOpen
+const lineLoginUrl = computed(() => `/api/line/login?returnTo=${encodeURIComponent(route.path)}`)
+
+const isGroupActive = (item) =>
+  item.children.some((child) =>
+    child.path === '/' ? route.path === '/' : route.path.startsWith(child.path)
+  )
+
+const onScroll = () => {
+  scrolled.value = window.scrollY > 4
 }
 
 onMounted(() => {
   store.fetchAndSetUser()
   referral.setReferral(route.query)
   animateVisitor()
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll)
+})
+
+watch(
+  () => route.fullPath,
+  () => {
+    navOpen.value = false
+    showEdit.value = false
+  }
+)
+
+watch(navOpen, (open) => {
+  if (typeof document !== 'undefined') {
+    document.documentElement.style.overflow = open ? 'hidden' : ''
+  }
 })
 
 watch(
@@ -238,412 +231,413 @@ const handleLogout = () => {
 </script>
 
 <style lang="scss" scoped>
-// 桌機版：Logo 右側的站點數據徽章
-.nav-wrapper {
-  gap: 24px;
-}
-.nav-stats {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+.yp-header {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
-  .ns-item {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 4px;
-    line-height: 1;
-    white-space: nowrap;
-
-    b {
-      font-size: 16px;
-      font-weight: 700;
-      color: #613030;
-      letter-spacing: -0.3px;
-    }
-    i {
-      font-style: normal;
-      font-size: 11.5px;
-      color: #8a7a78;
-      letter-spacing: 0.3px;
-    }
+  &.is-scrolled {
+    border-bottom-color: $yp-line;
+    box-shadow: 0 4px 16px -12px rgba(19, 48, 58, 0.3);
   }
 
-  .ns-item + .ns-item {
-    padding-left: 14px;
-    border-left: 1px solid #ececec;
-  }
-}
-
-@media (max-width: 1100px) {
-  .nav-stats {
-    gap: 10px;
-    .ns-item {
-      b { font-size: 14px; }
-      i { font-size: 10.5px; }
-    }
-    .ns-item + .ns-item {
-      padding-left: 10px;
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  // 手機版改於側選單顯示，這裡隱藏
-  .nav-stats {
-    display: none;
-  }
-}
-
-/* Resurrected Original Styles & New SCSS for Dropdowns */
-.index-nav {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-  z-index: 40;
-}
-
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  
-  @media (max-width: 768px) {
-    display: none;
-  }
-}
-
-.nav-item-group {
-  position: relative;
-  cursor: pointer;
-  padding: 10px 0; /* Add trigger area */
-  
-  &:hover .nav-dropdown {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* Style for the main nav link triggers */
-  .nav-link-btn {
+  &__inner {
+    max-width: $yp-container + 48px;
+    margin: 0 auto;
+    height: 60px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
+    gap: 32px;
+
+    @media (min-width: $yp-bp-md) {
+      height: $yp-header-h;
+      padding: 0 24px;
+    }
+  }
+
+  &__logo {
+    flex: none;
+    display: flex;
+
+    img {
+      height: 38px;
+      width: auto;
+
+      @media (min-width: $yp-bp-md) {
+        height: 46px;
+      }
+    }
+  }
+
+  &__nav {
+    display: none;
+    flex: 1;
     gap: 4px;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #333;
-    transition: all 0.3s ease;
-    
-    &:hover {
-      color: #764ba2;
-      background-color: rgba(118, 75, 162, 0.1);
-    }
-    
-    .nav-icon {
-      font-size: 14px;
-      transition: transform 0.3s;
+
+    @media (min-width: $yp-bp-lg) {
+      display: flex;
     }
   }
-  
-  &:hover .nav-icon {
-    transform: rotate(180deg);
+
+  &__actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
-}
 
-.nav-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  min-width: 180px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-  z-index: 50;
-  overflow: hidden;
-  border: 1px solid #f0f0f0;
-}
+  &__login {
+    padding-left: 16px;
+    padding-right: 16px;
 
-.dropdown-link {
-  display: block;
-  padding: 10px 16px;
-  color: #555;
-  text-decoration: none;
-  font-size: 14px;
-  transition: background 0.2s;
-  
-  &:hover {
-    background: #f9f9f9;
-    color: #764ba2;
-  }
-}
-
-.user-img {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid #eee;
-}
-
-.user-info-list {
-  position: absolute;
-  right: 0;
-  top: 45px;
-  width: 240px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  border: 1px solid #f0f0f0;
-  z-index: 100;
-}
-
-.user-menu {
-  padding: 8px 0;
-}
-
-.user-header {
-  padding: 10px 16px;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 5px;
-  
-  .user-name {
-    font-weight: bold;
-    color: #333;
-    margin: 0;
-  }
-  .user-email {
-    font-size: 12px;
-    color: #888;
-    margin: 0;
-  }
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-  color: #555;
-  text-decoration: none;
-  font-size: 14px;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  
-  &:hover {
-    background: #f5f5f5;
-    color: #333;
-  }
-  
-  &.logout {
-    color: #e53935;
-    border-top: 1px solid #f5f5f5;
-    margin-top: 5px;
-    
-    &:hover {
-      background: #ffebee;
+    @media (max-width: #{$yp-bp-sm - 1px}) {
+      display: none;
     }
   }
-}
 
-.menu-icon {
-  margin-right: 8px;
-  font-size: 16px;
-}
-
-/* Mobile Side Menu */
-#sidemenu {
-  .sidemenu__btn {
-    display: block;
+  &__burger {
     width: 40px;
     height: 40px;
-    border: none;
-    position: fixed;
-    right: 7px; // Original was 7px
-    top: 5px; // Add top since fixed
-    // margin: 7px; // Remove margin if we use top/right
+    border: 0;
+    border-radius: 10px;
     background: transparent;
-    z-index: 99;
-    cursor: pointer;
-    
-    @media (min-width: 768px) {
+    color: $yp-ink;
+    font-size: 24px;
+    display: grid;
+    place-items: center;
+
+    &:hover {
+      background: $yp-surface-2;
+    }
+
+    @media (min-width: $yp-bp-lg) {
       display: none;
+    }
+  }
+}
+
+.yp-nav-group {
+  position: relative;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: #33515a;
+  }
+
+  &__caret {
+    font-size: 16px;
+    color: $yp-subtle;
+    transition: transform 0.2s ease;
+  }
+
+  &.is-current &__btn {
+    color: $yp-primary-ink;
+    font-weight: 700;
+  }
+
+  &:hover &__btn,
+  &:focus-within &__btn {
+    background: $yp-surface-2;
+    color: $yp-ink;
+  }
+
+  &:hover &__caret,
+  &:focus-within &__caret {
+    transform: rotate(180deg);
+  }
+
+  &__menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 260px;
+    padding: 8px;
+    background: #fff;
+    border-radius: $yp-radius-lg;
+    border: 1px solid $yp-line;
+    box-shadow: 0 20px 40px -20px rgba(19, 48, 58, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: all 0.18s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -8px;
+      height: 8px;
+    }
+  }
+
+  &:hover &__menu,
+  &:focus-within &__menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  &__link {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: $yp-ink;
+
+    b {
+      display: block;
+      font-size: 0.9375rem;
+      font-weight: 700;
+    }
+
+    small {
+      display: block;
+      font-size: 0.8125rem;
+      color: $yp-muted;
+    }
+
+    &:hover,
+    &.router-link-exact-active {
+      background: $yp-primary-soft;
+      color: $yp-ink;
+    }
+  }
+
+  &__icon {
+    flex: none;
+    font-size: 20px;
+    color: $yp-primary;
+    margin-top: 2px;
+  }
+}
+
+.yp-user {
+  position: relative;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: transparent;
+    padding: 4px 8px 4px 4px;
+    border-radius: $yp-radius-pill;
+    color: $yp-ink;
+    font-weight: 500;
+
+    &:hover {
+      background: $yp-surface-2;
+    }
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  &__menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    width: 240px;
+    background: #fff;
+    border-radius: $yp-radius-lg;
+    border: 1px solid $yp-line;
+    box-shadow: 0 20px 40px -20px rgba(19, 48, 58, 0.35);
+    padding: 6px;
+    z-index: 10;
+  }
+
+  &__head {
+    padding: 10px 12px;
+    border-bottom: 1px solid $yp-line;
+    margin-bottom: 4px;
+  }
+
+  &__title {
+    font-weight: 700;
+    margin: 0;
+  }
+
+  &__email {
+    font-size: 0.75rem;
+    color: $yp-muted;
+    margin: 0;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 12px;
+    border: 0;
+    background: none;
+    border-radius: 8px;
+    color: $yp-ink;
+    font-size: 0.9375rem;
+    text-align: left;
+
+    &:hover {
+      background: $yp-surface-2;
+    }
+
+    &.is-danger {
+      color: $yp-danger;
+
+      &:hover {
+        background: $yp-danger-soft;
+      }
+    }
+  }
+}
+
+.yp-line-user {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: $yp-primary-soft;
+  color: $yp-primary-ink;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 3px $yp-line;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.yp-drawer {
+  position: fixed;
+  inset: 60px 0 0;
+  z-index: 1030;
+  background: rgba(19, 48, 58, 0.35);
+
+  @media (min-width: $yp-bp-md) {
+    inset: $yp-header-h 0 0;
+  }
+
+  @media (min-width: $yp-bp-lg) {
+    display: none;
+  }
+
+  &__panel {
+    background: $yp-bg;
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 12px 16px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  &__group {
+    background: #fff;
+    border-radius: $yp-radius-lg;
+    padding: 6px;
+    margin-bottom: 10px;
+  }
+
+  &__title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: $yp-subtle;
+    padding: 8px 10px 4px;
+    margin: 0;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 10px;
+    border-radius: 10px;
+    color: $yp-ink;
+    font-size: 1rem;
+    font-weight: 500;
+
+    :deep(svg:first-child) {
+      color: $yp-primary;
+      font-size: 20px;
+    }
+
+    &.router-link-exact-active {
+      background: $yp-primary-soft;
+    }
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: #fff;
+    border-radius: $yp-radius-lg;
+    padding: 14px 6px;
+    text-align: center;
+
+    div + div {
+      border-left: 1px solid $yp-line;
+    }
+
+    b {
+      display: block;
+      font-family: $yp-font-num;
+      font-size: 1.25rem;
+      font-weight: 600;
     }
 
     span {
-      display: block;
-      width: 20px;
-      height: 2px;
-      margin: auto;
-      background: black;
-      position: absolute;
-      top: 0; bottom: 0; left: 0; right: 0;
-      transition: all .4s ease;
-
-      &.top { transform: translateY(-8px); }
-      &.mid { opacity: 1; } /* Restore mid */
-      &.bottom { transform: translateY(8px); }
-    }
-    
-    &.active {
-      .top { transform: rotate(-45deg); }
-      .mid { transform: translateX(-20px) rotate(360deg); opacity: 0; }
-      .bottom { transform: rotate(45deg); }
-    }
-  }
-
-  nav {
-    width: 100%;
-    height: 100%;
-    background: #c9e0f6;
-    position: fixed;
-    top: 0;
-    right: 0;
-    z-index: 90;
-    overflow-y: auto;
-  }
-
-  .sidemenu__wrapper {
-    padding-top: 50px;
-  }
-
-  .sidemenu__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .sidemenu__item {
-    border-bottom: 1px solid rgba(255,255,255,0.3);
-    
-    .sidemenu__title {
-      padding: 1.2em;
-      font-size: 1.4em;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-    }
-    
-    a {
-      text-decoration: none;
-      line-height: 1.6em;
-      font-size: 1.6em;
-      padding: .5em;
-      display: block;
-      color: white;
-      transition: .4s ease;
-
-      &:hover {
-        background: lightgrey;
-        color: dimgrey;
-      }
-    }
-    
-    .sidemenu__link {
-       padding: 1.2em; // Match title padding for non-expandable items
-    }
-  }
-  
-  .sidemenu__sublist {
-    background: rgba(255, 255, 255, 0.4);
-    list-style: none;
-    padding: 0;
-  }
-
-  // 側選單站點數據
-  .sidemenu__stats {
-    margin: 24px 20px 32px;
-    padding: 20px 16px;
-    background: rgba(255, 255, 255, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 12px;
-    backdrop-filter: blur(4px);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-
-    .ss-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .ss-num {
-      font-size: 22px;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: -0.5px;
-      line-height: 1;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-    }
-    .ss-label {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.9);
-      letter-spacing: 0.5px;
-      font-weight: 500;
-    }
-    .ss-row + .ss-row {
-      padding-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.35);
-    }
-  }
-  
-  .sidemenu__subitem {
-    a {
-      font-size: 1.2em;
-      padding-left: 2em;
-      display: block;
-      color: #4a5568; /* Dark gray for contrast against light background */
-      text-decoration: none;
-      padding: 0.8em 0.8em 0.8em 2em;
-      font-weight: 500;
-      
-      &:hover {
-         background: rgba(255, 255, 255, 0.6);
-         color: #2d3748;
-      }
+      font-size: 0.75rem;
+      color: $yp-muted;
     }
   }
 }
 
-/* Transitions */
-.translateX-enter-active, .translateX-leave-active {
-  transition: .3s ease;
-}
-.translateX-enter-from, .translateX-leave-to {
-  transform: translateX(200px);
-  opacity: 0;
-}
-.translateX-enter-to, .translateX-leave-from {
-  transform: translateX(0);
-  opacity: 1;
+.yp-fade-enter-active,
+.yp-fade-leave-active {
+  transition: opacity 0.15s ease;
 }
 
-.slide-down-enter-active, .slide-down-leave-active {
-  transition: all 0.3s ease-out;
-  max-height: 500px;
-  overflow: hidden;
-}
-.slide-down-enter-from, .slide-down-leave-to {
-  max-height: 0;
+.yp-fade-enter-from,
+.yp-fade-leave-to {
   opacity: 0;
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s;
+.yp-drawer-enter-active,
+.yp-drawer-leave-active {
+  transition: opacity 0.2s ease;
+
+  .yp-drawer__panel {
+    transition: transform 0.2s ease;
+  }
 }
-.fade-enter-from, .fade-leave-to {
+
+.yp-drawer-enter-from,
+.yp-drawer-leave-to {
   opacity: 0;
+
+  .yp-drawer__panel {
+    transform: translateY(-12px);
+  }
 }
 </style>

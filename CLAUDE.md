@@ -11,6 +11,10 @@
 
 ## 🚨 開發注意事項
 
+### Design System（必讀）
+全站使用 Style A「蘭陽清新」設計系統，規範與元件速查見 **`docs/design-system.md`**。
+顏色一律用 `$yp-*` / `var(--yp-*)` token，共用元件命名 `.yp-*`；後台頁面使用 `layout: 'admin'`。
+
 ### CSS 風格指南
 - ✅ **使用**: Bootstrap 類別 (`container`, `card`, `btn`, `form-control`, `table`, etc.)
 - ❌ **不使用**: Tailwind 類別 (`mx-auto`, `p-6`, `text-gray-600`, `bg-white`, etc.)
