@@ -374,7 +374,8 @@ import PlaceModal from '~/components/PlaceModal.vue'
 const config = useRuntimeConfig()
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: ['admin-auth']
 })
 
 // SEO 設定

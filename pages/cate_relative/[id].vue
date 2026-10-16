@@ -153,7 +153,7 @@ const currentCateName = computed(() => {
 const searchText = ref('')
 
 const store = useRelativeStore()
-store.fetchAndSetRelative(route.params.id)
+store.fetchAndSetRelative({ cate: route.params.id })
 
 const hotTag = ['魔術', '派對']
 
