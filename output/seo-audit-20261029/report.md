@@ -17,7 +17,7 @@
 | 4. 標題重複品牌名 | 已修 | `app.vue` 的 titleTemplate 在標題已含「宜蘭旅遊通」時不再加 |
 | 5. 優惠券誤用 Product | 已修 | 改為店家 `LocalBusiness` + `makesOffer`（`utils/coupon-seo.js`） |
 | 6. 沒有 Organization / WebSite | 已修 | 首頁加上 |
-| 7. 效能 | 部分 | Google Fonts 改非同步；LINE LIFF SDK 改需要時才載入；bootstrap JS 只載 Modal、Collapse。主要 JS 156 KB → 107 KB（gzip）。本機 Lighthouse 首頁 FCP 10.8 → 5.9 秒、LCP 15.2 → 約 11 秒（本機未壓縮，數字僅供比較）。HTML 內嵌約 240 KB CSS、同時載入 gtag 與 GTM 兩套追蹤碼未處理（見下） |
+| 7. 效能 | 已修 | Google Fonts 改非同步；LINE LIFF SDK 改需要時才載入；bootstrap JS 只載 Modal、Collapse（主要 JS 156 KB → 107 KB gzip）。全站 CSS 改外部檔案可跨頁快取（`features.inlineStyles: false`，首頁 HTML 321 KB → 79 KB）。移除重複安裝的 gtag.js（GA4 已由 GTM 容器載入，原本每次瀏覽重複計算）。本機 Lighthouse（3 次中位數）：首頁 FCP 10.8 → 6.0 秒、LCP 15.2 → 10.9 秒；活動頁 FCP 10.7 → 6.0 秒、LCP 14.5 → 8.7 秒 |
 | 8. 47 頁共用描述 | 已修 | 隨第 1 項解決 |
 | 9. llms.txt 沒有連結 | 已修 | 改寫為 Markdown 連結 + 摘要；新增 `/llms-full.txt`（186 個連結） |
 | 10. 首頁標題 | 已修 | 「宜蘭旅遊通｜宜蘭優惠券、合法民宿與在地活動」 |
@@ -39,9 +39,9 @@
 
 ### 還需要你處理
 
-1. **www 轉址改 308**：Vercel → 專案 yilanpass → Settings → Domains → Add `www.yilanpass.com`，設定 Redirect to `yilanpass.com`、狀態碼 308。
-2. **gtag 與 GTM 兩套追蹤碼**（`nuxt.config.ts` 的 `G-45PDMJHNT9`、`app.vue` 的 `GTM-N97SLNC2`）合計約 300 KB。若 GTM 裡已設定 GA4，可拿掉 gtag 那段；要看你的追蹤設定決定。
-3. **內嵌 CSS 約 240 KB**：來自全站 Bootstrap + 設計系統 SCSS，精簡需要另外規劃。
+1. **www 轉址改 308**：Vercel → 專案 yilanpass → Settings → Domains → Add `www.yilanpass.com`，設定 Redirect to `yilanpass.com`、狀態碼 308。（AI 改網域設定被權限擋下）
+
+註：GA4 改由 GTM 單一載入後，GA4 的瀏覽數會比之前少（之前每次瀏覽被 gtag 與 GTM 各算一次），這是修正重複計算，不是流量下降。
 
 ## 總分（修正前）：約 56 / 100
 

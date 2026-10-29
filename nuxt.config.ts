@@ -69,6 +69,10 @@ export default defineNuxtConfig({
     }
   },
   devtools: { enabled: true },
+  // 全站 CSS 改用外部檔案（可跨頁快取），不要每頁 HTML 都內嵌約 240 KB 的 CSS
+  features: {
+    inlineStyles: false
+  },
   ngrok: {
     // module options
     authtoken: process.env.NGROK_AUTHTOKEN
@@ -123,18 +127,8 @@ export default defineNuxtConfig({
       noscript: [
         { innerHTML: `<link rel="stylesheet" href="${GOOGLE_FONTS_URL}">` }
       ],
-      script: [
-        {
-          src: "https://www.googletagmanager.com/gtag/js?id=G-45PDMJHNT9",
-          async: true,
-        },
-        {
-          children: `window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-45PDMJHNT9');`,
-        },
-      ],
+      // GA4（G-45PDMJHNT9）由 app.vue 的 GTM（GTM-N97SLNC2）容器內的 Google 代碼載入，
+      // 不要再另外安裝 gtag.js，否則每次瀏覽會重複計算、也多載入約 170 KB
     }
   },
   components: [
