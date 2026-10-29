@@ -210,6 +210,13 @@ definePageMeta({
   title: '優惠券更新時間列表',
   description: '查看所有優惠券和代訂服務的更新時間'
 })
+
+// 只有更新時間、內容很少的頁面：不收錄，但讓搜尋引擎跟著連結走
+useSeoMeta({
+  title: '優惠券更新時間列表',
+  description: '查看宜蘭旅遊通所有優惠券和代訂服務的更新時間',
+  robots: 'noindex, follow'
+})
 </script>
 
 <style scoped lang="scss">

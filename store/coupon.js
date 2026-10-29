@@ -18,13 +18,13 @@ const initState = {
 
 // 將其命名為useXXXStore，就像vue3的composable一樣
 const useCouponStore = defineStore("useCouponStore", {
-  state: () => initState,
+  state: () => structuredClone(initState), // 每個請求各自一份，避免 SSR 時跨請求共用狀態
   actions: {
     setCoupon(couponData) {
       this.couponData.data = couponData;
     },
     resetCoupon() {
-      this.couponData = initState.couponData;
+      this.couponData = structuredClone(initState.couponData);
     },
     async fetchAndSetCoupon(initData) {
       this.couponData.pending = true;

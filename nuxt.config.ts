@@ -4,6 +4,22 @@
 //   devtools: { enabled: true }
 // })
 import { resolve } from 'path'
+import { readdirSync } from 'fs'
+
+// build 時列出上傳圖片資料夾內的檔案，供 server/utils/site-images.js 判斷圖片是否已部署到本站
+function listPublicImages(...dirs: string[]) {
+  return dirs.flatMap((dir) => {
+    try {
+      return (readdirSync(resolve(__dirname, 'public', dir), { recursive: true }) as string[])
+        .map((file) => `${dir}/${String(file).replace(/\\/g, '/')}`)
+        .filter((file) => /\.(jpe?g|png|webp|gif|avif|svg)$/i.test(file))
+    } catch {
+      return []
+    }
+  })
+}
+
+const GOOGLE_FONTS_URL = 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Rubik:wght@500;600;700&display=swap'
 export default defineNuxtConfig({
   css: ['~/assets/scss/main.scss', 'leaflet/dist/leaflet.css'],
   modules: [
@@ -87,7 +103,7 @@ export default defineNuxtConfig({
         { property: 'og:type', content: 'website' },
         { property: 'og:title', content: '宜蘭旅遊通-宜蘭觀光民宿行銷協會 | 宜蘭合法民宿推薦與旅遊資訊' },
         { property: 'og:description', content: '提供宜蘭地區合法民宿推薦，包含親子民宿、寵物民宿、海景民宿、戲水池民宿、KTV民宿、烤肉民宿等多樣化住宿選擇' },
-        { property: 'og:url', content: 'https://yilanpass.com' },
+        // og:url / canonical 由 app.vue 依目前頁面路徑輸出，不要在這裡寫死首頁
         { property: 'og:image', content: 'https://yilanpass.com/logo.png' },
         
         // Twitter Card
@@ -97,15 +113,15 @@ export default defineNuxtConfig({
         { name: 'twitter:image', content: 'https://yilanpass.com/logo.png' }
       ],
       link: [
-        { rel: 'canonical', href: 'https://yilanpass.com' },
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
-        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
-        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
+        { rel: 'apple-touch-icon', href: '/favicon.png' },
         { rel: 'manifest', href: '/site.webmanifest' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Rubik:wght@500;600;700&display=swap' }
+        // 字型 CSS 非同步載入，避免阻擋首次渲染（無 JS 時由下方 noscript 載入）
+        { rel: 'stylesheet', href: GOOGLE_FONTS_URL, media: 'print', onload: "this.media='all'" }
+      ],
+      noscript: [
+        { innerHTML: `<link rel="stylesheet" href="${GOOGLE_FONTS_URL}">` }
       ],
       script: [
         {
@@ -141,6 +157,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     vercel: { functions: { maxDuration: 60 } },
+    virtual: {
+      '#public-image-files': () =>
+        `export default ${JSON.stringify(listPublicImages('shop', 'yilan-activities', 'relative', 'uploads'))}`
+    },
     // 專案根目錄 utils/ 的共用模組一律打包進 server bundle，避免本機 dev 產生錯誤的相對路徑
     externals: {
       inline: [/^(?!.*node_modules).*[\\/]utils[\\/][^\\/]+\.(cjs|mjs|js|ts)$/]

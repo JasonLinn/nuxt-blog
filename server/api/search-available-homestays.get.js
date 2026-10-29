@@ -1,6 +1,7 @@
 import databaseConfig from '../../utils/database-config.cjs';
 const { databaseUrl } = databaseConfig;
 import pg from 'pg';
+import { toSiteImageUrl } from '../utils/site-images.js';
 const { Pool } = pg;
 
 /**
@@ -242,8 +243,8 @@ export default defineEventHandler(async (event) => {
         name: row.name,
         area: row.area,
         city: row.city,
-        image_url: row.image_url,
-        image_urls: row.images || (row.image_url ? [row.image_url] : []),
+        image_url: toSiteImageUrl(row.image_url),
+        image_urls: (row.images || (row.image_url ? [row.image_url] : [])).map(toSiteImageUrl),
         min_guests: row.min_guests,
         max_guests: row.max_guests,
         features: {

@@ -372,8 +372,13 @@ const { loginRequired, loginUrl } = useSubmissionLogin()
 
 // 設定頁面標題
 useHead({
-  title: '填寫優惠券 - 宜蘭旅遊網',
-  meta: [{ name: 'description', content: '分享您的優惠券給其他旅客，豐富宜蘭旅遊體驗' }]
+  title: '店家免費刊登優惠券',
+  meta: [
+    {
+      name: 'description',
+      content: '宜蘭在地店家可免費在宜蘭旅遊通刊登電子優惠券，讓來宜蘭的旅客找到你的店。'
+    }
+  ]
 })
 
 // 響應式資料

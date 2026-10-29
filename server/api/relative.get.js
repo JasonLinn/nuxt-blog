@@ -1,4 +1,5 @@
 import { couponPool } from '../utils/coupon-db.js'
+import { withSiteImages } from '../utils/site-images.js'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -71,7 +72,7 @@ export default defineEventHandler(async (event) => {
     console.log('Query successful:', { total, itemsReturned: dataResult.rows.length })
 
     return {
-      items: dataResult.rows,
+      items: dataResult.rows.map((row) => withSiteImages(row)),
       pagination: {
         page,
         pageSize,

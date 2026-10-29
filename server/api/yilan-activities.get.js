@@ -2,6 +2,7 @@ import { getAdmin } from '../utils/admin-auth.js'
 import { publicActivity } from '../utils/security.js'
 import { query } from '~/server/utils/db.js'
 import { activityWindow } from '../../utils/activity-dates.js'
+import { withSiteImages } from '../utils/site-images.js'
 
 export default defineEventHandler(async event => {
   const input = getQuery(event)
@@ -34,5 +35,5 @@ export default defineEventHandler(async event => {
       FROM yilan_activities${where} ORDER BY ${order}, created_at DESC${pagination}`, params),
     query(`SELECT COUNT(*) AS total FROM yilan_activities${where}`, countParams)
   ])
-  return { success: true, data: admin ? result.rows : result.rows.map(publicActivity), total: Number(count.rows[0].total) }
+  return { success: true, data: (admin ? result.rows : result.rows.map(publicActivity)).map((row) => withSiteImages(row)), total: Number(count.rows[0].total) }
 })

@@ -4,11 +4,13 @@ Allow: /
 # 允許搜尋引擎索引主要頁面
 Allow: /homestay-list
 Allow: /homestays/
-Allow: /relative/
+Allow: /relative_shop/
+Allow: /yilan-activities/
 Allow: /articles/
 
 # 允許 AI 代理存取標準發現端點
 Allow: /llms.txt
+Allow: /llms-full.txt
 Allow: /.well-known/
 
 # 阻止索引管理和API路由

@@ -1,4 +1,5 @@
 import { couponPool } from '~/server/utils/coupon-db'
+import { withSiteImages } from '~/server/utils/site-images.js'
 
 export default defineEventHandler(async (event) => {
   const relativeId = getRouterParam(event, 'id')
@@ -21,5 +22,5 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return relativeRecord
+  return withSiteImages(relativeRecord)
 })

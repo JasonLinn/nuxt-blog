@@ -29,3 +29,16 @@ export function overlapsActivity(activity, start, end) {
   const last = dateOnly(activity.end_date) || first
   return !!first && (!start || last >= start) && (!end || first <= end)
 }
+
+// 固定格式的台灣日期（例：2026年10月24日 星期六）。不用 toLocaleDateString，
+// 因為 Node 與瀏覽器的 ICU 輸出格式不同，會造成 SSR hydration 不一致
+export function formatTaipeiDate(value, { weekday = false } = {}) {
+  // 含時間的 ISO 字串先轉成 Date，才會換算成台灣日期
+  const isTimestamp = typeof value === 'string' && /T/.test(value)
+  const date = dateOnly(isTimestamp ? new Date(value) : value)
+  if (!date) return ''
+  const [year, month, day] = date.split('-').map(Number)
+  const text = `${year}年${month}月${day}日`
+  if (!weekday) return text
+  return `${text} 星期${'日一二三四五六'[new Date(Date.UTC(year, month - 1, day)).getUTCDay()]}`
+}

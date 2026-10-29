@@ -22,7 +22,11 @@ export default defineEventHandler((event) => {
 
   // --- 2. Markdown Content Negotiation ---
   // If agent requests markdown on homepage, redirect to /api/markdown
-  if (path === '/' && acceptHeader.includes('text/markdown')) {
-    return sendRedirect(event, '/api/markdown', 302)
+  if (path === '/') {
+    // 首頁回應依 Accept 不同（HTML 或轉到 Markdown），告知快取分開存
+    setResponseHeader(event, 'Vary', 'Accept')
+    if (acceptHeader.includes('text/markdown')) {
+      return sendRedirect(event, '/api/markdown', 302)
+    }
   }
 })
