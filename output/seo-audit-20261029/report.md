@@ -23,7 +23,7 @@
 | 10. 首頁標題 | 已修 | 「宜蘭旅遊通｜宜蘭優惠券、合法民宿與在地活動」 |
 | 11. 沒有 `Vary: Accept` | 已修 | `server/middleware/agent-discovery.js` |
 | 12. 最後一頁仍有「下一頁」連結 | 已修 | 停用時不輸出 href |
-| 13. www 用 307 | **未修** | 需要在 Vercel 後台操作（見下） |
+| 13. www 用 307 | 已修 | 經使用者同意，在 Vercel 專案 yilanpass 加入 `www.yilanpass.com`，308 轉址到 `yilanpass.com`（已上線，保留路徑） |
 | 14. 首頁圖片缺 alt | 已修 | 封面拼貼圖補上店家名稱 |
 | 15. 圖片放在 raw.githubusercontent.com | 已修 | build 時列出 `public/` 已部署的圖片，API 與 sitemap 回傳本站網址；尚未部署的新圖保留原網址 |
 | 16. robots.txt `Content-Signal` | 保留 | 刻意的 AI 使用偏好宣告 |
@@ -37,11 +37,9 @@
 - 特色店家頁 og:url 指向不存在的 `/relative-store/`，改正並加 canonical。
 - `/launch-schedule` 內容只有更新時間，設為 `noindex, follow`。
 
-### 還需要你處理
+### 注意
 
-1. **www 轉址改 308**：Vercel → 專案 yilanpass → Settings → Domains → Add `www.yilanpass.com`，設定 Redirect to `yilanpass.com`、狀態碼 308。（AI 改網域設定被權限擋下）
-
-註：GA4 改由 GTM 單一載入後，GA4 的瀏覽數會比之前少（之前每次瀏覽被 gtag 與 GTM 各算一次），這是修正重複計算，不是流量下降。
+GA4 改由 GTM 單一載入後，GA4 的瀏覽數會比之前少（之前每次瀏覽被 gtag 與 GTM 各算一次），這是修正重複計算，不是流量下降。
 
 ## 總分（修正前）：約 56 / 100
 
