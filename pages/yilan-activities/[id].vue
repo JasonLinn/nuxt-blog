@@ -229,9 +229,7 @@
                     <small v-if="activity.last_synced_at" class="d-block text-muted"
                       >更新於
                       {{
-                        new Date(activity.last_synced_at).toLocaleDateString('zh-TW', {
-                          timeZone: 'Asia/Taipei'
-                        })
+                        formatTaipeiDate(activity.last_synced_at)
                       }}，異動以主辦單位公告為準。</small
                     >
                   </span>
@@ -357,42 +355,35 @@
 
 <script setup>
 import { sanitizeRichContent } from '~/utils/rich-content.js'
+import { buildActivitySeo } from '~/utils/activity-seo.js'
+import { serializeJsonLd } from '~/utils/homestay-seo.js'
+import { formatTaipeiDate } from '~/utils/activity-dates.js'
+
 const route = useRoute()
-const activity = ref(null)
-const loading = ref(true)
 const currentMainImageIndex = ref(0)
 const showLightbox = ref(false)
 const lightboxImageIndex = ref(0)
 
-const fetchActivity = async () => {
-  try {
-    loading.value = true
-    const response = await $fetch(`/api/yilan-activities/${route.params.id}`)
+// 伺服器端就載入活動，搜尋引擎才拿得到標題、內容與 SEO 標籤
+const { data: activityResponse, error: fetchError } = await useFetch(
+  `/api/yilan-activities/${route.params.id}`,
+  { key: `yilan-activity-${route.params.id}` }
+)
 
-    // 只顯示已通過審核的活動
-    if (response.data.status !== 'approved') {
-      activity.value = null
-      return
-    }
-
-    activity.value = response.data
-  } catch (error) {
-    console.error('Failed to fetch activity:', error)
-    activity.value = null
-  } finally {
-    loading.value = false
-  }
-}
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('zh-TW', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long'
+// 只顯示已通過審核的活動；找不到時回傳真正的 404
+if (fetchError.value || activityResponse.value?.data?.status !== 'approved') {
+  const notFound = !fetchError.value || [400, 404].includes(fetchError.value?.statusCode)
+  throw createError({
+    statusCode: notFound ? 404 : 503,
+    statusMessage: notFound ? 'Activity Not Found' : 'Service Unavailable',
+    fatal: true
   })
 }
+
+const activity = computed(() => activityResponse.value?.data || null)
+const loading = ref(false)
+
+const formatDate = (value) => formatTaipeiDate(value, { weekday: true })
 
 const formatDescription = (description) => {
   if (!description) return ''
@@ -517,7 +508,6 @@ const copyLink = async () => {
 }
 
 onMounted(() => {
-  fetchActivity()
   // 添加鍵盤事件監聽
   document.addEventListener('keydown', handleKeydown)
 })
@@ -529,39 +519,32 @@ onUnmounted(() => {
   if (toastTimer) clearTimeout(toastTimer)
 })
 
-// 動態設定頁面 SEO
-watchEffect(() => {
-  if (activity.value) {
-    const canonicalUrl = `https://yilanpass.com/yilan-activities/${activity.value.id}`
-
-    useHead({
-      title: `${activity.value.title} | 宜蘭活動總匯`,
-      meta: [
-        {
-          name: 'description',
-          content: activity.value.description?.substring(0, 150) + '...' || '宜蘭活動介紹'
-        },
-        { property: 'og:title', content: activity.value.title },
-        {
-          property: 'og:description',
-          content: activity.value.description?.substring(0, 150) + '...' || '宜蘭活動介紹'
-        },
-        {
-          property: 'og:image',
-          content:
-            activity.value.images && activity.value.images.length ? activity.value.images[0] : ''
-        },
-        { property: 'og:url', content: canonicalUrl }
-      ],
-      link: [
-        {
-          rel: 'canonical',
-          href: canonicalUrl
-        }
-      ]
-    })
-  }
+// 頁面 SEO：標題、描述、canonical 與 Event 結構化資料都來自頁面上顯示的活動資料
+const seo = computed(() => buildActivitySeo(activity.value))
+useSeoMeta({
+  title: () => seo.value.title,
+  description: () => seo.value.description,
+  ogTitle: () => seo.value.title,
+  ogDescription: () => seo.value.description,
+  ogImage: () => seo.value.image,
+  ogUrl: () => seo.value.url,
+  ogType: 'article',
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => seo.value.title,
+  twitterDescription: () => seo.value.description,
+  twitterImage: () => seo.value.image,
+  twitterUrl: () => seo.value.url
 })
+useHead(() => ({
+  link: [{ rel: 'canonical', href: seo.value.url }],
+  script: [
+    {
+      key: 'activity-schema',
+      type: 'application/ld+json',
+      innerHTML: serializeJsonLd(seo.value.schema)
+    }
+  ]
+}))
 </script>
 
 <style scoped lang="scss">

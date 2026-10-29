@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import liff from '@line/liff'
+import { loadLiff } from '~/utils/liff-client'
 
 useSeoMeta({
   title: '找房需求 - 宜蘭旅遊通',
@@ -76,6 +76,7 @@ const text =
   '住宿預算：50000'
 onMounted(async () => {
   try {
+    const liff = await loadLiff()
     await liff.init({ liffId: '2005661804-pZRYaLm6' }) // Use own liffId
     await liff.getProfile().then((profile) => {
       if (!liff.isLoggedIn()) {

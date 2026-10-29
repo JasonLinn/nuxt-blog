@@ -1,4 +1,6 @@
 import { pool } from '../utils/db.js'
+import { couponPool } from '../utils/coupon-db.js'
+import { toSiteImageUrl } from '../utils/site-images.js'
 
 // XML 轉義函數
 function escapeXml(unsafe: string): string {
@@ -29,7 +31,10 @@ export default defineEventHandler(async (event) => {
       { loc: '/rule', priority: '0.6', changefreq: 'monthly' },
       { loc: '/relative', priority: '0.7', changefreq: 'weekly' },
       { loc: '/findRoom', priority: '0.8', changefreq: 'daily' },
-      { loc: '/itinerary', priority: '0.8', changefreq: 'daily' }
+      { loc: '/itinerary', priority: '0.8', changefreq: 'daily' },
+      { loc: '/yilan-activities', priority: '0.8', changefreq: 'daily' },
+      { loc: '/map', priority: '0.7', changefreq: 'weekly' },
+      { loc: '/coupon-services', priority: '0.7', changefreq: 'weekly' }
     ]
     
     mainPages.forEach(page => {
@@ -76,7 +81,7 @@ export default defineEventHandler(async (event) => {
         // 如果有圖片，加入圖片資訊（Google Image Search）
         if (homestay.image_url) {
           const imageUrl = homestay.image_url.startsWith('http') 
-            ? homestay.image_url 
+            ? toSiteImageUrl(homestay.image_url) 
             : `${baseUrl}${homestay.image_url}`
           
           urlEntry += `
@@ -92,27 +97,6 @@ export default defineEventHandler(async (event) => {
         
         urls.push(urlEntry)
       }
-
-      // 取得地點資料
-      const placesResult = await client.query(`
-        SELECT id, updated_at 
-        FROM places 
-        WHERE status = 'active'
-        ORDER BY updated_at DESC
-      `)
-      console.log(`✅ Sitemap: 已加入 ${placesResult.rows.length} 個地點頁面`)
-      placesResult.rows.forEach((place: any) => {
-        const lastmod = place.updated_at 
-          ? new Date(place.updated_at).toISOString() 
-          : now
-        urls.push(`
-  <url>
-    <loc>${baseUrl}/relative/${place.id}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`)
-      })
 
       // 取得宜蘭活動資料
       try {
@@ -139,32 +123,50 @@ export default defineEventHandler(async (event) => {
         console.log('ℹ️ Sitemap: 沒有活動資料或表不存在')
       }
       
-      // 取得文章資料（如果有的話）
-      try {
-        const articlesResult = await client.query(`
-          SELECT id, updated_at 
-          FROM articles 
-          WHERE status = 'published'
-          ORDER BY updated_at DESC
-        `)
-        console.log(`✅ Sitemap: 已加入 ${articlesResult.rows.length} 個文章頁面`)
-        articlesResult.rows.forEach((article: any) => {
-          const lastmod = article.updated_at 
-            ? new Date(article.updated_at).toISOString() 
-            : now
-          urls.push(`
+      // 優惠券（/articles/:id）與特色店家（/relative_shop/:id）在優惠券資料庫
+      const couponPages = [
+        { table: 'article', path: 'articles', where: 'WHERE "archived_at" IS NULL', priority: '0.8', label: '優惠券' },
+        { table: 'relative', path: 'relative_shop', where: '', priority: '0.6', label: '特色店家' }
+      ]
+      for (const page of couponPages) {
+        try {
+          // to_jsonb 讀時間欄位，欄位不存在時回 null 而不是讓查詢失敗
+          const result = await couponPool.query(`
+            SELECT id, title,
+              to_jsonb(t)->>'updated_at' AS updated_at,
+              to_jsonb(t)->>'created_at' AS created_at,
+              to_jsonb(t)->'cover'->>0 AS cover
+            FROM "${page.table}" t
+            ${page.where}
+            ORDER BY id DESC
+          `)
+          console.log(`✅ Sitemap: 已加入 ${result.rows.length} 個${page.label}頁面`)
+          for (const row of result.rows) {
+            const time = row.updated_at || row.created_at
+            const lastmod = time && !isNaN(Date.parse(time)) ? new Date(time).toISOString() : now
+            let entry = `
   <url>
-    <loc>${baseUrl}/articles/${article.id}</loc>
+    <loc>${baseUrl}/${page.path}/${encodeURIComponent(row.id)}</loc>
     <lastmod>${lastmod}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
+    <priority>${page.priority}</priority>`
+            const cover = typeof row.cover === 'string' ? toSiteImageUrl(row.cover.trim()) : ''
+            if (/^(https?:\/\/|\/)/.test(cover)) {
+              const imageUrl = cover.startsWith('http') ? cover : `${baseUrl}${cover}`
+              entry += `
+    <image:image>
+      <image:loc>${escapeXml(imageUrl)}</image:loc>
+      <image:title>${escapeXml(row.title || page.label)}</image:title>
+    </image:image>`
+            }
+            urls.push(`${entry}
   </url>`)
-        })
-      } catch (articlesError) {
-        // 如果沒有 articles 表，繼續執行
-        console.log('ℹ️ Sitemap: 沒有文章資料或表不存在')
+          }
+        } catch (couponError) {
+          console.error(`❌ Sitemap: 讀取${page.label}失敗`, couponError)
+        }
       }
-      
+
     } catch (dbError) {
       console.error('❌ Sitemap 資料庫查詢錯誤:', dbError)
       // 即使資料庫查詢失敗，仍然回傳包含主要頁面的 sitemap

@@ -111,7 +111,7 @@
 
 <script setup>
 /* eslint-disable no-unused-vars, eqeqeq, n/handle-callback-err -- 既有業務邏輯（保留未使用的優惠券相關函式），本次僅重構版面 */
-import liff from '@line/liff'
+import { loadLiff } from '~/utils/liff-client'
 import { sanitizeRichContent } from '~/utils/rich-content.js'
 import useReferralStore from '~/store/referral'
 import { referral } from '~/utils/referral'
@@ -236,7 +236,7 @@ const handleHashRecive = () => {
   }
 }
 
-const getCupon = () => {
+const getCupon = async () => {
   // if (!liff.isLoggedIn()) {
   //   return;
   // }
@@ -396,6 +396,7 @@ const getCupon = () => {
     }
   }
 
+  const liff = await loadLiff()
   liff
     .sendMessages([
       {
@@ -420,7 +421,8 @@ const shareCopy = () => {
   navigator.clipboard.writeText(liffUrl + route.path)
   window?.alert('已複製連結!')
 }
-const shareCoupon = () => {
+const shareCoupon = async () => {
+  const liff = await loadLiff()
   liff
     .shareTargetPicker(
       [
@@ -556,24 +558,30 @@ const shareCoupon = () => {
 }
 // func end
 
-useHead({
-  title: article.value.title
-})
+const pageTitle = `${article.value.title}｜宜蘭特色店家｜宜蘭旅遊通`
+const pageUrl = `https://yilanpass.com/relative_shop/${encodeURIComponent(article.value.id)}`
+const description = String(article.value.content || '')
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .substring(0, 160)
+const coverImage = Array.isArray(article.value.cover) ? article.value.cover[0] : article.value.cover
 
-const description = article.value.content.replace(/\n/g, ' ').substring(0, 300)
-const { origin } = useRequestURL()
-const { baseURL } = useRuntimeConfig().app
+useHead({
+  title: pageTitle,
+  link: [{ rel: 'canonical', href: pageUrl }]
+})
 
 useSeoMeta({
   description,
-  ogTitle: article.value.title,
+  ogTitle: pageTitle,
   ogDescription: description,
-  ogImage: article.value.cover,
-  ogUrl: () => `${origin}${baseURL}/relative-store/${article.value.id}`,
-  twitterTitle: article.value.title,
+  ogImage: coverImage || 'https://yilanpass.com/logo.png',
+  ogUrl: pageUrl,
+  twitterTitle: pageTitle,
   twitterDescription: description,
-  twitterImage: article.value.cover,
-  twitterUrl: () => `${origin}${baseURL}/relative-store/${article.value.id}`,
+  twitterImage: coverImage || 'https://yilanpass.com/logo.png',
+  twitterUrl: pageUrl,
   twitterCard: 'summary_large_image'
 })
 </script>

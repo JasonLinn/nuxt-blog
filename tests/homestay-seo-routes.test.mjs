@@ -15,6 +15,9 @@ async function load(name) {
     name: 'mock-db', setup(builder) {
       builder.onResolve({ filter: /\/db\.js$/ }, () => ({ path: 'db', namespace: 'test' }));
       builder.onLoad({ filter: /.*/, namespace: 'test' }, () => ({ contents: 'export const pool = { query: (...args) => globalThis.seoDb(...args) };' }));
+      // Nitro 在 build 時產生的已部署圖片清單；測試用空清單（不改寫圖片網址）
+      builder.onResolve({ filter: /^#public-image-files$/ }, () => ({ path: 'public-image-files', namespace: 'test-images' }));
+      builder.onLoad({ filter: /.*/, namespace: 'test-images' }, () => ({ contents: 'export default [];' }));
     }
   }] });
   return (await import(pathToFileURL(outfile).href)).default;

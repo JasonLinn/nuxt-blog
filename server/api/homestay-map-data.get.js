@@ -1,4 +1,5 @@
 import { pool } from '../utils/db.js';
+import { toSiteImageUrl } from '../utils/site-images.js';
 
 /**
  * 民宿地圖資料 API
@@ -111,7 +112,7 @@ export default defineEventHandler(async (event) => {
           lat: parseFloat(homestay.latitude),
           lng: parseFloat(homestay.longitude)
         },
-        image_url: imageUrl,
+        image_url: toSiteImageUrl(imageUrl),
         website: homestay.website,
         phone: homestay.phone,
         price: priceDisplay,

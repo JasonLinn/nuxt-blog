@@ -1,4 +1,5 @@
 import { pool } from '../utils/db.js';
+import { toSiteImageUrl } from '../utils/site-images.js';
 
 // 簡單的記憶體快取
 const cache = new Map();
@@ -298,7 +299,9 @@ export default defineEventHandler(async (event) => {
         area: homestay.location,
         address: homestay.city,
         description: homestay.capacity_description,
-        image_urls: imageUrls,
+        image_url: toSiteImageUrl(homestay.image_url),
+        images: Array.isArray(homestay.images) ? homestay.images.map(toSiteImageUrl) : homestay.images,
+        image_urls: imageUrls.map(toSiteImageUrl),
         pricing_options: pricingMap[homestay.id] || [],
         features: {
           peopleTypes: [homestay.capacity_description].filter(Boolean),

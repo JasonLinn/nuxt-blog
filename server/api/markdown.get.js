@@ -28,10 +28,13 @@ export default defineEventHandler((event) => {
 | / | 首頁 — 在地店家電子優惠券 |
 | /homestay-list | 民宿列表 — 全部合法民宿搜尋 |
 | /homestays/{id} | 民宿詳情 — 房型、價格、設施、位置 |
-| /articles | 旅遊文章列表 |
 | /articles/{id} | 店家優惠券詳情 |
-| /relative | 宜蘭周邊景點、活動、優惠 |
+| /map | 優惠券地圖 |
+| /yilan-activities | 宜蘭活動總匯 |
+| /yilan-activities/{id} | 活動詳情 — 日期、地點、主辦單位 |
+| /relative | 特色店家 |
 | /llms.txt | AI 模型參考文件 |
+| /llms-full.txt | 全部民宿、優惠券、活動的連結清單 |
 
 ## API 端點
 

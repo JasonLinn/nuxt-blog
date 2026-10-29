@@ -187,7 +187,7 @@
 
 <script setup>
 /* eslint-disable no-unused-vars, no-unreachable, eqeqeq, camelcase, n/handle-callback-err -- 保留既有領取 / LIFF 邏輯，本次只重構 UI */
-import liff from '@line/liff'
+import { loadLiff } from '~/utils/liff-client'
 import { index_liff_url } from '~/utils/static'
 import useReferralStore from '~/store/referral'
 import useCouponMapStore from '~~/store/couponMap'
@@ -545,6 +545,7 @@ const getCupon = async () => {
     // }
   }
 
+  const liff = await loadLiff()
   liff
     .sendMessages([
       {
@@ -569,7 +570,8 @@ const shareCopy = () => {
   navigator.clipboard.writeText(index_liff_url + route.path)
   window?.alert('已複製連結!')
 }
-const shareCoupon = () => {
+const shareCoupon = async () => {
+  const liff = await loadLiff()
   liff
     .shareTargetPicker(
       [

@@ -1,4 +1,5 @@
 import { pool } from '../utils/db.js';
+import { toSiteImageUrl } from '../utils/site-images.js';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -102,7 +103,7 @@ export default defineEventHandler(async (event) => {
       area: homestay.location,
       address: homestay.city,
       description: homestay.capacity_description,
-      image_urls: imageUrls,
+      image_urls: imageUrls.map(toSiteImageUrl),
       features: {
         peopleTypes: [homestay.capacity_description],
         themeFeatures: homestay.theme_features || [],

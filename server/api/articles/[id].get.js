@@ -1,5 +1,6 @@
 import { couponPool } from '../../utils/coupon-db.js'
 import { getAdmin } from '../../utils/admin-auth.js'
+import { withSiteImages } from '../../utils/site-images.js'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -27,7 +28,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    return articleRecord.rows[0]
+    return withSiteImages(articleRecord.rows[0])
   } catch (error) {
     console.error('取得優惠券詳情錯誤:', error)
     

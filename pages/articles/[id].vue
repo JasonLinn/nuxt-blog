@@ -340,13 +340,15 @@
 
 <script setup>
 /* eslint-disable no-unused-vars, no-unreachable, eqeqeq, camelcase, n/handle-callback-err -- 保留既有領取 / LIFF 邏輯，本次只重構 UI */
-import liff from '@line/liff'
 import { onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
+import { loadLiff } from '~/utils/liff-client'
 import { index_liff_url } from '~/utils/static'
 import useReferralStore from '~/store/referral'
 import useStore from '~/store'
 import { category } from '~/utils/category'
 import { extractDeal, summarizeOffer } from '~/utils/coupon-deal'
+import { buildCouponSeo } from '~/utils/coupon-seo'
+import { serializeJsonLd } from '~/utils/homestay-seo'
 
 const route = useRoute()
 const store = useStore()
@@ -407,6 +409,8 @@ const onHide = () => (visibleRef.value = false)
 
 // 初始化 modal
 onMounted(() => {
+  // 預先載入 LIFF，點擊領券或分享時不用再等
+  loadLiff()
   if (process.client && typeof document !== 'undefined' && modalRef.value) {
     // 在客戶端動態導入 bootstrap
     import('bootstrap/dist/js/bootstrap.bundle')
@@ -868,6 +872,7 @@ const getCupon = async () => {
     // }
   }
 
+  const liff = await loadLiff()
   liff
     .sendMessages([
       {
@@ -894,9 +899,10 @@ const shareCopy = () => {
     window?.alert('已複製連結!')
   }
 }
-const shareCoupon = () => {
+const shareCoupon = async () => {
   if (!process.client) return
 
+  const liff = await loadLiff()
   liff
     .shareTargetPicker(
       [
@@ -1031,76 +1037,37 @@ const shareCoupon = () => {
     })
 }
 
-// SEO 優化
-const { origin } = useRequestURL()
-const { baseURL } = useRuntimeConfig().app
-const description = article.value.content.replace(/\n/g, ' ').substring(0, 160)
+// SEO 優化：標題、描述、canonical 與結構化資料（店家 LocalBusiness + 優惠 Offer）
 const tags = parseTags(article.value.tags).join(', ')
+const seo = buildCouponSeo(article.value)
 
 useHead({
-  title: `${article.value.title} | 宜蘭旅遊通 - 優惠券詳情`,
+  title: seo.title,
   meta: [
     { name: 'keywords', content: `${tags}, 宜蘭優惠, 宜蘭旅遊, 優惠券` },
     { name: 'author', content: '宜蘭旅遊通' }
   ],
-  link: [
-    {
-      rel: 'canonical',
-      href: `${origin}${baseURL}articles/${article.value.id}`
-    }
-  ],
+  link: [{ rel: 'canonical', href: seo.url }],
   script: [
     {
+      key: 'coupon-schema',
       type: 'application/ld+json',
-      children: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Product',
-        name: article.value.title,
-        description,
-        image: article.value.cover[0],
-        brand: {
-          '@type': 'Brand',
-          name: '宜蘭旅遊通'
-        },
-        offers: {
-          '@type': 'Offer',
-          url: `${origin}${baseURL}articles/${article.value.id}`,
-          priceCurrency: 'TWD',
-          price: '0',
-          availability: 'https://schema.org/InStock',
-          hasMerchantReturnPolicy: {
-            '@type': 'MerchantReturnPolicy',
-            applicableCountry: 'TW',
-            returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted'
-          },
-          shippingDetails: {
-            '@type': 'OfferShippingDetails',
-            shippingRate: {
-              '@type': 'MonetaryAmount',
-              value: 0,
-              currency: 'TWD'
-            },
-            shippingDestination: {
-              '@type': 'DefinedRegion',
-              addressCountry: 'TW'
-            }
-          }
-        }
-      })
+      innerHTML: serializeJsonLd(seo.schema)
     }
   ]
 })
 
 useSeoMeta({
-  description,
-  ogTitle: `${article.value.title} | 宜蘭旅遊通`,
-  ogDescription: description,
-  ogImage: article.value.cover[0],
-  ogUrl: () => `${origin}${baseURL}articles/${article.value.id}`,
+  description: seo.description,
+  ogTitle: seo.title,
+  ogDescription: seo.description,
+  ogImage: seo.image,
+  ogUrl: seo.url,
   ogType: 'website',
-  twitterTitle: `${article.value.title} | 宜蘭旅遊通`,
-  twitterDescription: description,
-  twitterImage: article.value.cover[0],
+  twitterTitle: seo.title,
+  twitterDescription: seo.description,
+  twitterImage: seo.image,
+  twitterUrl: seo.url,
   twitterCard: 'summary_large_image'
 })
 </script>

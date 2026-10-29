@@ -1,5 +1,6 @@
 import { getAdmin } from '../../utils/admin-auth.js'
 import { publicActivity } from '../../utils/security.js'
+import { withSiteImages } from '../../utils/site-images.js'
 import { query } from '~/server/utils/db.js'
 
 export default defineEventHandler(async (event) => {
@@ -41,7 +42,7 @@ export default defineEventHandler(async (event) => {
     
     return {
       success: true,
-      data: admin ? result.rows[0] : publicActivity(result.rows[0]),
+      data: withSiteImages(admin ? result.rows[0] : publicActivity(result.rows[0])),
       message: 'Activity fetched successfully'
     }
     

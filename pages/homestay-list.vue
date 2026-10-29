@@ -409,7 +409,8 @@
           <a
             class="yp-pager__btn"
             :class="{ 'is-disabled': currentPage <= 1 }"
-            :href="pageHref(currentPage - 1)"
+            :href="currentPage > 1 ? pageHref(currentPage - 1) : undefined"
+            :aria-disabled="currentPage <= 1 ? 'true' : undefined"
             aria-label="上一頁"
             @click.prevent="currentPage > 1 && (currentPage = currentPage - 1)"
           >
@@ -429,7 +430,8 @@
           <a
             class="yp-pager__btn"
             :class="{ 'is-disabled': currentPage >= totalPages }"
-            :href="pageHref(currentPage + 1)"
+            :href="currentPage < totalPages ? pageHref(currentPage + 1) : undefined"
+            :aria-disabled="currentPage >= totalPages ? 'true' : undefined"
             aria-label="下一頁"
             @click.prevent="currentPage < totalPages && (currentPage = currentPage + 1)"
           >

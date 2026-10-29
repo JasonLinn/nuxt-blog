@@ -87,10 +87,10 @@
 
         <div v-if="heroImages.length >= 3" class="home-hero__mosaic" aria-hidden="true">
           <img
-            v-for="(src, i) in heroImages"
-            :key="src"
-            :src="src"
-            :alt="''"
+            v-for="(image, i) in heroImages"
+            :key="image.src"
+            :src="image.src"
+            :alt="image.alt"
             :loading="i ? 'lazy' : 'eager'"
           />
         </div>
@@ -195,6 +195,7 @@
                 width="366"
                 height="183"
                 :loading="index < 4 ? 'eager' : 'lazy'"
+                :fetchpriority="index === 0 ? 'high' : undefined"
               />
               <span
                 v-if="showRanking && index < 3"
@@ -283,16 +284,19 @@ definePageMeta({ middleware: ['lodging-recommendation'] })
 const couponCategories = category.filter((cate) => cate.id !== 'live')
 
 // SEO 優化
+const HOME_TITLE = '宜蘭旅遊通｜宜蘭優惠券、合法民宿與在地活動'
+const HOME_DESCRIPTION =
+  '宜蘭旅遊通由宜蘭觀光民宿行銷協會發起，免費領取宜蘭在地店家電子優惠券（伴手禮、美食、租車、湯屋），查詢合法民宿推薦與宜蘭活動，輕鬆規劃宜蘭旅程。'
 useSeoMeta({
-  title: '優惠券列表 - 探索最新優惠',
-  ogTitle: '優惠券列表 - 探索最新優惠',
-  description: '探索宜蘭最新的優惠券和特價活動，包含伴手禮、租車、湯屋等各類優惠',
-  ogDescription: '探索宜蘭最新的優惠券和特價活動，包含伴手禮、租車、湯屋等各類優惠',
-  keywords: '優惠券,宜蘭,伴手禮,租車,湯屋,特價,活動',
-  canonical: 'https://yilanpass.com'
+  title: HOME_TITLE,
+  ogTitle: HOME_TITLE,
+  twitterTitle: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  ogDescription: HOME_DESCRIPTION,
+  twitterDescription: HOME_DESCRIPTION,
+  keywords: '宜蘭優惠券,宜蘭旅遊,宜蘭民宿,合法民宿,伴手禮,租車,湯屋,宜蘭活動'
 })
 
-// 額外設定 head link (雙重保險)
 useHead({
   link: [
     {
@@ -302,6 +306,35 @@ useHead({
     {
       rel: 'llms-txt',
       href: 'https://yilanpass.com/llms.txt'
+    }
+  ],
+  script: [
+    {
+      key: 'home-schema',
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'Organization',
+            '@id': 'https://yilanpass.com/#organization',
+            name: '宜蘭旅遊通',
+            founder: { '@type': 'Organization', name: '宜蘭觀光民宿行銷協會' },
+            url: 'https://yilanpass.com',
+            logo: 'https://yilanpass.com/logo.png',
+            sameAs: ['https://lin.ee/6ymvmWV'],
+            areaServed: { '@type': 'AdministrativeArea', name: '宜蘭縣' }
+          },
+          {
+            '@type': 'WebSite',
+            '@id': 'https://yilanpass.com/#website',
+            name: '宜蘭旅遊通',
+            url: 'https://yilanpass.com',
+            inLanguage: 'zh-TW',
+            publisher: { '@id': 'https://yilanpass.com/#organization' }
+          }
+        ]
+      })
     }
   ]
 })
@@ -329,11 +362,6 @@ const currentPage = computed(() => {
 })
 
 onMounted(() => {
-  selectedCate.value = route.query.cate || ''
-  selectedTown.value = route.query.town || null
-  searchText.value = route.query.search || ''
-  selectedSort.value = route.query.sort || 'popular'
-
   // 獲取熱門標籤
   fetchHotTags()
 })
@@ -407,7 +435,7 @@ const heroImages = computed(() => {
   return items
     .filter((item) => item.cover?.length)
     .slice(0, 3)
-    .map((item) => processImageSrc(item.cover[0]))
+    .map((item) => ({ src: processImageSrc(item.cover[0]), alt: item.title }))
 })
 
 let searchTimeout = null
@@ -529,17 +557,26 @@ const fetchData = async () => {
   }
 }
 
+const syncFiltersFromQuery = (query) => {
+  selectedCate.value = query.cate || ''
+  selectedTown.value = query.town || null
+  searchText.value = query.search || ''
+  selectedSort.value = query.sort || 'popular'
+}
+
+// 第一次載入在伺服器端完成，搜尋引擎拿到的 HTML 就有優惠券清單與內頁連結
+syncFiltersFromQuery(route.query)
+await useAsyncData('home-coupons', async () => {
+  await fetchData()
+  return true
+})
+
 watch(
   () => route.query,
   async (newQuery) => {
-    selectedCate.value = newQuery.cate || ''
-    selectedTown.value = newQuery.town || null
-    searchText.value = newQuery.search || ''
-    selectedSort.value = newQuery.sort || 'popular'
-
+    syncFiltersFromQuery(newQuery)
     await fetchData()
-  },
-  { immediate: true }
+  }
 )
 </script>
 
