@@ -7,6 +7,8 @@ export default defineEventHandler((event) => {
   setResponseHeader(event, 'Content-Type', 'text/markdown; charset=utf-8')
   setResponseHeader(event, 'x-markdown-tokens', '800')
   setResponseHeader(event, 'Cache-Control', 'public, max-age=3600')
+  // 首頁依 Accept 轉到這裡；最終回應也要標示 Vary，快取才不會把 Markdown 給瀏覽器
+  setResponseHeader(event, 'Vary', 'Accept')
 
   return `# 宜蘭旅遊通 — 宜蘭觀光民宿行銷協會
 
