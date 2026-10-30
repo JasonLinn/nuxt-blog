@@ -997,6 +997,10 @@ useSeoMeta({
 .detail-head {
   order: 2;
   min-width: 0;
+  // The shared card clips media; this card must let the share menu extend below it.
+  overflow: visible;
+  position: relative;
+  z-index: 2;
 }
 
 .detail-title {
