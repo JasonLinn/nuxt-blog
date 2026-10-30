@@ -42,22 +42,7 @@
         </div>
 
         <div class="coupon-info__bar">
-          <div
-            class="coupon-info__share"
-            tabindex="0"
-            @click="isOpenShare = !isOpenShare"
-            @blur="isOpenShare = false"
-          >
-            <span class="btn btn-soft btn-sm btn-icon"><Icon name="ri:share-line" />分享</span>
-            <div v-show="isOpenShare" class="coupon-info__menu" @mousedown.prevent>
-              <button type="button" class="coupon-info__menu-item" @click="shareCopy">
-                <Icon name="ri:link" />複製連結
-              </button>
-              <button type="button" class="coupon-info__menu-item" @click="shareCoupon">
-                <Icon name="ri:line-fill" />分享到 LINE
-              </button>
-            </div>
-          </div>
+          <CouponShare :coupon-id="article.id" :title="article.title" align="start" />
           <NuxtLink
             v-if="userInfo?.id === 1"
             class="btn btn-sm btn-outline-primary btn-icon"
@@ -188,7 +173,7 @@
 <script setup>
 /* eslint-disable no-unused-vars, no-unreachable, eqeqeq, camelcase, n/handle-callback-err -- 保留既有領取 / LIFF 邏輯，本次只重構 UI */
 import { loadLiff } from '~/utils/liff-client'
-import { index_liff_url } from '~/utils/static'
+import CouponShare from '~/components/CouponShare.vue'
 import useReferralStore from '~/store/referral'
 import useCouponMapStore from '~~/store/couponMap'
 import useStore from '~/store'
@@ -209,7 +194,6 @@ const { couponId } = props
 // const { $bootstrap } = useNuxtApp();
 const modalRef = ref(null)
 const referralCode = ref('')
-const isOpenShare = ref(false)
 const iconLoading = ref(false)
 let modal
 const hash = []
@@ -566,146 +550,6 @@ const getCupon = async () => {
     })
     .catch((error) => window.alert('未登入LINE帳號' + error))
 }
-const shareCopy = () => {
-  navigator.clipboard.writeText(index_liff_url + route.path)
-  window?.alert('已複製連結!')
-}
-const shareCoupon = async () => {
-  const liff = await loadLiff()
-  liff
-    .shareTargetPicker(
-      [
-        {
-          type: 'flex',
-          altText: '宜蘭旅遊通-優惠券',
-          contents: {
-            type: 'bubble',
-            header: {
-              type: 'box',
-              layout: 'vertical',
-              contents: [
-                {
-                  type: 'box',
-                  layout: 'horizontal',
-                  contents: [
-                    {
-                      type: 'image',
-                      url: article.value.cover[0],
-                      size: 'full',
-                      aspectMode: 'cover',
-                      aspectRatio: '2:1',
-                      gravity: 'center',
-                      flex: 1
-                    },
-                    {
-                      type: 'box',
-                      layout: 'horizontal',
-                      contents: [
-                        {
-                          type: 'text',
-                          text: '推薦',
-                          size: 'xs',
-                          color: '#ffffff',
-                          align: 'center',
-                          gravity: 'center'
-                        }
-                      ],
-                      backgroundColor: '#EC3D44',
-                      paddingAll: '2px',
-                      paddingStart: '4px',
-                      paddingEnd: '4px',
-                      flex: 0,
-                      position: 'absolute',
-                      offsetStart: '18px',
-                      offsetTop: '18px',
-                      cornerRadius: '100px',
-                      width: '48px',
-                      height: '25px'
-                    }
-                  ]
-                }
-              ],
-              paddingAll: '0px'
-            },
-            body: {
-              type: 'box',
-              layout: 'vertical',
-              contents: [
-                {
-                  type: 'box',
-                  layout: 'vertical',
-                  contents: [
-                    {
-                      type: 'box',
-                      layout: 'vertical',
-                      contents: [
-                        {
-                          type: 'text',
-                          contents: [],
-                          size: 'xl',
-                          wrap: true,
-                          text: article.value.title,
-                          color: '#ffffff',
-                          weight: 'bold'
-                        }
-                        // {
-                        //   "type": "text",
-                        //   "text": "3 Bedrooms, ¥35,000",
-                        //   "color": "#ffffffcc",
-                        //   "size": "sm"
-                        // }
-                      ],
-                      spacing: 'sm'
-                    },
-                    {
-                      type: 'box',
-                      layout: 'vertical',
-                      contents: [
-                        {
-                          type: 'text',
-                          text: '點我看更多',
-                          color: '#Ffffff',
-                          align: 'center'
-                        }
-                      ],
-                      paddingAll: '13px',
-                      backgroundColor: '#ffffff1A',
-                      cornerRadius: '30px',
-                      margin: 'xl'
-                    }
-                  ]
-                }
-              ],
-              paddingAll: '20px',
-              backgroundColor: '#464F69'
-            },
-            action: {
-              type: 'uri',
-              label: 'action',
-              uri: liffUrl + 'articles/' + article.value.id
-            }
-          }
-        }
-      ],
-      {
-        isMultiple: true
-      }
-    )
-    .then(function (res) {
-      if (res) {
-        // succeeded in sending a message through TargetPicker
-        console.log(`[${res.status}] Message sent!`)
-      } else {
-        // sending message canceled
-        console.log('TargetPicker was closed!')
-      }
-    })
-    .catch(function (error) {
-      // something went wrong before sending a message
-      console.log('something wrong happen')
-    })
-}
-
 useHead({
   title: article.value.title
 })
@@ -766,43 +610,6 @@ useSeoMeta({
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-  }
-
-  &__share {
-    position: relative;
-    z-index: 2;
-    outline: none;
-  }
-
-  &__menu {
-    position: absolute;
-    left: 0;
-    top: calc(100% + 6px);
-    min-width: 150px;
-    padding: 6px;
-    background: $yp-surface;
-    border: 1px solid $yp-line;
-    border-radius: $yp-radius;
-    box-shadow: $yp-shadow-lg;
-  }
-
-  &__menu-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 9px 10px;
-    border: 0;
-    border-radius: $yp-radius-sm;
-    background: transparent;
-    color: $yp-ink;
-    font-size: 0.9375rem;
-    text-align: left;
-
-    &:hover {
-      background: $yp-primary-soft;
-      color: $yp-primary-ink;
-    }
   }
 
   &__title {
