@@ -67,22 +67,21 @@
             </button>
           </div>
 
-          <ClientOnly>
-            <div class="yp-stats home-hero__stats d-none d-md-flex">
-              <span v-if="displayVisitorCount !== '0'"
-                ><b>{{ displayVisitorCount }}</b
-                >人次造訪</span
-              >
-              <span v-if="partnerStores"
-                ><b>{{ partnerStores }}</b
-                >家店家優惠</span
-              >
-              <span v-if="partnerHotels"
-                ><b>{{ partnerHotels }}</b
-                >間合作旅宿</span
-              >
-            </div>
-          </ClientOnly>
+          <!-- Reserve the same layout during SSR, loading, and the count-up animation. -->
+          <div class="yp-stats home-hero__stats d-none d-md-flex">
+            <span :class="{ invisible: displayVisitorCount === '0' }"
+              ><b class="home-hero__visitor-count">{{ displayVisitorCount }}</b
+              >人次造訪</span
+            >
+            <span :class="{ invisible: !partnerStores }"
+              ><b>{{ partnerStores }}</b
+              >家店家優惠</span
+            >
+            <span :class="{ invisible: !partnerHotels }"
+              ><b>{{ partnerHotels }}</b
+              >間合作旅宿</span
+            >
+          </div>
         </div>
 
         <div v-if="heroImages.length >= 3" class="home-hero__mosaic" aria-hidden="true">
@@ -594,6 +593,20 @@ watch(
 
   &__stats {
     margin-top: 18px;
+
+    > span {
+      white-space: nowrap;
+    }
+
+    b {
+      display: inline-block;
+      min-width: 2rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .home-hero__visitor-count {
+      min-width: 4.5rem;
+    }
   }
 
   &__mosaic {
