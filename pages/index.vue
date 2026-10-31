@@ -602,6 +602,7 @@ watch(
   margin-top: 14px;
 
   &__label {
+    flex-shrink: 0;
     font-size: 0.8125rem;
     color: $yp-muted;
     margin-right: 4px;
@@ -613,6 +614,16 @@ watch(
     height: calc(1.4em + 10px);
     justify-content: center;
     border-radius: $yp-radius-pill;
+  }
+
+  @media (max-width: #{$yp-bp-md - 1px}) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
