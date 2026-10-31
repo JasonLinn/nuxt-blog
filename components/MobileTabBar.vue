@@ -7,7 +7,18 @@
       class="yp-tabbar__item"
       :class="{ 'is-active': tab.match(route.path) }"
     >
-      <Icon :name="tab.match(route.path) ? tab.activeIcon : tab.icon" class="yp-tabbar__icon" />
+      <svg
+        class="yp-tabbar__icon"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="1em"
+        height="1em"
+        fill="currentColor"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path :d="tabIconPaths[tab.match(route.path) ? tab.activeIcon : tab.icon]" />
+      </svg>
       <span>{{ tab.title }}</span>
     </NuxtLink>
   </nav>
@@ -15,6 +26,8 @@
 
 <script setup>
 import { tabItems } from '~/utils/site-nav'
+// Bundle both states: route changes must never wait for the remote icon API.
+import tabIconPaths from '~/assets/icons/mobile-tabs.json'
 
 const route = useRoute()
 </script>
