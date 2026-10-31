@@ -46,24 +46,23 @@
             <button type="submit" class="btn btn-primary d-none d-sm-inline-block">搜尋優惠</button>
           </form>
 
-          <div class="home-hot">
+          <div class="home-hot" :aria-busy="hotTagsLoading">
             <span class="home-hot__label">熱門搜尋</span>
-            <template v-if="hotTagsLoading">
-              <span
-                v-for="n in 3"
-                :key="`hot-skeleton-${n}`"
-                class="yp-skeleton home-hot__skeleton"
-              />
-            </template>
+            <!-- Keep five equal-sized slots even when the API returns fewer tags. -->
             <button
-              v-for="tag in hotTag"
-              v-else
-              :key="tag"
+              v-for="n in 5"
+              :key="n"
               type="button"
-              class="yp-chip yp-chip--sm"
-              @click="clickTag(tag)"
+              class="yp-chip yp-chip--sm home-hot__tag"
+              :class="{
+                'yp-skeleton': hotTagsLoading,
+                invisible: !hotTagsLoading && !hotTag[n - 1]
+              }"
+              :disabled="hotTagsLoading || !hotTag[n - 1]"
+              :aria-hidden="hotTagsLoading || !hotTag[n - 1] ? true : undefined"
+              @click="clickTag(hotTag[n - 1])"
             >
-              {{ tag }}
+              <span :class="{ invisible: hotTagsLoading }">{{ hotTag[n - 1] || '\u00a0' }}</span>
             </button>
           </div>
 
@@ -659,9 +658,11 @@ watch(
     margin-right: 4px;
   }
 
-  &__skeleton {
-    width: 48px;
-    height: 26px;
+  &__tag {
+    // API keywords are at most three characters; match the chip's padding and border.
+    width: calc(3em + 26px);
+    height: calc(1.4em + 10px);
+    justify-content: center;
     border-radius: $yp-radius-pill;
   }
 }
