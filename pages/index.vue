@@ -82,16 +82,6 @@
             >
           </div>
         </div>
-
-        <div v-if="heroImages.length >= 3" class="home-hero__mosaic" aria-hidden="true">
-          <img
-            v-for="(image, i) in heroImages"
-            :key="image.src"
-            :src="image.src"
-            :alt="image.alt"
-            :loading="i ? 'lazy' : 'eager'"
-          />
-        </div>
       </div>
     </section>
 
@@ -428,14 +418,6 @@ const listTitle = computed(() => {
   return `${prefix}${cateName}${selectedSort.value === 'popular' ? '熱門優惠' : '優惠券'}`
 })
 
-const heroImages = computed(() => {
-  const items = couponObject.value?.data?.items || []
-  return items
-    .filter((item) => item.cover?.length)
-    .slice(0, 3)
-    .map((item) => ({ src: processImageSrc(item.cover[0]), alt: item.title }))
-})
-
 let searchTimeout = null
 const handleSearchInput = () => {
   if (searchTimeout) clearTimeout(searchTimeout)
@@ -581,14 +563,6 @@ watch(
 <style lang="scss" scoped>
 .home-hero {
   max-width: var(--yp-content-width, #{$yp-container});
-  display: flex;
-  align-items: center;
-  gap: 48px;
-
-  &__copy {
-    flex: 1;
-    min-width: 0;
-  }
 
   &__stats {
     margin-top: 18px;
@@ -605,31 +579,6 @@ watch(
 
     .home-hero__visitor-count {
       min-width: 4.5rem;
-    }
-  }
-
-  &__mosaic {
-    display: none;
-    flex: 0 0 clamp(400px, 28vw, 480px);
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 120px 120px;
-    gap: 12px;
-
-    @media (min-width: $yp-bp-lg) {
-      display: grid;
-    }
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 14px;
-      box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.3);
-      background: $yp-surface-2;
-    }
-
-    img:first-child {
-      grid-row: span 2;
     }
   }
 }
