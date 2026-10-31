@@ -32,37 +32,23 @@
                 <Icon name="ri:close-line" />
               </button>
             </div>
-            <select
-              v-model="selectedTown"
-              class="form-select yp-search__select d-none d-sm-block"
-              aria-label="選擇鄉鎮"
-              @change="clickTown"
-            >
-              <option :value="null">全部鄉鎮</option>
-              <option v-for="town in township" :key="town.name" :value="town.name">
-                {{ town.name }}
-              </option>
-            </select>
             <button type="submit" class="btn btn-primary d-none d-sm-inline-block">搜尋優惠</button>
           </form>
 
           <div class="home-hot" :aria-busy="hotTagsLoading">
-            <span class="home-hot__label">熱門搜尋</span>
-            <!-- Keep five equal-sized slots even when the API returns fewer tags. -->
+            <span class="home-hot__label">熱門：</span>
+            <!-- Reserve three text-link slots during loading. -->
             <button
-              v-for="n in 5"
+              v-for="n in 3"
               :key="n"
               type="button"
-              class="yp-chip yp-chip--sm home-hot__tag"
-              :class="{
-                'yp-skeleton': hotTagsLoading,
-                invisible: !hotTagsLoading && !hotTag[n - 1]
-              }"
-              :disabled="hotTagsLoading || !hotTag[n - 1]"
-              :aria-hidden="hotTagsLoading || !hotTag[n - 1] ? true : undefined"
-              @click="clickTag(hotTag[n - 1])"
+              class="home-hot__tag"
+              :class="{ 'yp-skeleton': hotTagsLoading }"
+              :disabled="hotTagsLoading"
+              :aria-hidden="hotTagsLoading ? true : undefined"
+              @click="clickTag(hotSearchTags[n - 1])"
             >
-              <span :class="{ invisible: hotTagsLoading }">{{ hotTag[n - 1] || '\u00a0' }}</span>
+              <span :class="{ invisible: hotTagsLoading }">{{ hotSearchTags[n - 1] }}</span>
             </button>
           </div>
 
@@ -86,53 +72,81 @@
     </section>
 
     <div class="yp-page home-list">
-      <!-- 篩選列 -->
-      <div class="yp-toolbar home-toolbar">
-        <div class="yp-chips" role="tablist" aria-label="優惠類別">
-          <button
-            v-for="cate in couponCategories"
-            :key="cate.id"
-            type="button"
-            role="tab"
-            class="yp-chip"
-            :class="{ 'is-active': selectedCate === cate.id }"
-            :aria-selected="selectedCate === cate.id"
-            @click="selectCate(cate.id)"
-          >
-            {{ cate.id === '' ? '全部' : cate.name }}
-          </button>
+      <div class="yp-section-head home-results-head">
+        <div class="home-results-head__title">
+          <h2 class="yp-section-head__title">{{ listTitle }}</h2>
+          <span v-if="totalCount" class="text-secondary small">{{ totalCount }} 張</span>
         </div>
-        <div class="d-flex align-items-center ms-auto gap-2">
-          <select
-            v-model="selectedTown"
-            class="form-select form-select-sm d-sm-none home-toolbar__town"
-            aria-label="選擇鄉鎮"
-            @change="clickTown"
-          >
-            <option :value="null">全部鄉鎮</option>
-            <option v-for="town in township" :key="town.name" :value="town.name">
-              {{ town.name }}
-            </option>
-          </select>
-          <div class="yp-seg" role="group" aria-label="排序">
-            <button
-              v-for="opt in sortOptions"
-              :key="opt.value"
-              type="button"
-              class="yp-seg__btn"
-              :class="{ 'is-active': selectedSort === opt.value }"
-              @click="selectSort(opt.value)"
-            >
-              {{ opt.label }}
-            </button>
-          </div>
-        </div>
+        <button
+          type="button"
+          class="btn btn-outline-primary home-filter-trigger"
+          aria-haspopup="dialog"
+          aria-controls="home-filter-dialog"
+          @click="openFilters"
+        >
+          <Icon name="ri:equalizer-line" />
+          篩選<span v-if="activeFilterCount" class="home-filter-trigger__count">{{
+            activeFilterCount
+          }}</span>
+        </button>
       </div>
 
-      <div class="yp-section-head">
-        <h2 class="yp-section-head__title">{{ listTitle }}</h2>
-        <span v-if="totalCount" class="text-secondary small">共 {{ totalCount }} 張</span>
+      <div class="home-categories" role="group" aria-label="優惠類別">
+        <button
+          v-for="cate in couponCategories"
+          :key="cate.id"
+          type="button"
+          class="home-categories__item"
+          :class="{ 'is-active': selectedCate === cate.id }"
+          :aria-pressed="selectedCate === cate.id"
+          @click="selectCate(cate.id)"
+        >
+          {{ categoryLabels[cate.id] }}
+        </button>
       </div>
+
+      <dialog
+        id="home-filter-dialog"
+        ref="filterDialog"
+        class="home-filter"
+        aria-labelledby="home-filter-title"
+        @click="closeFilterBackdrop"
+      >
+        <form class="home-filter__form" @submit.prevent="applyFilters">
+          <div class="home-filter__head">
+            <h2 id="home-filter-title">篩選優惠</h2>
+            <button
+              type="button"
+              class="btn btn-ghost btn-icon"
+              aria-label="關閉篩選"
+              @click="filterDialog.close()"
+            >
+              <Icon name="ri:close-line" />
+            </button>
+          </div>
+          <div class="mb-4">
+            <label for="home-filter-town" class="form-label">鄉鎮</label>
+            <select id="home-filter-town" v-model="draftTown" class="form-select">
+              <option :value="null">全部鄉鎮</option>
+              <option v-for="town in township" :key="town.name" :value="town.name">
+                {{ town.name }}
+              </option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label for="home-filter-sort" class="form-label">排序方式</label>
+            <select id="home-filter-sort" v-model="draftSort" class="form-select">
+              <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
+          </div>
+          <div class="home-filter__actions">
+            <button type="button" class="btn btn-soft" @click="resetDraftFilters">重設</button>
+            <button type="submit" class="btn btn-primary">套用篩選</button>
+          </div>
+        </form>
+      </dialog>
 
       <!-- 載入中 -->
       <div v-if="couponObject.pending" class="yp-grid home-grid">
@@ -270,6 +284,7 @@ import useCouponStore from '~~/store/coupon'
 
 definePageMeta({ middleware: ['lodging-recommendation'] })
 const couponCategories = category.filter((cate) => cate.id !== 'live')
+const categoryLabels = { '': '全部', eat: '美食', play: '玩樂', traffic: '交通' }
 
 // SEO 優化
 const HOME_TITLE = '宜蘭旅遊通｜宜蘭優惠券、合法民宿與在地活動'
@@ -336,11 +351,17 @@ const searchText = ref('')
 const selectedTown = ref(null)
 const selectedCate = ref('')
 const selectedSort = ref('popular')
+const filterDialog = ref(null)
+const draftTown = ref(null)
+const draftSort = ref('popular')
+const activeFilterCount = computed(
+  () => Number(Boolean(selectedTown.value)) + Number(selectedSort.value !== 'popular')
+)
 
 const sortOptions = [
-  { value: 'popular', label: '熱門' },
-  { value: 'newest', label: '最新' },
-  { value: 'random', label: '隨機' }
+  { value: 'popular', label: '熱門優先' },
+  { value: 'newest', label: '最新上架' },
+  { value: 'random', label: '隨機探索' }
 ]
 
 const { partnerStores, partnerHotels, displayVisitorCount } = useSiteStats()
@@ -359,6 +380,17 @@ const store = useCouponStore()
 // 熱門標籤
 const hotTag = ref(['伴手禮', '租車', '湯屋'])
 const hotTagsLoading = ref(true)
+// Prefer useful search topics over broad promotional words already implied by this page.
+const hotSearchTags = computed(() =>
+  [
+    ...new Set([
+      ...hotTag.value.filter((tag) => !['優惠', '活動', '特價', '免費', '限時'].includes(tag)),
+      '伴手禮',
+      '租車',
+      '湯屋'
+    ])
+  ].slice(0, 3)
+)
 
 // 從 API 獲取熱門標籤
 const fetchHotTags = async () => {
@@ -463,7 +495,7 @@ const updateRoute = (queryUpdates) => {
     cate: selectedCate.value || undefined,
     town: selectedTown.value || undefined,
     search: searchText.value || undefined,
-    sort: selectedSort.value === 'random' ? undefined : selectedSort.value,
+    sort: selectedSort.value === 'popular' ? undefined : selectedSort.value,
     page: currentPage.value || undefined,
     ...queryUpdates
   }
@@ -502,13 +534,26 @@ const selectCate = (id) => {
   updateRoute({ cate: id, page: 1 })
 }
 
-const selectSort = (value) => {
-  selectedSort.value = value
-  updateRoute({ sort: value, page: 1 })
+const openFilters = () => {
+  draftTown.value = selectedTown.value
+  draftSort.value = selectedSort.value
+  filterDialog.value?.showModal()
 }
 
-const clickTown = () => {
-  updateRoute({ town: selectedTown.value, page: 1 })
+const closeFilterBackdrop = (event) => {
+  if (event.target === filterDialog.value) filterDialog.value.close()
+}
+
+const resetDraftFilters = () => {
+  draftTown.value = null
+  draftSort.value = 'popular'
+}
+
+const applyFilters = () => {
+  selectedTown.value = draftTown.value
+  selectedSort.value = draftSort.value
+  updateRoute({ town: selectedTown.value, sort: selectedSort.value, page: 1 })
+  filterDialog.value.close()
 }
 
 const resetFilters = () => {
@@ -596,33 +641,31 @@ watch(
 
 .home-hot {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  margin-top: 14px;
+  gap: 8px;
+  margin-top: 8px;
 
   &__label {
     flex-shrink: 0;
     font-size: 0.8125rem;
     color: $yp-muted;
-    margin-right: 4px;
   }
 
   &__tag {
-    // API keywords are at most three characters; match the chip's padding and border.
-    width: calc(3em + 26px);
-    height: calc(1.4em + 10px);
-    justify-content: center;
-    border-radius: $yp-radius-pill;
-  }
+    flex: none;
+    width: 3.5rem;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: $yp-radius-sm;
+    background: transparent;
+    color: $yp-primary-ink;
+    font-size: 0.875rem;
+    white-space: nowrap;
 
-  @media (max-width: #{$yp-bp-md - 1px}) {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
+    &:hover:not(:disabled) {
+      text-decoration: underline;
+      text-underline-offset: 4px;
     }
   }
 }
@@ -636,17 +679,129 @@ watch(
   }
 }
 
-.home-toolbar {
-  &__town {
-    width: auto;
-    max-width: 120px;
+.home-results-head {
+  gap: 16px;
+  margin-bottom: 12px;
+
+  &__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+  }
+}
+
+.home-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+  min-height: 40px;
+
+  &__count {
+    font-family: $yp-font-num;
+    font-weight: 600;
+  }
+}
+
+.home-categories {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid $yp-line;
+
+  &__item {
+    position: relative;
+    min-height: 44px;
+    padding: 8px 4px 12px;
+    border: 0;
+    background: transparent;
+    color: $yp-muted;
+    font-size: 1rem;
+    font-weight: 500;
+
+    &:hover {
+      color: $yp-primary-ink;
+    }
+
+    &.is-active {
+      color: $yp-ink;
+      font-weight: 700;
+
+      &::after {
+        position: absolute;
+        right: 0;
+        bottom: -1px;
+        left: 0;
+        height: 3px;
+        border-radius: $yp-radius-pill;
+        background: $yp-primary;
+        content: '';
+      }
+    }
   }
 
   @media (max-width: #{$yp-bp-md - 1px}) {
-    .yp-chips {
-      width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
+
+.home-filter {
+  width: calc(100% - 32px);
+  max-width: 440px;
+  max-height: 85dvh;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: $yp-radius-lg;
+  background: $yp-surface;
+  color: $yp-ink;
+  box-shadow: $yp-shadow-lg;
+
+  &::backdrop {
+    background: rgba($yp-ink, 0.45);
+  }
+
+  &__form {
+    padding: 24px;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
     }
   }
+
+  &__actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  @media (max-width: #{$yp-bp-md - 1px}) {
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    border-radius: $yp-radius-lg $yp-radius-lg 0 0;
+
+    &__form {
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+    }
+  }
+}
+
+:global(body:has(.home-filter[open])) {
+  overflow: hidden;
 }
 
 .home-grid {
