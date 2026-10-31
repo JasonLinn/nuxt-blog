@@ -15,8 +15,13 @@
       <h2 class="about-block__title">關於我們</h2>
       <p class="about-block__text mb-0">
         歡迎來到
-        <strong>宜蘭旅遊通</strong
-        >！我們是由「宜蘭觀光民宿行銷協會」發起的數位旅遊平台，提供在地店家的免費電子優惠券、合法民宿推薦與旅遊資訊。旅客可以領取店家優惠券，也能依地區、人數與特色尋找合適的合法民宿，輕鬆規劃宜蘭旅程。
+        <strong>宜蘭旅遊通</strong>！我們是由「<a
+          href="https://www.ythma.com/"
+          class="about-block__association"
+          target="_blank"
+          rel="noopener noreferrer"
+          >宜蘭觀光民宿行銷協會<span class="visually-hidden">（另開新分頁）</span></a
+        >」發起的數位旅遊平台，提供在地店家的免費電子優惠券、合法民宿推薦與旅遊資訊。旅客可以領取店家優惠券，也能依地區、人數與特色尋找合適的合法民宿，輕鬆規劃宜蘭旅程。
       </p>
     </section>
 
@@ -128,6 +133,12 @@ const features = [
 
   &--last {
     margin-top: 28px;
+  }
+
+  &__association {
+    color: $yp-primary-ink;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }
 

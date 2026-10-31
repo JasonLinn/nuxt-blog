@@ -4,6 +4,14 @@
       <div class="yp-footer__brand">
         <img src="/logo.png" alt="宜蘭旅遊通" width="140" height="37" />
         <p>由宜蘭觀光民宿行銷協會發起，提供在地店家電子優惠券、合法民宿推薦與旅遊資訊。</p>
+        <a
+          href="https://www.ythma.com/"
+          class="yp-footer__association"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          宜蘭觀光民宿行銷協會<span class="visually-hidden">（另開新分頁）</span>
+        </a>
         <a href="https://lin.ee/6ymvmWV" class="btn btn-line btn-sm" target="_blank" rel="noopener">
           <Icon name="ri:line-fill" /> 加入官方 LINE
         </a>
@@ -70,6 +78,17 @@ const year = new Date().getFullYear()
       margin: 0 0 14px;
       line-height: 1.7;
     }
+  }
+
+  &__association {
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    width: fit-content;
+    margin-bottom: 8px;
+    color: $yp-primary-ink;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   &__col {
