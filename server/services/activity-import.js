@@ -5,6 +5,27 @@ export function collectionSummary(sources) {
   return sources.map(({ items, ...source }) => ({ ...source, fetched: items.length, current: items.filter(i => !i.expired).length, eligible: items.filter(i => !i.expired && !i.reasons.length).length, pending: items.filter(i => !i.expired && i.reasons.length).length }))
 }
 
+// A zero local result is valid only when it does not contradict known ongoing events.
+// Never infer that events were cancelled or delete them because a feed went empty.
+export async function verifyCollectionCoverage(sources, knownSources, retry = collectActivities) {
+  const suspect = sources.filter(s => s.ok && !s.items.length && Number(knownSources[s.source]) > 0)
+  if (!suspect.length) return sources
+  const retried = await retry({ sourceIds: suspect.map(s => s.source) })
+  return sources.map(source => {
+    if (!suspect.includes(source)) return source
+    const replacement = retried.find(s => s.source === source.source)
+    if (replacement?.ok && replacement.items.length) return { ...replacement, attempts: 2, warnings: [...(replacement.warnings || []), '首次回傳 0 筆，重試後恢復'] }
+    return { ...(replacement || source), ok: false, attempts: 2,
+      error: replacement && !replacement.ok ? replacement.error : `來源連續回傳 0 筆宜蘭活動，但仍有 ${knownSources[source.source]} 筆未結束的已收錄活動，需檢查來源；保留既有資料` }
+  })
+}
+
+async function collectVerified(client) {
+  const known = await client.query(`SELECT source_id, COUNT(*) AS count FROM activity_import_items
+    WHERE state = 'published' AND candidate->>'end_date' >= $1 GROUP BY source_id`, [taipeiToday()])
+  return verifyCollectionCoverage(await collectActivities(), Object.fromEntries(known.rows.map(r => [r.source_id, Number(r.count)])))
+}
+
 export async function writeActivity(client, item, sourceName, activityId = null, managed = true) {
   const fields = ['title', 'description', 'event_date', 'end_date', 'location', 'organizer_name', 'activity_type']
   const values = fields.map(key => key === 'organizer_name' ? (item[key] || '') : (item[key] || null))
@@ -29,7 +50,7 @@ export async function applyCollection(client, sources) {
   const existing = (await client.query('SELECT * FROM yilan_activities')).rows
   const summaries = []
   for (const source of sources) {
-    const counts = { source: source.source, name: source.name, ok: source.ok, fetched: source.items.length, published: 0, updated: 0, pending: 0, duplicate: 0, preserved: 0, expired: 0, unchanged: 0 }
+    const counts = { source: source.source, name: source.name, ok: source.ok, rawCount: source.rawCount, contentHash: source.contentHash, fetchedAt: source.fetchedAt, attempts: source.attempts || 1, fetched: source.items.length, published: 0, updated: 0, pending: 0, duplicate: 0, preserved: 0, expired: 0, unchanged: 0 }
     if (source.warnings?.length) counts.warnings = source.warnings
     if (!source.ok) { summaries.push({ ...counts, error: source.error }); continue }
     await client.query('SAVEPOINT import_source')
@@ -113,7 +134,7 @@ export async function acquireImportLock(client) {
 
 export async function syncActivities(pool, { dryRun = false } = {}) {
   if (dryRun) {
-    const sources = await collectActivities()
+    const sources = await collectVerified(pool)
     return { dryRun: true, ok: sources.every(s => s.ok), summary: collectionSummary(sources), sources }
   }
   const client = await pool.connect()
@@ -121,10 +142,10 @@ export async function syncActivities(pool, { dryRun = false } = {}) {
     await client.query('BEGIN')
     await acquireImportLock(client)
     const run = (await client.query("INSERT INTO activity_import_runs (status) VALUES ('running') RETURNING id")).rows[0]
-    const sources = await collectActivities()
+    const sources = await collectVerified(client)
     const summary = await applyCollection(client, sources)
     const status = summary.every(s => s.ok) ? 'success' : summary.some(s => s.ok) ? 'partial' : 'failed'
-    await client.query('UPDATE activity_import_runs SET status = $1, summary = $2::jsonb, finished_at = now() WHERE id = $3', [status, JSON.stringify(summary), run.id])
+    await client.query('UPDATE activity_import_runs SET status = $1, summary = $2::jsonb, finished_at = clock_timestamp() WHERE id = $3', [status, JSON.stringify(summary), run.id])
     await client.query('COMMIT')
     return { ok: status === 'success', status, summary }
   } catch (error) {

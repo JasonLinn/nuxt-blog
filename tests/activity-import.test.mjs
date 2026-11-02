@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { verifyCollectionCoverage } from '../server/services/activity-import.js'
 import { activityWindow, dateOnly, overlapsActivity, taipeiToday } from '../utils/activity-dates.js'
 import { normalizeCulture, normalizeYilanCalendar, collectActivities, reviewReasons, safeSourceUrl, sameEvent, possiblySameEvent, fetchSource, activitySources, safeActivityImage, parseExhibitionImages, enrichOfficialMedia, opentixEventUrl, parseProgramDetails, enrichCulturePrograms } from '../server/services/activity-sources.js'
 
@@ -38,6 +39,46 @@ test('trust and completeness are both required; unsafe links never become public
 test('HTTP 200 error pages and changed data schemas fail visibly', async () => {
   await assert.rejects(fetchSource(activitySources[0], async () => new Response('<html>Error</html>', { headers: { 'content-type': 'text/html' } })), /HTML/)
   assert.throws(() => normalizeCulture([], activitySources[1]), /空白/)
+})
+
+test('empty local feeds with ongoing published events retry and fail visibly without blocking other sources', async () => {
+  const empty = { source: 'culture-1', ok: true, rawCount: 400, items: [] }
+  const other = { source: 'culture-7', ok: true, items: [] }
+  let calls = 0
+  const result = await verifyCollectionCoverage([empty, other], { 'culture-1': 2 }, async options => {
+    calls++
+    assert.deepEqual(options.sourceIds, ['culture-1'])
+    return [empty]
+  })
+  assert.equal(calls, 1)
+  assert.equal(result[0].ok, false)
+  assert.equal(result[0].attempts, 2)
+  assert.match(result[0].error, /2 筆未結束/)
+  assert.equal(result[1], other)
+})
+
+test('legitimate empty feeds stay successful and recovered feeds retain retry evidence', async () => {
+  const empty = { source: 'culture-1', ok: true, items: [] }
+  assert.deepEqual(await verifyCollectionCoverage([empty], {}, () => { throw new Error('unexpected retry') }), [empty])
+  const recovered = { ...empty, items: [{ title: '已恢復的活動' }] }
+  const [result] = await verifyCollectionCoverage([empty], { 'culture-1': 1 }, async () => [recovered])
+  assert.equal(result.ok, true)
+  assert.equal(result.items.length, 1)
+  assert.equal(result.attempts, 2)
+  assert.match(result.warnings[0], /重試後恢復/)
+  const [failed] = await verifyCollectionCoverage([empty], { 'culture-1': 1 }, async () => [{ ...empty, ok: false, error: '來源逾時' }])
+  assert.equal(failed.ok, false)
+  assert.equal(failed.error, '來源逾時')
+})
+
+test('source diagnostics distinguish nationwide records from matching Yilan records', async () => {
+  const sources = await collectActivities({ sourceIds: ['culture-7'], fetcher: async () => new Response(JSON.stringify([
+    { UID: 'elsewhere', showInfo: [{ location: '臺北市', time: '2026/12/01' }] }
+  ])) })
+  assert.equal(sources.length, 1)
+  assert.equal(sources[0].rawCount, 1)
+  assert.equal(sources[0].items.length, 0)
+  assert.ok(sources[0].fetchedAt)
 })
 test('similar cross-source titles in overlapping dates require human comparison', () => {
   const a = { title: '「世紀初戀．楊麗花」歌仔戲特展', event_date: '2025-12-25', end_date: '2026-10-25' }

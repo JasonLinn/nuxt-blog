@@ -140,7 +140,7 @@ export function normalizeCulture(data, source) {
 
 async function fetchSourceBytes(url, fetcher, allowHtml = false, timeoutMs = 20000) {
   // Callers use registry URLs or a canonical URL with an exact host and numeric event ID.
-  const response = await fetcher(url, { redirect: 'error', signal: AbortSignal.timeout(timeoutMs) })
+  const response = await fetcher(url, { redirect: 'error', cache: 'no-store', headers: { 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(timeoutMs) })
   if (!response.ok) throw new Error(`來源 HTTP ${response.status}`)
   if (!allowHtml && /text\/html/i.test(response.headers.get('content-type') || '')) throw new Error('來源回傳 HTML 而非活動資料，請檢查來源服務')
   const reader = response.body.getReader()
@@ -158,7 +158,7 @@ async function fetchSourceBytes(url, fetcher, allowHtml = false, timeoutMs = 200
   return Buffer.concat(chunks)
 }
 
-export async function fetchSource(source, fetcher = fetch, now = new Date()) {
+async function fetchSourceDetails(source, fetcher = fetch, now = new Date()) {
   if (source.format === 'yilan-calendar') {
     const year = Number(taipeiToday(now).slice(0, 4))
     // Explicit annual URLs avoid the site's redirect and retain next-year events in December.
@@ -166,20 +166,25 @@ export async function fetchSource(source, fetcher = fetch, now = new Date()) {
       const html = await fetchSourceBytes(`${source.feed}${y}/`, fetcher, true)
       return normalizeYilanCalendar(html.toString('utf8'), y)
     }))
-    return calendars.flat()
+    const items = calendars.flat()
+    return { items, rawCount: items.length, contentHash: digest(items) }
   }
   const buffer = await fetchSourceBytes(source.feed, fetcher)
   const data = JSON.parse(buffer.toString('utf8').replace(/^\uFEFF/, ''))
-  return normalizeCulture(data, source)
+  return { items: normalizeCulture(data, source), rawCount: data.length, contentHash: digest(data) }
 }
 
-export async function collectActivities({ fetcher = fetch, now = new Date() } = {}) {
+export async function fetchSource(source, fetcher = fetch, now = new Date()) {
+  return (await fetchSourceDetails(source, fetcher, now)).items
+}
+
+export async function collectActivities({ fetcher = fetch, now = new Date(), sourceIds } = {}) {
   const today = taipeiToday(now)
-  const sources = await Promise.all(activitySources.map(async source => {
+  const sources = await Promise.all(activitySources.filter(s => !sourceIds || sourceIds.includes(s.id)).map(async source => {
     try {
-      const items = await fetchSource(source, fetcher, now)
+      const { items, rawCount, contentHash } = await fetchSourceDetails(source, fetcher, now)
       const unique = [...new Map(items.filter(i => i.external_id).map(i => [i.external_id, i])).values()]
-      return { source: source.id, name: source.name, ok: true, items: unique.map(item => ({ ...item, reasons: reviewReasons(item, source.official, source), expired: !!item.end_date && item.end_date < today })) }
+      return { source: source.id, name: source.name, ok: true, rawCount, contentHash, fetchedAt: now.toISOString(), items: unique.map(item => ({ ...item, reasons: reviewReasons(item, source.official, source), expired: !!item.end_date && item.end_date < today })) }
     } catch (error) {
       return { source: source.id, name: source.name, ok: false, error: error.name === 'TimeoutError' ? '來源逾時' : String(error.message).slice(0, 200), items: [] }
     }

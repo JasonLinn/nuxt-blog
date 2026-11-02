@@ -22,8 +22,8 @@
     </div>
 
     <div class="yp-card__section">
-      <p v-if="message" role="status" class="import-notice import-notice--ok">
-        <Icon name="ri:checkbox-circle-line" /> {{ message }}
+      <p v-if="message" role="status" class="import-notice" :class="summary.some(row => !row.ok) ? 'import-notice--error' : 'import-notice--ok'">
+        <Icon :name="summary.some(row => !row.ok) ? 'ri:error-warning-line' : 'ri:checkbox-circle-line'" /> {{ message }}
       </p>
       <p v-if="error" role="alert" class="import-notice import-notice--error">
         <Icon name="ri:error-warning-line" /> {{ error }}
@@ -45,6 +45,9 @@
               ><span v-if="row.duplicate">，{{ row.duplicate }} 筆重複</span></template
             >
             <span v-else class="import-error">{{ row.error }}</span>
+            <small v-if="row.rawCount != null" class="d-block import-muted">
+              來源原始 {{ row.rawCount }} 筆，篩出宜蘭 {{ row.fetched }} 筆；抓取 {{ row.attempts || 1 }} 次。
+            </small>
             <small v-if="row.warnings?.length" class="d-block import-muted">{{
               row.warnings.join('；')
             }}</small>
@@ -211,7 +214,7 @@ async function sync(dryRun) {
     })
     summary.value = data.summary
     message.value = dryRun
-      ? '預覽完成，尚未儲存或上架；實際更新時還會檢查重複與人工修改。'
+      ? data.ok ? '預覽完成，尚未儲存或上架；實際更新時還會檢查重複與人工修改。' : '部分來源預覽失敗，請查看下方原因；尚未儲存或上架。'
       : data.ok
       ? '更新完成。'
       : '部分來源未完成，成功的來源已儲存，請查看紀錄。'
