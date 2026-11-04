@@ -1,10 +1,13 @@
 import { createHash } from 'node:crypto'
 import { dateOnly, taipeiToday } from '../../utils/activity-dates.js'
+import { officialPageSources, parseOfficialPage } from './activity-official-pages.js'
 
-const cultureUrl = category => `https://cloud.culture.tw/frontsite/opendata/activityOpenDataJsonAction.do?category=${category}&method=doFindActivitiesByCategory`
+const cultureUrl = category => `https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?category=${category}&method=doFindTypeJ`
 export const activitySources = [
-  ...[1, 6, 7].map(category => ({ id: `culture-${category}`, name: `文化部（${{ 1: '音樂', 6: '展覽', 7: '講座' }[category]}）`, official: true, organizerOptional: true, descriptionOptional: true, url: 'https://data.gov.tw/dataset/10042', feed: cultureUrl(category), format: 'json' })),
-  { id: 'yilan-site', name: '宜蘭勁好玩', official: true, organizerOptional: true, descriptionOptional: true, url: 'https://travel.yilan.gov.tw/zh-tw/events/', feed: 'https://travel.yilan.gov.tw/zh-tw/events/', format: 'yilan-calendar' }
+  ...[1, 6, 7].map(category => ({ id: `culture-${category}`, name: `文化部（${{ 1: '音樂', 6: '展覽', 7: '講座' }[category]}）`, official: true, organizerOptional: true, descriptionOptional: true, url: 'https://data.gov.tw/dataset/6478', feed: cultureUrl(category), fallbackFeed: `https://cloud.culture.tw/frontsite/opendata/activityOpenDataJsonAction.do?category=${category}&method=doFindActivitiesByCategory`, format: 'json' })),
+  { id: 'yilan-site', name: '宜蘭勁好玩', official: true, organizerOptional: true, descriptionOptional: true, url: 'https://travel.yilan.gov.tw/zh-tw/events/', feed: 'https://travel.yilan.gov.tw/zh-tw/events/', format: 'yilan-calendar' },
+  { id: 'culture-other', name: '文化部（其他藝文類別）', official: true, organizerOptional: true, descriptionOptional: true, url: 'https://data.gov.tw/dataset/6478', feed: cultureUrl('all'), format: 'json', otherCategories: true },
+  ...officialPageSources
 ]
 export const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 export const plainText = value => String(value || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\\r\\n/g, '\n').trim()
@@ -158,7 +161,13 @@ async function fetchSourceBytes(url, fetcher, allowHtml = false, timeoutMs = 200
   return Buffer.concat(chunks)
 }
 
-async function fetchSourceDetails(source, fetcher = fetch, now = new Date()) {
+async function fetchSourceDetails(source, fetcher = fetch, now = new Date(), fallback = false) {
+  if (source.format === 'official-page') {
+    const buffer = await fetchSourceBytes(source.feed, fetcher, true)
+    const items = parseOfficialPage(buffer.toString('utf8'), source)
+      .map(item => ({ ...item, images: item.images.map(safeActivityImage).filter(Boolean) }))
+    return { items, rawCount: items.length, contentHash: digest(items), feedUrl: source.feed }
+  }
   if (source.format === 'yilan-calendar') {
     const year = Number(taipeiToday(now).slice(0, 4))
     // Explicit annual URLs avoid the site's redirect and retain next-year events in December.
@@ -169,22 +178,27 @@ async function fetchSourceDetails(source, fetcher = fetch, now = new Date()) {
     const items = calendars.flat()
     return { items, rawCount: items.length, contentHash: digest(items) }
   }
-  const buffer = await fetchSourceBytes(source.feed, fetcher)
+  const feedUrl = fallback && source.fallbackFeed ? source.fallbackFeed : source.feed
+  const buffer = await fetchSourceBytes(feedUrl, fetcher)
   const data = JSON.parse(buffer.toString('utf8').replace(/^\uFEFF/, ''))
-  return { items: normalizeCulture(data, source), rawCount: data.length, contentHash: digest(data) }
+  // Validate the whole feed before filtering categories. Empty OTHER categories are valid.
+  const all = normalizeCulture(data, source)
+  const otherIds = source.otherCategories ? new Set(data.filter(row => !['1', '6', '7'].includes(String(row.category))).map(row => row.UID)) : null
+  return { items: otherIds ? all.filter(item => otherIds.has(item.external_id.split(':')[0])) : all,
+    rawCount: data.length, contentHash: digest(data), feedUrl }
 }
 
 export async function fetchSource(source, fetcher = fetch, now = new Date()) {
   return (await fetchSourceDetails(source, fetcher, now)).items
 }
 
-export async function collectActivities({ fetcher = fetch, now = new Date(), sourceIds } = {}) {
+export async function collectActivities({ fetcher = fetch, now = new Date(), sourceIds, fallback = false } = {}) {
   const today = taipeiToday(now)
   const sources = await Promise.all(activitySources.filter(s => !sourceIds || sourceIds.includes(s.id)).map(async source => {
     try {
-      const { items, rawCount, contentHash } = await fetchSourceDetails(source, fetcher, now)
+      const { items, rawCount, contentHash, feedUrl } = await fetchSourceDetails(source, fetcher, now, fallback)
       const unique = [...new Map(items.filter(i => i.external_id).map(i => [i.external_id, i])).values()]
-      return { source: source.id, name: source.name, ok: true, rawCount, contentHash, fetchedAt: now.toISOString(), items: unique.map(item => ({ ...item, reasons: reviewReasons(item, source.official, source), expired: !!item.end_date && item.end_date < today })) }
+      return { source: source.id, name: source.name, ok: true, rawCount, contentHash, feedUrl, fetchedAt: now.toISOString(), items: unique.map(item => ({ ...item, reasons: reviewReasons(item, source.official, source), expired: !!item.end_date && item.end_date < today })) }
     } catch (error) {
       return { source: source.id, name: source.name, ok: false, error: error.name === 'TimeoutError' ? '來源逾時' : String(error.message).slice(0, 200), items: [] }
     }

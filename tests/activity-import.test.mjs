@@ -68,7 +68,7 @@ test('legitimate empty feeds stay successful and recovered feeds retain retry ev
   assert.match(result.warnings[0], /重試後恢復/)
   const [failed] = await verifyCollectionCoverage([empty], { 'culture-1': 1 }, async () => [{ ...empty, ok: false, error: '來源逾時' }])
   assert.equal(failed.ok, false)
-  assert.equal(failed.error, '來源逾時')
+  assert.match(failed.error, /來源逾時/)
 })
 
 test('source diagnostics distinguish nationwide records from matching Yilan records', async () => {
@@ -151,8 +151,8 @@ test('only approved sources are fetched and Yilan failures remain visible', asyn
     return new Response(calendarHtml(year, year === 2026 ? [yilanRow] : []), { headers: { 'content-type': 'text/html' } })
   }
   const now = new Date('2026-10-16T00:00:00Z')
-  assert.deepEqual(activitySources.map(s => s.id), ['culture-1', 'culture-6', 'culture-7', 'yilan-site'])
-  let sources = await collectActivities({ fetcher: fetcher(false), now })
+  assert.deepEqual(activitySources.map(s => s.id), ['culture-1', 'culture-6', 'culture-7', 'yilan-site', 'culture-other', 'yilan-news', 'ncfta', 'lanyang-museum', 'sunmake', 'necoast', 'taiwan-hotspring'])
+  let sources = await collectActivities({ fetcher: fetcher(false), now, sourceIds: ['culture-1', 'culture-6', 'culture-7', 'yilan-site'] })
   assert.equal(sources.find(s => s.source === 'yilan-site').items.length, 1)
   sources = await collectActivities({ fetcher: fetcher(true), now })
   assert.equal(sources.find(s => s.source === 'yilan-site').ok, false)

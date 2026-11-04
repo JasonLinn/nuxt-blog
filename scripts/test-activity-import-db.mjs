@@ -90,6 +90,22 @@ try {
   summary = await applyCollection(client, collection([item('photo-mirror', { duplicate_of: {source:'test-official',external_id:'photo'} })], 'yilan-site'))
   assert.equal(summary[0].duplicate, 1)
   assert.equal(summary[0].published, 0)
+  // A verified authoritative publisher takes over the SAME activity, then stale
+  // category feeds cannot revert it. Manual edits still win over every publisher.
+  const oldYang = item('697678ed26b32454e437c439:693524ccf9c5c735', { title: '世紀初戀－楊麗花歌仔戲特展', event_date: '2026-01-01', end_date: '2026-10-25' })
+  await applyCollection(client, collection([oldYang], 'culture-6'))
+  const oldId = (await client.query("SELECT id FROM yilan_activities WHERE title = $1", [oldYang.title])).rows[0].id
+  const updatedYang = item('248557', { title: oldYang.title, event_date: '2025-12-25', end_date: '2027-03-01' })
+  summary = await applyCollection(client, collection([updatedYang], 'ncfta'))
+  assert.equal(summary[0].updated, 1)
+  assert.equal((await client.query("SELECT activity_id FROM activity_import_items WHERE source_id = 'ncfta'")).rows[0].activity_id, oldId)
+  summary = await applyCollection(client, collection([oldYang], 'culture-6'))
+  assert.equal(summary[0].duplicate, 1)
+  assert.equal((await client.query("SELECT end_date::text FROM yilan_activities WHERE id = $1", [oldId])).rows[0].end_date, '2027-03-01')
+  await client.query('UPDATE yilan_activities SET import_managed = false WHERE id = $1', [oldId])
+  summary = await applyCollection(client, collection([{ ...updatedYang, end_date: '2028-01-01' }], 'ncfta'))
+  assert.equal(summary[0].preserved, 1)
+  assert.equal((await client.query("SELECT end_date::text FROM yilan_activities WHERE id = $1", [oldId])).rows[0].end_date, '2027-03-01')
   // Verify current live feed records traverse real SQL, but never retain them.
   const live = JSON.parse(await readFile('.cache/activity-import/preview.json', 'utf8'))
   const realSummary = await applyCollection(client, live.sources)

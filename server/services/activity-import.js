@@ -1,5 +1,6 @@
 import { collectActivities, digest, sameEvent, possiblySameEvent, reviewReasons, safeSourceUrl, safeActivityImage, plainText, activitySources } from './activity-sources.js'
 import { dateOnly, taipeiToday } from '../../utils/activity-dates.js'
+import { authoritativeActivityAliases } from './activity-official-pages.js'
 
 export function collectionSummary(sources) {
   return sources.map(({ items, ...source }) => ({ ...source, fetched: items.length, current: items.filter(i => !i.expired).length, eligible: items.filter(i => !i.expired && !i.reasons.length).length, pending: items.filter(i => !i.expired && i.reasons.length).length }))
@@ -7,23 +8,36 @@ export function collectionSummary(sources) {
 
 // A zero local result is valid only when it does not contradict known ongoing events.
 // Never infer that events were cancelled or delete them because a feed went empty.
-export async function verifyCollectionCoverage(sources, knownSources, retry = collectActivities) {
-  const suspect = sources.filter(s => s.ok && !s.items.length && Number(knownSources[s.source]) > 0)
+export async function verifyCollectionCoverage(sources, knownSources, retry = collectActivities, baselines = {}) {
+  const problem = s => {
+    if (!s.ok) return s.error || '來源讀取失敗'
+    if (!s.items.length && Number(knownSources[s.source]) > 0) return `回傳 0 筆宜蘭活動，但仍有 ${knownSources[s.source]} 筆未結束的已收錄活動`
+    const baseline = Number(baselines[s.source])
+    if (baseline >= 20 && Number.isFinite(s.rawCount) && s.rawCount < baseline * 0.5) return `來源原始筆數異常縮減（${s.rawCount}/${baseline}），需檢查來源完整性`
+    return null
+  }
+  const suspect = sources.filter(s => problem(s))
   if (!suspect.length) return sources
-  const retried = await retry({ sourceIds: suspect.map(s => s.source) })
+  const retried = await retry({ sourceIds: suspect.map(s => s.source), fallback: true })
   return sources.map(source => {
     if (!suspect.includes(source)) return source
     const replacement = retried.find(s => s.source === source.source)
-    if (replacement?.ok && replacement.items.length) return { ...replacement, attempts: 2, warnings: [...(replacement.warnings || []), '首次回傳 0 筆，重試後恢復'] }
+    const firstAttempt = { rawCount: source.rawCount, fetched: source.items.length, feedUrl: source.feedUrl, error: problem(source) }
+    if (replacement && !problem(replacement)) return { ...replacement, attempts: 2, firstAttempt, warnings: [...(replacement.warnings || []), '首次來源異常，官方端點重試後恢復'] }
     return { ...(replacement || source), ok: false, attempts: 2,
-      error: replacement && !replacement.ok ? replacement.error : `來源連續回傳 0 筆宜蘭活動，但仍有 ${knownSources[source.source]} 筆未結束的已收錄活動，需檢查來源；保留既有資料` }
+      firstAttempt, error: `${replacement ? problem(replacement) : problem(source)}；重試仍異常，保留既有資料` }
   })
 }
 
 async function collectVerified(client) {
   const known = await client.query(`SELECT source_id, COUNT(*) AS count FROM activity_import_items
     WHERE state = 'published' AND candidate->>'end_date' >= $1 GROUP BY source_id`, [taipeiToday()])
-  return verifyCollectionCoverage(await collectActivities(), Object.fromEntries(known.rows.map(r => [r.source_id, Number(r.count)])))
+  const history = await client.query(`SELECT s->>'source' AS source, MAX((s->>'rawCount')::int) AS count
+    FROM activity_import_runs r, jsonb_array_elements(r.summary) s
+    WHERE r.started_at > now() - interval '14 days' AND s->>'ok' = 'true' AND s->>'rawCount' IS NOT NULL
+    GROUP BY s->>'source'`)
+  return verifyCollectionCoverage(await collectActivities(), Object.fromEntries(known.rows.map(r => [r.source_id, Number(r.count)])),
+    collectActivities, Object.fromEntries(history.rows.map(r => [r.source, Number(r.count)])))
 }
 
 export async function writeActivity(client, item, sourceName, activityId = null, managed = true) {
@@ -50,7 +64,7 @@ export async function applyCollection(client, sources) {
   const existing = (await client.query('SELECT * FROM yilan_activities')).rows
   const summaries = []
   for (const source of sources) {
-    const counts = { source: source.source, name: source.name, ok: source.ok, rawCount: source.rawCount, contentHash: source.contentHash, fetchedAt: source.fetchedAt, attempts: source.attempts || 1, fetched: source.items.length, published: 0, updated: 0, pending: 0, duplicate: 0, preserved: 0, expired: 0, unchanged: 0 }
+    const counts = { source: source.source, name: source.name, ok: source.ok, rawCount: source.rawCount, contentHash: source.contentHash, feedUrl: source.feedUrl, firstAttempt: source.firstAttempt, fetchedAt: source.fetchedAt, attempts: source.attempts || 1, fetched: source.items.length, published: 0, updated: 0, pending: 0, duplicate: 0, preserved: 0, expired: 0, unchanged: 0 }
     if (source.warnings?.length) counts.warnings = source.warnings
     if (!source.ok) { summaries.push({ ...counts, error: source.error }); continue }
     await client.query('SAVEPOINT import_source')
@@ -60,17 +74,19 @@ export async function applyCollection(client, sources) {
         const item = { ...rawItem, reasons: [...rawItem.reasons] }
         const key = [source.source, item.external_id]
         const previous = (await client.query('SELECT * FROM activity_import_items WHERE source_id = $1 AND external_id = $2 FOR UPDATE', key)).rows[0]
+        const alias = authoritativeActivityAliases[`${source.source}:${item.external_id}`]
+        const predecessor = alias && !previous ? (await client.query('SELECT * FROM activity_import_items WHERE source_id = $1 AND external_id = $2 FOR UPDATE', [alias.source, alias.externalId])).rows[0] : null
         if (item.expired && !previous) { counts.expired++; continue }
         const { expired, reasons, ...content } = item
         const hash = digest(content)
-        let activity = previous?.activity_id ? existing.find(a => a.id === previous.activity_id) : null
-        if (previous?.activity_id) {
+        let activity = (previous?.activity_id || predecessor?.activity_id) ? existing.find(a => a.id === (previous?.activity_id || predecessor?.activity_id)) : null
+        if (previous?.activity_id || predecessor?.activity_id) {
           // Re-read under a row lock: an editor may have changed it since this run started.
-          const current = (await client.query('SELECT * FROM yilan_activities WHERE id = $1 FOR UPDATE', [previous.activity_id])).rows[0]
+          const current = (await client.query('SELECT * FROM yilan_activities WHERE id = $1 FOR UPDATE', [previous?.activity_id || predecessor?.activity_id])).rows[0]
           if (activity && current) Object.assign(activity, current)
           else activity = current || null
         }
-        let state = previous?.state || 'pending'
+        let state = previous?.state || predecessor?.state || 'pending'
         if (['dismissed', 'deleted'].includes(state) || (state === 'published' && !activity)) {
           state = state === 'published' ? 'deleted' : state
           counts.preserved++
@@ -115,6 +131,9 @@ export async function applyCollection(client, sources) {
             reasons = EXCLUDED.reasons, state = EXCLUDED.state, activity_id = EXCLUDED.activity_id,
             last_seen_at = now(), updated_at = CASE WHEN activity_import_items.content_hash <> EXCLUDED.content_hash THEN now() ELSE activity_import_items.updated_at END`,
         [...key, source.name, JSON.stringify(content), hash, JSON.stringify(item.reasons), state, activity?.id || null])
+        if (predecessor && activity && state === 'published') {
+          await client.query("UPDATE activity_import_items SET state = 'duplicate', updated_at = now() WHERE source_id = $1 AND external_id = $2", [alias.source, alias.externalId])
+        }
       }
       await client.query('RELEASE SAVEPOINT import_source')
       summaries.push(counts)
