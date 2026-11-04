@@ -22,7 +22,7 @@ export async function verifyCollectionCoverage(sources, knownSources, retry = co
   return sources.map(source => {
     if (!suspect.includes(source)) return source
     const replacement = retried.find(s => s.source === source.source)
-    const firstAttempt = { rawCount: source.rawCount, fetched: source.items.length, feedUrl: source.feedUrl, error: problem(source) }
+    const firstAttempt = { rawCount: source.rawCount, fetched: source.items.length, feedUrl: source.feedUrl, contentHash: source.contentHash, fetchedAt: source.fetchedAt, error: problem(source) }
     if (replacement && !problem(replacement)) return { ...replacement, attempts: 2, firstAttempt, warnings: [...(replacement.warnings || []), '首次來源異常，官方端點重試後恢復'] }
     return { ...(replacement || source), ok: false, attempts: 2,
       firstAttempt, error: `${replacement ? problem(replacement) : problem(source)}；重試仍異常，保留既有資料` }

@@ -32,7 +32,7 @@ test('a changed official date is parsed, but missing dates or mismatched identit
 })
 
 test('nonzero truncated feeds and zero-local feeds with no known events cannot pass a volume collapse', async () => {
-  const truncated = { source: 'culture-7', ok: true, rawCount: 10, items: [] }
+  const truncated = { source: 'culture-7', ok: true, rawCount: 10, contentHash: 'first-response-hash', fetchedAt: '2026-11-04T02:00:00Z', items: [] }
   const [failed] = await verifyCollectionCoverage([truncated], {}, async ({ fallback }) => {
     assert.equal(fallback, true)
     return [truncated]
@@ -42,6 +42,8 @@ test('nonzero truncated feeds and zero-local feeds with no known events cannot p
   const [recovered] = await verifyCollectionCoverage([truncated], {}, async () => [{ ...truncated, rawCount: 100 }], { 'culture-7': 99 })
   assert.equal(recovered.ok, true)
   assert.equal(recovered.firstAttempt.rawCount, 10)
+  assert.equal(recovered.firstAttempt.contentHash, 'first-response-hash')
+  assert.equal(recovered.firstAttempt.fetchedAt, '2026-11-04T02:00:00Z')
   const partial = { source: 'culture-1', ok: true, rawCount: 8, items: [{ external_id: 'one' }] }
   assert.equal((await verifyCollectionCoverage([partial], {}, async () => [partial], { 'culture-1': 465 }))[0].ok, false)
 })
