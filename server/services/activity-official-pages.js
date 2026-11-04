@@ -39,6 +39,30 @@ function block(text, start, end) {
   need(at >= 0, start)
   return text.slice(at + start.length).split(end)[0].trim()
 }
+function pageCover(html, base, accepts) {
+  const tag = html.match(/<meta\b[^>]*property=["']og:image["'][^>]*>/i)?.[0]
+  const value = tag?.match(/content=["']([^"']+)["']/i)?.[1]
+  if (!value) return []
+  try { const url = new URL(value.replace(/&amp;/g, '&'), base); return accepts(url) ? [url.href] : [] } catch { return [] }
+}
+
+// Resolve only the current page's Nuxt record, not another suggested activity's image.
+export function parseSunmakeCover(html, { id, title, start, end }) {
+  try {
+    const match = html.match(/<script\b[^>]*id=["']__NUXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i)
+    const data = JSON.parse(match?.[1] || 'null')
+    if (!Array.isArray(data)) return []
+    const cache = data[data[1]?.data]
+    const response = data[cache?.getStoreDetail ?? cache?.getActivityDetail]
+    const record = data[response?.Data]
+    if (!record || data[record.Id] !== id || data[record.Title] !== title) return []
+    if (start && (data[record.ActivityStartOn]?.slice(0, 10) !== start || data[record.ActivityEndOn]?.slice(0, 10) !== end)) return []
+    const url = new URL(data[record.Picture])
+    if (url.protocol !== 'https:' || url.hostname !== 'admin.px-sunmake.org.tw' || url.username || url.password || url.port) return []
+    if (!/^\/Public\/(post|show)\/\d+\/[^/]+\.(png|jpe?g|webp)$/i.test(url.pathname)) return []
+    return [url.href]
+  } catch { return [] }
+}
 export function parseOfficialPage(html, source) {
   const text = officialText(html)
   const item = (id, title, dates, location, description, extra = {}) => ({
@@ -71,7 +95,8 @@ export function parseOfficialPage(html, source) {
     const details = block(text, '正港宜蘭－烏石港正口兩百年特展', '展覽網站')
     return [item('TSLymSpecialExhibition-000044', '正港宜蘭－烏石港正口兩百年特展', range(details),
       '宜蘭縣頭城鎮青雲路三段750號 蘭陽博物館一樓特展室',
-      '紀念烏石港設立正口兩百年，透過史料、文物及多媒體呈現宜蘭水運歷史。09:00–17:00，每週三休館（國定假日依館方公告）；16:30停止售票。', { organizer_name: '宜蘭縣立蘭陽博物館' })]
+      '紀念烏石港設立正口兩百年，透過史料、文物及多媒體呈現宜蘭水運歷史。09:00–17:00，每週三休館（國定假日依館方公告）；16:30停止售票。', { organizer_name: '宜蘭縣立蘭陽博物館',
+        images: pageCover(html, source.feed, u => u.hostname === 'www.lym.gov.tw' && /^\/export\/sites\/lym\/images\/exhibition\/Special-Exhibition\/2-2-SE-20260413-port-\d+\.jpg$/.test(u.pathname)) })]
   }
   if (source.id === 'sunmake') {
     need(text.includes('感恩十載 傳藝謝平安') && text.includes('2026/01/21'), '年度節目身分')
@@ -89,7 +114,8 @@ export function parseOfficialPage(html, source) {
     const single = need(ceremony.match(/活動時間[：:]\s*(\d{1,2})\/(\d{1,2})/), '謝平安日期')
     const place = need(ceremony.match(/活動地點[：:]\s*([^\n]+)/)?.[1], '謝平安場地')
     result.push(item('107-peace', '感恩十載 傳藝謝平安', { event_date: day(year, single[1], single[2]), end_date: day(year, single[1], single[2]) },
-      `宜蘭縣五結鄉五濱路二段201號 宜蘭傳藝園區${place}`, ceremony, { activity_type: '節慶慶典', organizer_name: '宜蘭傳藝園區' }))
+      `宜蘭縣五結鄉五濱路二段201號 宜蘭傳藝園區${place}`, ceremony, { activity_type: '節慶慶典', organizer_name: '宜蘭傳藝園區',
+        images: parseSunmakeCover(html, { id: 107, title: '感恩十載 傳藝謝平安' }), image_source_name: '宜蘭傳藝園區（2026第四季系列主視覺；謝平安日為11/21）', image_source_url: source.feed }))
     return result
   }
   if (source.id === 'necoast') {
@@ -98,13 +124,22 @@ export function parseOfficialPage(html, source) {
     const dates = { event_date: day(m[1], m[2], m[3]), end_date: day(m[4], m[5], m[6]) }
     return [item('flower26', '2026草嶺古道芒花季', dates, '宜蘭縣頭城鎮大里遊客中心、草嶺古道（跨宜蘭與新北）',
       `活動期間為${dates.event_date}至${dates.end_date}。包含芒花健行、大里遊客中心主題裝置及假日體驗。接駁、手作、古裝體驗各有指定場次；請依官方活動頁及步道開放公告安排行程。`,
-      { activity_type: '戶外運動', organizer_name: source.name })]
+      { activity_type: '戶外運動', organizer_name: source.name,
+        images: pageCover(html, source.feed, u => u.hostname === 'events.necoast-nsa.gov.tw' && u.pathname === '/flower26/common/images/fbimg.jpg') })]
   }
   if (source.id === 'taiwan-hotspring') {
     need(text.includes('礁溪溫泉') && text.includes('2026 冬戀蘭陽溫泉季'), '溫泉季身分')
     const details = block(text, '活動日期：', '更多好湯活動')
+    const article = html.split('class="container-article"')[1]?.split('class="container-aside"')[0] || ''
+    const images = [...article.matchAll(/<img\b[^>]*>/gi)].flatMap(([tag]) => {
+      const src = tag.match(/\bdata-src=["']([^"']+)["']/i)?.[1] || tag.match(/\bsrc=["']([^"']+)["']/i)?.[1]
+      try {
+        const u = new URL(src || '', source.feed)
+        return u.hostname === 'taiwanhotspring.net' && /^\/UserFiles\/image\/[^?#]+\.(png|jpe?g|webp)$/i.test(u.pathname) ? [u.href] : []
+      } catch { return [] }
+    })
     return [item('4307', '2026 冬戀蘭陽溫泉季系列活動', range(details), '宜蘭縣礁溪鄉礁溪溫泉區（各子活動場地依主辦公告）',
-      `本頁為系列活動期間，不代表每天均有現場節目。子活動的確切地點、場次與內容以主辦單位後續公告為準。\n${details}`, { activity_type: '節慶慶典' })]
+      `本頁為系列活動期間，不代表每天均有現場節目。子活動的確切地點、場次與內容以主辦單位後續公告為準。\n${details}`, { activity_type: '節慶慶典', images: [...new Set(images)].slice(0, 6) })]
   }
   throw new Error('未核可的官方頁面')
 }

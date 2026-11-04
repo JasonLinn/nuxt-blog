@@ -1,12 +1,54 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { officialPageSources, parseOfficialPage } from '../server/services/activity-official-pages.js'
-import { collectActivities, activitySources } from '../server/services/activity-sources.js'
+import { officialPageSources, parseOfficialPage, parseSunmakeCover } from '../server/services/activity-official-pages.js'
+import { collectActivities, activitySources, safeActivityImage, enrichOfficialPageMedia } from '../server/services/activity-sources.js'
 import { verifyCollectionCoverage } from '../server/services/activity-import.js'
 
 const fixtures = Object.fromEntries(await Promise.all(officialPageSources.map(async s => [s.id,
   await readFile(new URL(`./fixtures/activity-official/${s.id}.html`, import.meta.url), 'utf8')])) )
+const media = Object.fromEntries(await Promise.all(['lanyang-museum', 'necoast', 'sunmake', 'sunmake-show'].map(async id => [id,
+  await readFile(new URL(`./fixtures/activity-official/${id}-media.html`, import.meta.url), 'utf8')])))
+
+test('official activity covers are imported from the matching page, not logos', () => {
+  for (const id of ['lanyang-museum', 'necoast', 'sunmake']) {
+    const source = officialPageSources.find(s => s.id === id)
+    const rows = parseOfficialPage(media[id] + fixtures[id], source)
+    const item = rows.find(i => id !== 'sunmake' || i.external_id === '107-peace')
+    assert.equal(item.images.length, 1)
+    assert.ok(safeActivityImage(item.images[0]))
+  }
+  const museum = officialPageSources.find(s => s.id === 'lanyang-museum')
+  assert.deepEqual(parseOfficialPage('<meta property="og:image" content="https://www.lym.gov.tw/logo.png">' + fixtures['lanyang-museum'], museum)[0].images, [])
+  assert.equal(safeActivityImage('https://events.necoast-nsa.gov.tw/flower25/common/images/fbimg.jpg'), null)
+  assert.equal(safeActivityImage('https://admin.px-sunmake.org.tw/Public/show/999/photo.png'), null)
+})
+
+test('Nezha media requires matching official ID, title and both dates', () => {
+  const expected = { id: 1045, title: '11月主題劇場「哪吒海底歷險記—海洋之心」', start: '2026-11-01', end: '2026-11-30' }
+  assert.equal(parseSunmakeCover(media['sunmake-show'], expected).length, 1)
+  for (const change of [{ id: 1046 }, { title: '另一場活動' }, { start: '2025-11-01' }, { end: '2026-12-31' }]) {
+    assert.deepEqual(parseSunmakeCover(media['sunmake-show'], { ...expected, ...change }), [])
+  }
+})
+
+test('hot spring pages only import article photos, never site branding or related events', () => {
+  const source = officialPageSources.find(s => s.id === 'taiwan-hotspring')
+  const html = `<meta property="og:image" content="https://taiwanhotspring.net/images/ogimg.jpg"><img src="/UserFiles/image/logo.png"><div class="container-article"><img src="images/loader.gif" data-src="/UserFiles/image/event.jpg"></div><div class="container-aside"><img src="/UserFiles/image/unrelated.jpg"></div>`
+  assert.deepEqual(parseOfficialPage(fixtures['taiwan-hotspring'] + html, source)[0].images, ['https://taiwanhotspring.net/UserFiles/image/event.jpg'])
+  assert.deepEqual(parseOfficialPage(fixtures['taiwan-hotspring'], source)[0].images, [])
+})
+
+test('official media fetch failures preserve existing images and missing covers are visible warnings', async () => {
+  const item = { external_id: '107-november', event_date: '2026-11-01', end_date: '2026-11-30', images: ['existing-photo'] }
+  const sources = [{ source: 'sunmake', ok: true, items: [item] }, { source: 'taiwan-hotspring', ok: true, items: [{ title: '溫泉季', images: [] }] }]
+  await enrichOfficialPageMedia(sources, async () => { throw new Error('unavailable') })
+  assert.deepEqual(item.images, ['existing-photo'])
+  assert.match(sources[0].warnings[0], /保留既有圖片/)
+  assert.match(sources[1].warnings[0], /尚無可核對/)
+  await enrichOfficialPageMedia(sources, async () => new Response(media['sunmake-show']))
+  assert.match(item.images[0], /\/show\/1045\//)
+})
 
 test('real official pages supply all missing events and the extended Yang exhibition', () => {
   const parsed = Object.fromEntries(officialPageSources.map(s => [s.id, parseOfficialPage(fixtures[s.id], s)]))

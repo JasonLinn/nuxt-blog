@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { dateOnly, taipeiToday } from '../../utils/activity-dates.js'
-import { officialPageSources, parseOfficialPage } from './activity-official-pages.js'
+import { officialPageSources, parseOfficialPage, parseSunmakeCover } from './activity-official-pages.js'
 
 const cultureUrl = category => `https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?category=${category}&method=doFindTypeJ`
 export const activitySources = [
@@ -25,6 +25,10 @@ export function safeActivityImage(value) {
   const { hostname, pathname } = new URL(safe)
   if (hostname === 'travel.yilan.gov.tw' && pathname.startsWith('/_api/content/images/')) return safe
   if (hostname === 'admin.px-sunmake.org.tw' && /^\/Public\/(exhibition|post)\/\d+\//.test(pathname)) return safe
+  if (hostname === 'admin.px-sunmake.org.tw' && /^\/Public\/show\/1045\/[^/]+\.(png|jpe?g|webp)$/i.test(pathname)) return safe
+  if (hostname === 'www.lym.gov.tw' && /^\/export\/sites\/lym\/images\/exhibition\/Special-Exhibition\/[^/]+\.(png|jpe?g|webp)$/i.test(pathname)) return safe
+  if (hostname === 'events.necoast-nsa.gov.tw' && pathname === '/flower26/common/images/fbimg.jpg') return safe
+  if (hostname === 'taiwanhotspring.net' && /^\/UserFiles\/image\/[^?#]+\.(png|jpe?g|webp)$/i.test(pathname)) return safe
   if (hostname === 's3.resource.opentix.life' && /^\/upload\/program\/[^/]+\.(jpg|jpeg|png|webp)$/i.test(pathname)) return safe
   if (['cloud.culture.tw', 'event.culture.tw', 'www.culture.tw'].includes(hostname) && /\.(jpg|jpeg|png|webp)(?:$)/i.test(pathname)) return safe
   return null
@@ -59,6 +63,26 @@ export async function enrichOfficialMedia(sources, fetcher = fetch) {
     } catch {
       culture.warnings = ['舉人之力官方圖片暫時無法更新，保留既有圖片']
     }
+  }
+}
+
+export async function enrichOfficialPageMedia(sources, fetcher = fetch) {
+  const source = sources.find(s => s.source === 'sunmake' && s.ok)
+  const show = source?.items.find(i => i.external_id === '107-november' && !i.expired)
+  if (show) {
+    const url = 'https://www.px-sunmake.org.tw/show/1045'
+    try {
+      const html = await fetchSourceBytes(url, fetcher, true)
+      const images = parseSunmakeCover(html.toString('utf8'), { id: 1045, title: '11月主題劇場「哪吒海底歷險記—海洋之心」', start: show.event_date, end: show.end_date }).map(safeActivityImage).filter(Boolean)
+      if (!images.length) throw new Error('圖片或活動身分不符')
+      Object.assign(show, { images, image_source_name: '宜蘭傳藝園區（哪吒官方節目頁）', image_source_url: url })
+    } catch {
+      source.warnings = [...(source.warnings || []), '哪吒官方圖片暫時無法更新或活動身分不符，保留既有圖片']
+    }
+  }
+  for (const source of sources.filter(s => s.ok && officialPageSources.some(p => p.id === s.source))) {
+    const missing = source.items.filter(i => !i.expired && !i.images.length && source.source !== 'ncfta')
+    if (missing.length) source.warnings = [...(source.warnings || []), ...missing.map(i => `尚無可核對的官方圖片：${i.title}`)]
   }
 }
 export function sameEvent(a, b) {
@@ -203,7 +227,7 @@ export async function collectActivities({ fetcher = fetch, now = new Date(), sou
       return { source: source.id, name: source.name, ok: false, error: error.name === 'TimeoutError' ? '來源逾時' : String(error.message).slice(0, 200), items: [] }
     }
   }))
-  await Promise.all([enrichOfficialMedia(sources, fetcher), enrichCulturePrograms(sources, fetcher)])
+  await Promise.all([enrichOfficialMedia(sources, fetcher), enrichCulturePrograms(sources, fetcher), enrichOfficialPageMedia(sources, fetcher)])
   for (const source of sources) {
     const policy = activitySources.find(s => s.id === source.source)
     for (const item of source.items) item.reasons = reviewReasons(item, policy.official, policy)
