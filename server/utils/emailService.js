@@ -47,8 +47,11 @@ const createTransporter = () => {
 
 // 審核通過郵件模板
 const getApprovalEmailTemplate = (homestayName, homestayId) => {
+  const homestayUrl = `https://yilanpass.com/homestays/${encodeURIComponent(homestayId)}`
+  const safeHomestayUrl = escapeHtml(homestayUrl)
   return {
     subject: '🎉 恭喜！您的民宿申請已通過審核',
+    text: `親愛的民宿業者，您好！\n\n您的民宿申請已通過審核。\n民宿名稱：${homestayName}\n申請編號：${homestayId}\n\n查看您的民宿頁面：\n${homestayUrl}\n\n感謝您選擇我們的平台，祝您營運順利！`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -64,8 +67,8 @@ const getApprovalEmailTemplate = (homestayName, homestayId) => {
           
           <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #48bb78; margin: 20px 0;">
             <h3 style="color: #48bb78; margin: 0 0 10px 0;">民宿資訊</h3>
-            <p style="margin: 5px 0; color: #4a5568;"><strong>民宿名稱：</strong>${homestayName}</p>
-            <p style="margin: 5px 0; color: #4a5568;"><strong>申請編號：</strong>${homestayId}</p>
+            <p style="margin: 5px 0; color: #4a5568;"><strong>民宿名稱：</strong>${escapeHtml(homestayName)}</p>
+            <p style="margin: 5px 0; color: #4a5568;"><strong>申請編號：</strong>${escapeHtml(homestayId)}</p>
             <p style="margin: 5px 0; color: #4a5568;"><strong>狀態：</strong><span style="color: #48bb78; font-weight: bold;">已通過審核</span></p>
           </div>
           
@@ -76,6 +79,17 @@ const getApprovalEmailTemplate = (homestayName, homestayId) => {
             <li>您可以隨時更新民宿資訊</li>
             <li>如有任何問題，歡迎聯繫我們的客服團隊</li>
           </ul>
+
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="${safeHomestayUrl}"
+               style="background: #48bb78; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block; font-weight: bold;">
+              查看您的民宿頁面
+            </a>
+            <p style="color: #718096; font-size: 14px; line-height: 1.6; word-break: break-all;">
+              也可以複製以下網址開啟或分享：<br>
+              <a href="${safeHomestayUrl}" style="color: #38a169;">${safeHomestayUrl}</a>
+            </p>
+          </div>
           
           <div style="text-align: center; margin-top: 30px;">
             <p style="color: #718096; font-size: 14px;">
@@ -316,13 +330,14 @@ export const sendAdminNotificationEmail = async (homestayName, homestayId, appli
 export const sendApprovalEmail = async (toEmail, homestayName, homestayId) => {
   try {
     const transporter = createTransporter()
-    const { subject, html } = getApprovalEmailTemplate(homestayName, homestayId)
+    const { subject, html, text } = getApprovalEmailTemplate(homestayName, homestayId)
     
     const mailOptions = {
       from: process.env.EMAIL_USER || 'noreply@yourdomain.com',
       to: toEmail,
       subject,
-      html
+      html,
+      text
     }
     
     const result = await transporter.sendMail(mailOptions)
@@ -450,4 +465,4 @@ export const testEmailConnection = async () => {
       message: `${errorMessage}: ${error.message}${suggestion}`
     }
   }
-} 
+}
