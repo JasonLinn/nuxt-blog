@@ -11,9 +11,22 @@
           v-for="item in menuItems"
           :key="item.title"
           class="yp-nav-group"
-          :class="{ 'is-current': isGroupActive(item) }"
+          :class="{
+            'is-current': isGroupActive(item),
+            'is-open': desktopMenu === item.title
+          }"
+          @mouseenter="desktopMenu = item.title"
+          @mouseleave="desktopMenu = null"
+          @focusin="desktopMenu = item.title"
+          @focusout="onDesktopFocusOut"
+          @click="desktopMenu = null"
+          @keydown.esc.prevent="closeDesktopMenu($event)"
         >
-          <NuxtLink :to="item.path" class="yp-nav-group__btn">
+          <NuxtLink
+            :to="item.path"
+            class="yp-nav-group__btn"
+            :aria-expanded="desktopMenu === item.title"
+          >
             {{ item.title }}
             <Icon name="ri:arrow-down-s-line" class="yp-nav-group__caret" />
           </NuxtLink>
@@ -167,6 +180,7 @@ const store = useStore()
 const userData = computed(() => store.getUserData)
 const referral = useReferralStore()
 const navOpen = ref(false)
+const desktopMenu = ref(null)
 const scrolled = ref(false)
 
 const { partnerStores, partnerHotels, displayVisitorCount, animateVisitor } = useSiteStats()
@@ -182,6 +196,17 @@ const isGroupActive = (item) =>
 
 const onScroll = () => {
   scrolled.value = window.scrollY > 4
+}
+
+const onDesktopFocusOut = (event) => {
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    desktopMenu.value = null
+  }
+}
+
+const closeDesktopMenu = (event) => {
+  event.currentTarget.querySelector('.yp-nav-group__btn')?.focus()
+  desktopMenu.value = null
 }
 
 onMounted(() => {
@@ -200,6 +225,7 @@ watch(
   () => route.fullPath,
   () => {
     navOpen.value = false
+    desktopMenu.value = null
     showEdit.value = false
   }
 )
@@ -362,8 +388,7 @@ const handleLogout = () => {
     color: $yp-ink;
   }
 
-  &:hover &__caret,
-  &:focus-within &__caret {
+  &.is-open &__caret {
     transform: rotate(180deg);
   }
 
@@ -392,8 +417,7 @@ const handleLogout = () => {
     }
   }
 
-  &:hover &__menu,
-  &:focus-within &__menu {
+  &.is-open &__menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
