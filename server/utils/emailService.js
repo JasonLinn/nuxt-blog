@@ -241,7 +241,7 @@ const getAdminNotificationTemplate = (homestayName, homestayId, applicantEmail, 
           </ul>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.BASE_URL || 'https://localhost:3000'}/admin-review" 
+            <a href="https://yilanpass.com/admin-review"
                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                       color: white; 
                       padding: 15px 30px; 
