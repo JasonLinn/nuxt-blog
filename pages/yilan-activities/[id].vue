@@ -198,7 +198,15 @@
               <ul class="yp-info-list">
                 <li v-if="activity.organizer_name">
                   <span class="yp-info-list__label">單位名稱</span>
-                  <span class="yp-info-list__value">{{ activity.organizer_name }}</span>
+                  <span class="yp-info-list__value">
+                    <a
+                      v-if="seo.schema.organizer"
+                      :href="seo.schema.organizer.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >{{ activity.organizer_name }}</a>
+                    <template v-else>{{ activity.organizer_name }}</template>
+                  </span>
                 </li>
                 <li
                   v-if="

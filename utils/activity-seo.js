@@ -1,5 +1,6 @@
 import { absoluteHttpUrl } from './homestay-seo.js'
 import { taipeiToday } from './activity-dates.js'
+import { buildActivityOrganizer } from './activity-organizers.js'
 
 const siteUrl = 'https://yilanpass.com'
 
@@ -72,9 +73,7 @@ export function buildActivitySeo(activity) {
             }
           }
         : undefined,
-      organizer: activity.organizer_name
-        ? { '@type': 'Organization', name: activity.organizer_name }
-        : undefined
+      organizer: buildActivityOrganizer(activity.organizer_name)
     }
   }
 }
