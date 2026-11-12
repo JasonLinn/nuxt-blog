@@ -42,7 +42,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@line/bot-sdk": "^9.2.2",
-    "@line/liff": "^2.23.2",
+    "@line/liff": "^2.32.0",
     "@nuxtjs/ngrok": "^3.0.1",
     "@nuxtjs/sitemap": "^7.4.3",
     "@pinia/nuxt": "^0.5.1",
