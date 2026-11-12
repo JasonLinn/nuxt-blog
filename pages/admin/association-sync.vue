@@ -20,12 +20,16 @@
     </header>
 
     <div class="alert alert-info" role="status">
-      <strong>目前僅供預覽，正式匯入尚未開放。</strong>
-      等確認官網的開通條件後，再處理配對與刊登。本頁不會新增、修改或下架會員。
+      <strong>已開放保存候選及確認 ID 對照，正式匯入尚未開放。</strong>
+      疑似重複保留待確認；保存對照不會新增、修改或下架公開會員。
     </div>
     <div v-if="status && !status.source_configured" class="alert alert-warning">
       尚未完成協會資料連線設定，請由網站管理者設定後再預覽。
     </div>
+    <details class="mb-3">
+      <summary class="btn btn-outline-primary">會員 ID 對照與待確認清單</summary>
+      <AssociationMemberReview class="mt-3" />
+    </details>
     <div v-if="error" class="yp-empty yp-empty--error" role="alert">
       <h2 class="yp-empty__title">無法產生預覽</h2>
       <p class="yp-empty__text">{{ error }}</p>
@@ -79,7 +83,10 @@
       </div>
       <div v-else class="yp-table-wrap">
         <div class="table-responsive">
-          <table class="table-hover yp-table-stack table align-middle">
+          <table
+            data-testid="live-preview-table"
+            class="table-hover yp-table-stack table align-middle"
+          >
             <thead>
               <tr>
                 <th>協會會員</th>
@@ -203,6 +210,7 @@
 </template>
 
 <script setup>
+import AssociationMemberReview from '~/components/admin/AssociationMemberReview.vue'
 definePageMeta({ layout: 'admin', middleware: 'admin-auth' })
 useHead({ title: '協會會員同步預覽', meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 
@@ -218,7 +226,8 @@ const categoryLabels = {
   match: '高可信配對候選',
   review: '疑似重複待確認',
   blocked: '既有審核限制',
-  invalid: '資料異常'
+  invalid: '資料異常',
+  linked: '已確認對照'
 }
 const fieldLabels = {
   name: '名稱',
@@ -275,7 +284,8 @@ const tagClass = (value) =>
     review: 'yp-tag--warning',
     blocked: 'yp-tag--danger',
     invalid: 'yp-tag--danger',
-    new: 'yp-tag--primary'
+    new: 'yp-tag--primary',
+    linked: 'yp-tag--success'
   })[value]
 
 async function loadStatus() {

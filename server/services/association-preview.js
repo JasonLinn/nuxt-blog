@@ -84,22 +84,27 @@ function differences(source, local) {
   })
 }
 
-export function buildAssociationPreview(snapshot, localRows, now = new Date()) {
+export function buildAssociationPreview(snapshot, localRows, now = new Date(), links = []) {
   const locals = localRows.map(localRecord)
+  const byExternal = new Map(links.map((link) => [link.external_id, String(link.homestay_id)]))
+  const byLocal = new Map(links.map((link) => [String(link.homestay_id), link.external_id]))
   const localKeys = locals.map(keys)
   const sourceKeys = snapshot.records.map(keys)
   const items = snapshot.records.map((source, index) => {
     const identity = sourceKeys[index]
-    const sourceDuplicates = snapshot.records.flatMap((other, otherIndex) => {
-      const evidence = otherIndex === index ? [] : signals(identity, sourceKeys[otherIndex])
-      return evidence.length
-        ? [{ external_id: other.external_id, name: other.name, signals: evidence }]
-        : []
-    })
+    const sourceDuplicates = snapshot.records
+      .flatMap((other, otherIndex) => {
+        const evidence = otherIndex === index ? [] : signals(identity, sourceKeys[otherIndex])
+        return evidence.length
+          ? [{ external_id: other.external_id, name: other.name, signals: evidence }]
+          : []
+      })
+      .sort((a, b) => a.external_id.localeCompare(b.external_id))
+    const confirmedId = byExternal.get(source.external_id) || null
     const candidates = locals
       .flatMap((local, localIndex) => {
         const evidence = signals(identity, localKeys[localIndex])
-        if (!evidence.length) return []
+        if (confirmedId ? local.id !== confirmedId : !evidence.length) return []
         const areaMatches = !!identity.area && identity.area === localKeys[localIndex].area
         return [
           {
@@ -107,6 +112,7 @@ export function buildAssociationPreview(snapshot, localRows, now = new Date()) {
             signals: evidence,
             area_matches: areaMatches,
             protected: local.status !== 'approved' || !local.available,
+            claimed_by: byLocal.get(local.id) || null,
             differences: differences(source, local)
           }
         ]
@@ -115,9 +121,18 @@ export function buildAssociationPreview(snapshot, localRows, now = new Date()) {
     let category = 'new'
     const reasons = [...source.issues]
     if (source.issues.length) category = 'invalid'
-    else if (candidates.some((candidate) => candidate.protected)) {
+    else if (confirmedId && !candidates.length) {
+      category = 'blocked'
+      reasons.push('已保存對照的既有民宿無法讀取，保留原對照並停止處理')
+    } else if (candidates.some((candidate) => candidate.protected)) {
       category = 'blocked'
       reasons.push('候選包含待審核、已停用或被拒絕的既有民宿，不能重新刊登')
+    } else if (confirmedId) {
+      category = 'linked'
+      reasons.push('使用已確認的固定 ID 對照；名稱或官網變更不會建立另一家民宿')
+    } else if (candidates.some((candidate) => candidate.claimed_by)) {
+      category = 'review'
+      reasons.push('候選已被其他協會會員對應，不能重複配對')
     } else if (sourceDuplicates.length) {
       category = 'review'
       reasons.push('來源名單內有相同名稱、官網或電話，需先確認是否同一家')
@@ -135,8 +150,15 @@ export function buildAssociationPreview(snapshot, localRows, now = new Date()) {
           ? '有多個既有候選，不能自動決定'
           : '只有單一識別條件相符或區域不同，需人工確認'
       )
-    } else reasons.push('未找到既有候選；不是已核准新增，仍待開通條件確認')
-    return { ...source, category, reasons, source_duplicates: sourceDuplicates, candidates }
+    } else reasons.push('未找到既有候選，保留待新增確認，不直接建立會員')
+    return {
+      ...source,
+      category,
+      reasons,
+      source_duplicates: sourceDuplicates,
+      candidates,
+      confirmed_homestay_id: confirmedId
+    }
   })
   // A local record claimed by more than one source can never be a high-confidence
   // proposal, even if those source rows share different identifiers.
@@ -159,6 +181,7 @@ export function buildAssociationPreview(snapshot, localRows, now = new Date()) {
     review: 0,
     blocked: 0,
     invalid: 0,
+    linked: 0,
     writes: 0
   }
   for (const item of items) summary[item.category]++
@@ -180,7 +203,7 @@ export function buildAssociationPreview(snapshot, localRows, now = new Date()) {
     local_without_candidates: unmatchedLocals,
     warnings: [
       ...snapshot.warnings,
-      'API 是否等於已開通旅遊通尚待確認；本次沒有新增、更新、配對或下架任何正式會員。',
+      '以協會 API 名單作為同步來源；本次預覽不新增、更新、配對或下架正式會員。',
       '未找到來源候選的既有民宿只列供核對，不視為取消刊登。'
     ]
   }
@@ -207,7 +230,19 @@ export async function previewAssociationMembers(pool, options = {}) {
       image_url, images, status, available FROM homestays ORDER BY id LIMIT 10001`)
     if (result.rows.length > 10000)
       throw new AssociationError('LOCAL_LIMIT', '既有會員超過預覽上限，請調整比對策略。', 503)
-    return buildAssociationPreview(snapshot, result.rows)
+    const ready = await client.query("SELECT to_regclass('association_member_links') AS relation")
+    const links = ready.rows[0]?.relation
+      ? (
+          await client.query(
+            'SELECT external_id, homestay_id FROM association_member_links WHERE source_id = $1',
+            ['ythma']
+          )
+        ).rows
+      : []
+    return {
+      ...buildAssociationPreview(snapshot, result.rows, new Date(), links),
+      mapping_ready: !!ready.rows[0]?.relation
+    }
   } catch (error) {
     if (error instanceof AssociationError) throw error
     throw new AssociationError('LOCAL_READ_FAILED', '無法讀取既有會員，未產生預覽。', 503)

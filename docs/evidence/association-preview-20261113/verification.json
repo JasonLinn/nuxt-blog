@@ -1,6 +1,6 @@
 {
   "local_origin": "http://127.0.0.1:3213",
-  "checked_at": "2026-11-12T16:57:14.496Z",
+  "checked_at": "2026-11-12T17:26:21.293Z",
   "screenshots_use_synthetic_data": true,
   "database_before": {
     "count": 55,
@@ -8,8 +8,8 @@
   },
   "live_preview": {
     "status": 200,
-    "generated_at": "2026-11-12T16:57:16.000Z",
-    "previewed_at": "2026-11-12T16:57:16.898Z",
+    "generated_at": "2026-11-12T17:26:23.000Z",
+    "previewed_at": "2026-11-12T17:26:24.295Z",
     "summary": {
       "source_count": 83,
       "local_count": 55,
@@ -18,10 +18,11 @@
       "review": 27,
       "blocked": 0,
       "invalid": 0,
+      "linked": 0,
       "writes": 0
     },
     "unmatched_local_count": 18,
-    "fingerprint": "e7ca8a2dd82aba8328224980057f7d4539cd8a0b4df6c84f7e79226f1b5ebf59"
+    "fingerprint": "cf5bf99c6c81f172ad89d6ba973e3d02e1a7e43dd7f21b48eab264bb4d45b2d4"
   },
   "import_status": 409,
   "anonymous_status": 401,

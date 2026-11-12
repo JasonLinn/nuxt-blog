@@ -16,6 +16,8 @@ export default defineEventHandler((event) => {
       !!process.env.YTHMA_BNB_API_KEY &&
       (!process.env.YTHMA_BNB_API_URL || process.env.YTHMA_BNB_API_URL === ASSOCIATION_API_URL),
     scheduled: false,
-    persists_previews: false
+    persists_previews: false,
+    supports_saved_reviews: true,
+    supports_manual_links: true
   }
 })

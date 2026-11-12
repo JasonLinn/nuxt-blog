@@ -129,11 +129,11 @@ try {
   await page.getByText('目前：039500001', { exact: true }).waitFor()
   await page.getByText('空值是否清除舊資料，需另行確認', { exact: true }).waitFor()
   await page.screenshot({ path: `${out}/desktop.png`, fullPage: false })
-  assert.equal(await page.locator('tbody tr').count(), 10)
+  assert.equal(await page.locator('[data-testid=live-preview-table] tbody tr').count(), 10)
   await page.getByRole('button', { name: '下一頁', exact: true }).click()
-  assert.equal(await page.locator('tbody tr').count(), 3)
+  assert.equal(await page.locator('[data-testid=live-preview-table] tbody tr').count(), 3)
   await page.getByLabel('比對分類', { exact: true }).selectOption('match')
-  assert.equal(await page.locator('tbody tr').count(), 1)
+  assert.equal(await page.locator('[data-testid=live-preview-table] tbody tr').count(), 1)
   await page.getByLabel('比對分類', { exact: true }).selectOption('')
   await page.getByLabel('搜尋名稱或識別碼', { exact: true }).fill('no-such-homestay')
   await page.getByRole('heading', { name: '沒有符合條件的資料' }).waitFor()
@@ -154,7 +154,11 @@ try {
   )
   await page.getByRole('button', { name: '重新預覽', exact: true }).click()
   await page.getByRole('heading', { name: '無法產生預覽' }).waitFor()
-  assert.equal(await page.locator('tbody tr').count(), 0, 'Failed refresh must clear old results')
+  assert.equal(
+    await page.locator('[data-testid=live-preview-table] tbody tr').count(),
+    0,
+    'Failed refresh must clear old results'
+  )
   await page.unroute('**/api/admin/association-sync/preview')
   await page.route('**/api/admin/association-sync/preview', (route) =>
     route.fulfill({ json: fixture })

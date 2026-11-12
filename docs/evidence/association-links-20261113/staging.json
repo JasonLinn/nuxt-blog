@@ -1,0 +1,37 @@
+{
+  "checked_at": "2026-11-12T17:25:39.472Z",
+  "staged": {
+    "success": true,
+    "staged": 83,
+    "summary": {
+      "source_count": 83,
+      "local_count": 55,
+      "new": 34,
+      "match": 22,
+      "review": 27,
+      "blocked": 0,
+      "invalid": 0,
+      "linked": 0,
+      "writes": 0
+    },
+    "links_created": 0,
+    "homestays_written": 0,
+    "can_import": false
+  },
+  "review_summary": {
+    "total": 83,
+    "linked": 0,
+    "pending": 83,
+    "absent": 0
+  },
+  "stale_reviews": 0,
+  "public_before": {
+    "count": 55,
+    "digest": "993d015989710d963481fd5f3e1a76e8"
+  },
+  "public_after": {
+    "count": 55,
+    "digest": "993d015989710d963481fd5f3e1a76e8"
+  },
+  "homestays_unchanged": true
+}

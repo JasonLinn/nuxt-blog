@@ -1,0 +1,35 @@
+{
+  "checked_at": "2026-11-12T17:35:26.249Z",
+  "live_reviews": {
+    "total": 83,
+    "linked": 0,
+    "pending": 83,
+    "absent": 0
+  },
+  "live_stale_reviews": 0,
+  "synthetic_browser_writes": true,
+  "checks": [
+    "manual selection and acknowledgement",
+    "ambiguous evidence required",
+    "confirmation persists across reload",
+    "saved ID shown without reconfirmation",
+    "stale confirmation fails visibly",
+    "stage saves without importing",
+    "search filters and pagination",
+    "absent records retained",
+    "desktop and mobile without overflow or page errors"
+  ],
+  "before": {
+    "links": 0,
+    "events": 0,
+    "homestays": 55,
+    "digest": "993d015989710d963481fd5f3e1a76e8"
+  },
+  "after": {
+    "links": 0,
+    "events": 0,
+    "homestays": 55,
+    "digest": "993d015989710d963481fd5f3e1a76e8"
+  },
+  "database_unchanged": true
+}

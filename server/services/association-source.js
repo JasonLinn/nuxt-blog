@@ -1,7 +1,7 @@
 import { isIP } from 'node:net'
 
 export const ASSOCIATION_API_URL = 'https://ythma.com/api/bnb/'
-export const IMPORT_DISABLED_REASON = '開通條件尚未確認，目前只提供預覽，不能正式匯入。'
+export const IMPORT_DISABLED_REASON = '目前只開放預覽與確認 ID 對照，正式會員匯入尚未開放。'
 const MAX_BYTES = 5 * 1024 * 1024
 const MAX_ROWS = 2000
 

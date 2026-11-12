@@ -47,7 +47,10 @@ async function load(file) {
 const handlers = {
   preview: await load('server/api/admin/association-sync/preview.post.js'),
   status: await load('server/api/admin/association-sync/status.get.js'),
-  run: await load('server/api/admin/association-sync/run.post.js')
+  run: await load('server/api/admin/association-sync/run.post.js'),
+  stage: await load('server/api/admin/association-sync/stage.post.js'),
+  reviews: await load('server/api/admin/association-sync/reviews.get.js'),
+  link: await load('server/api/admin/association-sync/link.post.js')
 }
 const auth = await load('server/middleware/auth.js')
 async function withServer(fn) {
@@ -97,22 +100,23 @@ test('all routes require a real admin and reject cross-site preview before provi
           assert.equal(
             (
               await request(name, {
-                method: name === 'status' ? 'GET' : 'POST',
+                method: ['status', 'reviews'].includes(name) ? 'GET' : 'POST',
                 headers: { cookie: badCookie }
               })
             ).status,
             401
           )
         }
-      assert.equal(
-        (
-          await request('preview', {
-            method: 'POST',
-            headers: { cookie, origin: 'https://evil.example', 'sec-fetch-site': 'cross-site' }
-          })
-        ).status,
-        403
-      )
+      for (const name of ['preview', 'stage', 'link'])
+        assert.equal(
+          (
+            await request(name, {
+              method: 'POST',
+              headers: { cookie, origin: 'https://evil.example', 'sec-fetch-site': 'cross-site' }
+            })
+          ).status,
+          403
+        )
     })
     assert.equal(calls, 0)
   } finally {
@@ -138,6 +142,50 @@ test('import cannot be unlocked by env flags or apply body; status exposes no cr
     assert.doesNotMatch(JSON.stringify(status.data), /private-source-key/)
     assert.match(status.headers.get('cache-control'), /no-store/)
   })
+})
+
+test('link rejects malformed, oversized and forged bodies before source or database access', async () => {
+  let calls = 0
+  globalThis.fetch = async () => {
+    calls++
+    throw new Error('unexpected')
+  }
+  globalThis.associationTestConnect = async () => {
+    calls++
+    throw new Error('unexpected')
+  }
+  try {
+    await withServer(async (request) => {
+      for (const [body, status] of [
+        ['{', 400],
+        [
+          JSON.stringify({
+            external_id: 'source',
+            homestay_id: '001',
+            revision: 1,
+            approved: true
+          }),
+          400
+        ],
+        [JSON.stringify({ external_id: 'source', homestay_id: '001', revision: 0 }), 400],
+        ['x'.repeat(4097), 413]
+      ]) {
+        assert.equal(
+          (
+            await request('link', {
+              method: 'POST',
+              headers: { cookie, 'content-type': 'application/json' },
+              body
+            })
+          ).status,
+          status
+        )
+      }
+    })
+    assert.equal(calls, 0)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 })
 
 test('authenticated preview ignores write/URL input and coalesces concurrent requests without writes', async () => {
