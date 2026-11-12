@@ -1,0 +1,49 @@
+{
+  "verified_at": "2026-11-12T18:02:49.268Z",
+  "deployment": {
+    "id": "dpl_FpgYjrxTu41Y4PYjHBrpAGkupVg2",
+    "url": "https://yilanpass.com",
+    "status": "READY",
+    "commit": "1d49584b88bc29e8905f6d2cfb3846136e4ccfe8",
+    "team": "jasonlinns-projects",
+    "project": "yilanpass"
+  },
+  "validation": {
+    "unit_and_security_tests": 58,
+    "isolated_database_tests": "passed",
+    "build": "passed",
+    "production_public_count": 80,
+    "imported": 34,
+    "held": 49,
+    "unchanged_accounts": 55,
+    "desktop_matches_verified_local_screenshot": true,
+    "mobile_matches_verified_local_screenshot": true
+  },
+  "schedule": {
+    "cron": "*/5 * * * *",
+    "path": "/api/cron/association-sync",
+    "natural_runs_observed": 1,
+    "runs": [
+      {
+        "actor": "cron",
+        "created_at": "2026-11-12T18:00:05.365Z",
+        "source_generated_at": "2026-11-12T18:00:05.000Z",
+        "summary": {
+          "held": 49,
+          "updated": 0,
+          "inserted": 0,
+          "unchanged": 34,
+          "quarantined": 0,
+          "source_count": 83,
+          "links_created": 0,
+          "missing_retained": 0,
+          "homestays_written": 0
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Source absence does not automatically unpublish without the provider contract.",
+    "No real upstream member edit was made; changed-data behavior was tested in the isolated database."
+  ]
+}

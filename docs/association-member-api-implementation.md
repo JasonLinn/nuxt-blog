@@ -49,7 +49,9 @@ Vercel 專案 `yilanpass`、團隊 `jasonlinns-projects`、既有 Pro 方案。�
 
 58 項會員／安全／民宿 SEO 測試通過。隔離 PostgreSQL 測試涵蓋唯一限制、同組及競爭配對、重跑／併發匯入、來源改名／換 ID、缺席保留、管理停用、舊版本拒絕及帳號資料保留。新增程式與 Vue 檢查無錯誤（既有頁面 console 警告保留），Nuxt production build 通過。
 
-本機 80 家清單、34 個新增頁面之 sitemap／llms、官網連結、統計、地圖／房況排除、桌面／手機、匿名匯入／cron 拒絕已驗證。證據：`docs/evidence/association-import-20261113/`；[首次匯入](./evidence/association-import-20261113/initial-import.json)、[資料庫測試](./evidence/association-import-20261113/database-tests.json)、[本機驗證](./evidence/association-import-20261113/local-verification.json)。正式部署與自然排程驗證會補在同目錄。
+本機與正式站均已驗證 80 家清單、34 個新增頁面之 sitemap／llms、官網連結、統計、地圖／房況排除、桌面／手機及匿名匯入／cron 拒絕。後台再次匯入回新增 0、未變 34、待確認 49。證據：`docs/evidence/association-import-20261113/`；[首次匯入](./evidence/association-import-20261113/initial-import.json)、[資料庫測試](./evidence/association-import-20261113/database-tests.json)、[本機驗證](./evidence/association-import-20261113/local-verification.json)、[正式站驗證](./evidence/association-import-20261113/production-verification.json)。
+
+正式部署 `dpl_FpgYjrxTu41Y4PYjHBrpAGkupVg2` 為 READY，對應已推送 commit `1d49584b88bc29e8905f6d2cfb3846136e4ccfe8`，已掛上 `yilanpass.com` 與 `www.yilanpass.com`。2026-11-13 02:00:05 台灣時間觀察到第一輪自然排程成功，來源 83、未變 34、待確認 49，未新增重複資料。見[部署與排程紀錄](./evidence/association-import-20261113/release.json)。未操作真實協會會員修改，更新行為由隔離資料庫測試驗證。
 
 ```powershell
 npm run association:migrate # 預演，不套用
