@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
         capacity_description,
         min_guests,
         max_guests
-      FROM homestays
+      FROM public_homestays
       WHERE ${whereConditions.join(' AND ')}
       ORDER BY 
         featured DESC,

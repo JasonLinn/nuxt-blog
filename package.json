@@ -25,6 +25,8 @@
     "test:association": "node --test tests/association-*.test.mjs",
     "association:migrate": "node --env-file=.env scripts/migrate-association-links.mjs",
     "association:stage": "node --env-file=.env scripts/stage-association-members.mjs",
+    "association:import": "node --env-file=.env scripts/import-association-members.mjs",
+    "test:association:import-db": "node --env-file=.env scripts/test-association-import-db.mjs",
     "test:association:db": "node --env-file=.env scripts/test-association-links-db.mjs"
   },
   "devDependencies": {

@@ -7,6 +7,7 @@ try {
   await client.query('BEGIN')
   await client.query("SET LOCAL lock_timeout = '5s'")
   await client.query(await readFile('migrations/20261113_association_member_links.sql', 'utf8'))
+  await client.query(await readFile('migrations/20261113_association_public_listings.sql', 'utf8'))
   await client.query(process.argv.includes('--apply') ? 'COMMIT' : 'ROLLBACK')
   console.log(
     JSON.stringify({

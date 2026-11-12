@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-11-12T17:54:45.350Z",
+  "checks": [
+    "only unambiguous new sources imported; candidates and protected accounts held; no invented ratings prices coordinates or login fields",
+    "repeated and concurrent imports are idempotent",
+    "confirmed mappings keep old IDs and overlay source fields without changing any account row",
+    "missing source retains prior page; reused business under a new source ID is held",
+    "manual hidden status survives sync; older versions roll back without a successful run record"
+  ],
+  "isolated_schema": true,
+  "public_before": {
+    "count": 55,
+    "digest": "51c79a8d82aa22c666b38311a4e88a1d"
+  },
+  "public_after": {
+    "count": 55,
+    "digest": "51c79a8d82aa22c666b38311a4e88a1d"
+  },
+  "accounts_unchanged": true
+}

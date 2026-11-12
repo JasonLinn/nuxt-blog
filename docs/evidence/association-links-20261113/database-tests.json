@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-12T17:21:58.834Z",
+  "checked_at": "2026-11-12T17:53:18.571Z",
   "isolated_schema": true,
   "checks": [
     "migration can be repeated",
@@ -8,15 +8,15 @@
     "ambiguous records require evidence; protected and wrong candidates rejected; concurrent competing IDs cannot duplicate",
     "renaming, removal and reappearance preserve confirmed IDs without changing listings",
     "stale source, changed local data, outdated UI and malformed snapshots reject atomically",
-    "public homestays count and full-row digest unchanged"
+    "public account fields unchanged (excluding live view counters)"
   ],
   "public_before": {
     "count": 55,
-    "digest": "993d015989710d963481fd5f3e1a76e8"
+    "digest": "51c79a8d82aa22c666b38311a4e88a1d"
   },
   "public_after": {
     "count": 55,
-    "digest": "993d015989710d963481fd5f3e1a76e8"
+    "digest": "51c79a8d82aa22c666b38311a4e88a1d"
   },
   "homestays_unchanged": true
 }

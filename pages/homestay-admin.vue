@@ -124,6 +124,11 @@
         <section id="owner-basic" class="yp-form-section">
           <h2 class="yp-form-section__title">基本資訊</h2>
           <p class="yp-form-section__desc">民宿名稱、位置與聯絡方式</p>
+          <p v-if="homestay.association_managed" class="alert alert-info">
+            公開名稱、地區、電話、官網、LINE 與照片由協會官網同步，請至
+            <a href="https://ythma.com/" target="_blank" rel="noopener noreferrer">協會官網</a>
+            更新；房況、價格及其他資料仍在這裡管理。
+          </p>
 
           <div class="row g-3 mb-3">
             <div class="col-12 col-md-6">
@@ -132,7 +137,7 @@
                 v-model="editData.name"
                 type="text"
                 class="form-control"
-                :disabled="saving"
+                :disabled="saving || homestay.association_managed"
                 required
               />
             </div>
@@ -143,7 +148,7 @@
                 v-model="editData.location"
                 type="text"
                 class="form-control"
-                :disabled="saving"
+                :disabled="saving || homestay.association_managed"
                 required
               />
             </div>
@@ -155,7 +160,12 @@
 
             <div class="col-12 col-md-6">
               <label class="form-label">電話</label>
-              <input v-model="editData.phone" type="tel" class="form-control" :disabled="saving" />
+              <input
+                v-model="editData.phone"
+                type="tel"
+                class="form-control"
+                :disabled="saving || homestay.association_managed"
+              />
             </div>
 
             <div class="col-12">
@@ -164,7 +174,7 @@
                 v-model="editData.website"
                 type="url"
                 class="form-control"
-                :disabled="saving"
+                :disabled="saving || homestay.association_managed"
               />
             </div>
           </div>
@@ -180,7 +190,7 @@
                 type="url"
                 class="form-control"
                 placeholder="https://line.me/ti/p/YOUR_LINE_ID"
-                :disabled="saving"
+                :disabled="saving || homestay.association_managed"
               />
             </div>
 
@@ -255,7 +265,7 @@
         </section>
 
         <!-- 圖片管理 -->
-        <section id="owner-images" class="yp-form-section">
+        <section v-if="!homestay.association_managed" id="owner-images" class="yp-form-section">
           <h2 class="yp-form-section__title">民宿圖片</h2>
           <p class="yp-form-section__desc">
             第一張圖片將作為主要圖片顯示，可上傳檔案或貼上圖片網址

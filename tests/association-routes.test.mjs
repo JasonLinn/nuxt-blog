@@ -36,7 +36,8 @@ async function load(file) {
         setup(builder) {
           builder.onResolve({ filter: /\/db\.js$/ }, () => ({ path: 'mock-db', namespace: 'test' }))
           builder.onLoad({ filter: /.*/, namespace: 'test' }, () => ({
-            contents: 'export const pool = {connect: () => globalThis.associationTestConnect()};'
+            contents:
+              'export const pool = {connect: () => globalThis.associationTestConnect(), query: async (...args) => (await globalThis.associationTestConnect()).query(...args)};'
           }))
         }
       }
@@ -107,7 +108,7 @@ test('all routes require a real admin and reject cross-site preview before provi
             401
           )
         }
-      for (const name of ['preview', 'stage', 'link'])
+      for (const name of ['preview', 'stage', 'link', 'run'])
         assert.equal(
           (
             await request(name, {
@@ -124,8 +125,12 @@ test('all routes require a real admin and reject cross-site preview before provi
   }
 })
 
-test('import cannot be unlocked by env flags or apply body; status exposes no credentials', async () => {
-  process.env.ASSOCIATION_SYNC_ENABLED = 'true'
+test('disabled import rejects explicit apply; status exposes no credentials', async () => {
+  process.env.ASSOCIATION_SYNC_ENABLED = 'false'
+  globalThis.associationTestConnect = async () => ({
+    query: async () => ({ rows: [] }),
+    release() {}
+  })
   process.env.ASSOCIATION_SYNC_DRY_RUN = 'false'
   await withServer(async (request) => {
     const result = await request('run', {

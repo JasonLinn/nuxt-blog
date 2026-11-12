@@ -3,7 +3,7 @@ import { toSiteImageUrl } from '../utils/site-images.js';
 
 // 簡單的記憶體快取
 const cache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 分鐘快取
+const CACHE_TTL = 60 * 1000; // Maximum one-minute cache
 
 // 產生快取鍵
 const getCacheKey = (filters) => {
@@ -147,7 +147,7 @@ export default defineEventHandler(async (event) => {
     // 取得總筆數 (用於分頁)
     const countQuery = `
       SELECT COUNT(*) as total
-      FROM homestays h
+      FROM public_homestays h
       WHERE ${whereConditions.join(' AND ')}
     `;
 
@@ -201,7 +201,7 @@ export default defineEventHandler(async (event) => {
         h.total_reviews,
         h.featured,
         h.view_count
-      FROM homestays h
+      FROM public_homestays h
       WHERE ${whereConditions.join(' AND ')}
       ORDER BY ${orderClause}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}

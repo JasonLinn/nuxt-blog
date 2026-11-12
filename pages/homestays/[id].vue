@@ -450,6 +450,8 @@ if (fetchError.value || !bnbData.value?.bnb) {
 
 // 綁定資料
 const bnb = computed(() => bnbData.value?.bnb)
+if (bnb.value.id !== String(bnbId))
+  await navigateTo(`/homestays/${encodeURIComponent(bnb.value.id)}`, { redirectCode: 301 })
 const loading = ref(false) // SSR 完成後就不需要 loading 狀態了，或者可以保留給切換圖片等操作
 
 // Metadata and structured data use the same public fields rendered on this page.

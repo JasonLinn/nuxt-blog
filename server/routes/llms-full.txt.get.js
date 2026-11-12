@@ -21,12 +21,12 @@ async function section(title, load) {
 
 export default defineEventHandler(async (event) => {
   setHeader(event, 'Content-Type', 'text/markdown; charset=utf-8')
-  setHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
+  setHeader(event, 'Cache-Control', 'public, max-age=60, s-maxage=60')
 
   const homestays = await section('宜蘭合法民宿', async () => {
     const { rows } = await pool.query(`
       SELECT id, name, city, location
-      FROM homestays
+      FROM public_homestays
       WHERE status = 'approved' AND available = true
       ORDER BY city, name
     `)

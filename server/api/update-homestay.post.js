@@ -46,6 +46,15 @@ export default defineEventHandler(async (event) => {
     
     try {
       await client.query('BEGIN');
+      await client.query("SELECT pg_advisory_xact_lock(hashtext(current_schema()),hashtext('ythma-member-links'))");
+      const managed=(await client.query(`SELECT h.name,h.location,h.website,h.phone,h.images,h.image_url,h.social_line
+        FROM homestays h JOIN public_homestays p ON p.id=h.id
+        WHERE h.id=$1 AND p.association_managed FOR UPDATE OF h`,[homestayId])).rows[0];
+      // Source-controlled presentation must not silently overwrite account data.
+      if(managed){
+        for(const key of ['name','location','website','phone','images','image_url']) updateData[key]=managed[key];
+        updateData.social={...updateData.social,line:managed.social_line};
+      }
 
       // 處理圖片資料 - 支援新的 images 陣列和舊的 image_url
       let finalImages = [];
@@ -240,4 +249,4 @@ export default defineEventHandler(async (event) => {
       statusMessage: '更新民宿資料時發生錯誤'
     });
   }
-}); 
+});

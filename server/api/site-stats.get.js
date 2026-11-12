@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
     ),
     withTimeout(
       homestayPool.query(
-        `SELECT COUNT(*)::int AS c FROM homestays WHERE status = 'approved'`
+        `SELECT COUNT(*)::int AS c FROM public_homestays WHERE status = 'approved'`
       ),
       QUERY_TIMEOUT_MS,
       'partner_hotels'

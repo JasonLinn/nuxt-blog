@@ -1,0 +1,25 @@
+{
+  "checked_at": "2026-11-12T17:49:19.309Z",
+  "success": true,
+  "summary": {
+    "source_count": 83,
+    "inserted": 34,
+    "updated": 0,
+    "unchanged": 0,
+    "held": 49,
+    "quarantined": 0,
+    "missing_retained": 0,
+    "homestays_written": 0,
+    "links_created": 0
+  },
+  "public_count": 80,
+  "accounts_before": {
+    "count": 55,
+    "digest": "993d015989710d963481fd5f3e1a76e8"
+  },
+  "accounts_after": {
+    "count": 55,
+    "digest": "993d015989710d963481fd5f3e1a76e8"
+  },
+  "accounts_unchanged": true
+}

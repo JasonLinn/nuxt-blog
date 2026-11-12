@@ -15,7 +15,8 @@
     <template v-if="reviews">
       <p class="small text-muted">
         已保存 {{ reviews.summary.total }} 筆 · 已確認對照 {{ reviews.summary.linked }} 筆 · 待確認
-        {{ reviews.summary.pending }} 筆 · 本次名單未出現 {{ reviews.summary.absent }} 筆
+        {{ reviews.summary.pending }} 筆 · 已匯入 {{ reviews.summary.imported || 0 }} 筆 ·
+        本次名單未出現 {{ reviews.summary.absent }} 筆
       </p>
       <div class="yp-filter-bar">
         <label for="member-review-search" class="visually-hidden">搜尋已保存會員</label>
@@ -68,7 +69,15 @@
                   <span
                     class="yp-tag"
                     :class="item.confirmed_homestay_id ? 'yp-tag--success' : 'yp-tag--warning'"
-                    >{{ item.confirmed_homestay_id ? '已確認對照' : labels[item.category] }}</span
+                    >{{
+                      item.imported
+                        ? item.publication_state === 'active'
+                          ? '已匯入'
+                          : '匯入後待確認'
+                        : item.confirmed_homestay_id
+                        ? '已確認對照'
+                        : labels[item.category]
+                    }}</span
                   >
                   <p v-if="!item.present_in_source" class="small text-warning mt-2">
                     本次名單未出現，保留對照與待確認記錄。
@@ -177,6 +186,9 @@
                       {{ saving === item.external_id ? '保存中…' : '確認此對照' }}
                     </button>
                   </form>
+                  <p v-else-if="item.imported" class="small text-muted mb-0">
+                    已保存公開介紹；無登入帳號或房況資料。
+                  </p>
                   <p v-else class="small text-muted mb-0">保留待確認，這裡不會直接新增或匯入。</p>
                 </td>
               </tr>
@@ -223,7 +235,9 @@ const filtered = computed(() =>
   (reviews.value?.items || []).filter(
     (item) =>
       (filter.value === 'all' ||
-        (filter.value === 'pending' && !item.confirmed_homestay_id) ||
+        (filter.value === 'pending' &&
+          !item.confirmed_homestay_id &&
+          (!item.imported || item.publication_state !== 'active')) ||
         (filter.value === 'linked' && item.confirmed_homestay_id) ||
         (filter.value === 'absent' && !item.present_in_source)) &&
       `${item.name} ${item.external_id} ${item.confirmed_homestay_id || ''}`

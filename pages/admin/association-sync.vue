@@ -16,19 +16,35 @@
         <button v-if="preview && !loading" class="btn btn-outline-primary" @click="downloadPreview">
           下載比對結果
         </button>
+        <button
+          v-if="status?.can_import"
+          class="btn btn-success"
+          :disabled="loading || importing || !preview"
+          @click="runImport"
+        >
+          {{ importing ? '同步中…' : '匯入符合條件的會員' }}
+        </button>
       </div>
     </header>
 
     <div class="alert alert-info" role="status">
-      <strong>已開放保存候選及確認 ID 對照，正式匯入尚未開放。</strong>
-      疑似重複保留待確認；保存對照不會新增、修改或下架公開會員。
+      <strong>{{ status?.can_import ? '正式同步已啟用。' : '正式同步尚未啟用。' }}</strong>
+      只匯入沒有重複候選或已確認 ID 對照的資料；高可信候選與疑似重複仍須人工配對。
     </div>
+    <p v-if="importResult" class="alert alert-success" role="status">
+      新增 {{ importResult.inserted }} 筆、更新 {{ importResult.updated }} 筆、未變
+      {{ importResult.unchanged }} 筆、保留待確認 {{ importResult.held }} 筆。
+    </p>
+    <p v-if="status?.last_import" class="small text-muted">
+      最近成功同步：{{ formatTime(status.last_import.created_at) }} · 正式站每 5
+      分鐘同步；來源缺席暫不自動下架。
+    </p>
     <div v-if="status && !status.source_configured" class="alert alert-warning">
       尚未完成協會資料連線設定，請由網站管理者設定後再預覽。
     </div>
     <details class="mb-3">
       <summary class="btn btn-outline-primary">會員 ID 對照與待確認清單</summary>
-      <AssociationMemberReview class="mt-3" />
+      <AssociationMemberReview :key="reviewKey" class="mt-3" />
     </details>
     <div v-if="error" class="yp-empty yp-empty--error" role="alert">
       <h2 class="yp-empty__title">無法產生預覽</h2>
@@ -53,7 +69,7 @@
         }}（台灣時間）
       </p>
       <p class="text-muted">
-        高可信候選仍需確認；未找到候選的資料也尚未核准新增。下載結果是本次快照，不能直接匯入。
+        高可信候選仍需確認；沒有重複候選的資料可同步為公開介紹。下載結果只供核對。
       </p>
       <ul v-if="preview.warnings.length" class="small text-muted">
         <li v-for="warning in preview.warnings" :key="warning">{{ warning }}</li>
@@ -211,6 +227,28 @@
 
 <script setup>
 import AssociationMemberReview from '~/components/admin/AssociationMemberReview.vue'
+const importing = ref(false)
+const importResult = ref(null)
+const reviewKey = ref(0)
+async function runImport() {
+  importing.value = true
+  error.value = ''
+  try {
+    const result = await $fetch('/api/admin/association-sync/run', {
+      method: 'POST',
+      body: { apply: true },
+      retry: 0
+    })
+    importResult.value = result.summary
+    reviewKey.value++
+    await loadStatus()
+    await loadPreview()
+  } catch (err) {
+    error.value = err.data?.data?.message || '同步失敗，請稍後重試。'
+  } finally {
+    importing.value = false
+  }
+}
 definePageMeta({ layout: 'admin', middleware: 'admin-auth' })
 useHead({ title: '協會會員同步預覽', meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 

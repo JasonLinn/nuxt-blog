@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
         h.service_amenities,
         h.phone,
         h.website
-      FROM homestays h
+      FROM public_homestays h
       WHERE h.id = $1 AND h.available = true
     `;
 

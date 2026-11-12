@@ -1,0 +1,33 @@
+{
+  "checked_at": "2026-11-12T17:55:22.455Z",
+  "origin": "http://127.0.0.1:3213",
+  "public_count": 80,
+  "imported_count": 34,
+  "example_url": "http://127.0.0.1:3213/homestays/ythma_-1tCjhd7RP0REef9W2jxbA",
+  "checks": {
+    "unique_list": true,
+    "detail": true,
+    "official_link": true,
+    "unprovided_facts_absent": true,
+    "sitemap": true,
+    "llms": true,
+    "map_no_invented_coordinates": true,
+    "no_invented_availability": true,
+    "statistics": true,
+    "desktop_mobile": true,
+    "anonymous_import": 401,
+    "unauthorized_cron": 401,
+    "admin_status": 200,
+    "admin_import_enabled": true,
+    "page_errors": []
+  },
+  "accounts_before": {
+    "count": 55,
+    "digest": "51c79a8d82aa22c666b38311a4e88a1d"
+  },
+  "accounts_after": {
+    "count": 55,
+    "digest": "51c79a8d82aa22c666b38311a4e88a1d"
+  },
+  "accounts_unchanged": true
+}

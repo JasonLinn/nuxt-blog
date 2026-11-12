@@ -69,7 +69,7 @@ export async function withAssociationTransaction(pool, work, { readOnly = false 
   }
 }
 
-async function readLocalsAndLinks(client, lock = false) {
+export async function readLocalsAndLinks(client, lock = false) {
   const locals = await client.query(localSql + (lock ? ' FOR SHARE' : ''))
   if (locals.rows.length > 10000)
     throw new AssociationError('LOCAL_LIMIT', '既有會員超過比對上限。', 503)
@@ -96,32 +96,35 @@ async function assertFreshSnapshot(client, snapshot) {
 // This stages review metadata only. It never writes homestays or creates links.
 export async function stageAssociationMembers(pool, options = {}) {
   const snapshot = await fetchAssociationSnapshot(options)
-  return withAssociationTransaction(pool, async (client) => {
-    await assertFreshSnapshot(client, snapshot)
-    const { locals, links } = await readLocalsAndLinks(client)
-    const preview = buildAssociationPreview(snapshot, locals, new Date(), links)
-    const priorRows = await client.query(
-      'SELECT external_id, source_updated_at FROM association_member_reviews WHERE source_id = $1',
-      [SOURCE]
-    )
-    const priorById = new Map(priorRows.rows.map((row) => [row.external_id, row.source_updated_at]))
-    for (const item of preview.items) {
-      const prior = priorById.get(item.external_id)
-      if (
-        item.source_updated_at &&
-        prior &&
-        Date.parse(item.source_updated_at) < new Date(prior).getTime()
-      ) {
-        throw new AssociationError(
-          'SOURCE_VERSION_REGRESSION',
-          '會員修改時間早於已保存資料，這次清單未更新。',
-          409
-        )
-      }
+  return withAssociationTransaction(pool, (client) => stageAssociationSnapshot(client, snapshot))
+}
+
+export async function stageAssociationSnapshot(client, snapshot) {
+  await assertFreshSnapshot(client, snapshot)
+  const { locals, links } = await readLocalsAndLinks(client)
+  const preview = buildAssociationPreview(snapshot, locals, new Date(), links)
+  const priorRows = await client.query(
+    'SELECT external_id, source_updated_at FROM association_member_reviews WHERE source_id = $1',
+    [SOURCE]
+  )
+  const priorById = new Map(priorRows.rows.map((row) => [row.external_id, row.source_updated_at]))
+  for (const item of preview.items) {
+    const prior = priorById.get(item.external_id)
+    if (
+      item.source_updated_at &&
+      prior &&
+      Date.parse(item.source_updated_at) < new Date(prior).getTime()
+    ) {
+      throw new AssociationError(
+        'SOURCE_VERSION_REGRESSION',
+        '會員修改時間早於已保存資料，這次清單未更新。',
+        409
+      )
     }
-    if (preview.items.length)
-      await client.query(
-        `INSERT INTO association_member_reviews
+  }
+  if (preview.items.length)
+    await client.query(
+      `INSERT INTO association_member_reviews
         (source_id, external_id, category, preview_item, content_hash, source_updated_at, source_generated_at)
         SELECT $1, row.external_id, row.category, row.preview_item, row.content_hash, row.source_updated_at, $3::timestamptz
         FROM jsonb_to_recordset($2::jsonb) AS row(external_id text, category text, preview_item jsonb, content_hash text, source_updated_at timestamptz)
@@ -133,41 +136,40 @@ export async function stageAssociationMembers(pool, options = {}) {
           content_hash = EXCLUDED.content_hash, present_in_source = true,
           source_updated_at = EXCLUDED.source_updated_at,
           source_generated_at = EXCLUDED.source_generated_at, last_seen_at = now()`,
-        [
-          SOURCE,
-          JSON.stringify(
-            preview.items.map((item) => ({
-              external_id: item.external_id,
-              category: item.category,
-              preview_item: item,
-              content_hash: reviewHash(item),
-              source_updated_at: item.source_updated_at
-            }))
-          ),
-          snapshot.generated_at
-        ]
-      )
-    // Absence only changes review metadata. Confirmed links and public listings survive.
-    await client.query(
-      `UPDATE association_member_reviews SET present_in_source = false, revision = revision + 1
-      WHERE source_id = $1 AND present_in_source AND NOT (external_id = ANY($2::text[]))`,
-      [SOURCE, snapshot.records.map((row) => row.external_id)]
+      [
+        SOURCE,
+        JSON.stringify(
+          preview.items.map((item) => ({
+            external_id: item.external_id,
+            category: item.category,
+            preview_item: item,
+            content_hash: reviewHash(item),
+            source_updated_at: item.source_updated_at
+          }))
+        ),
+        snapshot.generated_at
+      ]
     )
-    await client.query(
-      `INSERT INTO association_member_sync_state (source_id, generated_at, source_count)
+  // Absence only changes review metadata. Confirmed links and public listings survive.
+  await client.query(
+    `UPDATE association_member_reviews SET present_in_source = false, revision = revision + 1
+      WHERE source_id = $1 AND present_in_source AND NOT (external_id = ANY($2::text[]))`,
+    [SOURCE, snapshot.records.map((row) => row.external_id)]
+  )
+  await client.query(
+    `INSERT INTO association_member_sync_state (source_id, generated_at, source_count)
       VALUES ($1,$2,$3) ON CONFLICT (source_id) DO UPDATE SET generated_at = EXCLUDED.generated_at,
       source_count = EXCLUDED.source_count, reviewed_at = now()`,
-      [SOURCE, snapshot.generated_at, snapshot.count]
-    )
-    return {
-      success: true,
-      staged: snapshot.count,
-      summary: preview.summary,
-      links_created: 0,
-      homestays_written: 0,
-      can_import: false
-    }
-  })
+    [SOURCE, snapshot.generated_at, snapshot.count]
+  )
+  return {
+    success: true,
+    staged: snapshot.count,
+    summary: preview.summary,
+    links_created: 0,
+    homestays_written: 0,
+    can_import: false
+  }
 }
 
 export function readAssociationReviews(pool) {
@@ -185,6 +187,12 @@ export function readAssociationReviews(pool) {
         'SELECT generated_at, reviewed_at, source_count FROM association_member_sync_state WHERE source_id = $1',
         [SOURCE]
       )
+      const published = (
+        await client.query(
+          "SELECT external_id,state FROM association_public_listings WHERE source_id='ythma'"
+        )
+      ).rows
+      const publishedById = new Map(published.map((row) => [row.external_id, row.state]))
       // Re-evaluate candidates against current local data. A saved card can be visible
       // but cannot be confirmed until refreshed if local evidence has since changed.
       const records = result.rows
@@ -226,6 +234,8 @@ export function readAssociationReviews(pool) {
             row.present_in_source &&
             reviewHash(item) !== row.content_hash,
           confirmed_homestay_id: linkById.get(row.external_id) || null,
+          imported: publishedById.has(row.external_id),
+          publication_state: publishedById.get(row.external_id) || null,
           last_seen_at: row.last_seen_at
         }
       })
@@ -237,7 +247,8 @@ export function readAssociationReviews(pool) {
         summary: {
           total: items.length,
           linked: links.length,
-          pending: items.filter((item) => !item.confirmed_homestay_id).length,
+          pending: items.filter((item) => !item.confirmed_homestay_id && !item.imported).length,
+          imported: published.length,
           absent: items.filter((item) => !item.present_in_source).length
         }
       }

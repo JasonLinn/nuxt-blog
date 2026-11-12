@@ -64,7 +64,7 @@ const counts = async () =>
 const fingerprint = async () =>
   (
     await admin.query(
-      "SELECT count(*)::int AS count, md5(string_agg(row_to_json(h)::text, '|' ORDER BY id)) AS digest FROM public.homestays h"
+      "SELECT count(*)::int AS count, md5(string_agg((to_jsonb(h)-'view_count')::text, '|' ORDER BY id)) AS digest FROM public.homestays h"
     )
   ).rows[0]
 const checks = []
@@ -79,6 +79,9 @@ try {
   const migration = await readFile('migrations/20261113_association_member_links.sql', 'utf8')
   await query(migration)
   await query(migration)
+  await query(
+    'CREATE TABLE association_public_listings(external_id text,state text,source_id text)'
+  )
   checks.push('migration can be repeated')
   for (const [id, name, website, status] of [
     ['001', '民宿 alpha', 'https://alpha.example.com', 'approved'],
@@ -200,7 +203,7 @@ try {
   )
   const after = await fingerprint()
   assert.deepEqual(after, before)
-  checks.push('public homestays count and full-row digest unchanged')
+  checks.push('public account fields unchanged (excluding live view counters)')
   const evidence = {
     checked_at: new Date().toISOString(),
     isolated_schema: true,

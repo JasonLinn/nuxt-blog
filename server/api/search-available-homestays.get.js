@@ -170,7 +170,7 @@ export default defineEventHandler(async (event) => {
               WHEN EXTRACT(DOW FROM ha.date) NOT IN (0, 6) AND ha.weekday_price IS NOT NULL THEN ha.weekday_price
               ELSE NULL 
             END) as avg_price
-          FROM homestays h
+          FROM public_homestays h
           INNER JOIN homestay_availability ha ON h.id = ha.homestay_id
           WHERE h.status = 'approved' 
             AND h.available = true
@@ -201,7 +201,7 @@ export default defineEventHandler(async (event) => {
       }
 
       baseQuery += `
-          GROUP BY h.id, h.name, h.location, h.city, h.image_url, h.min_guests, 
+          GROUP BY h.id, h.name, h.location, h.city, h.image_url, h.images, h.min_guests,
                    h.max_guests, h.theme_features, h.service_amenities, h.rating, 
                    h.total_reviews, h.view_count, h.featured
           HAVING COUNT(CASE WHEN ha.is_available = true THEN 1 END) = $${paramIndex + 1}

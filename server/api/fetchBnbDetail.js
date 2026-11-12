@@ -17,7 +17,13 @@ export default defineEventHandler(async (event) => {
     }
 
     // 保持ID為字符串格式，避免前導零被丟失
-    const homestayId = String(id).trim();
+    let homestayId = String(id).trim();
+    if (homestayId.startsWith('ythma_')) {
+      const linked = await pool.query(`SELECT l.homestay_id FROM association_member_links l
+        JOIN public_homestays h ON h.id=l.homestay_id
+        WHERE l.source_id='ythma' AND l.external_id=$1`, [homestayId.slice(6)]);
+      if (linked.rows[0]) homestayId = linked.rows[0].homestay_id;
+    }
     
     if (!homestayId) {
       return {
@@ -54,7 +60,7 @@ export default defineEventHandler(async (event) => {
         h.total_reviews,
         h.featured,
         h.view_count
-      FROM homestays h
+      FROM public_homestays h
       WHERE h.id = $1 AND h.available = true AND h.status = 'approved'
     `;
 
@@ -170,4 +176,4 @@ export default defineEventHandler(async (event) => {
     console.error('獲取民宿詳情錯誤:', { code: error.code || 'QUERY_FAILED' });
     throw createError({ statusCode: 503, statusMessage: 'Service Unavailable' });
   }
-}); 
+});

@@ -60,6 +60,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const homestay = result.rows[0];
+    homestay.association_managed = (await pool.query('SELECT association_managed FROM public_homestays WHERE id=$1',[homestayId])).rows[0]?.association_managed || false;
 
     // 獲取價格資料
     const pricingQuery = `
@@ -119,4 +120,4 @@ export default defineEventHandler(async (event) => {
       statusMessage: '身份驗證失敗'
     });
   }
-}); 
+});
