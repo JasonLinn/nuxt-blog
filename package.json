@@ -20,7 +20,9 @@
     "activities:sync": "node --env-file=.env scripts/sync-activities.mjs --apply",
     "test:activities": "node --test tests/activity-*.test.mjs",
     "test:activities:db": "node --env-file=.env scripts/test-activity-import-db.mjs",
-    "test:security:build": "node scripts/test-security-built.mjs"
+    "test:security:build": "node scripts/test-security-built.mjs",
+    "association:preview": "node --env-file=.env scripts/preview-association-members.mjs",
+    "test:association": "node --test tests/association-*.test.mjs"
   },
   "devDependencies": {
     "@neondatabase/serverless": "^0.6.1",

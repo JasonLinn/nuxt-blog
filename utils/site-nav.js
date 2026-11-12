@@ -125,6 +125,7 @@ export const adminMenu = [
     items: [
       { title: '民宿審核', path: '/admin-review', icon: 'ri:shield-check-line' },
       { title: '民宿管理', path: '/admin/homestays', icon: 'ri:home-4-line' },
+      { title: '協會同步預覽', path: '/admin/association-sync', icon: 'ri:git-merge-line' },
       { title: '特色項目', path: '/admin/features', icon: 'ri:price-tag-3-line' }
     ]
   },

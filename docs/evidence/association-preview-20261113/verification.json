@@ -1,0 +1,47 @@
+{
+  "local_origin": "http://127.0.0.1:3213",
+  "checked_at": "2026-11-12T16:57:14.496Z",
+  "screenshots_use_synthetic_data": true,
+  "database_before": {
+    "count": 55,
+    "digest": "993d015989710d963481fd5f3e1a76e8"
+  },
+  "live_preview": {
+    "status": 200,
+    "generated_at": "2026-11-12T16:57:16.000Z",
+    "previewed_at": "2026-11-12T16:57:16.898Z",
+    "summary": {
+      "source_count": 83,
+      "local_count": 55,
+      "new": 34,
+      "match": 22,
+      "review": 27,
+      "blocked": 0,
+      "invalid": 0,
+      "writes": 0
+    },
+    "unmatched_local_count": 18,
+    "fingerprint": "e7ca8a2dd82aba8328224980057f7d4539cd8a0b4df6c84f7e79226f1b5ebf59"
+  },
+  "import_status": 409,
+  "anonymous_status": 401,
+  "database_after": {
+    "count": 55,
+    "digest": "993d015989710d963481fd5f3e1a76e8"
+  },
+  "database_unchanged": true,
+  "browser": {
+    "desktop": "1440x1000",
+    "mobile": "375x900",
+    "pagination": true,
+    "search": true,
+    "category_filter": true,
+    "download": true,
+    "field_differences": true,
+    "failure_clears_stale_results": true,
+    "retry": true,
+    "unconfigured_state": true,
+    "page_errors": [],
+    "mobile_overflow": false
+  }
+}

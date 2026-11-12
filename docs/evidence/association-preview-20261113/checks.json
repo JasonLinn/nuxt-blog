@@ -1,0 +1,20 @@
+{
+  "checked_date_taipei": "2026-11-13",
+  "scope": "local preview-only implementation",
+  "tests": {
+    "command": "node --test tests/association-*.test.mjs tests/security*.test.mjs tests/homestay-seo*.test.mjs",
+    "passed": 50,
+    "failed": 0,
+    "association_tests": 20
+  },
+  "eslint_changed_runtime_files": "passed",
+  "nuxt_production_build": "passed",
+  "git_diff_check": "passed",
+  "secret_scan": { "checked_files": 550, "leaks": 0 },
+  "browser_and_live_readonly_verification": "verification.json",
+  "screenshots": { "desktop": "desktop.png", "mobile": "mobile.png", "data": "synthetic" },
+  "production_imports": 0,
+  "production_deployed": false,
+  "scheduled": false,
+  "known_build_warnings": ["Existing Browserslist database age", "Dependency exports deprecation"]
+}
