@@ -550,10 +550,12 @@ const patchUser = async () => {
   }
 }
 
-const checkReferral = async () => {
+// silent：從網址 ?ref= 自動帶入時不跳出提示，驗證結果直接顯示在推薦店家欄位。
+const checkReferral = async (options) => {
+  const silent = options?.silent === true
   try {
     if (!referralCode.value) {
-      if (process.client) alert('請輸入推薦代碼')
+      if (process.client && !silent) alert('請輸入推薦代碼')
       return
     }
 
@@ -566,12 +568,12 @@ const checkReferral = async () => {
 
     referralStore.value = response.data
     isCheckReferral.value = true
-    if (process.client) alert('成功代入: ' + referralStore.value.name)
+    if (process.client && !silent) alert('成功代入: ' + referralStore.value.name)
   } catch (error) {
     console.error('檢查推薦代碼時發生錯誤:', error)
 
     // 根据错误状态码显示不同的错误信息
-    if (process.client) {
+    if (process.client && !silent) {
       if (error.response?.status === 404) {
         alert('無效的推薦代碼')
       } else if (error.response?.status === 400) {
@@ -585,6 +587,15 @@ const checkReferral = async () => {
     isCheckReferral.value = false
   }
 }
+
+// 合作夥伴的連結可帶 ?ref=推薦代碼（例如 /articles/90?ref=dsrspa），進頁後自動填入並驗證。
+onMounted(() => {
+  const queryRef = Array.isArray(route.query.ref) ? route.query.ref[0] : route.query.ref
+  const prefill = typeof queryRef === 'string' ? queryRef.trim().slice(0, 50) : ''
+  if (!prefill || !article.value?.isReferral) return
+  referralCode.value = prefill
+  checkReferral({ silent: true })
+})
 
 // 添加新的條碼生成函數
 const generateBarcode = async (canvas, text) => {
@@ -630,7 +641,7 @@ const handleHashRecive = async () => {
         alert('請先登入')
         hideModal()
         // 使用函數生成 LINE 登錄 URL
-        navigateTo(getLineLoginUrl(route.path), { external: true })
+        navigateTo(getLineLoginUrl(route.fullPath), { external: true })
       }
       return
     }
@@ -657,7 +668,7 @@ const getCupon = async () => {
   if (iconLoading.value) return
   if (!userId.value) {
     alert('請先登入')
-    await navigateTo(getLineLoginUrl(route.path), { external: true })
+    await navigateTo(getLineLoginUrl(route.fullPath), { external: true })
     return
   }
   try {
