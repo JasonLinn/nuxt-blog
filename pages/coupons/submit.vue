@@ -102,14 +102,18 @@
           <!-- 鄉鎮 -->
           <div class="col-12">
             <label for="township" class="form-label required">鄉鎮</label>
-            <textarea
+            <select
               id="township"
               v-model="form.township"
-              placeholder="請輸入鄉鎮"
               name="township"
-              rows="2"
-              class="form-control"
-            />
+              class="form-select"
+              required
+            >
+              <option disabled value="">請選擇鄉鎮</option>
+              <option v-for="town in townships" :key="town.zipcode" :value="town.name">
+                {{ town.name }}
+              </option>
+            </select>
           </div>
         </div>
       </section>
@@ -376,7 +380,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { category } from '~/utils/category'
+import { category, township as townships } from '~/utils/category'
 import { prepareCouponImage } from '~/utils/coupon-upload'
 const { loginRequired, loginUrl } = useSubmissionLogin()
 
@@ -499,9 +503,7 @@ const submitCoupon = async () => {
   try {
     submitting.value = true
 
-    // 處理地址和鄉鎮轉為陣列
     const adressArray = form.adress ? [form.adress] : []
-    const townshipArray = form.township ? [form.township] : []
 
     // 處理座標轉為 JSON
     let positionJson = null
@@ -530,7 +532,7 @@ const submitCoupon = async () => {
         category: form.category_id,
         category_id: form.category_id,
         adress: adressArray,
-        township: townshipArray,
+        township: [form.township],
         tags: form.tags,
         position: positionJson,
         amount: form.amount,

@@ -1,6 +1,7 @@
 // 使用者提交優惠券
 import { couponPool } from '../../utils/coupon-db.js'
 import { requireUploader } from '../../utils/upload-auth.js'
+import { township as townships } from '../../../utils/category.js'
 
 export default defineEventHandler(async (event) => {
   requireUploader(event)
@@ -23,6 +24,11 @@ export default defineEventHandler(async (event) => {
           statusMessage: `缺少必填欄位: ${field}`
         })
       }
+    }
+
+    if (!Array.isArray(data.township) || data.township.length !== 1 ||
+        !townships.some(town => town.name === data.township[0])) {
+      throw createError({ statusCode: 400, message: '請選擇一個宜蘭縣鄉鎮市' })
     }
 
     const client = await couponPool.connect()
