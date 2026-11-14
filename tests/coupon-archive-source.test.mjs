@@ -1,6 +1,8 @@
 import { access, readFile } from 'node:fs/promises'
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { parse } from 'vue/compiler-sfc'
+import { effectScope, nextTick, reactive, ref, watch } from 'vue'
 
 const source = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8')
 
@@ -80,10 +82,30 @@ test('admin coupons page forwards cookies during SSR data fetch', async () => {
   assert.match(adminCouponsPage, /headers:\s*useRequestHeaders\(\['cookie'\]\)/)
 })
 
-test('admin coupons page refetches when route query changes', async () => {
-  const adminCouponsPage = await source('pages/admin/coupons.vue')
+test('admin coupons page refetches when route query changes', async (t) => {
+  const { descriptor } = parse(await source('pages/admin/coupons.vue'))
+  const route = reactive({ query: {} })
+  const requests = []
+  const setup = new Function('useRoute', 'useRouter', 'definePageMeta', 'ref', 'watch', 'useRequestHeaders', '$fetch',
+    `return (async () => { ${descriptor.scriptSetup.content} })()`)
+  const scope = effectScope()
+  t.after(() => scope.stop())
+  await scope.run(() => setup(() => route, () => ({}), () => {}, ref, watch, () => ({}), async (url, { query }) => {
+    requests.push({ url, ...query })
+    return { items: [] }
+  }))
 
-  assert.match(adminCouponsPage, /watch\(\(\)\s*=>\s*route\.query,\s*async[\s\S]*await fetchCoupons\(\)/)
+  route.query = { status: 'archived', search: '冬山', page: '2' }
+  await nextTick()
+  route.query = {}
+  await nextTick()
+
+  const activeRequest = { url: '/api/admin/coupons', status: 'active', searchText: undefined, page: 1, pageSize: 100 }
+  assert.deepEqual(requests, [
+    activeRequest,
+    { ...activeRequest, status: 'archived', searchText: '冬山', page: 2 },
+    activeRequest
+  ])
 })
 
 test('admin coupons page exposes pagination controls', async () => {
