@@ -219,7 +219,7 @@
         <h2 class="yp-form-section__title">代表性圖片</h2>
         <ol class="submit-steps">
           <li>已有圖片網址？請貼上 URL。</li>
-          <li>沒有網址？改用下方上傳圖片檔（JPEG / PNG / GIF，5MB 以內）。</li>
+          <li>也可以選擇 JPEG、PNG 或 GIF 圖片，大圖會自動縮小後上傳。</li>
         </ol>
 
         <!-- 圖片 URL 輸入 -->

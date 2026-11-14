@@ -1,4 +1,3 @@
-const maxFileBytes = 5 * 1024 * 1024
 // Leave room for multipart headers under the production request limit.
 const maxRequestFileBytes = 4 * 1024 * 1024
 
@@ -6,7 +5,6 @@ export async function prepareCouponImage(file) {
   if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
     throw new Error('請選擇 JPEG、PNG 或 GIF 圖片。')
   }
-  if (file.size > maxFileBytes) throw new Error('圖片超過 5 MB，請縮小後重新選取。')
   if (file.size <= maxRequestFileBytes) return file
 
   const url = URL.createObjectURL(file)
@@ -26,6 +24,8 @@ export async function prepareCouponImage(file) {
       if (blob.size <= maxRequestFileBytes) return blob
       scale *= 0.75
     } while (canvas.width > 1 || canvas.height > 1)
+  } catch {
+    // Decoding or encoding can fail for damaged files or limited device memory.
   } finally {
     URL.revokeObjectURL(url)
   }
