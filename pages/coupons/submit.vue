@@ -381,7 +381,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { category, township as townships } from '~/utils/category'
-import { prepareCouponImage } from '~/utils/coupon-upload'
+import { prepareUploadImage } from '~/utils/image-upload'
 const { loginRequired, loginUrl } = useSubmissionLogin()
 
 // 設定頁面標題
@@ -437,7 +437,7 @@ const handleFileUpload = async (event) => {
       uploadIndex.value = index + 1
       try {
         const body = new FormData()
-        body.append('file', await prepareCouponImage(file), file.name)
+        body.append('file', await prepareUploadImage(file))
         const response = await $fetch('/api/upload', { method: 'POST', body })
         if (!response.success || !response.url) throw new Error('上傳失敗，請重新選取圖片。')
         form.cover.push(response.url)

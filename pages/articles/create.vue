@@ -167,7 +167,7 @@
       <section class="yp-form-section">
         <h2 class="yp-form-section__title">圖片</h2>
         <p class="yp-form-section__desc">
-          第一張會作為封面。可貼上圖片網址，或上傳圖片檔（JPEG / PNG / GIF，5MB 以內）。
+          第一張會作為封面。可貼上圖片網址，或上傳圖片檔（JPEG / PNG / GIF，大圖會自動縮小）。
         </p>
 
         <label for="coverUrl" class="form-label required">圖片 URL</label>
@@ -194,13 +194,14 @@
           <input
             type="file"
             class="visually-hidden"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/gif,image/webp"
             multiple
+            :disabled="uploadingImages"
             @change="handleFileUpload"
           />
           <Icon name="ri:upload-cloud-2-line" class="upload-icon" />
           <span class="d-block fw-bold text-ink">請上傳代表性圖片</span>
-          <span class="d-block small">點擊選擇檔案，可一次選多張</span>
+          <span class="d-block small">{{ uploadingImages ? '圖片上傳中…' : '點擊選擇檔案，可一次選多張' }}</span>
         </label>
 
         <!-- 統一的圖片預覽區域 -->
@@ -252,7 +253,7 @@
 
       <div class="yp-form-actions">
         <NuxtLink class="btn btn-ghost" to="/">取消</NuxtLink>
-        <button type="submit" class="btn btn-primary">發布</button>
+        <button type="submit" :disabled="uploadingImages" class="btn btn-primary">發布</button>
       </div>
     </form>
   </div>
@@ -281,53 +282,9 @@ const articleData = reactive({
 
 const coverUrl = ref('')
 
-const handleFileUpload = async (event) => {
-  const files = event.target.files
-  if (!files.length) return
-
-  for (const file of files) {
-    try {
-      console.log('開始上傳文件:', file.name)
-
-      // 驗證文件類型
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error('只允許上傳 JPEG、PNG 和 GIF 格式的圖片')
-      }
-
-      // 驗證文件大小 (5MB)
-      const maxSize = 5 * 1024 * 1024
-      if (file.size > maxSize) {
-        throw new Error('文件太大，最大允許 5MB')
-      }
-
-      // 創建 FormData
-      const formData = new FormData()
-      formData.append('file', file)
-
-      // 上傳到後端 API
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error || '上傳失敗')
-      }
-
-      console.log('上傳成功:', data.url)
-
-      // 只添加到 articleData.cover
-      if (!articleData.cover) articleData.cover = []
-      articleData.cover.push(data.url)
-    } catch (error) {
-      console.error('上傳錯誤:', error)
-      alert(`上傳失敗：${error.message}`)
-    }
-  }
-}
+const { uploadingImages, handleFileUpload } = useFormImageUpload((url) => {
+  articleData.cover.push(url)
+})
 
 const removeImage = (index) => {
   articleData.cover.splice(index, 1)
@@ -351,6 +308,7 @@ const addCoverUrl = () => {
 }
 
 const handleSubmit = async () => {
+  if (uploadingImages.value) return
   try {
     const position = articleData.position.match(/\d+\.\d+/g)
 

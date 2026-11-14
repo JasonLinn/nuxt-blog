@@ -56,7 +56,7 @@
       <section class="yp-form-section">
         <h2 class="yp-form-section__title">圖片</h2>
         <p class="yp-form-section__desc">
-          可貼上圖片網址或上傳（JPEG、PNG、GIF，單檔 5MB 內）；第一張為封面，可用箭頭調整順序。
+          可貼上圖片網址或上傳（JPEG、PNG、GIF，大圖會自動縮小）；第一張為封面，可用箭頭調整順序。
         </p>
 
         <label for="coverUrl" class="form-label"><TipIcon />圖片 URL</label>
@@ -82,14 +82,15 @@
         <label for="fileUpload" class="yp-upload d-block">
           <Icon name="ri:image-add-line" class="fs-2 text-primary" />
           <div class="fw-bold mt-1">請上傳代表性圖片</div>
-          <div class="small">點擊選擇檔案，可一次選多張</div>
+          <div class="small">{{ uploadingImages ? '圖片上傳中…' : '點擊選擇檔案，可一次選多張' }}</div>
         </label>
         <input
           id="fileUpload"
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/gif,image/webp"
           multiple
           class="visually-hidden"
+          :disabled="uploadingImages"
           @change="handleFileUpload"
         />
 
@@ -164,7 +165,7 @@
 
       <div class="yp-form-actions">
         <NuxtLink class="btn btn-ghost" to="/">取消</NuxtLink>
-        <button type="submit" class="btn btn-primary">更新</button>
+        <button type="submit" :disabled="uploadingImages" class="btn btn-primary">更新</button>
       </div>
     </form>
   </div>
@@ -251,6 +252,7 @@ function initQuill() {
     placeholder: '請撰寫代訂服務內容...'
   })
 
+  enableEditorImageUpload(quill)
   quillInitialized = true
 
   // 設置初始內容 - 確保數據已準備好
@@ -334,58 +336,13 @@ const moveImage = (index, direction) => {
   }
 }
 
-const handleFileUpload = async (event) => {
-  const files = event.target.files
-  if (!files.length) return
-
-  for (const file of files) {
-    try {
-      console.log('開始上傳文件:', file.name)
-
-      // 驗證文件類型
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error('只允許上傳 JPEG、PNG 和 GIF 格式的圖片')
-      }
-
-      // 驗證文件大小 (5MB)
-      const maxSize = 5 * 1024 * 1024
-      if (file.size > maxSize) {
-        throw new Error('文件太大，最大允許 5MB')
-      }
-
-      // 創建 FormData
-      const formData = new FormData()
-      formData.append('file', file)
-
-      // 上傳到後端 API
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error || '上傳失敗')
-      }
-
-      console.log('上傳成功:', data.url)
-
-      // 確保 cover 是數組
-      if (!Array.isArray(articleData.value.cover)) {
-        articleData.value.cover = []
-      }
-
-      articleData.value.cover.push(data.url)
-    } catch (error) {
-      console.error('上傳錯誤:', error)
-      alert(`上傳失敗：${error.message}`)
-    }
-  }
-}
+const { uploadingImages, handleFileUpload, enableEditorImageUpload } = useFormImageUpload((url) => {
+  if (!Array.isArray(articleData.value.cover)) articleData.value.cover = []
+  articleData.value.cover.push(url)
+})
 
 const handleSubmit = async () => {
+  if (uploadingImages.value) return
   try {
     // 驗證必填欄位
     if (!articleData.value || !articleData.value.title || !articleData.value.category) {

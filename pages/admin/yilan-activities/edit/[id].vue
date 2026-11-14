@@ -125,7 +125,7 @@
       <!-- 活動圖片 -->
       <section class="yp-form-section">
         <h2 class="yp-form-section__title">活動圖片</h2>
-        <p class="yp-form-section__desc">最多 5 張，支援 JPG、PNG，單張不超過 5MB。</p>
+        <p class="yp-form-section__desc">最多 5 張，支援 JPG、PNG，大圖會自動縮小。</p>
 
         <!-- 現有圖片 -->
         <div v-if="form.images && form.images.length" class="mb-4">
@@ -146,16 +146,16 @@
         </div>
 
         <!-- 新圖片預覽 -->
-        <div v-if="newImagePreview.length" class="mb-4">
+        <div v-if="selectedImages.length" class="mb-4">
           <h3 class="yilan-edit__sub">新增圖片</h3>
           <div class="yilan-edit__thumbs">
-            <div v-for="(preview, index) in newImagePreview" :key="index" class="yilan-edit__thumb">
+            <div v-for="(preview, index) in selectedImages" :key="index" class="yilan-edit__thumb">
               <img :src="preview.url" :alt="`新圖片預覽 ${index + 1}`" />
               <button
                 type="button"
                 class="yilan-edit__remove"
                 :aria-label="`移除新圖片 ${index + 1}`"
-                @click="removeNewImage(index)"
+                @click="removeImage(index)"
               >
                 <Icon name="ri:close-line" />
               </button>
@@ -174,7 +174,8 @@
             multiple
             accept="image/*"
             class="d-none"
-            @change="handleFileUpload"
+            :disabled="submitting"
+            @change="selectImages($event, { existingCount: form.images?.length || 0 })"
           />
         </label>
       </section>
@@ -209,6 +210,7 @@
 </template>
 
 <script setup>
+import { appendActivityImages } from '~/utils/image-upload'
 definePageMeta({
   middleware: 'admin-auth',
   layout: 'admin'
@@ -220,8 +222,7 @@ const router = useRouter()
 const activity = ref(null)
 const loading = ref(true)
 const submitting = ref(false)
-const newImageFiles = ref([])
-const newImagePreview = ref([])
+const { selectedImages, selectImages, removeImage } = useActivityImageSelection()
 const deletedImages = ref([])
 const fileInput = ref(null)
 
@@ -265,44 +266,10 @@ const fetchActivity = async () => {
   }
 }
 
-const handleFileUpload = (event) => {
-  const files = Array.from(event.target.files)
-  const totalImages = (form.value.images?.length || 0) + newImageFiles.value.length + files.length
-
-  if (totalImages > 5) {
-    alert('最多只能有 5 張圖片')
-    return
-  }
-
-  files.forEach((file) => {
-    if (file.size > 5 * 1024 * 1024) {
-      alert(`圖片 ${file.name} 超過 5MB，請選擇較小的檔案`)
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      newImagePreview.value.push({
-        url: e.target.result,
-        file
-      })
-      newImageFiles.value.push(file)
-    }
-    reader.readAsDataURL(file)
-  })
-
-  event.target.value = ''
-}
-
 const removeExistingImage = (index) => {
   const removedImage = form.value.images[index]
   deletedImages.value.push(removedImage)
   form.value.images.splice(index, 1)
-}
-
-const removeNewImage = (index) => {
-  newImagePreview.value.splice(index, 1)
-  newImageFiles.value.splice(index, 1)
 }
 
 const updateActivity = async () => {
@@ -328,9 +295,7 @@ const updateActivity = async () => {
     })
 
     // 添加新圖片文件
-    newImageFiles.value.forEach((file) => {
-      formData.append('images', file)
-    })
+    await appendActivityImages(formData, selectedImages.value.map(image => image.file))
 
     await $fetch(`/api/yilan-activities/${route.params.id}`, {
       method: 'PATCH',

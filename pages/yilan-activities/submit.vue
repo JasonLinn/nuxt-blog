@@ -33,7 +33,7 @@
           :disabled="aiProcessing"
           @change="handleAIImageUpload"
         />
-        <div class="form-text">支援 JPG、PNG、WebP 格式，建議大小不超過 5MB</div>
+        <div class="form-text">支援 JPG、PNG、WebP 格式，大圖會自動縮小</div>
 
         <div v-if="aiProcessing" class="py-3 text-center">
           <div class="spinner-border text-primary" role="status">
@@ -373,7 +373,7 @@
       <!-- 活動圖片 -->
       <section class="yp-form-section">
         <h2 class="yp-form-section__title">活動圖片</h2>
-        <p class="yp-form-section__desc">可上傳多張圖片，建議大小不超過 2MB。</p>
+        <p class="yp-form-section__desc">最多 5 張，送出時會自動縮小圖片。</p>
 
         <label for="images" class="yp-upload upload-zone" :class="{ 'is-invalid': errors.images }">
           <input
@@ -382,7 +382,8 @@
             class="upload-zone__input"
             accept="image/*"
             multiple
-            @change="handleImageUpload"
+            :disabled="isSubmitting"
+            @change="selectImages($event, { replace: true })"
           />
           <Icon name="ri:image-add-line" class="upload-zone__icon" />
           <span class="upload-zone__title">點擊或拖曳圖片到這裡上傳</span>
@@ -391,9 +392,9 @@
         <div v-if="errors.images" class="text-danger small mt-2">{{ errors.images }}</div>
 
         <!-- 圖片預覽 -->
-        <div v-if="imagePreviews.length > 0" class="preview-grid">
-          <div v-for="(preview, index) in imagePreviews" :key="index" class="preview-grid__item">
-            <img :src="preview" :alt="`預覽圖片 ${index + 1}`" />
+        <div v-if="selectedImages.length > 0" class="preview-grid">
+          <div v-for="(preview, index) in selectedImages" :key="index" class="preview-grid__item">
+            <img :src="preview.url" :alt="`預覽圖片 ${index + 1}`" />
             <button
               type="button"
               class="preview-grid__remove"
@@ -465,6 +466,7 @@
 </template>
 
 <script setup>
+import { appendActivityImages, prepareUploadImage } from '~/utils/image-upload'
 const { loginRequired, loginUrl } = useSubmissionLogin()
 
 // 檢查是否為管理員
@@ -496,8 +498,7 @@ const form = reactive({
   submitter_email: '',
   price: null,
   capacity: null,
-  website: '',
-  images: []
+  website: ''
 })
 
 // 表單驗證錯誤
@@ -507,7 +508,7 @@ const errors = reactive({})
 const isSubmitting = ref(false)
 
 // 圖片預覽
-const imagePreviews = ref([])
+const { selectedImages, selectImages, removeImage } = useActivityImageSelection()
 
 // 已填入欄位的中文名稱
 const filledFields = computed(() => {
@@ -547,12 +548,6 @@ const handleAIImageUpload = async (event) => {
 
   if (!file) return
 
-  // 檢查檔案大小（5MB）
-  if (file.size > 5 * 1024 * 1024) {
-    aiError.value = '圖片大小不能超過 5MB'
-    return
-  }
-
   aiProcessing.value = true
   aiError.value = ''
   aiResult.value = null
@@ -560,7 +555,10 @@ const handleAIImageUpload = async (event) => {
 
   try {
     const formData = new FormData()
-    formData.append('image', file)
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+      throw new Error('請選擇 JPG、PNG 或 WebP 海報。')
+    }
+    formData.append('image', await prepareUploadImage(file))
 
     const response = await $fetch('/api/ai/extract-activity-info', {
       method: 'POST',
@@ -671,32 +669,6 @@ const handleStartDateChange = () => {
   delete errors.event_start_date
 }
 
-// 處理圖片上傳
-const handleImageUpload = (event) => {
-  const files = Array.from(event.target.files)
-  form.images = files
-
-  // 生成預覽圖
-  imagePreviews.value = []
-  files.forEach((file) => {
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        imagePreviews.value.push(e.target.result)
-      }
-      reader.readAsDataURL(file)
-    }
-  })
-}
-
-// 移除圖片
-const removeImage = (index) => {
-  imagePreviews.value.splice(index, 1)
-  const newFiles = Array.from(form.images)
-  newFiles.splice(index, 1)
-  form.images = newFiles
-}
-
 // 表單驗證
 const validateForm = () => {
   // 清除之前的錯誤
@@ -787,17 +759,13 @@ const submitActivity = async () => {
 
     // 添加文字欄位
     Object.entries(form).forEach(([key, value]) => {
-      if (key !== 'images' && value !== null && value !== '') {
+      if (value !== null && value !== '') {
         formData.append(key, value)
       }
     })
 
     // 添加圖片檔案
-    if (form.images && form.images.length > 0) {
-      form.images.forEach((file, index) => {
-        formData.append('images', file)
-      })
-    }
+    await appendActivityImages(formData, selectedImages.value.map(image => image.file))
 
     // 提交到 API
     const response = await $fetch('/api/yilan-activities', {

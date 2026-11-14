@@ -283,7 +283,7 @@
             />
             <Icon name="ri:image-add-line" class="owner-upload-icon" />
             <div class="fw-bold">點擊上傳圖片檔案</div>
-            <div class="small">支援 JPG、PNG、GIF 格式，單檔最大 5MB，可一次選擇多張圖片</div>
+            <div class="small">支援 JPG、PNG、GIF 格式，大圖會自動縮小，可一次選擇多張圖片</div>
           </label>
 
           <!-- 手動添加圖片URL -->
@@ -565,6 +565,7 @@
 </template>
 
 <script setup>
+import { prepareUploadImage } from '~/utils/image-upload'
 import { ref, onMounted, computed } from 'vue'
 import { navigateTo } from 'nuxt/app'
 
@@ -669,21 +670,9 @@ const handleFileUpload = async (event) => {
     for (const file of files) {
       console.log('開始上傳文件:', file.name)
 
-      // 驗證文件類型
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error(`檔案 ${file.name} 格式不支援，只允許 JPEG、PNG 和 GIF 格式`)
-      }
-
-      // 驗證文件大小 (5MB)
-      const maxSize = 5 * 1024 * 1024
-      if (file.size > maxSize) {
-        throw new Error(`檔案 ${file.name} 太大，最大允許 5MB`)
-      }
-
       // 創建 FormData
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', await prepareUploadImage(file))
 
       // 首先嘗試 GitHub 上傳，如果失敗則使用本地上傳
       let response
@@ -949,6 +938,7 @@ const handleAvailabilityChange = (result) => {
 
 // 處理更新
 const handleUpdate = async () => {
+  if (saving.value) return
   try {
     saving.value = true
 

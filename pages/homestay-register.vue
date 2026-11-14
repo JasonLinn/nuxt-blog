@@ -254,14 +254,14 @@
               <input
                 type="file"
                 class="visually-hidden"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/gif,image/webp"
                 multiple
-                :disabled="submitting"
+                :disabled="submitting || uploadingImages"
                 @change="handleFileUpload"
               />
               <Icon name="ri:image-add-line" class="register-upload-icon" />
-              <div class="fw-bold">點擊選擇圖片</div>
-              <div class="small">支援 JPG、PNG、GIF 格式，單檔最大 5MB</div>
+              <div class="fw-bold">{{ uploadingImages ? '圖片上傳中…' : '點擊選擇圖片' }}</div>
+              <div class="small">支援 JPG、PNG、GIF 格式，大圖會自動縮小</div>
             </label>
 
             <!-- 手動輸入圖片 URL -->
@@ -567,7 +567,7 @@
             v-if="currentStep === 3"
             type="submit"
             class="btn btn-primary"
-            :disabled="!canSubmit || submitting"
+            :disabled="!canSubmit || submitting || uploadingImages"
           >
             <span
               v-if="submitting"
@@ -698,53 +698,9 @@ const nextStep = () => {
 }
 
 // 處理檔案上傳
-const handleFileUpload = async (event) => {
-  const files = event.target.files
-  if (!files.length) return
-
-  for (const file of files) {
-    try {
-      console.log('開始上傳文件:', file.name)
-
-      // 驗證文件類型
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error('只允許上傳 JPEG、PNG 和 GIF 格式的圖片')
-      }
-
-      // 驗證文件大小 (5MB)
-      const maxSize = 5 * 1024 * 1024
-      if (file.size > maxSize) {
-        throw new Error('文件太大，最大允許 5MB')
-      }
-
-      // 創建 FormData
-      const uploadFormData = new FormData()
-      uploadFormData.append('file', file)
-
-      // 上傳到後端 API
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: uploadFormData
-      })
-
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error || '上傳失敗')
-      }
-
-      console.log('上傳成功:', data.url)
-
-      // 添加到 formData.images 陣列
-      if (!formData.value.images) formData.value.images = []
-      formData.value.images.push(data.url)
-    } catch (error) {
-      console.error('上傳錯誤:', error)
-      alert(`上傳失敗：${error.message}`)
-    }
-  }
-}
+const { uploadingImages, handleFileUpload } = useFormImageUpload((url) => {
+  formData.value.images.push(url)
+})
 
 // 添加手動輸入的圖片URL
 const addCoverUrl = () => {
@@ -772,6 +728,7 @@ const removeImage = (index) => {
 
 // 提交表單
 const handleSubmit = async () => {
+  if (uploadingImages.value) return
   if (!canSubmit.value) return
 
   submitting.value = true

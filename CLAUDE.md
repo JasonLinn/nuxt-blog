@@ -52,7 +52,7 @@
   - `index.vue` - 活動列表頁（Bootstrap 卡片佈局）
   - `[id].vue` - 活動詳情頁（自定義美觀設計）
   - `submit.vue` - 活動投稿表單（Bootstrap 表單）
-- `pages/admin/yilan-activities.vue` - 管理後台（Bootstrap 表格）
+- `pages/admin/yilan-activities/index.vue` - 管理後台（Bootstrap 表格）
 - `server/api/yilan-activities/` - API 端點
 - `components/LayoutHeader.vue` - 導航選單
 

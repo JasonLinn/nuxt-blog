@@ -310,14 +310,15 @@
               @keydown.space.prevent="triggerFileInput"
             >
               <Icon name="ri:upload-cloud-2-line" class="pm-upload__icon" />
-              <p class="pm-upload__title">點擊上傳圖片</p>
-              <span class="pm-upload__hint">支援 JPG、PNG 格式，最大 5MB</span>
+              <p class="pm-upload__title">{{ uploadingImages ? '圖片上傳中…' : '點擊上傳圖片' }}</p>
+              <span class="pm-upload__hint">支援 JPG、PNG 格式，大圖會自動縮小</span>
               <input
                 ref="fileInput"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/gif,image/webp"
                 multiple
                 class="d-none"
+                :disabled="uploadingImages"
                 @change="handleFileUpload"
               />
             </div>
@@ -389,7 +390,7 @@
           <button type="button" class="btn btn-outline-secondary" @click="$emit('close')">
             取消
           </button>
-          <button type="submit" :disabled="saving" class="btn btn-primary btn-icon">
+          <button type="submit" :disabled="saving || uploadingImages" class="btn btn-primary btn-icon">
             <span v-if="saving" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
             <Icon v-else :name="isEditing ? 'ri:save-line' : 'ri:add-line'" />
             {{ saving ? '儲存中...' : isEditing ? '更新地點' : '新增地點' }}
@@ -585,44 +586,9 @@ const triggerFileInput = () => {
   }
 }
 
-const handleFileUpload = async (event) => {
-  const files = event.target.files
-  if (!files.length) return
-
-  for (const file of files) {
-    try {
-      // 驗證檔案
-      if (!file.type.startsWith('image/')) {
-        alert('請選擇圖片檔案')
-        continue
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        alert('圖片檔案不能超過 5MB')
-        continue
-      }
-
-      // 上傳檔案
-      const uploadBody = new FormData()
-      uploadBody.append('file', file)
-
-      const response = await $fetch('/api/upload', {
-        method: 'POST',
-        body: uploadBody
-      })
-
-      if (response.success) {
-        formData.images.push(response.url)
-      }
-    } catch (error) {
-      console.error('上傳圖片失敗:', error)
-      alert('上傳圖片失敗，請重試')
-    }
-  }
-
-  // 清空檔案輸入
-  event.target.value = ''
-}
+const { uploadingImages, handleFileUpload } = useFormImageUpload((url) => {
+  formData.images.push(url)
+})
 
 // 判斷圖片是否來自 Google Places
 const isGoogleImage = (imageUrl) => {
@@ -635,6 +601,7 @@ const removeImage = (index) => {
 
 // 表單提交
 const handleSubmit = async () => {
+  if (uploadingImages.value) return
   try {
     saving.value = true
 

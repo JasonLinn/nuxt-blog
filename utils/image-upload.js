@@ -1,11 +1,11 @@
 // Leave room for multipart headers under the production request limit.
 const maxRequestFileBytes = 4 * 1024 * 1024
 
-export async function prepareCouponImage(file) {
-  if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
-    throw new Error('請選擇 JPEG、PNG 或 GIF 圖片。')
+export async function prepareUploadImage(file, maxBytes = maxRequestFileBytes) {
+  if (!['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+    throw new Error('請選擇 JPEG、PNG、GIF 或 WebP 圖片。')
   }
-  if (file.size <= maxRequestFileBytes) return file
+  if (file.size <= maxBytes) return file
 
   const url = URL.createObjectURL(file)
   try {
@@ -21,7 +21,10 @@ export async function prepareCouponImage(file) {
       context.drawImage(image, 0, 0, canvas.width, canvas.height)
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.85))
       if (!blob) break
-      if (blob.size <= maxRequestFileBytes) return blob
+      if (blob.size <= maxBytes) {
+        const name = file.name.replace(/\.[^.]+$/, '') + (blob.type === 'image/webp' ? '.webp' : '.png')
+        return new File([blob], name, { type: blob.type })
+      }
       scale *= 0.75
     } while (canvas.width > 1 || canvas.height > 1)
   } catch {
@@ -30,4 +33,14 @@ export async function prepareCouponImage(file) {
     URL.revokeObjectURL(url)
   }
   throw new Error('無法處理圖片，請重新選取或更換圖片。')
+}
+
+// Activity forms send all new images in the same multipart request.
+export async function appendActivityImages(body, files) {
+  if (!files.length) return
+  if (files.length > 5) throw new Error('一次最多可上傳 5 張活動圖片。')
+  const maxBytes = Math.floor(maxRequestFileBytes / files.length)
+  for (const file of files) {
+    body.append('images', await prepareUploadImage(file, maxBytes))
+  }
 }

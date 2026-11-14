@@ -152,7 +152,7 @@
       <!-- 活動圖片 -->
       <section class="yp-form-section">
         <h2 class="yp-form-section__title">活動圖片</h2>
-        <p class="yp-form-section__desc">支援 JPG、PNG、GIF 格式，單檔最大 5MB。</p>
+        <p class="yp-form-section__desc">支援 JPG、PNG、GIF 格式，大圖會自動縮小。</p>
 
         <!-- 現有圖片 -->
         <div v-if="form.images && form.images.length" class="mb-4">
@@ -173,20 +173,20 @@
         </div>
 
         <!-- 新圖片預覽 -->
-        <div v-if="newImagePreview.length" class="mb-4">
+        <div v-if="selectedImages.length" class="mb-4">
           <h3 class="activity-edit__sub">新增圖片</h3>
           <div class="activity-edit__thumbs">
             <div
-              v-for="(preview, index) in newImagePreview"
+              v-for="(preview, index) in selectedImages"
               :key="index"
               class="activity-edit__thumb"
             >
-              <img :src="preview" :alt="`新圖片預覽 ${index + 1}`" />
+              <img :src="preview.url" :alt="`新圖片預覽 ${index + 1}`" />
               <button
                 type="button"
                 class="activity-edit__remove"
                 :aria-label="`移除新圖片 ${index + 1}`"
-                @click="removeNewImage(index)"
+                @click="removeImage(index)"
               >
                 <Icon name="ri:close-line" />
               </button>
@@ -205,7 +205,8 @@
             multiple
             accept="image/*"
             class="d-none"
-            @change="handleFileChange"
+            :disabled="submitting"
+            @change="selectImages($event, { existingCount: form.images?.length || 0 })"
           />
         </label>
       </section>
@@ -240,6 +241,7 @@
 </template>
 
 <script setup>
+import { appendActivityImages } from '~/utils/image-upload'
 definePageMeta({
   middleware: 'admin-auth',
   layout: 'admin'
@@ -252,8 +254,7 @@ const activity = ref(null)
 const loading = ref(true)
 const submitting = ref(false)
 const deletedImages = ref([])
-const newImageFiles = ref([])
-const newImagePreview = ref([])
+const { selectedImages, selectImages, removeImage, clearImages } = useActivityImageSelection()
 
 const form = ref({
   title: '',
@@ -297,48 +298,10 @@ const fetchActivity = async () => {
   }
 }
 
-const handleFileChange = (event) => {
-  console.log('handleFileChange 被觸發了', event.target.files)
-  const files = Array.from(event.target.files)
-
-  console.log('選擇的檔案數量:', files.length)
-
-  files.forEach((file, fileIndex) => {
-    console.log(`處理檔案 ${fileIndex + 1}:`, file.name, file.size)
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert(`檔案 ${file.name} 超過 5MB 限制`)
-      return
-    }
-
-    newImageFiles.value.push(file)
-    console.log('newImageFiles 陣列長度:', newImageFiles.value.length)
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      console.log('圖片讀取完成:', e.target.result.substring(0, 50) + '...')
-      newImagePreview.value.push(e.target.result)
-      console.log('newImagePreview 陣列長度:', newImagePreview.value.length)
-    }
-    reader.onerror = (e) => {
-      console.error('圖片讀取錯誤:', e)
-    }
-    reader.readAsDataURL(file)
-  })
-
-  // 清空檔案輸入，允許重複選擇同樣的檔案
-  event.target.value = ''
-}
-
 const removeExistingImage = (index) => {
   const removedImage = form.value.images[index]
   deletedImages.value.push(removedImage)
   form.value.images.splice(index, 1)
-}
-
-const removeNewImage = (index) => {
-  newImagePreview.value.splice(index, 1)
-  newImageFiles.value.splice(index, 1)
 }
 
 const updateActivity = async () => {
@@ -346,7 +309,7 @@ const updateActivity = async () => {
     submitting.value = true
 
     console.log('=== 開始更新活動 ===')
-    console.log('新圖片檔案數量:', newImageFiles.value.length)
+    console.log('新圖片檔案數量:', selectedImages.value.length)
     console.log('要刪除的圖片:', deletedImages.value)
 
     const formData = new FormData()
@@ -366,10 +329,7 @@ const updateActivity = async () => {
     })
 
     // 添加新圖片文件
-    newImageFiles.value.forEach((file, index) => {
-      formData.append('images', file)
-      console.log(`添加新圖片檔案 ${index + 1}:`, file.name, file.size, 'bytes')
-    })
+    await appendActivityImages(formData, selectedImages.value.map(image => image.file))
 
     console.log('FormData 建立完成，發送請求...')
 
@@ -385,8 +345,7 @@ const updateActivity = async () => {
     await fetchActivity()
 
     // 清空上傳相關的資料
-    newImageFiles.value = []
-    newImagePreview.value = []
+    clearImages()
     deletedImages.value = []
 
     router.push(`/admin/activities/${route.params.id}`)
