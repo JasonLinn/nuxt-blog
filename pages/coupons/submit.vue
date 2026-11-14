@@ -85,7 +85,7 @@
 
           <!-- 經緯度 -->
           <div class="col-12">
-            <label for="position" class="form-label required">經緯度</label>
+            <label for="position" class="form-label">經緯度（選填）</label>
             <input
               id="position"
               v-model="form.position"
@@ -227,12 +227,13 @@
             placeholder="或輸入圖片 URL"
             type="text"
             class="form-control"
-            @keyup.enter="addCoverUrl"
+            :disabled="uploading || submitting"
+            @keydown.enter.prevent="addCoverUrl"
           />
           <button
             type="button"
             class="btn btn-outline-primary"
-            :disabled="!coverUrl"
+            :disabled="!coverUrl || uploading || submitting"
             @click.prevent="addCoverUrl"
           >
             添加 URL
@@ -244,14 +245,21 @@
           <input
             type="file"
             class="visually-hidden"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/gif"
+            :disabled="uploading || submitting"
             multiple
             @change="handleFileUpload"
           />
-          <Icon name="ri:upload-cloud-2-line" class="upload-icon" />
-          <span class="d-block fw-bold text-ink">點擊選擇圖片</span>
-          <span class="d-block small">可一次選多張，第一張會作為封面</span>
+          <span v-if="uploading" class="spinner-border text-primary" aria-hidden="true" />
+          <Icon v-else name="ri:upload-cloud-2-line" class="upload-icon" />
+          <span class="d-block fw-bold text-ink" aria-live="polite">{{
+            uploading ? `圖片上傳中（${uploadIndex} / ${uploadTotal}）` : '點擊選擇圖片'
+          }}</span>
+          <span v-if="!uploading" class="d-block small">可一次選多張，第一張會作為封面</span>
         </label>
+        <ul v-if="uploadErrors.length" class="text-danger mt-2" role="alert">
+          <li v-for="(message, index) in uploadErrors" :key="index">{{ message }}</li>
+        </ul>
 
         <!-- 圖片預覽 -->
         <div v-if="form.cover.length" class="submit-img">
@@ -262,6 +270,7 @@
               type="button"
               class="submit-img__remove btn btn-danger btn-sm"
               aria-label="刪除圖片"
+              :disabled="uploading || submitting"
               @click.prevent="removeImage(index)"
             >
               <Icon name="ri:close-line" />
@@ -333,13 +342,13 @@
       </section>
 
       <div class="yp-form-actions">
-        <button type="button" class="btn btn-ghost btn-icon me-auto" @click="resetForm">
+        <button type="button" class="btn btn-ghost btn-icon me-auto" :disabled="uploading || submitting" @click="resetForm">
           <Icon name="ri:refresh-line" />重設表單
         </button>
-        <button type="submit" :disabled="submitting" class="btn btn-primary btn-icon">
+        <button type="submit" :disabled="uploading || submitting" class="btn btn-primary btn-icon">
           <span v-if="submitting" class="spinner-border spinner-border-sm" aria-hidden="true" />
           <Icon v-else name="ri:send-plane-fill" />
-          {{ submitting ? '填寫中...' : '填寫審核' }}
+          {{ uploading ? '等待圖片上傳' : submitting ? '送審中…' : '填寫審核' }}
         </button>
       </div>
     </form>
@@ -368,6 +377,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { category } from '~/utils/category'
+import { prepareCouponImage } from '~/utils/coupon-upload'
 const { loginRequired, loginUrl } = useSubmissionLogin()
 
 // 設定頁面標題
@@ -383,6 +393,10 @@ useHead({
 
 // 響應式資料
 const submitting = ref(false)
+const uploadTotal = ref(0)
+const uploadIndex = ref(0)
+const uploading = computed(() => uploadTotal.value > 0)
+const uploadErrors = ref([])
 const showSuccessModal = ref(false)
 const coverUrl = ref('')
 
@@ -408,49 +422,30 @@ const form = reactive({
 
 // 處理圖片上傳
 const handleFileUpload = async (event) => {
-  const files = event.target.files
-  if (!files.length) return
-
-  for (const file of files) {
-    try {
-      console.log('開始上傳文件:', file.name)
-
-      // 驗證文件類型
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
-      if (!allowedTypes.includes(file.type)) {
-        alert('只允許上傳 JPEG、PNG 和 GIF 格式的圖片')
-        continue
+  const input = event.target
+  const files = Array.from(input.files)
+  if (!files.length || uploading.value || submitting.value) return
+  input.value = ''
+  uploadErrors.value = []
+  uploadTotal.value = files.length
+  try {
+    for (const [index, file] of files.entries()) {
+      uploadIndex.value = index + 1
+      try {
+        const body = new FormData()
+        body.append('file', await prepareCouponImage(file), file.name)
+        const response = await $fetch('/api/upload', { method: 'POST', body })
+        if (!response.success || !response.url) throw new Error('上傳失敗，請重新選取圖片。')
+        form.cover.push(response.url)
+      } catch (error) {
+        const message = error.response?.status === 401
+          ? '登入已過期，請重新登入。'
+          : error.response ? '上傳失敗，請稍後重試。' : error.message
+        uploadErrors.value.push(`${file.name}：${message}`)
       }
-
-      // 驗證文件大小 (5MB)
-      const maxSize = 5 * 1024 * 1024
-      if (file.size > maxSize) {
-        alert('文件太大，最大允許 5MB')
-        continue
-      }
-
-      // 創建 FormData
-      const formData = new FormData()
-      formData.append('file', file)
-
-      // 上傳到後端 API
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error || '上傳失敗')
-      }
-
-      console.log('上傳成功:', data.url)
-      form.cover.push(data.url)
-    } catch (error) {
-      console.error('上傳錯誤:', error)
-      alert(`上傳失敗：${error.message}`)
     }
+  } finally {
+    uploadTotal.value = 0
   }
 }
 
@@ -494,11 +489,13 @@ const resetForm = (force) => {
       }
     })
     coverUrl.value = ''
+    uploadErrors.value = []
   }
 }
 
 // 填寫優惠券
 const submitCoupon = async () => {
+  if (uploading.value || submitting.value) return
   try {
     submitting.value = true
 
