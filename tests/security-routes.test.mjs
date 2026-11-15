@@ -152,19 +152,21 @@ test('anonymous coupon image uploads and submissions have separate enforced quot
 
 const couponBody = { title: 'Test', content: 'Test', business_name: 'Test', submitter_name: 'Guest', township: ['冬山鄉'] }
 const verifiedCoupon = { success: true, hostname: '127.0.0.1', action: 'coupon_submit' }
+const verifiedActivity = { ...verifiedCoupon, action: 'activity_submit' }
+const activityVerificationHeaders = { 'x-turnstile-token': 'activity-test-response' }
 
 function mockSiteverify(t, respond) {
   const original = globalThis.fetch
   t.mock.method(globalThis, 'fetch', (url, options) => {
     if (url !== 'https://challenges.cloudflare.com/turnstile/v0/siteverify') return original(url, options)
     assert.equal(options.method, 'POST')
-    assert.equal(options.body.get('secret'), 'coupon-test-secret')
+    assert.equal(options.body.get('secret'), 'submission-test-secret')
     return respond(options.body.get('response'))
   })
 }
 
 test('a guest can upload a coupon image and submit it for review after verifying once', async t => {
-  process.env.TURNSTILE_SECRET_KEY = 'coupon-test-secret'
+  process.env.TURNSTILE_SECRET_KEY = 'submission-test-secret'
   t.after(() => { delete process.env.TURNSTILE_SECRET_KEY })
   let verified = 0
   mockSiteverify(t, token => {
@@ -219,11 +221,11 @@ test('coupon submissions fail closed for missing, invalid, misbound or unavailab
   mockSiteverify(t, () => { calls++; return reply() })
   delete process.env.TURNSTILE_SECRET_KEY
   assert.equal((await send('token')).status, 503)
-  process.env.TURNSTILE_SECRET_KEY = 'coupon-test-secret'
+  process.env.TURNSTILE_SECRET_KEY = 'submission-test-secret'
   t.after(() => { delete process.env.TURNSTILE_SECRET_KEY })
   for (const token of [undefined, '', {}, 'x'.repeat(2049)]) assert.equal((await send(token)).status, 422)
   assert.equal(calls, 0)
-  for (const result of [{ success: false }, { ...verifiedCoupon, action: 'other' }, { ...verifiedCoupon, hostname: 'other.example' }]) {
+  for (const result of [{ success: false }, verifiedActivity, { ...verifiedCoupon, hostname: 'other.example' }]) {
     reply = () => Response.json(result)
     assert.equal((await send('invalid')).status, 422)
   }
@@ -249,7 +251,41 @@ async function guestActivityForm() {
   return form
 }
 
-test('guest activity submissions normalize images and ignore caller-supplied publication status', async () => {
+function mockActivityVerification(t, respond = () => Response.json(verifiedActivity)) {
+  process.env.TURNSTILE_SECRET_KEY = 'submission-test-secret'
+  t.after(() => { delete process.env.TURNSTILE_SECRET_KEY })
+  mockSiteverify(t, token => {
+    assert.equal(token, activityVerificationHeaders['x-turnstile-token'])
+    return respond()
+  })
+}
+
+test('both activity submission routes require an activity challenge before parsing or saving', async t => {
+  let reply
+  mockActivityVerification(t, () => reply())
+  let dbCalls = 0
+  globalThis.securityDb = async () => { dbCalls++; return { rows: [] } }
+  for (const [route, headers] of [['yilan-activities', {}], ['activities', { cookie: adminCookie }]]) {
+    const handler = await load(`server/api/${route}.post.js`)
+    const send = verification => request(handler, '/', { method: 'POST', headers: { ...headers, ...verification }, body: 'invalid form' })
+    const missing = await send({})
+    assert.equal(missing.status, 422)
+    assert.equal(missing.data.data.failureReason, 'challenge')
+    for (const result of [verifiedCoupon, { ...verifiedActivity, hostname: 'other.example' },
+      { success: false, 'error-codes': ['timeout-or-duplicate'] }]) {
+      reply = () => Response.json(result)
+      assert.equal((await send(activityVerificationHeaders)).status, 422)
+    }
+    reply = () => { throw new Error('Siteverify unavailable') }
+    const offline = await send(activityVerificationHeaders)
+    assert.equal(offline.status, 503)
+    assert.equal(offline.data.data.failureReason, 'challengeService')
+  }
+  assert.equal(dbCalls, 0)
+})
+
+test('verified guest activity submissions normalize images and ignore caller-supplied publication status', async t => {
+  mockActivityVerification(t)
   const submit = await load('server/api/yilan-activities.post.js')
   const form = await guestActivityForm()
   let inserts = 0
@@ -261,18 +297,19 @@ test('guest activity submissions normalize images and ignore caller-supplied pub
     inserts++
     return { rows: [{ id: 7 }] }
   }
-  const response = await request(submit, '/', { method: 'POST', body: form })
+  const response = await request(submit, '/', { method: 'POST', headers: activityVerificationHeaders, body: form })
   assert.equal(response.status, 200, response.text)
   assert.equal(response.data.data.status, 'pending')
   form.set('images', new Blob(['invalid'], { type: 'image/png' }), 'bad.png')
-  assert.equal((await request(submit, '/', { method: 'POST', body: form })).status, 400)
+  assert.equal((await request(submit, '/', { method: 'POST', headers: activityVerificationHeaders, body: form })).status, 400)
   assert.equal(inserts, 1)
   const middleware = await load('server/middleware/01-security-limits.js')
   globalThis.securityDb = async () => ({ rows: [] })
   assert.equal((await request(middleware, '/api/yilan-activities', { method: 'POST' })).status, 429)
 })
 
-test('guest activity text and images follow the real review transition in PostgreSQL', { skip: !submissionDbUrl }, async () => {
+test('guest activity text and images follow the real review transition in PostgreSQL', { skip: !submissionDbUrl }, async t => {
+  mockActivityVerification(t)
   const { Client } = (await import('pg')).default
   const client = new Client({ connectionString: submissionDbUrl })
   const schema = `guest_activity_test_${Date.now()}`
@@ -292,7 +329,7 @@ test('guest activity text and images follow the real review transition in Postgr
     const list = await load('server/api/yilan-activities.get.js')
     const image = await load('server/api/activity-submission-images/[id].get.js')
     const approve = await load('server/api/yilan-activities/[id]/approve.post.js')
-    const response = await request(submit, '/', { method: 'POST', body: await guestActivityForm() })
+    const response = await request(submit, '/', { method: 'POST', headers: activityVerificationHeaders, body: await guestActivityForm() })
     assert.equal(response.status, 200, response.text)
     const { id, images } = response.data.data
     const imageId = images[0].split('/').pop()

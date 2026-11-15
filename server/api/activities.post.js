@@ -1,4 +1,5 @@
 import { requireUploader } from '../utils/upload-auth.js'
+import { verifyActivityChallenge } from '../utils/submission-turnstile.js'
 import { saveLocalImage } from '../utils/safe-images.js'
 import { query } from '~/server/utils/db.js'
 import formidable from 'formidable'
@@ -7,6 +8,7 @@ import path from 'path'
 
 export default defineEventHandler(async (event) => {
   requireUploader(event)
+  await verifyActivityChallenge(event)
   try {
     // 解析 multipart/form-data
     const form = formidable({

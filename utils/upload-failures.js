@@ -35,7 +35,7 @@ export const incidentIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0
 export function classifyFailure(error) {
   const status = Number(error?.response?.status || error?.statusCode || error?.status) || null
   const text = [error?.data?.message, error?.data?.statusMessage, error?.message, error?.statusMessage].join(' ')
-  let reason = error?.failureReason
+  let reason = error?.failureReason || error?.data?.failureReason || error?.data?.data?.failureReason
   if (!Object.hasOwn(failureReasons, reason)) {
     if (/GitHub upload failed|Coupon image upload failed|EROFS|ENOSPC/i.test(text)) reason = 'storage'
     else if (/Invalid raster image/i.test(text)) reason = 'invalidImage'

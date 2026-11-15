@@ -449,9 +449,10 @@
       </section>
 
       <!-- 提交按鈕 -->
+      <SubmissionTurnstile ref="challenge" kind="activity" @token="turnstileToken = $event" />
       <div class="yp-form-actions">
         <NuxtLink to="/yilan-activities" class="btn btn-outline-secondary">取消返回</NuxtLink>
-        <button type="submit" class="btn btn-primary" :disabled="!formReady || isSubmitting">
+        <button type="submit" class="btn btn-primary" :disabled="!formReady || isSubmitting || !turnstileToken">
           <span
             v-if="isSubmitting"
             class="spinner-border spinner-border-sm me-2"
@@ -507,6 +508,8 @@ const errors = reactive({})
 // 提交狀態
 const formReady = ref(false)
 const isSubmitting = ref(false)
+const challenge = ref(null)
+const turnstileToken = ref('')
 
 // 圖片預覽
 const { selectedImages, selectImages, removeImage } = useActivityImageSelection('activity')
@@ -744,7 +747,7 @@ const validateForm = () => {
 
 // 提交表單
 const submitActivity = async () => {
-  if (isSubmitting.value) return
+  if (!formReady.value || isSubmitting.value || !turnstileToken.value) return
   if (!validateForm()) {
     // 滾動到第一個錯誤欄位
     const firstError = document.querySelector('.is-invalid')
@@ -773,6 +776,7 @@ const submitActivity = async () => {
     // 提交到 API
     const response = await $fetch('/api/yilan-activities', {
       method: 'POST',
+      headers: { 'X-Turnstile-Token': turnstileToken.value },
       body: formData
     })
 
@@ -789,7 +793,9 @@ const submitActivity = async () => {
     // eslint-disable-next-line no-console
     console.error('提交活動失敗:', error)
 
-    alert(reportUploadFailure('activity', selectedImages.value.length ? 'upload' : 'submit', error))
+    const stage = selectedImages.value.length && !error?.data?.data?.failureReason ? 'upload' : 'submit'
+    alert(reportUploadFailure('activity', stage, error))
+    challenge.value?.reset()
   } finally {
     isSubmitting.value = false
   }

@@ -4,6 +4,7 @@ import formidable from 'formidable'
 import { dateOnly } from '../../utils/activity-dates.js'
 import { query } from '../utils/db.js'
 import { normalizeImage } from '../utils/safe-images.js'
+import { verifyActivityChallenge } from '../utils/submission-turnstile.js'
 
 const maxFileBytes = 4 * 1024 * 1024
 
@@ -70,6 +71,7 @@ function activityFields(fields) {
 }
 
 export default defineEventHandler(async event => {
+  await verifyActivityChallenge(event)
   const tempFiles = []
   try {
     let fields

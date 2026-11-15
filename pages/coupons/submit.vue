@@ -344,7 +344,7 @@
         </div>
       </section>
 
-      <CouponTurnstile ref="challenge" @token="turnstileToken = $event" />
+      <SubmissionTurnstile ref="challenge" kind="coupon" @token="turnstileToken = $event" />
       <div class="yp-form-actions">
         <p v-if="submitError" class="alert alert-danger" role="alert">{{ submitError }}</p>
         <button type="button" class="btn btn-ghost btn-icon me-auto" :disabled="uploading || submitting" @click="resetForm">
