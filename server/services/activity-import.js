@@ -1,4 +1,4 @@
-import { collectActivities, digest, sameEvent, possiblySameEvent, reviewReasons, safeSourceUrl, safeActivityImage, plainText, activitySources } from './activity-sources.js'
+import { collectActivities, digest, sameEvent, possiblySameEvent, reviewReasons, safeSourceUrl, safeActivityImage, plainText, activitySources, opentixEventUrl } from './activity-sources.js'
 import { dateOnly, taipeiToday } from '../../utils/activity-dates.js'
 import { authoritativeActivityAliases } from './activity-official-pages.js'
 
@@ -59,6 +59,21 @@ export async function writeActivity(client, item, sourceName, activityId = null,
   return (await client.query(`INSERT INTO yilan_activities (${fields.join(', ')}, created_at, updated_at, approved_at, last_synced_at) VALUES (${values.map((_, i) => `$${i + 1}`).join(', ')}, now(), now(), now(), now()) RETURNING *`, values)).rows[0]
 }
 
+// A ticket program can tour multiple venues. Only transfer its original
+// published/pending decision when both the canonical ID and the venue match.
+async function ticketProgramPredecessor(client, item, sourceId) {
+  const url = opentixEventUrl(item.source_url)
+  const direct = sourceId === 'opentix-yilan'
+  if (!url || !item.location || (!direct && !sourceId.startsWith('culture-'))) return null
+  const providers = direct ? ['culture-1', 'culture-other', 'culture-6', 'culture-7'] : ['opentix-yilan']
+  const { rows } = await client.query(`SELECT source_id, external_id, state, activity_id FROM activity_import_items
+    WHERE source_id = ANY($1::text[]) AND candidate->>'location' = $2
+      AND candidate->>'source_url' = ANY($3::text[]) ORDER BY external_id LIMIT 2`,
+  [providers, item.location, [url, url.replace('/event/', '/program/'), url + '/', url.replace('/event/', '/program/') + '/']])
+  if (rows.length > 1) throw new Error('OPENTIX 節目與場館對應到多筆既有資料，需人工確認')
+  return rows[0]
+}
+
 // The caller owns the transaction. One database lock serializes cron, manual sync and inbox approval.
 export async function applyCollection(client, sources) {
   const existing = (await client.query('SELECT * FROM yilan_activities')).rows
@@ -75,7 +90,11 @@ export async function applyCollection(client, sources) {
         const key = [source.source, item.external_id]
         const previous = (await client.query('SELECT * FROM activity_import_items WHERE source_id = $1 AND external_id = $2 FOR UPDATE', key)).rows[0]
         const alias = authoritativeActivityAliases[`${source.source}:${item.external_id}`]
-        const predecessor = alias && !previous ? (await client.query('SELECT * FROM activity_import_items WHERE source_id = $1 AND external_id = $2 FOR UPDATE', [alias.source, alias.externalId])).rows[0] : null
+        let predecessor = null
+        if (!previous) {
+          predecessor = alias ? (await client.query('SELECT * FROM activity_import_items WHERE source_id = $1 AND external_id = $2 FOR UPDATE', [alias.source, alias.externalId])).rows[0]
+            : await ticketProgramPredecessor(client, item, source.source)
+        }
         if (item.expired && !previous) { counts.expired++; continue }
         const { expired, reasons, ...content } = item
         const hash = digest(content)
@@ -86,7 +105,8 @@ export async function applyCollection(client, sources) {
           if (activity && current) Object.assign(activity, current)
           else activity = current || null
         }
-        let state = previous?.state || predecessor?.state || 'pending'
+        const ticketFeedOwnsItem = predecessor?.source_id === 'opentix-yilan'
+        let state = ticketFeedOwnsItem ? 'duplicate' : previous?.state || predecessor?.state || 'pending'
         if (['dismissed', 'deleted'].includes(state) || (state === 'published' && !activity)) {
           state = state === 'published' ? 'deleted' : state
           counts.preserved++
@@ -131,8 +151,9 @@ export async function applyCollection(client, sources) {
             reasons = EXCLUDED.reasons, state = EXCLUDED.state, activity_id = EXCLUDED.activity_id,
             last_seen_at = now(), updated_at = CASE WHEN activity_import_items.content_hash <> EXCLUDED.content_hash THEN now() ELSE activity_import_items.updated_at END`,
         [...key, source.name, JSON.stringify(content), hash, JSON.stringify(item.reasons), state, activity?.id || null])
-        if (predecessor && activity && state === 'published') {
-          await client.query("UPDATE activity_import_items SET state = 'duplicate', updated_at = now() WHERE source_id = $1 AND external_id = $2", [alias.source, alias.externalId])
+        if (predecessor && !ticketFeedOwnsItem && ['pending', 'published'].includes(state)) {
+          await client.query("UPDATE activity_import_items SET activity_id = $3, state = 'duplicate', updated_at = now() WHERE source_id = $1 AND external_id = $2",
+            [predecessor.source_id, predecessor.external_id, activity?.id || null])
         }
       }
       await client.query('RELEASE SAVEPOINT import_source')

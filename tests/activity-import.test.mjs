@@ -151,7 +151,7 @@ test('only approved sources are fetched and Yilan failures remain visible', asyn
     return new Response(calendarHtml(year, year === 2026 ? [yilanRow] : []), { headers: { 'content-type': 'text/html' } })
   }
   const now = new Date('2026-10-16T00:00:00Z')
-  assert.deepEqual(activitySources.map(s => s.id), ['culture-1', 'culture-6', 'culture-7', 'yilan-site', 'culture-other', 'yilan-news', 'ncfta', 'lanyang-museum', 'sunmake', 'necoast', 'taiwan-hotspring'])
+  assert.deepEqual(activitySources.map(s => s.id), ['culture-1', 'culture-6', 'culture-7', 'yilan-site', 'culture-other', 'yilan-news', 'ncfta', 'lanyang-museum', 'sunmake', 'necoast', 'taiwan-hotspring', 'opentix-yilan'])
   let sources = await collectActivities({ fetcher: fetcher(false), now, sourceIds: ['culture-1', 'culture-6', 'culture-7', 'yilan-site'] })
   assert.equal(sources.find(s => s.source === 'yilan-site').items.length, 1)
   sources = await collectActivities({ fetcher: fetcher(true), now })
@@ -161,6 +161,33 @@ test('only approved sources are fetched and Yilan failures remain visible', asyn
 const programItem = { title: '宜蘭音樂會', event_date: '2026-11-01', end_date: '2026-11-01', location: '宜蘭縣宜蘭市中山路 宜蘭演藝廳', source_url: 'https://www.opentix.life/program/123', images: [], description: '', organizer_name: '' }
 const programEvent = { '@type': 'Event', name: programItem.title, startDate: '2026-11-01T19:00:00', endDate: '2026-11-01T21:00:00', description: '官方簡介', organizer: [{ name: '音樂團' }], image: 'https://s3.resource.opentix.life/upload/program/poster.png', location: { name: '宜蘭演藝廳', address: { addressLocality: '宜蘭縣' } } }
 const programHtml = event => `<script type="application/ld+json">${JSON.stringify(event)}</script>`
+
+test('OPENTIX regional search verifies local dates against the local venue on a touring program', async () => {
+  const local = { ...programEvent, eventStatus: 'https://schema.org/EventScheduled',
+    location: { name: '宜蘭演藝廳', address: { addressLocality: '宜蘭縣', streetAddress: '宜蘭市中山路' } } }
+  const taipei = { ...local, startDate: '2026-10-01T19:00:00', location: { name: '其他場館', address: { addressLocality: '臺北市' } } }
+  const time = { start: Date.parse(local.startDate + '+08:00'), end: Date.parse(local.endDate + '+08:00') }
+  const program = { id: '123', type: '節目', title: local.name, eventVenues: [{ city: '宜蘭', name: local.location.name, times: [time] }] }
+  const fetcher = async (url, options) => {
+    if (url === 'https://search.opentix.life/search') {
+      assert.deepEqual(JSON.parse(options.body).cityFilter, ['宜蘭'])
+      return Response.json({ result: { hitsCount: 1, found: [{ source: program }] } })
+    }
+    assert.equal(url, 'https://www.opentix.life/event/123')
+    return new Response(programHtml(taipei) + programHtml(local))
+  }
+  const options = { sourceIds: ['opentix-yilan'], now: new Date('2026-10-16'), fetcher }
+  const [source] = await collectActivities(options)
+  assert.deepEqual(source.items[0].reasons, [])
+  assert.equal(source.items[0].event_date, '2026-11-01')
+  assert.equal(source.items[0].location, '宜蘭縣宜蘭市中山路 宜蘭演藝廳')
+  time.start += 3600000
+  assert.match((await collectActivities(options))[0].items[0].reasons.join(' '), /不一致/)
+  const [truncated] = await collectActivities({ ...options, fetcher: async () =>
+    Response.json({ result: { hitsCount: 1, found: [] } }) })
+  assert.equal(truncated.ok, false)
+  assert.match(truncated.error, /分頁不完整/)
+})
 
 test('approved official sources tolerate blank details but still require confirmed core fields', () => {
   for (const policy of activitySources) {

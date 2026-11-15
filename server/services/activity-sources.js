@@ -6,8 +6,9 @@ const cultureUrl = category => `https://cloud.culture.tw/frontsite/trans/SearchS
 export const activitySources = [
   ...[1, 6, 7].map(category => ({ id: `culture-${category}`, name: `文化部（${{ 1: '音樂', 6: '展覽', 7: '講座' }[category]}）`, official: true, organizerOptional: true, descriptionOptional: true, url: 'https://data.gov.tw/dataset/6478', feed: cultureUrl(category), fallbackFeed: `https://cloud.culture.tw/frontsite/opendata/activityOpenDataJsonAction.do?category=${category}&method=doFindActivitiesByCategory`, format: 'json' })),
   { id: 'yilan-site', name: '宜蘭勁好玩', official: true, organizerOptional: true, descriptionOptional: true, url: 'https://travel.yilan.gov.tw/zh-tw/events/', feed: 'https://travel.yilan.gov.tw/zh-tw/events/', format: 'yilan-calendar' },
-  { id: 'culture-other', name: '文化部（其他藝文類別）', official: true, organizerOptional: true, descriptionOptional: true, url: 'https://data.gov.tw/dataset/6478', feed: cultureUrl('all'), format: 'json', otherCategories: true },
-  ...officialPageSources
+  { id: 'culture-other', name: '文化部（其他藝文類別）', official: true, organizerOptional: true, descriptionOptional: true, url: 'https://data.gov.tw/dataset/6478', feed: cultureUrl('all'), fallbackFeed: 'https://cloud.culture.tw/frontsite/opendata/activityOpenDataJsonAction.do?category=all&method=doFindActivitiesByCategory', format: 'json', otherCategories: true },
+  ...officialPageSources,
+  { id: 'opentix-yilan', name: 'OPENTIX 兩廳院文化生活', official: true, organizerOptional: true, descriptionOptional: true, url: 'https://www.opentix.life/search', feed: 'https://search.opentix.life/search', format: 'opentix' }
 ]
 export const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 export const plainText = value => String(value || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\\r\\n/g, '\n').trim()
@@ -165,9 +166,10 @@ export function normalizeCulture(data, source) {
   return result
 }
 
-async function fetchSourceBytes(url, fetcher, allowHtml = false, timeoutMs = 20000) {
+async function fetchSourceBytes(url, fetcher, allowHtml = false, timeoutMs = 20000, options = {}) {
   // Callers use registry URLs or a canonical URL with an exact host and numeric event ID.
-  const response = await fetcher(url, { redirect: 'error', cache: 'no-store', headers: { 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(timeoutMs) })
+  const response = await fetcher(url, { ...options, redirect: 'error', cache: 'no-store',
+    headers: { 'Cache-Control': 'no-cache', ...options.headers }, signal: options.signal || AbortSignal.timeout(timeoutMs) })
   if (!response.ok) throw new Error(`來源 HTTP ${response.status}`)
   if (!allowHtml && /text\/html/i.test(response.headers.get('content-type') || '')) throw new Error('來源回傳 HTML 而非活動資料，請檢查來源服務')
   const reader = response.body.getReader()
@@ -186,6 +188,7 @@ async function fetchSourceBytes(url, fetcher, allowHtml = false, timeoutMs = 200
 }
 
 async function fetchSourceDetails(source, fetcher = fetch, now = new Date(), fallback = false) {
+  if (source.format === 'opentix') return fetchOpentixYilan(source, fetcher)
   if (source.format === 'official-page') {
     const buffer = await fetchSourceBytes(source.feed, fetcher, true)
     const items = parseOfficialPage(buffer.toString('utf8'), source)
@@ -244,7 +247,7 @@ export function opentixEventUrl(value) {
     ? `https://www.opentix.life/event/${match[1]}` : null
 }
 
-export function parseProgramDetails(html, item) {
+function programEvents(html) {
   const events = []
   for (const match of html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
     try {
@@ -252,16 +255,89 @@ export function parseProgramDetails(html, item) {
       events.push(...(Array.isArray(data) ? data : data['@graph'] || [data]))
     } catch { /* Other page metadata need not be valid event data. */ }
   }
-  const event = events.find(e => e['@type'] === 'Event' && cleanTitle(e.name) === cleanTitle(item.title))
-  if (!event) throw new Error('找不到相符的活動資料')
-  const venue = cleanTitle(event.location?.name)
-  if (dateOnly(event.startDate) !== item.event_date || dateOnly(event.endDate) !== item.end_date || !venue || !cleanTitle(item.location).includes(venue) || event.location?.address?.addressLocality !== '宜蘭縣') return { source_conflict: true }
+  return events.filter(event => event?.['@type'] === 'Event')
+}
+
+export function parseProgramDetails(html, item) {
+  const matches = programEvents(html).filter(e => cleanTitle(e.name) === cleanTitle(item.title))
+  if (!matches.length) throw new Error('找不到相符的活動資料')
+  const event = matches.find(e => e.location?.address?.addressLocality === '宜蘭縣'
+    && dateOnly(e.startDate) === item.event_date && dateOnly(e.endDate) === item.end_date
+    && cleanTitle(e.location.name) && cleanTitle(item.location).includes(cleanTitle(e.location.name)))
+  if (!event) return { source_conflict: true }
   const images = [event.image].flat().map(safeActivityImage).filter(Boolean).slice(0, 8)
   const organizers = [event.organizer].flat().filter(Boolean).map(o => plainText(o.name)).filter(Boolean)
   return {
     images, description: plainText(plainText(event.description)), organizer_name: organizers.join('、'),
     cancelled: /EventCancelled|EventPostponed|EventRescheduled/.test(event.eventStatus || '')
   }
+}
+
+// OPENTIX lists touring shows under every city they visit. Only use sessions
+// confirmed for the same Yilan venue on both the search result and the event page.
+function opentixVenueItems(program, html, url) {
+  const events = programEvents(html).filter(e => cleanTitle(e.name) === cleanTitle(program.title)
+    && e.location?.address?.addressLocality === '宜蘭縣')
+  const venues = program.eventVenues.filter(v => v.city === '宜蘭')
+  if (!venues.length) throw new Error('OPENTIX 搜尋結果缺少宜蘭場館')
+  return venues.map(venue => {
+    const shows = events.filter(e => e.location.name === venue.name)
+    if (!venue.name || !shows.length || !venue.times?.length) throw new Error('OPENTIX 節目頁與搜尋場館不符')
+    const first = shows[0], address = plainText(first.location.address.streetAddress)
+    const location = address ? '宜蘭縣' + address.replace(/^宜蘭縣/, '') + ' ' + plainText(venue.name) : ''
+    // The ticket site uses Taiwan local time for schema.org dates without an offset.
+    const epoch = value => Date.parse(/(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? value : value + '+08:00')
+    const aligned = shows.length === venue.times.length && venue.times.every(t =>
+      shows.some(e => epoch(e.startDate) === t.start && epoch(e.endDate) === t.end))
+    const localDate = value => Number.isFinite(epoch(value)) ? taipeiToday(new Date(epoch(value))) : null
+    const starts = shows.map(e => localDate(e.startDate)).filter(Boolean).sort()
+    const ends = shows.map(e => localDate(e.endDate)).filter(Boolean).sort()
+    return {
+      external_id: program.id + ':' + digest(venue.name).slice(0, 16),
+      title: plainText(program.title), location, event_date: starts[0], end_date: ends.at(-1),
+      activity_type: program.displayCategory === '親子' ? '親子活動' : '文化藝術',
+      source_url: url, description: plainText(plainText(first.description)),
+      organizer_name: [first.organizer].flat().filter(Boolean).map(o => plainText(o.name)).filter(Boolean).join('、'),
+      images: [first.image].flat().map(safeActivityImage).filter(Boolean),
+      image_source_name: 'OPENTIX 兩廳院文化生活', image_source_url: url,
+      schedule: shows.map(e => ({ start: e.startDate, end: e.endDate })),
+      schedule_uncertain: shows.length > 1 || shows.some(e => !/\/EventScheduled$/.test(e.eventStatus)),
+      source_conflict: !aligned, cancelled: shows.some(e => /EventCancelled|EventPostponed|EventRescheduled/.test(e.eventStatus))
+    }
+  })
+}
+
+async function fetchOpentixYilan(source, fetcher) {
+  const signal = AbortSignal.timeout(12000)
+  const programs = new Map()
+  let offset = 0, total
+  do {
+    const body = JSON.stringify({ language: 'zh-CHT', cityFilter: ['宜蘭'], pageSize: 30, offset })
+    const bytes = await fetchSourceBytes(source.feed, fetcher, false, 12000, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body, signal
+    })
+    const { result, error } = JSON.parse(bytes.toString('utf8'))
+    if (error || !Number.isSafeInteger(result?.hitsCount) || result.hitsCount < 0 || !Array.isArray(result.found)
+      || (total !== undefined && total !== result.hitsCount)) throw new Error('OPENTIX 地區清單格式或總數改變')
+    total = result.hitsCount
+    for (const { source: entry } of result.found) {
+      if (!entry || typeof entry.id !== 'string' || !/^\d+$/.test(entry.id) || programs.has(entry.id)) throw new Error('OPENTIX 地區清單編號缺漏或重複')
+      programs.set(entry.id, entry)
+    }
+    offset += result.found.length
+    if ((!result.found.length && offset < total) || offset > total) throw new Error('OPENTIX 地區清單分頁不完整')
+  } while (offset < total)
+  const entries = [...programs.values()].filter(entry => entry.type === '節目')
+  const items = []
+  for (let index = 0; index < entries.length; index += 4) {
+    const groups = await Promise.all(entries.slice(index, index + 4).map(async program => {
+      const url = 'https://www.opentix.life/event/' + program.id
+      const html = await fetchSourceBytes(url, fetcher, true, 12000, { signal })
+      return opentixVenueItems(program, html.toString('utf8'), url)
+    }))
+    items.push(...groups.flat())
+  }
+  return { items, rawCount: total, contentHash: digest(items), feedUrl: source.feed }
 }
 
 export async function enrichCulturePrograms(sources, fetcher = fetch) {

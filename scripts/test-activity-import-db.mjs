@@ -106,6 +106,25 @@ try {
   summary = await applyCollection(client, collection([{ ...updatedYang, end_date: '2028-01-01' }], 'ncfta'))
   assert.equal(summary[0].preserved, 1)
   assert.equal((await client.query("SELECT end_date::text FROM yilan_activities WHERE id = $1", [oldId])).rows[0].end_date, '2027-03-01')
+  // The direct program feed takes over the existing page and moderation state.
+  const ministryProgram = item('moc-program', { title: '蘭陽交響音樂會', source_url: 'https://www.opentix.life/program/123' })
+  await applyCollection(client, collection([ministryProgram], 'culture-1'))
+  const programId = (await client.query("SELECT activity_id FROM activity_import_items WHERE external_id='moc-program'")).rows[0].activity_id
+  const directProgram = { ...ministryProgram, external_id: 'direct-program', source_url: 'https://www.opentix.life/event/123' }
+  summary = await applyCollection(client, collection([directProgram], 'opentix-yilan'))
+  assert.equal(summary[0].published, 0)
+  assert.equal(summary[0].updated, 1)
+  assert.equal((await client.query("SELECT activity_id FROM activity_import_items WHERE external_id='direct-program'")).rows[0].activity_id, programId)
+  summary = await applyCollection(client, [...collection([ministryProgram], 'culture-1'), ...collection([directProgram], 'opentix-yilan')])
+  assert.equal(summary[0].duplicate, 1)
+  assert.equal(summary[1].unchanged, 1)
+  const uncertain = item('moc-pending', { title: '兩場親子活動', source_url: 'https://www.opentix.life/program/456', schedule_uncertain: true })
+  await applyCollection(client, collection([uncertain], 'culture-other'))
+  await applyCollection(client, collection([{ ...uncertain, external_id: 'direct-pending' }], 'opentix-yilan'))
+  assert.deepEqual((await client.query("SELECT external_id FROM activity_import_items WHERE state='pending' AND candidate->>'title'=$1", [uncertain.title])).rows, [{ external_id: 'direct-pending' }])
+  const newMocKey = { ...uncertain, external_id: 'moc-rekeyed' }
+  summary = await applyCollection(client, collection([newMocKey], 'culture-other'))
+  assert.equal(summary[0].duplicate, 1)
   // Verify current live feed records traverse real SQL, but never retain them.
   const live = JSON.parse(await readFile('.cache/activity-import/preview.json', 'utf8'))
   const realSummary = await applyCollection(client, live.sources)
