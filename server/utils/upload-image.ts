@@ -34,6 +34,6 @@ export async function uploadImage(event: H3Event) {
     }
   )
   const data = await response.json()
-  if (!response.ok) throw new Error(`GitHub upload failed: ${data.message || 'Unknown error'}`)
+  if (!response.ok) throw Object.assign(new Error(`GitHub upload failed: ${data.message || 'Unknown error'}`), { providerStatus: response.status })
   return { success: true, url: data.content.download_url, provider: 'github' }
 }

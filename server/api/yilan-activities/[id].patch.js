@@ -58,19 +58,14 @@ export default defineEventHandler(async (event) => {
       if (files.images) {
         const imageFiles = Array.isArray(files.images) ? files.images : [files.images]
         
-        for (const file of imageFiles) {
-          if (file.size > 0) {
-            try {
-              // 使用統一的上傳函式
-              const uploadResult = await uploadFile(file, true)
-              if (uploadResult.success) {
-                newImageUrls.push(uploadResult.url)
-              }
-            } catch (uploadError) {
-              console.error('圖片上傳失敗:', uploadError)
-              // 繼續處理其他圖片
-            }
+        try {
+          for (const file of imageFiles) {
+            if (!file.size) throw createError({ statusCode: 400, message: 'No file uploaded' })
+            const result = await uploadFile(file, true)
+            newImageUrls.push(result.url)
           }
+        } finally {
+          await Promise.all(imageFiles.map(file => rm(file.filepath, { force: true })))
         }
       }
       
@@ -182,44 +177,36 @@ export default defineEventHandler(async (event) => {
 
 // 圖片上傳函式 - 與 POST API 相同邏輯
 async function uploadFile(file, allowGitHub) {
-  try {
-    const config = useRuntimeConfig()
-    const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
+  const config = useRuntimeConfig()
+  const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
 
-    const image = await normalizeImage(await readFile(file.filepath))
-    file.safeImage = image
-    file.mimetype = 'image/webp'
-    // 驗證文件類型
-    const allowedTypes = ['image/webp']
-    if (!file.mimetype || !allowedTypes.includes(file.mimetype)) {
-      throw new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.')
-    }
+  const image = await normalizeImage(await readFile(file.filepath))
+  file.safeImage = image
+  file.mimetype = 'image/webp'
+  // 驗證文件類型
+  const allowedTypes = ['image/webp']
+  if (!file.mimetype || !allowedTypes.includes(file.mimetype)) {
+    throw new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.')
+  }
 
-    // 驗證文件大小 (5MB)
-    const maxSize = 5 * 1024 * 1024
-    if (file.size > maxSize) {
-      throw new Error('File too large. Maximum size is 5MB.')
-    }
+  // 驗證文件大小 (5MB)
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    throw new Error('File too large. Maximum size is 5MB.')
+  }
 
-    // 檢查 GitHub 配置是否完整
-    const hasGitHubConfig = GITHUB_USERNAME && GITHUB_REPO && GITHUB_TOKEN
-    
-    if (hasGitHubConfig && allowGitHub) {
-      // 使用 GitHub 上傳
-      return await uploadToGitHub(file, config)
-    } else {
-      // 使用本地上傳作為備用方案
-      console.warn('GitHub 配置不完整，使用本地上傳')
-      return await uploadToLocal(file)
-    }
+  // 檢查 GitHub 配置是否完整
+  const hasGitHubConfig = GITHUB_USERNAME && GITHUB_REPO && GITHUB_TOKEN
 
-  } catch (error) {
-    console.error('Upload error:', error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
-    }
-  } finally { await rm(file.filepath, { force: true }) }
+  if (hasGitHubConfig && allowGitHub) {
+    // 使用 GitHub 上傳
+    try { return await uploadToGitHub(file, config) }
+    catch { throw createError({ statusCode: 502, message: 'GitHub upload failed' }) }
+  } else {
+    // 使用本地上傳作為備用方案
+    console.warn('GitHub 配置不完整，使用本地上傳')
+    return await uploadToLocal(file)
+  }
 }
 
 // GitHub 上傳函數

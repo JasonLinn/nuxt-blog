@@ -282,7 +282,7 @@ const articleData = reactive({
 
 const coverUrl = ref('')
 
-const { uploadingImages, handleFileUpload } = useFormImageUpload((url) => {
+const { uploadingImages, handleFileUpload } = useFormImageUpload('article', (url) => {
   articleData.cover.push(url)
 })
 

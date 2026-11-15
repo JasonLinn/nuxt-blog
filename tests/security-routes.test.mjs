@@ -55,7 +55,7 @@ test('sensitive real route handlers reject anonymous and fake cookies before dat
     'activities/[id].patch.js', 'yilan-activities/[id].patch.js', 'images/list.get.ts', 'images/delete.post.ts', 'upload.post.ts',
     'upload-local.post.ts', 'ai/extract-activity-info.post.ts', 'sendMsg.post.js', 'cupon.patch.js', 'user/[id].get.js',
     'user/user.post.js', 'user/appendCoupon.patch.js', 'user/updateCoupon.patch.js', 'received.post.js', 'hash/generate.post.ts',
-    'activities.post.js', 'yilan-activities.post.js',
+    'activities.post.js', 'yilan-activities.post.js', 'admin/upload-failures.get.js',
     'admin/activity-imports.get.js', 'admin/activity-imports/sync.post.js', 'admin/activity-imports/review.post.js', 'cron/activity-import.get.js'
   ]
   for (const file of routes) {
@@ -176,6 +176,41 @@ test('a guest can upload a coupon image and submit it for review', async t => {
   assert.equal(result.status, 200)
   assert.equal(result.data.data.id, 123)
   assert.ok(inserted)
+})
+
+test('failure reports store allowlisted diagnostics and can be looked up by an admin', async () => {
+  const receive = await load('server/api/upload-failures.post.js')
+  const lookup = await load('server/api/admin/upload-failures.get.js')
+  const id = '6c8ef689-9a39-4931-a1f8-51464635aaef'
+  const record = { id, at: new Date().toISOString(), source: 'coupon', stage: 'select', reason: 'format',
+    mime: 'image/heic', bytes: 912, filename: 'private-filename', message: 'private-message' }
+  let saved
+  globalThis.securityDb = async (sql, params) => {
+    if (sql.includes('INSERT INTO upload_failures')) {
+      assert.match(sql, /ON CONFLICT \(id\) DO NOTHING/)
+      saved = params
+    }
+    return { rows: [{ hits: 1 }] }
+  }
+  const post = data => request(receive, '/', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) })
+  assert.equal((await post({ ...record, reason: 'private-message' })).status, 400)
+  assert.equal((await post(record)).data.recorded, true)
+  assert.deepEqual(saved.slice(2), ['coupon', 'select', 'format', null, 'image/heic', 912, 'browser', null])
+  assert.equal(JSON.stringify(saved).includes('private'), false)
+  globalThis.securityDb = async (_sql, [key]) => ({ rows: key === id ? [{ id }] : [] })
+  assert.deepEqual((await request(lookup, '/', { query: '?id=' + id, headers: { cookie: adminCookie } })).data.rows, [{ id }])
+})
+
+test('a rejected coupon submission returns the same reference and reason saved by the server', async () => {
+  const handler = await load('server/api/coupons/submit.post.js')
+  let saved
+  globalThis.securityDb = async (sql, params) => { assert.match(sql, /INSERT INTO upload_failures/); saved = params; return { rows: [] } }
+  const result = await request(handler, '/', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ title: 'T', content: 'T', business_name: 'T', submitter_name: 'T', township: [] }) })
+  assert.equal(result.status, 400)
+  assert.equal(result.data.data.incident.id, saved[0])
+  assert.equal(result.data.data.incident.reason, 'township')
+  assert.equal(result.data.data.incident.saved, true)
 })
 
 test('photo metadata returns a bounded same-origin URL rather than a credential or Base64 image', async () => {

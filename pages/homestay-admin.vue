@@ -565,6 +565,7 @@
 </template>
 
 <script setup>
+import { reportUploadFailure } from '~/utils/report-upload-failure'
 import { prepareUploadImage } from '~/utils/image-upload'
 import { ref, onMounted, computed } from 'vue'
 import { navigateTo } from 'nuxt/app'
@@ -660,7 +661,8 @@ const triggerFileInput = () => {
 
 // 處理檔案上傳
 const handleFileUpload = async (event) => {
-  const files = event.target.files
+  const files = Array.from(event.target.files)
+  let activeFile
   if (!files.length) return
 
   saving.value = true
@@ -668,7 +670,7 @@ const handleFileUpload = async (event) => {
 
   try {
     for (const file of files) {
-      console.log('開始上傳文件:', file.name)
+      activeFile = file
 
       // 創建 FormData
       const formData = new FormData()
@@ -690,6 +692,7 @@ const handleFileUpload = async (event) => {
         })
       }
 
+      if (!response.ok) throw Object.assign(new Error('Upload failed'), { status: response.status })
       const data = await response.json()
 
       if (!data.success) {
@@ -707,7 +710,7 @@ const handleFileUpload = async (event) => {
     showMessage(`成功上傳 ${files.length} 張圖片！`, 'success')
   } catch (error) {
     console.error('上傳錯誤:', error)
-    showMessage(`上傳失敗：${error.message}`, 'error')
+    showMessage('上傳失敗：' + reportUploadFailure('homestayEdit', 'upload', error, activeFile), 'error')
   } finally {
     saving.value = false
     // 清空檔案輸入

@@ -586,7 +586,7 @@ const triggerFileInput = () => {
   }
 }
 
-const { uploadingImages, handleFileUpload } = useFormImageUpload((url) => {
+const { uploadingImages, handleFileUpload } = useFormImageUpload('place', (url) => {
   formData.images.push(url)
 })
 

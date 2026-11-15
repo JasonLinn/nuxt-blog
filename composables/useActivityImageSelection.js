@@ -1,4 +1,6 @@
-export function useActivityImageSelection() {
+import { reportUploadFailure } from '~/utils/report-upload-failure'
+import { imageSelectionError } from '~/utils/upload-failures'
+export function useActivityImageSelection(source) {
   const selectedImages = ref([])
 
   function clearImages() {
@@ -11,13 +13,23 @@ export function useActivityImageSelection() {
     event.target.value = ''
     if (!files.length) return
     if (existingCount + (replace ? 0 : selectedImages.value.length) + files.length > 5) {
-      alert('最多可選擇 5 張活動圖片。')
+      alert(reportUploadFailure(source, 'select', imageSelectionError('tooMany')))
       return
     }
-    if (replace) clearImages()
+    const previews = []
     for (const file of files) {
-      selectedImages.value.push({ file, url: URL.createObjectURL(file) })
+      try {
+        if (!['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) throw imageSelectionError('format')
+        if (!file.size) throw imageSelectionError('empty')
+        previews.push({ file, url: URL.createObjectURL(file) })
+      } catch (error) {
+        previews.forEach(image => URL.revokeObjectURL(image.url))
+        alert(reportUploadFailure(source, 'select', error.failureReason ? error : imageSelectionError('decode'), file))
+        return
+      }
     }
+    if (replace) clearImages()
+    selectedImages.value.push(...previews)
   }
 
   function removeImage(index) {

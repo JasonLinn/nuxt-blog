@@ -466,6 +466,8 @@
 </template>
 
 <script setup>
+import { reportUploadFailure } from '~/utils/report-upload-failure'
+import { imageSelectionError } from '~/utils/upload-failures'
 import { appendActivityImages, prepareUploadImage } from '~/utils/image-upload'
 const { loginRequired, loginUrl } = useSubmissionLogin()
 
@@ -508,7 +510,7 @@ const errors = reactive({})
 const isSubmitting = ref(false)
 
 // 圖片預覽
-const { selectedImages, selectImages, removeImage } = useActivityImageSelection()
+const { selectedImages, selectImages, removeImage } = useActivityImageSelection('activity')
 
 // 已填入欄位的中文名稱
 const filledFields = computed(() => {
@@ -556,7 +558,7 @@ const handleAIImageUpload = async (event) => {
   try {
     const formData = new FormData()
     if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
-      throw new Error('請選擇 JPG、PNG 或 WebP 海報。')
+      throw imageSelectionError('format')
     }
     formData.append('image', await prepareUploadImage(file))
 
@@ -643,7 +645,7 @@ const handleAIImageUpload = async (event) => {
     }
   } catch (error) {
     console.error('AI 分析錯誤:', error)
-    aiError.value = error.data?.message || error.message || 'AI 分析失敗，請稍後再試'
+    aiError.value = reportUploadFailure('poster', 'upload', error, file)
   } finally {
     aiProcessing.value = false
   }
@@ -786,11 +788,7 @@ const submitActivity = async () => {
     // eslint-disable-next-line no-console
     console.error('提交活動失敗:', error)
 
-    // 顯示錯誤訊息
-    const errorMessage = error.data?.message || error.message || '提交失敗，請稍後再試'
-
-    // 這裡可以用 toast 或 alert 顯示錯誤
-    alert(errorMessage)
+    alert(reportUploadFailure('activity', selectedImages.value.length ? 'upload' : 'submit', error))
   } finally {
     isSubmitting.value = false
   }

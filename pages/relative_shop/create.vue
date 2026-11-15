@@ -230,7 +230,7 @@ function initQuill() {
   })
 }
 
-const { uploadingImages, handleFileUpload, enableEditorImageUpload } = useFormImageUpload((url) => {
+const { uploadingImages, handleFileUpload, enableEditorImageUpload } = useFormImageUpload('shop', (url) => {
   articleData.cover.push(url)
 })
 

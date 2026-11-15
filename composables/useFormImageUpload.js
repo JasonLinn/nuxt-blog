@@ -1,6 +1,7 @@
+import { reportUploadFailure } from '~/utils/report-upload-failure'
 import { prepareUploadImage } from '~/utils/image-upload'
 
-export function useFormImageUpload(addImage) {
+export function useFormImageUpload(source, addImage) {
   const uploadingImages = ref(false)
 
   async function handleFileUpload(event, onUploaded = addImage) {
@@ -18,7 +19,7 @@ export function useFormImageUpload(addImage) {
           if (!result.success || !result.url) throw new Error(result.error || '請稍後再試。')
           onUploaded(result.url)
         } catch (error) {
-          alert(`${file.name} 上傳失敗：${error.message}`)
+          alert(`${file.name} 上傳失敗：${reportUploadFailure(source, 'upload', error, file)}`)
         }
       }
     } finally {

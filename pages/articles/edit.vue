@@ -329,7 +329,7 @@ const addCoverUrl = () => {
   }
 }
 
-const { uploadingImages, handleFileUpload } = useFormImageUpload((url) => {
+const { uploadingImages, handleFileUpload } = useFormImageUpload('article', (url) => {
   coverArray.value = [...coverArray.value, url]
 })
 

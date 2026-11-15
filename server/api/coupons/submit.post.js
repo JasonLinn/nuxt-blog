@@ -1,5 +1,6 @@
 // 使用者提交優惠券
 import { couponPool } from '../../utils/coupon-db.js'
+import { couponFailure } from '../../utils/upload-failures.js'
 import { township as townships } from '../../../utils/category.js'
 
 export default defineEventHandler(async (event) => {
@@ -89,16 +90,6 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error) {
-    console.error('提交優惠券失敗:', error)
-    console.error('Error details:', error.message, error.detail, error.hint)
-    
-    if (error.statusCode) {
-      throw error
-    }
-    
-    throw createError({
-      statusCode: 500,
-      statusMessage: `提交優惠券失敗: ${error.message}`
-    })
+    throw await couponFailure(error, 'submit')
   }
 })

@@ -241,6 +241,7 @@
 </template>
 
 <script setup>
+import { reportUploadFailure } from '~/utils/report-upload-failure'
 import { appendActivityImages } from '~/utils/image-upload'
 definePageMeta({
   middleware: 'admin-auth',
@@ -254,7 +255,7 @@ const activity = ref(null)
 const loading = ref(true)
 const submitting = ref(false)
 const deletedImages = ref([])
-const { selectedImages, selectImages, removeImage, clearImages } = useActivityImageSelection()
+const { selectedImages, selectImages, removeImage, clearImages } = useActivityImageSelection('activityEdit')
 
 const form = ref({
   title: '',
@@ -351,7 +352,7 @@ const updateActivity = async () => {
     router.push(`/admin/activities/${route.params.id}`)
   } catch (error) {
     console.error('❌ 更新失敗:', error)
-    alert('更新失敗：' + (error.message || '未知錯誤'))
+    alert(reportUploadFailure('activityEdit', selectedImages.value.length ? 'upload' : 'submit', error))
   } finally {
     submitting.value = false
   }

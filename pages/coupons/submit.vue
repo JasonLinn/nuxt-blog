@@ -24,7 +24,7 @@
       </div>
     </aside>
 
-    <form class="coupon-form" @submit.prevent="submitCoupon">
+    <form class="coupon-form" @invalid.capture="reportInvalidField" @submit.prevent="submitCoupon">
       <!-- 優惠資訊 -->
       <section class="yp-form-section">
         <h2 class="yp-form-section__title">優惠資訊</h2>
@@ -248,7 +248,7 @@
           <input
             type="file"
             class="visually-hidden"
-            accept="image/jpeg,image/png,image/gif"
+            accept="image/jpeg,image/png,image/gif,image/webp"
             :disabled="uploading || submitting"
             multiple
             @change="handleFileUpload"
@@ -260,7 +260,7 @@
           }}</span>
           <span v-if="!uploading" class="d-block small">可一次選多張，第一張會作為封面</span>
         </label>
-        <ul v-if="uploadErrors.length" class="text-danger mt-2" role="alert">
+        <ul v-if="uploadErrors.length" class="alert alert-danger mt-2 ps-5" role="alert">
           <li v-for="(message, index) in uploadErrors" :key="index">{{ message }}</li>
         </ul>
 
@@ -345,6 +345,7 @@
       </section>
 
       <div class="yp-form-actions">
+        <p v-if="submitError" class="alert alert-danger" role="alert">{{ submitError }}</p>
         <button type="button" class="btn btn-ghost btn-icon me-auto" :disabled="uploading || submitting" @click="resetForm">
           <Icon name="ri:refresh-line" />重設表單
         </button>
@@ -380,6 +381,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { category, township as townships } from '~/utils/category'
+import { reportUploadFailure } from '~/utils/report-upload-failure'
 import { prepareUploadImage } from '~/utils/image-upload'
 
 // 設定頁面標題
@@ -440,7 +442,7 @@ const handleFileUpload = async (event) => {
         if (!response.success || !response.url) throw new Error('上傳失敗，請重新選取圖片。')
         form.cover.push(response.url)
       } catch (error) {
-        const message = error.response ? '上傳失敗，請稍後重試。' : error.message
+        const message = reportUploadFailure('coupon', 'upload', error, file)
         uploadErrors.value.push(`${file.name}：${message}`)
       }
     }
@@ -490,13 +492,24 @@ const resetForm = (force) => {
     })
     coverUrl.value = ''
     uploadErrors.value = []
+    submitError.value = ''
   }
 }
+
+// A browser emits one invalid event per invalid field in a single submission.
+const reportInvalidField = event => {
+  const field = event.target
+  if (field.form.querySelector(':invalid') !== field) return
+  const reason = field.id === 'township' ? 'township' : field.validity.valueMissing ? 'required' : field.id === 'submitter_email' ? 'email' : 'invalid'
+  submitError.value = reportUploadFailure('coupon', 'submit', { failureReason: reason, field: field.id })
+}
+const submitError = ref('')
 
 // 填寫優惠券
 const submitCoupon = async () => {
   if (uploading.value || submitting.value) return
   try {
+    submitError.value = ''
     submitting.value = true
 
     const adressArray = form.adress ? [form.adress] : []
@@ -547,7 +560,7 @@ const submitCoupon = async () => {
     }
   } catch (error) {
     console.error('填寫優惠券失敗:', error)
-    alert('填寫失敗：' + (error.data?.message || error.message || '請稍後再試'))
+    submitError.value = '送審失敗：' + reportUploadFailure('coupon', 'submit', error)
   } finally {
     submitting.value = false
   }

@@ -336,7 +336,7 @@ const moveImage = (index, direction) => {
   }
 }
 
-const { uploadingImages, handleFileUpload, enableEditorImageUpload } = useFormImageUpload((url) => {
+const { uploadingImages, handleFileUpload, enableEditorImageUpload } = useFormImageUpload('shop', (url) => {
   if (!Array.isArray(articleData.value.cover)) articleData.value.cover = []
   articleData.value.cover.push(url)
 })

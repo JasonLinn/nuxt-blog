@@ -5,7 +5,8 @@ import path from 'node:path'
 import { createError } from 'h3'
 
 export async function normalizeImage(data) {
-  if (!Buffer.isBuffer(data) || !data.length || data.length > 5 * 1024 * 1024) throw createError({ statusCode: 400, statusMessage: 'Invalid image size' })
+  if (!Buffer.isBuffer(data) || !data.length) throw createError({ statusCode: 400, statusMessage: 'No file uploaded' })
+  if (data.length > 5 * 1024 * 1024) throw createError({ statusCode: 413, statusMessage: 'File too large' })
   try {
     const image = sharp(data, { limitInputPixels: 25000000 })
     const metadata = await image.metadata()

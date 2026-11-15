@@ -210,6 +210,7 @@
 </template>
 
 <script setup>
+import { reportUploadFailure } from '~/utils/report-upload-failure'
 import { appendActivityImages } from '~/utils/image-upload'
 definePageMeta({
   middleware: 'admin-auth',
@@ -222,7 +223,7 @@ const router = useRouter()
 const activity = ref(null)
 const loading = ref(true)
 const submitting = ref(false)
-const { selectedImages, selectImages, removeImage } = useActivityImageSelection()
+const { selectedImages, selectImages, removeImage } = useActivityImageSelection('activityEdit')
 const deletedImages = ref([])
 const fileInput = ref(null)
 
@@ -305,7 +306,7 @@ const updateActivity = async () => {
     router.push(`/admin/yilan-activities/${route.params.id}`)
   } catch (error) {
     console.error('Failed to update activity:', error)
-    alert('更新失敗，請稍後再試')
+    alert(reportUploadFailure('activityEdit', selectedImages.value.length ? 'upload' : 'submit', error))
   } finally {
     submitting.value = false
   }

@@ -698,7 +698,7 @@ const nextStep = () => {
 }
 
 // 處理檔案上傳
-const { uploadingImages, handleFileUpload } = useFormImageUpload((url) => {
+const { uploadingImages, handleFileUpload } = useFormImageUpload('homestay', (url) => {
   formData.value.images.push(url)
 })
 

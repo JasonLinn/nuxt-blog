@@ -132,6 +132,7 @@ export const adminMenu = [
   {
     group: '優惠券',
     items: [
+      { title: '上傳與送審失敗紀錄', path: '/admin/upload-failures', icon: 'ri:error-warning-line' },
       { title: '優惠券審核', path: '/admin/coupon-review', icon: 'ri:checkbox-multiple-line' },
       { title: '優惠券管理', path: '/admin/coupons', icon: 'ri:coupon-3-line' },
       { title: '推薦碼與店家', path: '/admin/referral', icon: 'ri:share-forward-line' }
