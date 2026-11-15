@@ -2,8 +2,9 @@ import { createError, readMultipartFormData, type H3Event } from 'h3'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { normalizeImage } from './safe-images.js'
+import { recordSuccess } from './upload-events.js'
 
-export async function uploadImage(event: H3Event) {
+export async function uploadImage(event: H3Event, source: string) {
   const parts = await readMultipartFormData(event)
   if (!parts?.length) throw createError({ statusCode: 400, message: 'No file uploaded' })
 
@@ -12,6 +13,12 @@ export async function uploadImage(event: H3Event) {
     throw createError({ statusCode: 413, message: 'File too large. Maximum size is 5MB.' })
   }
 
+  const result = await storeImage(file)
+  await recordSuccess(source, 'upload', { mime: file.type, bytes: file.data.length })
+  return result
+}
+
+async function storeImage(file: Awaited<ReturnType<typeof normalizeImage>>) {
   const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = useRuntimeConfig()
   if (!GITHUB_USERNAME || !GITHUB_REPO || !GITHUB_TOKEN) {
     console.warn('GitHub 配置不完整，使用本地上傳')

@@ -175,6 +175,11 @@ test('a guest can upload a coupon image and submit it for review after verifying
     return Response.json(verified === 1 ? verifiedCoupon : { success: false, 'error-codes': ['timeout-or-duplicate'] })
   })
   const upload = await load('server/api/coupons/upload.post.ts')
+  const successes = []
+  globalThis.securityDb = async (sql, params) => {
+    if (sql.includes("'success', 'server'")) successes.push(params.slice(1))
+    return { rows: [] }
+  }
   const body = new FormData()
   body.set('file', new Blob(['invalid']), 'invalid.png')
   assert.equal((await request(upload, '/', { method: 'POST', body })).status, 400)
@@ -186,10 +191,17 @@ test('a guest can upload a coupon image and submit it for review after verifying
   assert.equal(image.status, 200)
   assert.match(image.data.url, /^\/uploads\/[a-f0-9-]+\.webp$/)
   t.after(() => rm(path.join('public', image.data.url), { force: true }))
+  assert.equal(successes.length, 1)
+  assert.deepEqual(successes[0].slice(0, 3), ['coupon', 'upload', 'image/webp'])
+  assert.ok(successes[0][3] > 0)
 
   const submit = await load('server/api/coupons/submit.post.js')
   let inserted = false
   globalThis.securityDb = async (sql, params) => {
+    if (sql.includes("'success', 'server'")) {
+      successes.push(params.slice(1))
+      return { rows: [] }
+    }
     assert.match(sql, /INSERT INTO pending_coupons/)
     assert.match(sql, /'pending'/)
     assert.deepEqual(params[10], [image.data.url])
@@ -203,6 +215,7 @@ test('a guest can upload a coupon image and submit it for review after verifying
   assert.equal(result.status, 200)
   assert.equal(result.data.data.id, 123)
   assert.ok(inserted)
+  assert.deepEqual(successes.slice(1), [['coupon', 'submit', null, null, 123]])
   globalThis.securityDb = async sql => { assert.match(sql, /INSERT INTO upload_failures/); return { rows: [] } }
   const replay = await request(submit, '/', { method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ ...couponBody, turnstileToken: 'coupon-test-response' }) })
@@ -289,7 +302,12 @@ test('verified guest activity submissions normalize images and ignore caller-sup
   const submit = await load('server/api/yilan-activities.post.js')
   const form = await guestActivityForm()
   let inserts = 0
+  const successes = []
   globalThis.securityDb = async (sql, params) => {
+    if (sql.includes("'success', 'server'")) {
+      successes.push([params[1], params[2], params[5]])
+      return { rows: [] }
+    }
     assert.match(sql, /'pending'/)
     const [ids, encoded] = params.slice(-2)
     assert.deepEqual(params[2], [`/api/activity-submission-images/${ids[0]}`])
@@ -303,6 +321,7 @@ test('verified guest activity submissions normalize images and ignore caller-sup
   form.set('images', new Blob(['invalid'], { type: 'image/png' }), 'bad.png')
   assert.equal((await request(submit, '/', { method: 'POST', headers: activityVerificationHeaders, body: form })).status, 400)
   assert.equal(inserts, 1)
+  assert.deepEqual(successes.sort(), [['activity', 'submit', 7], ['activity', 'upload', 7]])
   const middleware = await load('server/middleware/01-security-limits.js')
   globalThis.securityDb = async () => ({ rows: [] })
   assert.equal((await request(middleware, '/api/yilan-activities', { method: 'POST' })).status, 429)
@@ -322,6 +341,10 @@ test('guest activity text and images follow the real review transition in Postgr
     await client.query('CREATE SEQUENCE test_ids')
     await client.query("ALTER TABLE yilan_activities ALTER COLUMN id SET DEFAULT nextval('test_ids')")
     await client.query(await readFile('migrations/20261115_activity_submissions.sql', 'utf8'))
+    await client.query(await readFile('migrations/20261115_upload_failures.sql', 'utf8'))
+    const legacyId = 'b611ced4-05a6-4cdf-91d1-3e2505f6a14b'
+    await client.query("INSERT INTO upload_failures (id, occurred_at, source, stage, reason, reporter) VALUES ($1, now(), 'activity', 'select', 'decode', 'browser')", [legacyId])
+    await client.query(await readFile('migrations/20261115_upload_event_outcomes.sql', 'utf8'))
     globalThis.securityDb = (sql, params) => client.query(sql, params)
 
     const submit = await load('server/api/yilan-activities.post.js')
@@ -332,6 +355,16 @@ test('guest activity text and images follow the real review transition in Postgr
     const response = await request(submit, '/', { method: 'POST', headers: activityVerificationHeaders, body: await guestActivityForm() })
     assert.equal(response.status, 200, response.text)
     const { id, images } = response.data.data
+    const logs = await load('server/api/admin/upload-failures.get.js')
+    const day = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Taipei' }).format(new Date())
+    const lookup = async filter => (await request(logs, '/', { query: '?' + filter, headers: { cookie: adminCookie } })).data.rows
+    const successes = await lookup('day=' + day + '&outcome=success')
+    assert.deepEqual(successes.map(row => row.stage).sort(), ['submit', 'upload'])
+    assert.ok(successes.every(row => row.outcome === 'success' && row.submission_id === String(id)))
+    const failures = await lookup('day=' + day + '&outcome=failure')
+    assert.deepEqual(failures.map(row => [row.id, row.outcome]), [[legacyId, 'failure']])
+    assert.equal((await lookup('day=' + day)).length, 3)
+    assert.equal((await lookup('id=' + successes[0].id))[0].outcome, 'success')
     const imageId = images[0].split('/').pop()
     const admin = { headers: { cookie: adminCookie } }
     const getImage = (options = {}) => request(image, '/:id', { id: imageId, ...options })
@@ -379,6 +412,7 @@ test('failure reports store allowlisted diagnostics and can be looked up by an a
     return { rows: [{ hits: 1 }] }
   }
   const post = data => request(receive, '/', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) })
+  assert.equal((await post({ ...record, outcome: 'success' })).status, 400)
   assert.equal((await post({ ...record, reason: 'private-message' })).status, 400)
   assert.equal((await post(record)).data.recorded, true)
   assert.deepEqual(saved.slice(2), ['coupon', 'select', 'format', null, 'image/heic', 912, 'browser', null])

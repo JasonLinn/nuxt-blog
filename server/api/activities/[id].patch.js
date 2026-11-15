@@ -1,5 +1,6 @@
 import { validateActivityUpdate } from '../../utils/security.js'
 import { saveLocalImage, deleteOwnedImage } from '../../utils/safe-images.js'
+import { recordSuccess } from '../../utils/upload-events.js'
 import { requireAdmin } from '../../utils/admin-auth.js'
 import { query } from '~/server/utils/db.js'
 import formidable from 'formidable'
@@ -67,6 +68,7 @@ export default defineEventHandler(async (event) => {
             console.log('處理圖片檔案:', file.originalFilename, file.size, 'bytes')
             
             const imageUrl = await saveLocalImage(file)
+            await recordSuccess('activityEdit', 'upload', { mime: 'image/webp', submissionId: existingActivity.id })
             newImageUrls.push(imageUrl)
             
             console.log('圖片儲存成功:', imageUrl)
@@ -172,6 +174,7 @@ export default defineEventHandler(async (event) => {
     params.push(parseInt(id))
     
     const result = await query(sql, params)
+    if (result.rows.length) await recordSuccess('activityEdit', 'submit', { submissionId: existingActivity.id })
     
     return {
       success: true,

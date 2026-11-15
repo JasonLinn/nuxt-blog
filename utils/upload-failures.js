@@ -1,6 +1,7 @@
 export const failureSources = {
   coupon: '優惠券', activity: '活動投稿', activityEdit: '活動編輯', poster: 'AI 海報辨識',
-  article: '文章', shop: '合作店家', place: '景點', homestay: '民宿登錄', homestayEdit: '民宿管理'
+  article: '文章', shop: '合作店家', place: '景點', homestay: '民宿登錄', homestayEdit: '民宿管理',
+  upload: '共用圖片上傳'
 }
 export const failureStages = { select: '選取圖片', upload: '上傳圖片', submit: '送出表單' }
 export const couponFields = {

@@ -681,6 +681,7 @@ const handleFileUpload = async (event) => {
       try {
         response = await fetch('/api/upload', {
           method: 'POST',
+          headers: { 'x-upload-source': 'homestayEdit' },
           body: formData
         })
       } catch (error) {
@@ -688,6 +689,7 @@ const handleFileUpload = async (event) => {
         // 使用本地上傳作為備用
         response = await fetch('/api/upload-local', {
           method: 'POST',
+          headers: { 'x-upload-source': 'homestayEdit' },
           body: formData
         })
       }

@@ -1,4 +1,5 @@
 import { normalizeImage } from '../utils/safe-images.js'
+import { recordSuccess, sharedUploadSource } from '../utils/upload-events.js'
 import { requireUploader } from '../utils/upload-auth.js'
 import { defineEventHandler, readMultipartFormData } from 'h3'
 import { writeFile, mkdir } from 'fs/promises'
@@ -54,6 +55,7 @@ export default defineEventHandler(async (event) => {
     // 儲存文件
     const filePath = join(uploadDir, fileName)
     await writeFile(filePath, file.data)
+    await recordSuccess(sharedUploadSource(event), 'upload', { mime: file.type, bytes: file.data.length })
 
     // 返回可訪問的 URL
     const fileUrl = `/uploads/${fileName}`
@@ -70,4 +72,4 @@ export default defineEventHandler(async (event) => {
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     }
   }
-}) 
+})

@@ -1,6 +1,7 @@
 // 使用者提交優惠券
 import { couponPool } from '../../utils/coupon-db.js'
 import { couponFailure } from '../../utils/upload-failures.js'
+import { recordSuccess } from '../../utils/upload-events.js'
 import { verifySubmissionChallenge } from '../../utils/submission-turnstile.js'
 import { township as townships } from '../../../utils/category.js'
 
@@ -80,6 +81,7 @@ export default defineEventHandler(async (event) => {
     ])
       
       const couponId = result.rows[0].id
+      await recordSuccess('coupon', 'submit', { submissionId: couponId })
 
       return {
         success: true,

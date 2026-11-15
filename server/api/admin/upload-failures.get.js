@@ -6,7 +6,8 @@ import { incidentIdPattern } from '../../../utils/upload-failures.js'
 export default defineEventHandler(async event => {
   requireAdmin(event)
   setHeader(event, 'Cache-Control', 'private, no-store')
-  const { id, day } = getQuery(event)
+  const { id, day, outcome = 'all' } = getQuery(event)
+  if (!['all', 'success', 'failure'].includes(outcome)) throw createError({ statusCode: 400, message: '無效的結果篩選' })
   let condition, value
   if (id) {
     if (!incidentIdPattern.test(id)) throw createError({ statusCode: 400, message: '查詢碼格式有誤' })
@@ -17,6 +18,11 @@ export default defineEventHandler(async event => {
     condition = "occurred_at >= ($1::date::timestamp AT TIME ZONE 'Asia/Taipei') AND occurred_at < (($1::date + 1)::timestamp AT TIME ZONE 'Asia/Taipei')"
     value = day
   }
-  const { rows } = await query(`SELECT * FROM upload_failures WHERE ${condition} ORDER BY occurred_at DESC LIMIT 201`, [value])
+  const params = [value]
+  if (!id && outcome !== 'all') {
+    condition += ' AND outcome = $2'
+    params.push(outcome)
+  }
+  const { rows } = await query(`SELECT * FROM upload_failures WHERE ${condition} ORDER BY occurred_at DESC LIMIT 201`, params)
   return { rows: rows.slice(0, 200), truncated: rows.length > 200 }
 })

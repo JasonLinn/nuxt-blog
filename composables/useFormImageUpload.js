@@ -15,7 +15,7 @@ export function useFormImageUpload(source, addImage) {
         try {
           const body = new FormData()
           body.append('file', await prepareUploadImage(file))
-          const result = await $fetch('/api/upload', { method: 'POST', body })
+          const result = await $fetch('/api/upload', { method: 'POST', headers: { 'x-upload-source': source }, body })
           if (!result.success || !result.url) throw new Error(result.error || '請稍後再試。')
           onUploaded(result.url)
         } catch (error) {

@@ -4,7 +4,8 @@ import { query } from './db.js'
 import { classifyFailure, couponFields, failureSources, failureStages, failureReasons, incidentIdPattern } from '../../utils/upload-failures.js'
 
 export function validateFailure(data) {
-  if (!data || typeof data.id !== 'string' || !incidentIdPattern.test(data.id)
+  if (!data || (data.outcome !== undefined && data.outcome !== 'failure')
+    || typeof data.id !== 'string' || !incidentIdPattern.test(data.id)
     || typeof data.source !== 'string' || !Object.hasOwn(failureSources, data.source)
     || typeof data.stage !== 'string' || !Object.hasOwn(failureStages, data.stage)
     || typeof data.reason !== 'string' || !Object.hasOwn(failureReasons, data.reason)) {

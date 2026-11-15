@@ -1,4 +1,5 @@
 import { normalizeImage } from '../../utils/safe-images.js'
+import { recordSuccess } from '../../utils/upload-events.js'
 import { rm } from 'node:fs/promises'
 import { validateActivityUpdate } from '../../utils/security.js'
 import { saveLocalImage, deleteOwnedImage } from '../../utils/safe-images.js'
@@ -62,6 +63,7 @@ export default defineEventHandler(async (event) => {
           for (const file of imageFiles) {
             if (!file.size) throw createError({ statusCode: 400, message: 'No file uploaded' })
             const result = await uploadFile(file, true)
+            await recordSuccess('activityEdit', 'upload', { mime: 'image/webp', bytes: file.safeImage.data.length, submissionId: existingActivity.id })
             newImageUrls.push(result.url)
           }
         } finally {
@@ -154,6 +156,7 @@ export default defineEventHandler(async (event) => {
     params.push(parseInt(id))
     
     const result = await query(sql, params)
+    if (result.rows.length) await recordSuccess('activityEdit', 'submit', { submissionId: existingActivity.id })
     
     return {
       success: true,

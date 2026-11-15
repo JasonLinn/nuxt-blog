@@ -1,5 +1,6 @@
 // 前台用戶提交地點推薦（需要審核）
 import { pool } from '../../utils/db.js';
+import { recordSuccess } from '../../utils/upload-events.js';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -70,6 +71,7 @@ export default defineEventHandler(async (event) => {
       
       if (result.rows.length > 0) {
         const newPlace = result.rows[0];
+        await recordSuccess('place', 'submit', { submissionId: newPlace.id }, client);
         
         console.log('新地點提交成功:', {
           id: newPlace.id,

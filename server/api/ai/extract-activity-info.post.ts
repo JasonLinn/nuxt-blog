@@ -1,4 +1,5 @@
 import { requireAdmin } from '../../utils/admin-auth.js'
+import { recordSuccess } from '../../utils/upload-events.js'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export default defineEventHandler(async (event) => {
@@ -192,6 +193,7 @@ export default defineEventHandler(async (event) => {
     console.log('✅ AI 分析完成，提取的資料:', cleanedData)
     console.log('🎉 AI 分析流程完成，準備回傳結果')
 
+    await recordSuccess('poster', 'upload', { mime: mimeType, bytes: imageFile.data.length })
     return {
       success: true,
       data: cleanedData,

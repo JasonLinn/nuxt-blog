@@ -4,6 +4,7 @@ import formidable from 'formidable'
 import { dateOnly } from '../../utils/activity-dates.js'
 import { query } from '../utils/db.js'
 import { normalizeImage } from '../utils/safe-images.js'
+import { recordSuccess } from '../utils/upload-events.js'
 import { verifyActivityChallenge } from '../utils/submission-turnstile.js'
 
 const maxFileBytes = 4 * 1024 * 1024
@@ -96,7 +97,7 @@ export default defineEventHandler(async event => {
     for (const file of files.images || []) {
       const image = await normalizeImage(await readFile(file.filepath), 2048)
       if (image.data.length > maxFileBytes) throw createError({ statusCode: 413, statusMessage: 'Image too large' })
-      images.push({ id: randomUUID(), data: image.data.toString('base64') })
+      images.push({ id: randomUUID(), data: image.data.toString('base64'), bytes: image.data.length })
     }
     const urls = images.map(image => `/api/activity-submission-images/${image.id}`)
 
@@ -121,6 +122,11 @@ export default defineEventHandler(async event => {
       activity.activity_type, activity.organizer_name, activity.organizer_email, activity.organizer_phone,
       activity.organizer_contact, activity.submitter_name, activity.submitter_email, activity.price,
       activity.capacity, activity.website, images.map(image => image.id), images.map(image => image.data)
+    ])
+    const submissionId = result.rows[0].id
+    await Promise.all([
+      ...images.map(image => recordSuccess('activity', 'upload', { mime: 'image/webp', bytes: image.bytes, submissionId })),
+      recordSuccess('activity', 'submit', { submissionId })
     ])
     setHeader(event, 'Cache-Control', 'no-store')
     return { success: true, data: { ...activity, id: result.rows[0].id, images: urls, status: 'pending' }, message: 'Activity submitted successfully' }

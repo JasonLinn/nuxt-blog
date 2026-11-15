@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { pool } from '../utils/db.js';
+import { recordSuccess } from '../utils/upload-events.js';
 import { sendAdminNotificationEmail } from '../utils/emailService.js';
 
 export default defineEventHandler(async (event) => {
@@ -240,6 +241,7 @@ export default defineEventHandler(async (event) => {
 
       // 提交交易
       await client.query('COMMIT');
+      await recordSuccess('homestay', 'submit', { submissionId: homestayId }, client);
 
       // 發送管理員通知郵件（在交易提交後，避免影響註冊流程）
       try {
@@ -287,4 +289,4 @@ export default defineEventHandler(async (event) => {
       statusMessage: '註冊系統發生錯誤，請稍後重試'
     });
   }
-}); 
+});

@@ -1,6 +1,7 @@
 import { requireUploader } from '../utils/upload-auth.js'
 import { verifyActivityChallenge } from '../utils/submission-turnstile.js'
 import { saveLocalImage } from '../utils/safe-images.js'
+import { recordSuccess } from '../utils/upload-events.js'
 import { query } from '~/server/utils/db.js'
 import formidable from 'formidable'
 import fs from 'fs'
@@ -34,6 +35,7 @@ export default defineEventHandler(async (event) => {
       for (const file of imageFiles) {
         if (file.size > 0) {
           imageUrls.push(await saveLocalImage(file))
+          await recordSuccess('activity', 'upload', { mime: 'image/webp' })
         }
       }
     }
@@ -125,6 +127,7 @@ export default defineEventHandler(async (event) => {
     
     const result = await query(sql, params)
     const newActivity = result.rows[0]
+    await recordSuccess('activity', 'submit', { submissionId: newActivity.id })
     
     return {
       success: true,
