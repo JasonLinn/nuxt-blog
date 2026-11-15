@@ -83,7 +83,7 @@
           <p class="review-card__desc">{{ truncateText(coupon.content, 80) }}</p>
 
           <div class="review-card__deal">
-            <span class="yp-tag yp-tag--deal">
+            <span v-if="hasDiscountValue(coupon)" class="yp-tag yp-tag--deal">
               {{
                 coupon.discount_type === 'percentage'
                   ? `${coupon.discount_value}% 折扣`
@@ -170,7 +170,7 @@
                 <p>{{ selectedCoupon.content }}</p>
               </div>
 
-              <div class="review-modal__section d-flex flex-wrap gap-4">
+              <div v-if="hasDiscountValue(selectedCoupon)" class="review-modal__section d-flex flex-wrap gap-4">
                 <div>
                   <strong>優惠類型</strong>
                   <div>
@@ -314,6 +314,7 @@ const statusFilter = ref('all')
 const reviewingIds = ref([])
 const showModal = ref(false)
 const dropdownOpen = ref(false)
+const hasDiscountValue = coupon => coupon.discount_value != null && String(coupon.discount_value).trim() !== '' && Number.isFinite(Number(coupon.discount_value))
 
 // 計算屬性
 const statusOptions = [

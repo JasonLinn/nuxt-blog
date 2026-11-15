@@ -1,6 +1,7 @@
 // 使用者提交優惠券
 import { couponPool } from '../../utils/coupon-db.js'
 import { couponFailure } from '../../utils/upload-failures.js'
+import { verifyCouponChallenge } from '../../utils/coupon-turnstile.js'
 import { township as townships } from '../../../utils/category.js'
 
 export default defineEventHandler(async (event) => {
@@ -30,6 +31,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, message: '請選擇一個宜蘭縣鄉鎮市' })
     }
 
+    await verifyCouponChallenge(event, data.turnstileToken)
     const client = await couponPool.connect()
     
     try {

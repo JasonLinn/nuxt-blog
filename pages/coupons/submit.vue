@@ -344,12 +344,13 @@
         </div>
       </section>
 
+      <CouponTurnstile ref="challenge" @token="turnstileToken = $event" />
       <div class="yp-form-actions">
         <p v-if="submitError" class="alert alert-danger" role="alert">{{ submitError }}</p>
         <button type="button" class="btn btn-ghost btn-icon me-auto" :disabled="uploading || submitting" @click="resetForm">
           <Icon name="ri:refresh-line" />重設表單
         </button>
-        <button type="submit" :disabled="uploading || submitting" class="btn btn-primary btn-icon">
+        <button type="submit" :disabled="uploading || submitting || !turnstileToken" class="btn btn-primary btn-icon">
           <span v-if="submitting" class="spinner-border spinner-border-sm" aria-hidden="true" />
           <Icon v-else name="ri:send-plane-fill" />
           {{ uploading ? '等待圖片上傳' : submitting ? '送審中…' : '填寫審核' }}
@@ -397,6 +398,8 @@ useHead({
 
 // 響應式資料
 const submitting = ref(false)
+const challenge = ref(null)
+const turnstileToken = ref('')
 const uploadTotal = ref(0)
 const uploadIndex = ref(0)
 const uploading = computed(() => uploadTotal.value > 0)
@@ -507,7 +510,7 @@ const submitError = ref('')
 
 // 填寫優惠券
 const submitCoupon = async () => {
-  if (uploading.value || submitting.value) return
+  if (uploading.value || submitting.value || !turnstileToken.value) return
   try {
     submitError.value = ''
     submitting.value = true
@@ -533,6 +536,7 @@ const submitCoupon = async () => {
     const response = await $fetch('/api/coupons/submit', {
       method: 'POST',
       body: {
+        turnstileToken: turnstileToken.value,
         title: form.title,
         content: form.content,
         business_name: form.business_name,
@@ -563,6 +567,7 @@ const submitCoupon = async () => {
     submitError.value = '送審失敗：' + reportUploadFailure('coupon', 'submit', error)
   } finally {
     submitting.value = false
+    challenge.value?.reset()
   }
 }
 

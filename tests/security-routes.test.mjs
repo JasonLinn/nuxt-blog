@@ -150,7 +150,28 @@ test('anonymous coupon image uploads and submissions have separate enforced quot
   assert.equal((await request(handler, '/api/coupons/upload', options)).status, 429)
 })
 
-test('a guest can upload a coupon image and submit it for review', async t => {
+const couponBody = { title: 'Test', content: 'Test', business_name: 'Test', submitter_name: 'Guest', township: ['冬山鄉'] }
+const verifiedCoupon = { success: true, hostname: '127.0.0.1', action: 'coupon_submit' }
+
+function mockSiteverify(t, respond) {
+  const original = globalThis.fetch
+  t.mock.method(globalThis, 'fetch', (url, options) => {
+    if (url !== 'https://challenges.cloudflare.com/turnstile/v0/siteverify') return original(url, options)
+    assert.equal(options.method, 'POST')
+    assert.equal(options.body.get('secret'), 'coupon-test-secret')
+    return respond(options.body.get('response'))
+  })
+}
+
+test('a guest can upload a coupon image and submit it for review after verifying once', async t => {
+  process.env.TURNSTILE_SECRET_KEY = 'coupon-test-secret'
+  t.after(() => { delete process.env.TURNSTILE_SECRET_KEY })
+  let verified = 0
+  mockSiteverify(t, token => {
+    assert.equal(token, 'coupon-test-response')
+    verified++
+    return Response.json(verified === 1 ? verifiedCoupon : { success: false, 'error-codes': ['timeout-or-duplicate'] })
+  })
   const upload = await load('server/api/coupons/upload.post.ts')
   const body = new FormData()
   body.set('file', new Blob(['invalid']), 'invalid.png')
@@ -175,12 +196,43 @@ test('a guest can upload a coupon image and submit it for review', async t => {
   }
   const result = await request(submit, '/', {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ title: 'Test', content: 'Test', business_name: 'Test', submitter_name: 'Guest',
-      township: ['冬山鄉'], cover: [image.data.url], status: 'approved' })
+    body: JSON.stringify({ ...couponBody, turnstileToken: 'coupon-test-response', cover: [image.data.url], status: 'approved' })
   })
   assert.equal(result.status, 200)
   assert.equal(result.data.data.id, 123)
   assert.ok(inserted)
+  globalThis.securityDb = async sql => { assert.match(sql, /INSERT INTO upload_failures/); return { rows: [] } }
+  const replay = await request(submit, '/', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ ...couponBody, turnstileToken: 'coupon-test-response' }) })
+  assert.equal(replay.status, 422)
+  assert.equal(verified, 2)
+})
+
+test('coupon submissions fail closed for missing, invalid, misbound or unavailable verification', async t => {
+  const handler = await load('server/api/coupons/submit.post.js')
+  const queries = []
+  globalThis.securityDb = async sql => { queries.push(sql); return { rows: [] } }
+  const send = token => request(handler, '/', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ ...couponBody, turnstileToken: token }) })
+  let reply
+  let calls = 0
+  mockSiteverify(t, () => { calls++; return reply() })
+  delete process.env.TURNSTILE_SECRET_KEY
+  assert.equal((await send('token')).status, 503)
+  process.env.TURNSTILE_SECRET_KEY = 'coupon-test-secret'
+  t.after(() => { delete process.env.TURNSTILE_SECRET_KEY })
+  for (const token of [undefined, '', {}, 'x'.repeat(2049)]) assert.equal((await send(token)).status, 422)
+  assert.equal(calls, 0)
+  for (const result of [{ success: false }, { ...verifiedCoupon, action: 'other' }, { ...verifiedCoupon, hostname: 'other.example' }]) {
+    reply = () => Response.json(result)
+    assert.equal((await send('invalid')).status, 422)
+  }
+  for (const outage of [() => { throw new Error('offline') }, () => new Response('', { status: 502 }), () => Response.json({}),
+    () => Response.json({ success: false, 'error-codes': ['invalid-input-secret'] })]) {
+    reply = outage
+    assert.equal((await send('token')).status, 503)
+  }
+  assert.ok(queries.every(sql => sql.includes('INSERT INTO upload_failures')))
 })
 
 async function guestActivityForm() {

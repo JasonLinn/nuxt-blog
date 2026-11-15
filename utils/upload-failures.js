@@ -20,6 +20,8 @@ export const failureReasons = {
   offline: '目前沒有網路連線，請連線後重試。',
   network: '無法連上伺服器或未收到回應，請檢查網路。',
   township: '請選擇一個宜蘭縣鄉鎮市。',
+  challenge: '安全驗證未通過或已逾時，請重新驗證後送審。',
+  challengeService: '安全驗證服務暫時無法使用，請稍後重試。',
   required: '必填資料不完整，請檢查標示的欄位。',
   email: '電子信箱格式有誤，請檢查後重試。',
   invalid: '資料未通過驗證，請檢查後重試。',
