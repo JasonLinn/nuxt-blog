@@ -24,8 +24,7 @@
       </div>
     </aside>
 
-    <SubmissionLoginGate v-if="loginRequired" :login-url="loginUrl" title="請先登入再刊登優惠券" />
-    <form v-else class="coupon-form" @submit.prevent="submitCoupon">
+    <form class="coupon-form" @submit.prevent="submitCoupon">
       <!-- 優惠資訊 -->
       <section class="yp-form-section">
         <h2 class="yp-form-section__title">優惠資訊</h2>
@@ -382,7 +381,6 @@
 import { ref, reactive } from 'vue'
 import { category, township as townships } from '~/utils/category'
 import { prepareUploadImage } from '~/utils/image-upload'
-const { loginRequired, loginUrl } = useSubmissionLogin()
 
 // 設定頁面標題
 useHead({
@@ -438,13 +436,11 @@ const handleFileUpload = async (event) => {
       try {
         const body = new FormData()
         body.append('file', await prepareUploadImage(file))
-        const response = await $fetch('/api/upload', { method: 'POST', body })
+        const response = await $fetch('/api/coupons/upload', { method: 'POST', body })
         if (!response.success || !response.url) throw new Error('上傳失敗，請重新選取圖片。')
         form.cover.push(response.url)
       } catch (error) {
-        const message = error.response?.status === 401
-          ? '登入已過期，請重新登入。'
-          : error.response ? '上傳失敗，請稍後重試。' : error.message
+        const message = error.response ? '上傳失敗，請稍後重試。' : error.message
         uploadErrors.value.push(`${file.name}：${message}`)
       }
     }

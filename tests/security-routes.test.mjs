@@ -28,7 +28,7 @@ async function load(relative) {
     name: 'isolated-database', setup(builder) {
       builder.onResolve({ filter: /(?:^|\/)(?:db|coupon-db)\.js$/ }, () => ({ path: 'test-db', namespace: 'test' }))
       builder.onResolve({ filter: /^pg$/ }, () => ({ path: 'test-pg', namespace: 'test' }))
-      builder.onLoad({ filter: /.*/, namespace: 'test' }, args => ({ contents: args.path === 'test-pg' ? `export default { Pool: class { query(...args) { return globalThis.securityDb(...args) } } }` : `export const query = (...args) => globalThis.securityDb(...args); export const pool = {query}; export const couponPool = pool;` }))
+      builder.onLoad({ filter: /.*/, namespace: 'test' }, args => ({ contents: args.path === 'test-pg' ? `export default { Pool: class { query(...args) { return globalThis.securityDb(...args) } } }` : `export const query = (...args) => globalThis.securityDb(...args); export const pool = {query}; export const couponPool = {query, connect: async () => ({query, release() {}})};` }))
     }
   }] })
   return (await import(pathToFileURL(outfile))).default
@@ -55,7 +55,7 @@ test('sensitive real route handlers reject anonymous and fake cookies before dat
     'activities/[id].patch.js', 'yilan-activities/[id].patch.js', 'images/list.get.ts', 'images/delete.post.ts', 'upload.post.ts',
     'upload-local.post.ts', 'ai/extract-activity-info.post.ts', 'sendMsg.post.js', 'cupon.patch.js', 'user/[id].get.js',
     'user/user.post.js', 'user/appendCoupon.patch.js', 'user/updateCoupon.patch.js', 'received.post.js', 'hash/generate.post.ts',
-    'activities.post.js', 'yilan-activities.post.js', 'coupons/submit.post.js',
+    'activities.post.js', 'yilan-activities.post.js',
     'admin/activity-imports.get.js', 'admin/activity-imports/sync.post.js', 'admin/activity-imports/review.post.js', 'cron/activity-import.get.js'
   ]
   for (const file of routes) {
@@ -126,7 +126,7 @@ test('mutation middleware rejects cross-site browser requests', async () => {
   assert.equal((await request(handler, '/api/user/user', { method: 'POST' })).status, 200)
 })
 
-test('five uploads leave the form submission quota available and upload quota still applies', async () => {
+test('anonymous coupon image uploads and submissions have separate enforced quotas', async () => {
   const middleware = await load('server/middleware/01-security-limits.js')
   const handler = h3.eventHandler(async event => { await middleware(event); return { success: true } })
   const hits = new Map()
@@ -136,13 +136,46 @@ test('five uploads leave the form submission quota available and upload quota st
     hits.set(key, count + 1)
     return { rows: [{ hits: count + 1 }] }
   }
-  const options = { method: 'POST', headers: { cookie: adminCookie } }
-  for (let i = 0; i < 5; i++) assert.equal((await request(handler, '/api/upload', options)).status, 200)
+  const options = { method: 'POST' }
+  for (let i = 0; i < 5; i++) assert.equal((await request(handler, '/api/coupons/upload', options)).status, 200)
   assert.equal((await request(handler, '/api/coupons/submit', options)).status, 200)
   assert.equal(hits.get('uploads:daily'), 5)
   assert.equal(hits.get('submissions:daily'), 1)
-  for (let i = 5; i < 20; i++) assert.equal((await request(handler, '/api/upload', options)).status, 200)
-  assert.equal((await request(handler, '/api/upload', options)).status, 429)
+  for (let i = 5; i < 20; i++) assert.equal((await request(handler, '/api/coupons/upload', options)).status, 200)
+  assert.equal((await request(handler, '/api/coupons/upload', options)).status, 429)
+})
+
+test('a guest can upload a coupon image and submit it for review', async t => {
+  const upload = await load('server/api/coupons/upload.post.ts')
+  const body = new FormData()
+  body.set('file', new Blob(['invalid']), 'invalid.png')
+  assert.equal((await request(upload, '/', { method: 'POST', body })).status, 400)
+
+  const sharp = (await import('sharp')).default
+  const png = await sharp({ create: { width: 2, height: 2, channels: 3, background: 'white' } }).png().toBuffer()
+  body.set('file', new Blob([png], { type: 'image/png' }), 'coupon.png')
+  const image = await request(upload, '/', { method: 'POST', body })
+  assert.equal(image.status, 200)
+  assert.match(image.data.url, /^\/uploads\/[a-f0-9-]+\.webp$/)
+  t.after(() => rm(path.join('public', image.data.url), { force: true }))
+
+  const submit = await load('server/api/coupons/submit.post.js')
+  let inserted = false
+  globalThis.securityDb = async (sql, params) => {
+    assert.match(sql, /INSERT INTO pending_coupons/)
+    assert.match(sql, /'pending'/)
+    assert.deepEqual(params[10], [image.data.url])
+    inserted = true
+    return { rows: [{ id: 123 }] }
+  }
+  const result = await request(submit, '/', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ title: 'Test', content: 'Test', business_name: 'Test', submitter_name: 'Guest',
+      township: ['冬山鄉'], cover: [image.data.url], status: 'approved' })
+  })
+  assert.equal(result.status, 200)
+  assert.equal(result.data.data.id, 123)
+  assert.ok(inserted)
 })
 
 test('photo metadata returns a bounded same-origin URL rather than a credential or Base64 image', async () => {

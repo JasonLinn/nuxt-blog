@@ -1,10 +1,8 @@
 // 使用者提交優惠券
 import { couponPool } from '../../utils/coupon-db.js'
-import { requireUploader } from '../../utils/upload-auth.js'
 import { township as townships } from '../../../utils/category.js'
 
 export default defineEventHandler(async (event) => {
-  requireUploader(event)
   try {
     const data = await readBody(event)
     
