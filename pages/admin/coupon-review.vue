@@ -310,7 +310,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 const loading = ref(true)
 const coupons = ref([])
 const selectedCoupon = ref(null)
-const statusFilter = ref('all')
+const statusFilter = ref('pending')
 const reviewingIds = ref([])
 const showModal = ref(false)
 const dropdownOpen = ref(false)
