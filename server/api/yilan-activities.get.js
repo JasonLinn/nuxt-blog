@@ -21,7 +21,9 @@ export default defineEventHandler(async event => {
   let pagination = ''
   if (input.limit) { params.push(paging(input.limit, 100, 500)); pagination += ` LIMIT $${params.length}` }
   if (input.offset) { params.push(paging(input.offset, 0, 100000)); pagination += ` OFFSET $${params.length}` }
-  const order = filter === 'past' ? 'COALESCE(end_date, event_date) DESC' : 'event_date ASC'
+  const order = filter === 'past'
+    ? 'COALESCE(end_date, event_date) DESC, created_at DESC NULLS LAST, id DESC'
+    : 'created_at DESC NULLS LAST, id DESC'
   const [result, count] = await Promise.all([
     query(`SELECT id, title, description, images, event_date, event_time, end_date, end_time, is_multi_day,
       location, activity_type, organizer_name, organizer_email, organizer_phone, contact_info,
@@ -32,7 +34,7 @@ export default defineEventHandler(async event => {
         to_jsonb(yilan_activities)->>'source_name' AS source_name,
       to_jsonb(yilan_activities)->>'source_url' AS source_url,
       to_jsonb(yilan_activities)->>'last_synced_at' AS last_synced_at
-      FROM yilan_activities${where} ORDER BY ${order}, created_at DESC${pagination}`, params),
+      FROM yilan_activities${where} ORDER BY ${order}${pagination}`, params),
     query(`SELECT COUNT(*) AS total FROM yilan_activities${where}`, countParams)
   ])
   return { success: true, data: (admin ? result.rows : result.rows.map(publicActivity)).map((row) => withSiteImages(row)), total: Number(count.rows[0].total) }

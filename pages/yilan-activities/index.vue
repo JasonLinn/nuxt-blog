@@ -322,7 +322,7 @@
           v-if="!loading && !fetchError && filteredActivities.length"
           class="text-secondary small"
         >
-          共 {{ filteredActivities.length }} 場
+          共 {{ filteredActivities.length }} 場 · 最近新增優先
         </span>
       </div>
 
@@ -619,7 +619,7 @@ const filteredActivities = computed(() => {
     )
   }
 
-  return filtered.sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
+  return filtered
 })
 
 const totalPages = computed(() => Math.ceil(filteredActivities.value.length / itemsPerPage))
