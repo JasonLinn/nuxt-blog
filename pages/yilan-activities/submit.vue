@@ -15,7 +15,7 @@
       </div>
     </header>
 
-    <form novalidate @submit.prevent="submitActivity">
+    <form novalidate :inert="!formReady" :aria-busy="!formReady" @submit.prevent="submitActivity">
       <!-- AI 自動填入區塊（僅管理員可見） -->
       <section v-if="isAdmin" class="yp-form-section ai-assist">
         <h2 class="yp-form-section__title">
@@ -381,7 +381,7 @@
             class="upload-zone__input"
             accept="image/*"
             multiple
-            :disabled="isSubmitting"
+            :disabled="!formReady || isSubmitting"
             @change="selectImages($event, { replace: true })"
           />
           <Icon name="ri:image-add-line" class="upload-zone__icon" />
@@ -451,13 +451,13 @@
       <!-- 提交按鈕 -->
       <div class="yp-form-actions">
         <NuxtLink to="/yilan-activities" class="btn btn-outline-secondary">取消返回</NuxtLink>
-        <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+        <button type="submit" class="btn btn-primary" :disabled="!formReady || isSubmitting">
           <span
             v-if="isSubmitting"
             class="spinner-border spinner-border-sm me-2"
             role="status"
           ></span>
-          {{ isSubmitting ? '提交中...' : '提交投稿' }}
+          {{ !formReady ? '表單載入中…' : isSubmitting ? '提交中...' : '提交投稿' }}
         </button>
       </div>
     </form>
@@ -505,6 +505,7 @@ const form = reactive({
 const errors = reactive({})
 
 // 提交狀態
+const formReady = ref(false)
 const isSubmitting = ref(false)
 
 // 圖片預覽
@@ -534,6 +535,7 @@ const filledFields = computed(() => {
 
 // 檢查管理員權限
 onMounted(async () => {
+  formReady.value = true
   try {
     const response = await $fetch('/api/auth/check-admin')
     isAdmin.value = response.isAdmin
