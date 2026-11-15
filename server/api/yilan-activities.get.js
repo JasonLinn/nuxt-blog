@@ -26,7 +26,7 @@ export default defineEventHandler(async event => {
     : 'created_at DESC NULLS LAST, id DESC'
   const [result, count] = await Promise.all([
     query(`SELECT id, title, description, images, event_date, event_time, end_date, end_time, is_multi_day,
-      location, activity_type, organizer_name, organizer_email, organizer_phone, contact_info,
+      location, activity_type, organizer_name, organizer_email, organizer_phone, contact_info, price, capacity, website,
       status, rejection_reason, submitter_name, submitter_email, admin_notes,
       created_at, updated_at, approved_at, approved_by,
       to_jsonb(yilan_activities)->>'image_source_name' AS image_source_name,

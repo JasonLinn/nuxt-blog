@@ -9,7 +9,7 @@ const submissionPaths = ['/api/activities', '/api/yilan-activities', '/api/place
 export default defineEventHandler(async event => {
   const pathname = getRequestURL(event).pathname.toLowerCase().replace(/\/+$/, '')
   const isUpload = uploadPaths.includes(pathname)
-  if (['/api/upload', '/api/upload-local', '/api/activities', '/api/yilan-activities'].includes(pathname) && event.method === 'POST') requireUploader(event)
+  if (['/api/upload', '/api/upload-local', '/api/activities'].includes(pathname) && event.method === 'POST') requireUploader(event)
   if (['/api/sendMsg', '/api/ai/extract-activity-info'].includes(pathname)) requireAdmin(event)
   if (/^\/api\/google\/places\//.test(pathname) || pathname === '/api/maps') {
     await enforceQuota(event, 'google', 60, 2000)

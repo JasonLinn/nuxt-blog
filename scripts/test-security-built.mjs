@@ -35,7 +35,7 @@ try {
     ['GET', '/api/images/list'], ['POST', '/api/images/delete'], ['POST', '/api/upload'], ['POST', '/api/upload-local'],
     ['POST', '/api/ai/extract-activity-info'], ['POST', '/api/sendMsg'], ['PATCH', '/api/cupon'], ['GET', '/api/user/victim'],
     ['POST', '/api/user/user'], ['PATCH', '/api/user/appendCoupon'], ['PATCH', '/api/user/updateCoupon'], ['POST', '/api/received'],
-    ['POST', '/api/hash/generate'], ['POST', '/api/activities'], ['POST', '/api/yilan-activities']
+    ['POST', '/api/hash/generate'], ['POST', '/api/activities'], ['POST', '/api/yilan-activities/1/approve']
   ]
   for (const [method, route] of routes) {
     const response = await fetch(base + route, { method, headers: { cookie: 'admin_access_token=fake; line_session=fake' } })

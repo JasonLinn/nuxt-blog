@@ -79,6 +79,7 @@
                   <span class="yp-info-list__label">聯絡電話</span>
                   <span class="yp-info-list__value">{{ activity.organizer_phone }}</span>
                 </li>
+                <ActivitySubmissionDetails :activity="activity" />
               </ul>
             </div>
           </section>

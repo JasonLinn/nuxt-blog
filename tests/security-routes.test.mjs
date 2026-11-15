@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
-import { mkdir, rm } from 'node:fs/promises'
+import { mkdir, readFile, rm } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { createHmac } from 'node:crypto'
 import path from 'node:path'
@@ -10,6 +10,7 @@ import * as h3 from 'h3'
 import jwt from 'jsonwebtoken'
 
 Object.assign(globalThis, h3)
+const submissionDbUrl = process.env.TEST_ACTIVITY_SUBMISSION_DB === '1' && process.env.HOMESTAY_DATABASE_URL
 process.env.ADMIN_JWT_SECRET = 'route-test-key'
 process.env.LEGACY_JWT_SECRET = 'route-legacy-key'
 process.env.LINE_SESSION_SECRET = 'route-line-key'
@@ -28,6 +29,10 @@ async function load(relative) {
     name: 'isolated-database', setup(builder) {
       builder.onResolve({ filter: /(?:^|\/)(?:db|coupon-db)\.js$/ }, () => ({ path: 'test-db', namespace: 'test' }))
       builder.onResolve({ filter: /^pg$/ }, () => ({ path: 'test-pg', namespace: 'test' }))
+      builder.onResolve({ filter: /^~\/server\/utils\/emailService\.js$/ }, () => ({ path: 'test-mail', namespace: 'test-mail' }))
+      builder.onLoad({ filter: /.*/, namespace: 'test-mail' }, () => ({ contents: 'export const sendActivityApprovalEmail = async () => {}' }))
+      builder.onResolve({ filter: /^#public-image-files$/ }, () => ({ path: 'test-assets', namespace: 'test-assets' }))
+      builder.onLoad({ filter: /.*/, namespace: 'test-assets' }, () => ({ contents: 'export default []' }))
       builder.onLoad({ filter: /.*/, namespace: 'test' }, args => ({ contents: args.path === 'test-pg' ? `export default { Pool: class { query(...args) { return globalThis.securityDb(...args) } } }` : `export const query = (...args) => globalThis.securityDb(...args); export const pool = {query}; export const couponPool = {query, connect: async () => ({query, release() {}})};` }))
     }
   }] })
@@ -41,9 +46,9 @@ async function request(handler, route = '/', options = {}) {
   const server = createServer(h3.toNodeListener(app))
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
   try {
-    const response = await fetch(`http://127.0.0.1:${server.address().port}${route.replace(':id', '1')}${options.query || ''}`, options)
+    const response = await fetch(`http://127.0.0.1:${server.address().port}${route.replace(':id', options.id || '1')}${options.query || ''}`, options)
     const text = await response.text()
-    return { status: response.status, text, data: (() => { try { return JSON.parse(text) } catch { return null } })() }
+    return { status: response.status, headers: response.headers, text, data: (() => { try { return JSON.parse(text) } catch { return null } })() }
   } finally { await new Promise(resolve => server.close(resolve)) }
 }
 
@@ -55,7 +60,7 @@ test('sensitive real route handlers reject anonymous and fake cookies before dat
     'activities/[id].patch.js', 'yilan-activities/[id].patch.js', 'images/list.get.ts', 'images/delete.post.ts', 'upload.post.ts',
     'upload-local.post.ts', 'ai/extract-activity-info.post.ts', 'sendMsg.post.js', 'cupon.patch.js', 'user/[id].get.js',
     'user/user.post.js', 'user/appendCoupon.patch.js', 'user/updateCoupon.patch.js', 'received.post.js', 'hash/generate.post.ts',
-    'activities.post.js', 'yilan-activities.post.js', 'admin/upload-failures.get.js',
+    'activities.post.js', 'yilan-activities/[id]/approve.post.js', 'admin/upload-failures.get.js',
     'admin/activity-imports.get.js', 'admin/activity-imports/sync.post.js', 'admin/activity-imports/review.post.js', 'cron/activity-import.get.js'
   ]
   for (const file of routes) {
@@ -176,6 +181,98 @@ test('a guest can upload a coupon image and submit it for review', async t => {
   assert.equal(result.status, 200)
   assert.equal(result.data.data.id, 123)
   assert.ok(inserted)
+})
+
+async function guestActivityForm() {
+  const sharp = (await import('sharp')).default
+  const png = await sharp({ create: { width: 3, height: 2, channels: 3, background: 'blue' } }).png().toBuffer()
+  const form = new FormData()
+  for (const [field, value] of Object.entries({
+    title: 'Guest activity', description: 'Details', location: '宜蘭', activity_type: '文化',
+    event_start_date: '2099-01-01', organizer_name: 'Organizer', submitter_name: 'Guest',
+    submitter_email: 'guest@example.invalid', price: '0', capacity: '12', website: 'https://example.org/',
+    status: 'approved'
+  })) form.set(field, value)
+  form.append('images', new Blob([png], { type: 'image/png' }), 'guest.png')
+  return form
+}
+
+test('guest activity submissions normalize images and ignore caller-supplied publication status', async () => {
+  const submit = await load('server/api/yilan-activities.post.js')
+  const form = await guestActivityForm()
+  let inserts = 0
+  globalThis.securityDb = async (sql, params) => {
+    assert.match(sql, /'pending'/)
+    const [ids, encoded] = params.slice(-2)
+    assert.deepEqual(params[2], [`/api/activity-submission-images/${ids[0]}`])
+    assert.equal(Buffer.from(encoded[0], 'base64').toString('ascii', 8, 12), 'WEBP')
+    inserts++
+    return { rows: [{ id: 7 }] }
+  }
+  const response = await request(submit, '/', { method: 'POST', body: form })
+  assert.equal(response.status, 200, response.text)
+  assert.equal(response.data.data.status, 'pending')
+  form.set('images', new Blob(['invalid'], { type: 'image/png' }), 'bad.png')
+  assert.equal((await request(submit, '/', { method: 'POST', body: form })).status, 400)
+  assert.equal(inserts, 1)
+  const middleware = await load('server/middleware/01-security-limits.js')
+  globalThis.securityDb = async () => ({ rows: [] })
+  assert.equal((await request(middleware, '/api/yilan-activities', { method: 'POST' })).status, 429)
+})
+
+test('guest activity text and images follow the real review transition in PostgreSQL', { skip: !submissionDbUrl }, async () => {
+  const { Client } = (await import('pg')).default
+  const client = new Client({ connectionString: submissionDbUrl })
+  const schema = `guest_activity_test_${Date.now()}`
+  await client.connect()
+  try {
+    await client.query('BEGIN')
+    await client.query(`CREATE SCHEMA ${schema}`)
+    await client.query(`SET LOCAL search_path TO ${schema}`)
+    await client.query('CREATE TABLE yilan_activities (LIKE public.yilan_activities INCLUDING DEFAULTS INCLUDING INDEXES)')
+    await client.query('CREATE SEQUENCE test_ids')
+    await client.query("ALTER TABLE yilan_activities ALTER COLUMN id SET DEFAULT nextval('test_ids')")
+    await client.query(await readFile('migrations/20261115_activity_submissions.sql', 'utf8'))
+    globalThis.securityDb = (sql, params) => client.query(sql, params)
+
+    const submit = await load('server/api/yilan-activities.post.js')
+    const detail = await load('server/api/yilan-activities/[id].get.js')
+    const list = await load('server/api/yilan-activities.get.js')
+    const image = await load('server/api/activity-submission-images/[id].get.js')
+    const approve = await load('server/api/yilan-activities/[id]/approve.post.js')
+    const response = await request(submit, '/', { method: 'POST', body: await guestActivityForm() })
+    assert.equal(response.status, 200, response.text)
+    const { id, images } = response.data.data
+    const imageId = images[0].split('/').pop()
+    const admin = { headers: { cookie: adminCookie } }
+    const getImage = (options = {}) => request(image, '/:id', { id: imageId, ...options })
+    const getDetail = (options = {}) => request(detail, '/:id', { id, ...options })
+    assert.equal((await request(list, '/', { query: '?status=pending' })).data.total, 0)
+    assert.equal((await getDetail()).status, 404)
+    assert.equal((await getImage({ headers: { cookie: 'admin_access_token=fake' } })).status, 404)
+    const pending = (await getDetail(admin)).data.data
+    assert.deepEqual([pending.status, pending.price, pending.capacity, pending.website], ['pending', 0, 12, 'https://example.org/'])
+    const preview = await getImage(admin)
+    assert.equal(preview.headers.get('content-type'), 'image/webp')
+    assert.match(preview.headers.get('cache-control'), /no-store/)
+    assert.equal(preview.text.slice(8, 12), 'WEBP')
+    assert.equal((await request(approve, '/:id', { id, method: 'POST' })).status, 401)
+    assert.equal((await request(approve, '/:id', { id, method: 'POST', ...admin })).status, 200)
+    assert.equal((await request(list)).data.total, 1)
+    const published = (await getDetail()).data.data
+    assert.deepEqual(published.images, images)
+    assert.ok(!('submitter_email' in published))
+    assert.equal((await getImage()).text, preview.text)
+    await client.query("UPDATE yilan_activities SET status='rejected' WHERE id=$1", [id])
+    assert.equal((await getImage()).status, 404)
+    await client.query("UPDATE yilan_activities SET status='approved', images='{}' WHERE id=$1", [id])
+    assert.equal((await getImage()).status, 404)
+    await client.query('DELETE FROM yilan_activities WHERE id=$1', [id])
+    assert.equal((await client.query('SELECT id FROM activity_submission_images')).rowCount, 0)
+  } finally {
+    await client.query('ROLLBACK')
+    await client.end()
+  }
 })
 
 test('failure reports store allowlisted diagnostics and can be looked up by an admin', async () => {

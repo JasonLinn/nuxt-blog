@@ -4,14 +4,16 @@ import { readFile, writeFile, mkdir, rm, lstat, realpath } from 'node:fs/promise
 import path from 'node:path'
 import { createError } from 'h3'
 
-export async function normalizeImage(data) {
+export async function normalizeImage(data, maxDimension) {
   if (!Buffer.isBuffer(data) || !data.length) throw createError({ statusCode: 400, statusMessage: 'No file uploaded' })
   if (data.length > 5 * 1024 * 1024) throw createError({ statusCode: 413, statusMessage: 'File too large' })
   try {
     const image = sharp(data, { limitInputPixels: 25000000 })
     const metadata = await image.metadata()
     if (!['jpeg', 'png', 'gif', 'webp'].includes(metadata.format)) throw new Error('Unsupported format')
-    return { data: await image.rotate().webp({ quality: 85 }).toBuffer(), filename: `${randomUUID()}.webp`, type: 'image/webp' }
+    image.rotate()
+    if (maxDimension) image.resize(maxDimension, maxDimension, { fit: 'inside', withoutEnlargement: true })
+    return { data: await image.webp({ quality: 85 }).toBuffer(), filename: `${randomUUID()}.webp`, type: 'image/webp' }
   } catch { throw createError({ statusCode: 400, statusMessage: 'Invalid raster image' }) }
 }
 

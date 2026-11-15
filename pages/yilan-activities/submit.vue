@@ -10,13 +10,12 @@
       <div>
         <h1 class="yp-page-head__title">投稿活動</h1>
         <p class="yp-page-head__desc">
-          分享您的精彩活動，讓更多人知道宜蘭的美好。審核通過後會刊登在活動總匯。
+          免登入即可填寫活動資料、上傳圖片。活動與圖片會在審核通過後一起公開。
         </p>
       </div>
     </header>
 
-    <SubmissionLoginGate v-if="loginRequired" :login-url="loginUrl" title="請先登入再投稿活動" />
-    <form v-else novalidate @submit.prevent="submitActivity">
+    <form novalidate @submit.prevent="submitActivity">
       <!-- AI 自動填入區塊（僅管理員可見） -->
       <section v-if="isAdmin" class="yp-form-section ai-assist">
         <h2 class="yp-form-section__title">
@@ -469,7 +468,6 @@
 import { reportUploadFailure } from '~/utils/report-upload-failure'
 import { imageSelectionError } from '~/utils/upload-failures'
 import { appendActivityImages, prepareUploadImage } from '~/utils/image-upload'
-const { loginRequired, loginUrl } = useSubmissionLogin()
 
 // 檢查是否為管理員
 const isAdmin = ref(false)
@@ -744,6 +742,7 @@ const validateForm = () => {
 
 // 提交表單
 const submitActivity = async () => {
+  if (isSubmitting.value) return
   if (!validateForm()) {
     // 滾動到第一個錯誤欄位
     const firstError = document.querySelector('.is-invalid')

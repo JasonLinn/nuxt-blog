@@ -183,6 +183,7 @@
                   <span class="yp-info-list__label">活動地點</span>
                   <span class="yp-info-list__value">{{ activity.location }}</span>
                 </li>
+                <ActivitySubmissionDetails :activity="activity" />
               </ul>
             </div>
           </section>

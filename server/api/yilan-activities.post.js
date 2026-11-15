@@ -1,282 +1,132 @@
-import { requireUploader } from '../utils/upload-auth.js'
-import { getAdmin } from '../utils/admin-auth.js'
-import { normalizeImage } from '../utils/safe-images.js'
-import { rm } from 'node:fs/promises'
-import { query } from '~/server/utils/db.js'
+import { randomUUID } from 'node:crypto'
+import { readFile, rm } from 'node:fs/promises'
 import formidable from 'formidable'
-import { readFile } from 'fs/promises'
+import { dateOnly } from '../../utils/activity-dates.js'
+import { query } from '../utils/db.js'
+import { normalizeImage } from '../utils/safe-images.js'
 
-export default defineEventHandler(async (event) => {
-  requireUploader(event)
+const maxFileBytes = 4 * 1024 * 1024
+
+function invalid(field) {
+  return createError({ statusCode: 400, statusMessage: `Invalid field: ${field}` })
+}
+
+function activityFields(fields) {
+  function field(key, max = 65535) {
+    const raw = Array.isArray(fields[key]) ? fields[key][0] : fields[key]
+    if (raw == null || raw === '') return null
+    if (!['string', 'boolean', 'number'].includes(typeof raw)) throw invalid(key)
+    const value = String(raw).trim()
+    if (value.length > max || value.includes('\0')) throw invalid(key)
+    return value || null
+  }
+
+  function integer(key, minimum) {
+    const value = field(key)
+    if (value === null) return null
+    if (!/^\d+$/.test(value) || Number(value) < minimum || Number(value) > 2147483647) throw invalid(key)
+    return Number(value)
+  }
+
+  const activity = {
+    title: field('title', 255),
+    description: field('description'),
+    event_date: field('event_start_date', 10),
+    end_date: field('event_end_date', 10),
+    event_time: field('event_start_time', 8),
+    end_time: field('event_end_time', 8),
+    is_multi_day: field('is_multi_day') === 'true',
+    location: field('location', 255),
+    activity_type: field('activity_type', 100),
+    organizer_name: field('organizer_name', 255),
+    organizer_email: field('organizer_email', 255),
+    organizer_phone: field('organizer_phone', 50),
+    organizer_contact: field('organizer_contact'),
+    submitter_name: field('submitter_name', 255) || field('organizer_name', 255),
+    submitter_email: field('submitter_email', 255),
+    price: integer('price', 0),
+    capacity: integer('capacity', 1),
+    website: field('website', 2048)
+  }
+  for (const key of ['title', 'event_date', 'organizer_name', 'submitter_name', 'submitter_email']) {
+    if (!activity[key]) throw invalid(key)
+  }
+  for (const key of ['event_date', 'end_date']) {
+    if (activity[key] && dateOnly(activity[key]) !== activity[key]) throw invalid(key)
+  }
+  if ((activity.is_multi_day && !activity.end_date) || (activity.end_date && activity.end_date < activity.event_date)) {
+    throw invalid('end_date')
+  }
+  for (const key of ['event_time', 'end_time']) {
+    if (activity[key] && !/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(activity[key])) throw invalid(key)
+  }
+  for (const key of ['organizer_email', 'submitter_email']) {
+    if (activity[key] && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(activity[key])) throw invalid(key)
+  }
+  if (activity.website && (!URL.canParse(activity.website) || !['http:', 'https:'].includes(new URL(activity.website).protocol))) {
+    throw invalid('website')
+  }
+  return activity
+}
+
+export default defineEventHandler(async event => {
+  const tempFiles = []
   try {
-    // 檢查內容類型
-    const contentType = getHeader(event, 'content-type')
-    
-    let fields, imageUrls = []
-    
-    if (contentType && contentType.includes('multipart/form-data')) {
-      // 處理包含檔案上傳的請求
+    let fields
+    let files = {}
+    if (getHeader(event, 'content-type')?.startsWith('multipart/form-data')) {
       const form = formidable({
-        keepExtensions: false,
-        maxFieldsSize: 256 * 1024,
-        maxTotalFileSize: 25 * 1024 * 1024,
-        maxFileSize: 5 * 1024 * 1024, // 5MB
-        maxFiles: 5
+        maxFields: 40, maxFieldsSize: 256 * 1024,
+        maxFiles: 5, maxFileSize: maxFileBytes, maxTotalFileSize: maxFileBytes
       })
-      
-      const [formFields, files] = await form.parse(event.node.req)
-      fields = formFields
-      
-      // 處理圖片上傳 - 使用與民宿相同的上傳邏輯
-      if (files && files.images) {
-        const imageFiles = Array.isArray(files.images) ? files.images : [files.images]
-        
-        try {
-          for (const file of imageFiles) {
-            if (!file.size) throw createError({ statusCode: 400, message: 'No file uploaded' })
-            const result = await uploadFile(file, true)
-            imageUrls.push(result.url)
-          }
-        } finally {
-          await Promise.all(imageFiles.map(file => rm(file.filepath, { force: true })))
-        }
-      }
+      form.on('fileBegin', (_name, file) => tempFiles.push(file.filepath))
+      const parsed = await form.parse(event.node.req)
+      fields = parsed[0]
+      files = parsed[1]
     } else {
-      // 處理 JSON 請求（無檔案上傳）
       fields = await readBody(event)
     }
-    
-    // 提取表單數據
-    const getData = (field) => {
-      const value = Array.isArray(fields[field]) ? fields[field][0] : fields[field]
-      return value || null
-    }
-    
-    const getBooleanData = (field) => {
-      const value = getData(field)
-      return value === 'true' || value === true
-    }
+    if (!fields || typeof fields !== 'object' || Array.isArray(fields)) throw invalid('form')
+    if (Object.keys(files).some(key => key !== 'images')) throw invalid('images')
+    const activity = activityFields(fields)
 
-    // 構建活動資料
-    const activityData = {
-      title: getData('title'),
-      description: getData('description'),
-      images: imageUrls.length > 0 ? imageUrls : null, // 保持為陣列
-      event_date: getData('event_start_date'),
-      end_date: getData('event_end_date'),
-      event_time: getData('event_start_time'),
-      end_time: getData('event_end_time'),
-      location: getData('location'),
-      activity_type: getData('activity_type'),
-      organizer_name: getData('organizer_name'),
-      organizer_email: getData('organizer_email'), // 不自動填入提交者信箱,允許為 null
-      organizer_phone: getData('organizer_phone'),
-      organizer_contact: getData('organizer_contact'), // 使用正確的欄位名稱
-      submitter_name: getData('submitter_name') || getData('organizer_name'),
-      submitter_email: getData('submitter_email'),
-      status: 'pending'
+    const images = []
+    for (const file of files.images || []) {
+      const image = await normalizeImage(await readFile(file.filepath), 2048)
+      if (image.data.length > maxFileBytes) throw createError({ statusCode: 413, statusMessage: 'Image too large' })
+      images.push({ id: randomUUID(), data: image.data.toString('base64') })
     }
-    
-    console.log('收到的表單資料:', fields)
-    console.log('處理後的活動資料:', activityData)
-    
-    // 驗證必填欄位 (organizer_email 為選填)
-    const requiredFields = ['title', 'event_date', 'organizer_name', 'submitter_name', 'submitter_email']
-    for (const field of requiredFields) {
-      if (!activityData[field] || activityData[field].toString().trim() === '') {
-        console.error(`缺少必填欄位: ${field}, 值為:`, activityData[field])
-        throw createError({
-          statusCode: 400,
-          statusMessage: `Missing required field: ${field}`
-        })
-      }
-    }
-    
-    // 如果有結束日期，驗證多天活動
-    const isMultiDay = getBooleanData('is_multi_day')
-    if (isMultiDay && !activityData.end_date) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: 'End date is required for multi-day events'
-      })
-    }
-    
-    // 使用正確的表結構進行插入
-    const sql = `
-      INSERT INTO yilan_activities (
-        title, description, images, event_date, end_date, event_time, end_time, is_multi_day,
-        location, activity_type, organizer_name, organizer_email, organizer_phone,
-        organizer_contact, contact_info, submitter_name, submitter_email, status, created_at, updated_at
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-      ) RETURNING id
-    `
-    
-    const params = [
-      activityData.title,
-      activityData.description,
-      activityData.images, // JavaScript 陣列會自動轉為 PostgreSQL ARRAY
-      activityData.event_date,
-      activityData.end_date,
-      activityData.event_time,
-      activityData.end_time,
-      isMultiDay,
-      activityData.location,
-      activityData.activity_type,
-      activityData.organizer_name,
-      activityData.organizer_email || null, // 允許為 null,不強制填入
-      activityData.organizer_phone || null,
-      activityData.organizer_contact || null, // organizer_contact 欄位
-      null, // contact_info 欄位 (暫時設為 null)
-      activityData.submitter_name,
-      activityData.submitter_email,
-      activityData.status
-    ]
-    
-    console.log('準備插入的 SQL:', sql)
-    console.log('SQL 參數:', params)
-    
-    const result = await query(sql, params)
-    const newActivity = result.rows[0]
-    
-    return {
-      success: true,
-      data: { 
-        id: newActivity.id,
-        ...activityData 
-      },
-      message: 'Activity submitted successfully'
-    }
-    
+    const urls = images.map(image => `/api/activity-submission-images/${image.id}`)
+
+    // The activity and its private images must be saved together, including on upload failure.
+    const result = await query(`
+      WITH submission AS (
+        INSERT INTO yilan_activities (
+          title, description, images, event_date, end_date, event_time, end_time, is_multi_day,
+          location, activity_type, organizer_name, organizer_email, organizer_phone, organizer_contact,
+          contact_info, submitter_name, submitter_email, price, capacity, website, status, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
+          $14, $15, $16, $17, $18, $19, 'pending', now(), now()) RETURNING id
+      ), saved_images AS (
+        INSERT INTO activity_submission_images (id, activity_id, image_data)
+        SELECT image.id, submission.id, decode(image.encoded, 'base64')
+        FROM submission CROSS JOIN unnest($20::uuid[], $21::text[]) AS image(id, encoded)
+      )
+      SELECT id FROM submission
+    `, [
+      activity.title, activity.description, urls, activity.event_date, activity.end_date,
+      activity.event_time, activity.end_time, activity.is_multi_day, activity.location,
+      activity.activity_type, activity.organizer_name, activity.organizer_email, activity.organizer_phone,
+      activity.organizer_contact, activity.submitter_name, activity.submitter_email, activity.price,
+      activity.capacity, activity.website, images.map(image => image.id), images.map(image => image.data)
+    ])
+    setHeader(event, 'Cache-Control', 'no-store')
+    return { success: true, data: { ...activity, id: result.rows[0].id, images: urls, status: 'pending' }, message: 'Activity submitted successfully' }
   } catch (error) {
-    console.error('Error creating activity:', error)
-    
-    // 詳細錯誤日誌
-    if (error.code) {
-      console.error('Database error code:', error.code)
-      console.error('Database error detail:', error.detail)
-    }
-    
-    // 如果是驗證錯誤，返回適當的狀態碼
-    if (error.statusCode) {
-      throw error
-    }
-    
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to submit activity',
-      cause: error
-    })
+    if (error.statusCode) throw error
+    if (error.httpCode >= 400 && error.httpCode < 500) throw createError({ statusCode: error.httpCode, statusMessage: 'Invalid upload' })
+    throw createError({ statusCode: 500, statusMessage: 'Failed to submit activity' })
+  } finally {
+    await Promise.all(tempFiles.map(file => rm(file, { force: true })))
   }
 })
-
-// 圖片上傳函式 - 複製自 upload.post.ts 的邏輯
-async function uploadFile(file, allowGitHub) {
-  const config = useRuntimeConfig()
-  const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
-
-  const image = await normalizeImage(await readFile(file.filepath))
-  file.safeImage = image
-  file.mimetype = 'image/webp'
-  // 驗證文件類型
-  const allowedTypes = ['image/webp']
-  if (!file.mimetype || !allowedTypes.includes(file.mimetype)) {
-    throw new Error('Invalid file type. Only JPEG, PNG and GIF are allowed.')
-  }
-
-  // 驗證文件大小 (5MB)
-  const maxSize = 5 * 1024 * 1024
-  if (file.size > maxSize) {
-    throw new Error('File too large. Maximum size is 5MB.')
-  }
-
-  // 檢查 GitHub 配置是否完整
-  const hasGitHubConfig = GITHUB_USERNAME && GITHUB_REPO && GITHUB_TOKEN
-
-  if (hasGitHubConfig && allowGitHub) {
-    // 使用 GitHub 上傳
-    try { return await uploadToGitHub(file, config) }
-    catch { throw createError({ statusCode: 502, message: 'GitHub upload failed' }) }
-  } else {
-    // 使用本地上傳作為備用方案
-    console.warn('GitHub 配置不完整，使用本地上傳')
-    return await uploadToLocal(file)
-  }
-}
-
-// GitHub 上傳函數
-async function uploadToGitHub(file, config) {
-  const { GITHUB_USERNAME, GITHUB_REPO, GITHUB_TOKEN } = config
-  
-  // 生成唯一的檔案名稱
-  const timestamp = new Date().getTime()
-  const fileName = file.safeImage.filename
-
-  // 讀取檔案並轉換為 base64
-  const fileData = file.safeImage.data
-  const base64Data = Buffer.from(fileData).toString('base64')
-
-  // 上傳到 GitHub
-  const response = await fetch(
-    `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/public/yilan-activities/${fileName}`,
-    {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github.v3+json'
-      },
-      body: JSON.stringify({
-        message: `Upload yilan-activity image ${fileName}`,
-        content: base64Data
-      })
-    }
-  )
-
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(`GitHub upload failed: ${errorData.message || 'Unknown error'}`)
-  }
-
-  const data = await response.json()
-  return {
-    success: true,
-    url: data.content.download_url,
-    provider: 'github'
-  }
-}
-
-// 本地上傳函數
-async function uploadToLocal(file) {
-  const { writeFile, mkdir } = await import('fs/promises')
-  const { join } = await import('path')
-  const { existsSync } = await import('fs')
-  
-  // 生成唯一的檔案名稱
-  const timestamp = new Date().getTime()
-  const extension = file.originalFilename?.split('.').pop() || 'jpg'
-  const fileName = file.safeImage.filename
-
-  // 設定上傳目錄
-  const uploadDir = join(process.cwd(), 'public', 'yilan-activities')
-  
-  // 確保上傳目錄存在
-  if (!existsSync(uploadDir)) {
-    await mkdir(uploadDir, { recursive: true })
-  }
-
-  // 讀取並儲存文件
-  const fileData = file.safeImage.data
-  const filePath = join(uploadDir, fileName)
-  await writeFile(filePath, fileData)
-
-  // 返回可訪問的 URL
-  const fileUrl = `/yilan-activities/${fileName}`
-
-  return {
-    success: true,
-    url: fileUrl,
-    provider: 'local'
-  }
-}
