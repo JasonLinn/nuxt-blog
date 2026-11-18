@@ -1,0 +1,282 @@
+{
+  "verifiedAt": "2026-11-02T12:59:18.843Z",
+  "commit": "788386dc64ccb81c35cd2e8014bb375eef9bb50e",
+  "deploymentId": "dpl_8LmczGvNxc93yTex5ZvGEDbg18oK",
+  "environment": "production",
+  "url": "https://yilanpass.com",
+  "preview": [
+    {
+      "source": "culture-1",
+      "name": "文化部（音樂）",
+      "ok": true,
+      "rawCount": 452,
+      "contentHash": "397d71e83e2d7a61e23ab2f8dbf5e476e1e686acb5a85e5a8a595ef2160d54fa",
+      "fetchedAt": "2026-11-02T12:59:14.022Z",
+      "fetched": 2,
+      "current": 2,
+      "eligible": 2,
+      "pending": 0
+    },
+    {
+      "source": "culture-6",
+      "name": "文化部（展覽）",
+      "ok": true,
+      "rawCount": 277,
+      "contentHash": "fece214c328dac3c6ec061baace466ba94f6801dbf455d058864673aa5a4b201",
+      "fetchedAt": "2026-11-02T12:59:14.022Z",
+      "fetched": 1,
+      "current": 1,
+      "eligible": 1,
+      "pending": 0
+    },
+    {
+      "source": "culture-7",
+      "name": "文化部（講座）",
+      "ok": true,
+      "rawCount": 96,
+      "contentHash": "06c29612dcb1c6de277ec8615d789ffa7863ea25f995e1ab21137895a7a0cfab",
+      "fetchedAt": "2026-11-02T12:59:14.022Z",
+      "fetched": 0,
+      "current": 0,
+      "eligible": 0,
+      "pending": 0
+    },
+    {
+      "source": "yilan-site",
+      "name": "宜蘭勁好玩",
+      "ok": true,
+      "rawCount": 60,
+      "contentHash": "e6e784fbeff54fd45e4e159223a221d33a736fce23c179ad92847a0bcfb585bc",
+      "fetchedAt": "2026-11-02T12:59:14.022Z",
+      "fetched": 60,
+      "current": 3,
+      "eligible": 2,
+      "pending": 1
+    }
+  ],
+  "sync": {
+    "ok": true,
+    "status": "success",
+    "summary": [
+      {
+        "source": "culture-1",
+        "name": "文化部（音樂）",
+        "ok": true,
+        "rawCount": 452,
+        "contentHash": "397d71e83e2d7a61e23ab2f8dbf5e476e1e686acb5a85e5a8a595ef2160d54fa",
+        "fetchedAt": "2026-11-02T12:59:16.471Z",
+        "attempts": 1,
+        "fetched": 2,
+        "published": 0,
+        "updated": 0,
+        "pending": 0,
+        "duplicate": 0,
+        "preserved": 0,
+        "expired": 0,
+        "unchanged": 2
+      },
+      {
+        "source": "culture-6",
+        "name": "文化部（展覽）",
+        "ok": true,
+        "rawCount": 277,
+        "contentHash": "fece214c328dac3c6ec061baace466ba94f6801dbf455d058864673aa5a4b201",
+        "fetchedAt": "2026-11-02T12:59:16.471Z",
+        "attempts": 1,
+        "fetched": 1,
+        "published": 0,
+        "updated": 0,
+        "pending": 0,
+        "duplicate": 0,
+        "preserved": 0,
+        "expired": 0,
+        "unchanged": 1
+      },
+      {
+        "source": "culture-7",
+        "name": "文化部（講座）",
+        "ok": true,
+        "rawCount": 96,
+        "contentHash": "06c29612dcb1c6de277ec8615d789ffa7863ea25f995e1ab21137895a7a0cfab",
+        "fetchedAt": "2026-11-02T12:59:16.471Z",
+        "attempts": 1,
+        "fetched": 0,
+        "published": 0,
+        "updated": 0,
+        "pending": 0,
+        "duplicate": 0,
+        "preserved": 0,
+        "expired": 0,
+        "unchanged": 0
+      },
+      {
+        "source": "yilan-site",
+        "name": "宜蘭勁好玩",
+        "ok": true,
+        "rawCount": 60,
+        "contentHash": "e6e784fbeff54fd45e4e159223a221d33a736fce23c179ad92847a0bcfb585bc",
+        "fetchedAt": "2026-11-02T12:59:16.471Z",
+        "attempts": 1,
+        "fetched": 60,
+        "published": 0,
+        "updated": 0,
+        "pending": 0,
+        "duplicate": 1,
+        "preserved": 0,
+        "expired": 51,
+        "unchanged": 8
+      }
+    ]
+  },
+  "latestRun": {
+    "id": "24",
+    "started_at": "2026-11-02T12:59:16.438Z",
+    "finished_at": "2026-11-02T12:59:17.720Z",
+    "status": "success",
+    "summary": [
+      {
+        "ok": true,
+        "name": "文化部（音樂）",
+        "source": "culture-1",
+        "expired": 0,
+        "fetched": 2,
+        "pending": 0,
+        "updated": 0,
+        "attempts": 1,
+        "rawCount": 452,
+        "duplicate": 0,
+        "fetchedAt": "2026-11-02T12:59:16.471Z",
+        "preserved": 0,
+        "published": 0,
+        "unchanged": 2,
+        "contentHash": "397d71e83e2d7a61e23ab2f8dbf5e476e1e686acb5a85e5a8a595ef2160d54fa"
+      },
+      {
+        "ok": true,
+        "name": "文化部（展覽）",
+        "source": "culture-6",
+        "expired": 0,
+        "fetched": 1,
+        "pending": 0,
+        "updated": 0,
+        "attempts": 1,
+        "rawCount": 277,
+        "duplicate": 0,
+        "fetchedAt": "2026-11-02T12:59:16.471Z",
+        "preserved": 0,
+        "published": 0,
+        "unchanged": 1,
+        "contentHash": "fece214c328dac3c6ec061baace466ba94f6801dbf455d058864673aa5a4b201"
+      },
+      {
+        "ok": true,
+        "name": "文化部（講座）",
+        "source": "culture-7",
+        "expired": 0,
+        "fetched": 0,
+        "pending": 0,
+        "updated": 0,
+        "attempts": 1,
+        "rawCount": 96,
+        "duplicate": 0,
+        "fetchedAt": "2026-11-02T12:59:16.471Z",
+        "preserved": 0,
+        "published": 0,
+        "unchanged": 0,
+        "contentHash": "06c29612dcb1c6de277ec8615d789ffa7863ea25f995e1ab21137895a7a0cfab"
+      },
+      {
+        "ok": true,
+        "name": "宜蘭勁好玩",
+        "source": "yilan-site",
+        "expired": 51,
+        "fetched": 60,
+        "pending": 0,
+        "updated": 0,
+        "attempts": 1,
+        "rawCount": 60,
+        "duplicate": 1,
+        "fetchedAt": "2026-11-02T12:59:16.471Z",
+        "preserved": 0,
+        "published": 0,
+        "unchanged": 8,
+        "contentHash": "e6e784fbeff54fd45e4e159223a221d33a736fce23c179ad92847a0bcfb585bc"
+      }
+    ]
+  },
+  "activities": [
+    {
+      "id": 64,
+      "title": "舉人之力：蘭陽首舉百宅第常設展",
+      "start": "2026-01-01T00:00:00.000Z",
+      "end": "2026-12-31T00:00:00.000Z"
+    },
+    {
+      "id": 65,
+      "title": "二結王公文化祭｜二結王公廟240週年系列活動",
+      "start": "2026-09-19T00:00:00.000Z",
+      "end": "2026-12-23T00:00:00.000Z"
+    },
+    {
+      "id": 66,
+      "title": "2026 冬山河馬拉松",
+      "start": "2026-11-14T00:00:00.000Z",
+      "end": "2026-11-14T00:00:00.000Z"
+    },
+    {
+      "id": 76,
+      "title": "2026 宜蘭冬山河超級馬拉松",
+      "start": "2026-11-20T00:00:00.000Z",
+      "end": "2026-11-21T00:00:00.000Z"
+    },
+    {
+      "id": 72,
+      "title": "蘭燈之星 2026 新逸交響樂團年度公演",
+      "start": "2026-12-18T00:00:00.000Z",
+      "end": "2026-12-18T00:00:00.000Z"
+    },
+    {
+      "id": 71,
+      "title": "雙子二重奏《初心》",
+      "start": "2027-01-16T00:00:00.000Z",
+      "end": "2027-01-16T00:00:00.000Z"
+    }
+  ],
+  "checks": {
+    "publicList": true,
+    "backfillDetailHtml": true,
+    "noDuplicateBackfill": true,
+    "adminUnauthenticated": 401,
+    "cronUnauthenticated": 401,
+    "physicalPhone": "not tested",
+    "nextScheduledRun": "not yet observed"
+  },
+  "tests": {
+    "activityUnit": "16/16",
+    "isolatedDatabase": "passed; rollback",
+    "allUnit": "77/78; pre-existing coupon watcher regex failure",
+    "localBuild": "passed"
+  },
+  "deployment": {
+    "status": "READY",
+    "framework": "Nuxt",
+    "buildSeconds": 92.648,
+    "productionAliases": [
+      "yilanpass.com",
+      "www.yilanpass.com"
+    ]
+  },
+  "observability": {
+    "deploymentErrorScan": {
+      "since": "2026-11-02T12:44:25.866Z",
+      "until": "2026-11-02T12:59:25.866Z",
+      "levels": [
+        "error",
+        "fatal"
+      ],
+      "result": "No matching log records"
+    },
+    "drains": "not inspected",
+    "scheduledNextRun": "not yet observed"
+  }
+}

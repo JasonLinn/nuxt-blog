@@ -1,0 +1,1528 @@
+{
+  "dryRun": true,
+  "ok": true,
+  "summary": [
+    {
+      "source": "culture-1",
+      "name": "文化部（音樂）",
+      "ok": true,
+      "rawCount": 465,
+      "contentHash": "26d89d4c8ab51f1072b095b9d4e1ebea35c787a91898c0c0200401fe86c8e4c8",
+      "fetchedAt": "2026-11-04T03:54:49.182Z",
+      "fetched": 2,
+      "current": 2,
+      "eligible": 2,
+      "pending": 0
+    },
+    {
+      "source": "culture-6",
+      "name": "文化部（展覽）",
+      "ok": true,
+      "rawCount": 278,
+      "contentHash": "45c3bb3eaf5362c97721256648f61864f3befe90b307b5dd18fa9a7e107ac9e0",
+      "fetchedAt": "2026-11-04T03:54:49.182Z",
+      "fetched": 1,
+      "current": 1,
+      "eligible": 1,
+      "pending": 0
+    },
+    {
+      "source": "culture-7",
+      "name": "文化部（講座）",
+      "ok": true,
+      "rawCount": 99,
+      "contentHash": "8cbc70e83fd65db4e1b4c2e6526a9335fad89cce020fd5003db95375f80736e5",
+      "fetchedAt": "2026-11-04T03:54:49.182Z",
+      "fetched": 0,
+      "current": 0,
+      "eligible": 0,
+      "pending": 0
+    },
+    {
+      "source": "yilan-site",
+      "name": "宜蘭勁好玩",
+      "ok": true,
+      "rawCount": 60,
+      "contentHash": "d2c26c488aa334a62e464effdba9db3e0606b3871a3b7860e7e3a5929c15d62b",
+      "fetchedAt": "2026-11-04T03:54:49.182Z",
+      "fetched": 60,
+      "current": 3,
+      "eligible": 2,
+      "pending": 1
+    }
+  ],
+  "sources": [
+    {
+      "source": "culture-1",
+      "name": "文化部（音樂）",
+      "ok": true,
+      "rawCount": 465,
+      "contentHash": "26d89d4c8ab51f1072b095b9d4e1ebea35c787a91898c0c0200401fe86c8e4c8",
+      "fetchedAt": "2026-11-04T03:54:49.182Z",
+      "items": [
+        {
+          "external_id": "6a8c790426b32434f435803a:458bf00a89f0da6d",
+          "title": "雙子二重奏《初心》",
+          "description": "本場音樂會《初心》，由雙子二重奏策劃與演出，回歸打擊樂二重奏最純粹的形式。節目選錄多首風格與文化背景各異的作品，橫跨北歐當代創作、經典改編、二十世紀重要文本，以及跨文化與在地聲響的再詮釋，在緊密的二重奏編制中，展現節奏、音色與結構之間的深度對話，呈現當代打擊樂豐富而多層次的語彙。巴赫《英國組曲第二號》第五樂章〈布雷舞曲 I & II〉源自巴洛克組曲的",
+          "event_date": "2027-01-16",
+          "end_date": "2027-01-16",
+          "location": "宜蘭縣宜蘭市中山路二段482號 宜蘭演藝廳",
+          "organizer_name": "雙子打擊樂團",
+          "activity_type": "文化藝術",
+          "source_url": "https://www.opentix.life/program/2089266667219144705",
+          "source_updated_at": null,
+          "images": [
+            "https://s3.resource.opentix.life/upload/program/1787635311420dZrEdMJ2jZ.jpeg"
+          ],
+          "schedule_uncertain": false,
+          "image_source_name": "OPENTIX 官方活動頁",
+          "image_source_url": "https://www.opentix.life/event/2089266667219144705",
+          "schedule": [
+            {
+              "start": "2027/01/16 19:30:00",
+              "end": "2027/01/16 20:30:00",
+              "price": ""
+            }
+          ],
+          "reasons": [],
+          "expired": false,
+          "cancelled": false
+        },
+        {
+          "external_id": "6ad10a0826b324165c32e5fe:458bf00a89f0da6d",
+          "title": "蘭燈之星 2026 新逸交響樂團年度公演",
+          "description": "【蘭燈之星 2026 新逸交響樂團年度公演】音樂，照亮成長的燈光，心繫我們宜蘭的家鄉——延續「蘭燈之星」的初心，新逸交響樂團攜手林孝信文化基金會，再次以音樂為橋，匯聚來自宜蘭的優秀音樂人才，與專業音樂家攜手登台。這不只是一場音樂會，更是一場關於家鄉、傳承與成長的音樂相遇。本場演出由新逸交響樂團常任指揮許瀞心教授領銜，集結女高音劉夢潔、女中音陳佳雯、男中音趙方",
+          "event_date": "2026-12-18",
+          "end_date": "2026-12-18",
+          "location": "宜蘭縣宜蘭市中山路二段482號 宜蘭演藝廳",
+          "organizer_name": "新逸藝術有限公司",
+          "activity_type": "文化藝術",
+          "source_url": "https://www.opentix.life/program/2104863939604979713",
+          "source_updated_at": null,
+          "images": [
+            "https://s3.resource.opentix.life/upload/program/1791872794148RLnmTwSZay.png"
+          ],
+          "schedule_uncertain": false,
+          "image_source_name": "OPENTIX 官方活動頁",
+          "image_source_url": "https://www.opentix.life/event/2104863939604979713",
+          "schedule": [
+            {
+              "start": "2026/12/18 19:00:00",
+              "end": "2026/12/18 21:00:00",
+              "price": ""
+            }
+          ],
+          "reasons": [],
+          "expired": false,
+          "cancelled": false
+        }
+      ]
+    },
+    {
+      "source": "culture-6",
+      "name": "文化部（展覽）",
+      "ok": true,
+      "rawCount": 278,
+      "contentHash": "45c3bb3eaf5362c97721256648f61864f3befe90b307b5dd18fa9a7e107ac9e0",
+      "fetchedAt": "2026-11-04T03:54:49.182Z",
+      "items": [
+        {
+          "external_id": "6977d86a26b32454e437c46e:693524ccf9c5c735",
+          "title": "舉人之力：蘭陽首舉百宅第常設展",
+          "description": "黃纘緒——宜蘭歷史上第一位舉人，他用一生寫下「成就他人」的故事。\r\n走進黃舉人宅，不只是踏入一座百年古厝，更是走入一段深植人心的生命軌跡。這裡，是他的故居，也是宜蘭唯一現存的舉人宅第。展覽從他寒門苦讀、金榜題名，到返鄉投身地方建設的歷程娓娓道來。黃纘緒經營水圳、倡議建廟、推廣北管文化，黃纘緒將個人功名化作照亮鄉里的光，真實實踐了「君子成人之美」的文人價值。\r\n展覽以《舉人之力》為主題，從正廳家具、書法工藝到科舉制度與北管戲曲，透過場景重現與互動體驗，帶領你穿越清代科舉的層層考驗，感受黃纘緒如何憑藉毅力與信念脫穎而出，並將知識與品格轉化為助人之力。\r\n今日的黃舉人宅，不僅是三合院，更是一座關於責任、善念與影響力的啟發基地。 誠摯邀請你，走進歷史，等你來點亮，下一個善的故事。",
+          "event_date": "2026-01-01",
+          "end_date": "2026-12-31",
+          "location": "宜蘭縣五結鄉24鄰五濱路二段201號 國立傳統藝術中心宜蘭園區",
+          "organizer_name": "財團法人全聯善美的文化藝術基金會",
+          "activity_type": "文化藝術",
+          "source_url": "https://cloud.culture.tw/frontsite/opendata/activityOpenDataJsonAction.do?category=6&method=doFindActivitiesByCategory",
+          "source_updated_at": null,
+          "images": [
+            "https://admin.px-sunmake.org.tw/Public/exhibition/955/2.jpeg",
+            "https://admin.px-sunmake.org.tw/Public/exhibition/955/3.jpeg",
+            "https://admin.px-sunmake.org.tw/Public/exhibition/955/4.jpeg",
+            "https://admin.px-sunmake.org.tw/Public/exhibition/955/5.jpeg",
+            "https://admin.px-sunmake.org.tw/Public/exhibition/955/6.jpeg",
+            "https://admin.px-sunmake.org.tw/Public/exhibition/955/7.jpeg"
+          ],
+          "schedule_uncertain": false,
+          "image_source_name": "宜蘭傳藝園區／全聯善美的文化藝術基金會",
+          "image_source_url": "https://www.px-sunmake.org.tw/exhibition/955",
+          "schedule": [
+            {
+              "start": "2026/01/01 09:00:00",
+              "end": "2026/12/31 17:00:00",
+              "price": "門票--敬老票+75;門票--縣民票+100;門票--優待票+120;門票--普通票+150"
+            }
+          ],
+          "reasons": [],
+          "expired": false
+        }
+      ]
+    },
+    {
+      "source": "culture-7",
+      "name": "文化部（講座）",
+      "ok": true,
+      "rawCount": 99,
+      "contentHash": "8cbc70e83fd65db4e1b4c2e6526a9335fad89cce020fd5003db95375f80736e5",
+      "fetchedAt": "2026-11-04T03:54:49.182Z",
+      "items": []
+    },
+    {
+      "source": "yilan-site",
+      "name": "宜蘭勁好玩",
+      "ok": true,
+      "rawCount": 60,
+      "contentHash": "d2c26c488aa334a62e464effdba9db3e0606b3871a3b7860e7e3a5929c15d62b",
+      "fetchedAt": "2026-11-04T03:54:49.182Z",
+      "items": [
+        {
+          "external_id": "176",
+          "title": "2026映像節(預計為11-12月辦理)",
+          "description": "中興文化創意園區（以下簡稱本園區）自2017年試營運，即被賦予串連宜蘭縣內文化聚落、培養文化藝術軟實力與文創產業匯流旗艦基地之使命。\r\n\r\n本園區為臺灣重要的工業遺構，其獨特的空間魅力為最重要的資產與特色，以「光」與「影」為創作主題，透過光的投射與影的生成，形成「互為表裡」的視覺語言。展覽將運用燈光裝置、互動投影、沉浸式場景，讓觀眾於步行中感受時間、空間與自我交疊的多重體驗。\r\n\r\n〈流動的纖維光影 Flowing Fiber〉Lua Rivera\r\n以抽象語彙捕捉紙漿纖維在水中漂浮的詩意瞬間，象徵造紙工藝的生命律動。\r\n\r\n\r\n〈光聚 ─ 緩緩 Light Gathering — Gently〉\r\n以星形構件組構大尺度裝置，觀者步入其中，身影牽動光的波紋，形成光影的緩慢流動。",
+          "event_date": "2026-11-01",
+          "end_date": "2026-12-31",
+          "location": "宜蘭縣五結鄉中正路二段6之8號 (中興文化創意園區)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/176/",
+          "source_updated_at": "2026-01-07T11:51:14.4167341",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27004/480x360_articles-image-vnd9t7bi9kek35iejf39pg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27003/480x360_articles-image-ssdk922ko0i5-lf0ucnjmq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/176/",
+          "reasons": [
+            "日期或場次需確認"
+          ],
+          "expired": false
+        },
+        {
+          "external_id": "346",
+          "title": "二結王公文化祭｜二結王公廟240週年系列活動",
+          "description": "二結王公廟走過240年香火歲月，古公三王信仰長久守護地方，也承載著一代又一代居民與信徒的記憶。今年特別規劃三大慶典系列活動，結合祈安遶境、祈福法會、公益市集、平安福宴、王公論壇、音樂演出與煙火秀等，邀請全國信眾與鄉親朋友，共同迎接這場重要的文化盛會！\r\n\r\n240年，是見證王公神威的歲月，也是地方共同珍藏的記憶。誠摯邀請大家走進二結王公廟，一起祈福、逛市集、享福宴、賞煙火，共同為古公三王祝壽，見證二結王公廟240週年的榮耀時刻！\r\n\r\n\r\n【系列活動資訊】\r\n\r\n▋9/19－9/20｜古公三王南北巡🏮\r\n古公三王聖駕出巡，並隆重迎請白沙屯拱天宮、山邊媽祖宮前來聯合遶境，巡行宜蘭多處宮廟，祈求蘭陽平原風調雨順、地方百業暢旺興盛、闔蘭平安。\r\n\r\n活動日程｜\r\n\r\n9/19（六）｜北巡 Northern Route\r\n9/20（日）｜南巡 Southern Route\r\n\r\n\r\n亮點區域｜\r\n\r\n\r\n五結 Wujie｜走進王公信仰的故鄉，感受田園聚落與240年香火傳承\r\n羅東 Luodong｜跟著神轎穿梭熱鬧街區，祈福之餘也別忘了品嚐宜蘭好味道\r\n冬山 Dongshan｜走過田野、水岸與地方聚落，看見最有人情味的蘭陽風景\r\n\r\n\r\n\r\n▋10/9－10/11｜240週年祈安法會🙏\r\n連續三天舉辦祈福法會，並結合市集、晚會與王公論壇\r\n\r\n10/9（五）\r\n\r\n\r\n08:00－16:30｜祈福法會\r\n15:00－21:00｜廟口公益市集（將邀請知名美食餐車與在地特色攤商，以傳統美食、古早童玩及傳統工藝為主題，重現早期廟口熱鬧歡騰的景象。）\r\n\r\n\r\n10/10（六）\r\n\r\n\r\n08:00－16:30｜祈福法會\r\n17:00－18:30｜友宮廟祝壽\r\n18:30－20:30｜平安福宴晚會（將安排藝人及藝文團體演出，20:10更有絢爛煙火秀，陪大家共同為王公祝壽！）\r\n\r\n\r\n10/11（日）\r\n\r\n\r\n08:00－16:30｜祈福法會\r\n09:00－12:00、14:00－16:00｜王公論壇\r\n\r\n\r\n\r\n▋12/19－12/23｜二結王公文化節🔥\r\n王公生慶典將迎來抓童乩、跳過火等重要傳統儀式，帶領大家走進二結深厚的信仰文化，共同見證年度代表性的宗教盛典之一。",
+          "event_date": "2026-09-19",
+          "end_date": "2026-12-23",
+          "location": "宜蘭縣五結鄉宜蘭境內",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/346/",
+          "source_updated_at": "2026-09-17T15:44:54.8464165",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28047/480x360_articles-image-7qr2sbjmska0cfrf3kv35a.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28049/480x360_articles-image-bnfubv0oc0epagw-ultozw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28048/480x360_articles-image-whi_hz-pf0afts-ibkvslw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/346/",
+          "reasons": [],
+          "expired": false
+        },
+        {
+          "external_id": "219",
+          "title": "2026 冬山河馬拉松",
+          "description": "迎風奔跑，來場全台最便利的綠運輸馬拉松！✨\r\n2026 冬山河馬拉松，帶你穿越生態綠舟的森林與濕地、感受冬山河的開闊河景與鄉間風光，從不同角度體驗冬山之美！📸\r\n\r\n【ℹ️活動資訊】\r\n\r\n活動日期📅：2026/11/14(六)\r\n集合地點📍：冬山火車站前廣場\r\n集合時間⏰：05:50 開場（各組於 06:30 起陸續鳴槍出發）\r\n\r\n\r\n【🗺️路線組別】火車站就是起終點，路線平緩安全，風景美麗 🏃‍♂️💨_________\r\n\r\n\r\n🏃42公里全馬組｜06:30起跑 (限時 7.5 小時)\r\n🏃21公里半馬組｜06:40起跑\r\n🏃10公里挑戰組｜06:50起跑\r\n🏃5公里休閒組｜07:00起跑\r\n\r\n＊路線以冬山火車站為起終點，途經冬山河自行車道、加禮遠橋、茄冬橋、生態綠洲等美麗秘境\r\n\r\n【📝報名資訊】\r\n\r\n\r\n報名時間⏰：2025/12/22 至 2026/10/10止 (若額滿將提前截止) \r\n活動費用💰：42K組 850元 / 21K組 750元 / 10K組 650元 / 5K組 550元 (影流2025年度賽事跑者及宜蘭縣民另享專屬優惠價)\r\n報名連結及活動詳情🔗：2026冬山河馬拉松-活動簡章\r\n\r\n\r\n💡溫馨提醒：本賽事全面落實永續環保理念，賽道補給站不提供一次性紙杯與塑膠杯，請跑友記得自備水具喔！活動當天會場還有舉辦「冬山好格秋市集」，讓大家完賽後可以直接逛市集、吃美食。快標記你的跑友夥伴，一起來報名吧！🙌",
+          "event_date": "2026-11-14",
+          "end_date": "2026-11-14",
+          "location": "宜蘭縣冬山鄉冬山車站站前廣場",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/219/",
+          "source_updated_at": "2026-04-16T18:03:55.1826899",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27221/480x360_articles-image-sgcdyfaymuwczu1snicl2w.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/219/",
+          "reasons": [],
+          "expired": false
+        },
+        {
+          "external_id": "352",
+          "title": "2026 月亮什麼冬冬",
+          "description": "🌕一年一度的「月亮什麼冬冬」來囉！\r\n今年的主題——「中秋月亮變身飛碟降臨冬山，展開星際之旅」！將飛碟概念與月亮裝置結合，要在冬山火車站廣場為大家帶來不一樣的中秋氛圍，活動期間現場也準備了幸福冬山環保購物袋和冬山在地好吃的柚子要送給大家！\r\n\r\n只要在活動現場與裝置藝術合照打卡，即可至服務台兌換好禮（數量有限，送完為止）\r\n秋高氣爽的夜晚，歡迎大家搭乘火車或順道來冬山散散步、拍拍照，感受一下專屬於冬山的中秋夜景色。\r\n\r\n📅活動資訊\r\n活動日期｜2026年9月23日（三）至 11月1日（日）\r\n點燈時間｜每日 17:00 — 23:00\r\n活動地點｜冬山火車站前廣場\r\n兌換時間｜自 9/23 起 17:00 開始於火車站下服務台兌換，送完為止\r\n\r\n平日兌換時間 17:00－22:00\r\n假日兌換時間 08:00－22:00\r\n\r\n\r\n🪧小叮嚀：夜間前往請注意步伐與自身安全，拍照時也請共同愛護現場的展覽裝置與設施！📸",
+          "event_date": "2026-09-23",
+          "end_date": "2026-11-01",
+          "location": "宜蘭縣冬山鄉冬山火車站前廣場",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/352/",
+          "source_updated_at": "2026-10-06T16:19:13.0712753",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28115/480x360_articles-image-679tmpawne2hoee2kapkiq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/352/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "186",
+          "title": "鏡看五結之美攝影比賽(預計5~10月辦理)",
+          "description": "活動時間以主辦單位最新公告為主，內容規劃中，敬請期待。\r\n\r\n五結鄉擁有豐富自然資源與人文歷史，為推廣鄉內自然景觀及產業文化，促進休閒旅遊活動與觀光產業發展 五結鄉公所鼓勵民眾走出戶外，深入探索走訪五結美景，將淳樸自然景色的美麗意象，透過攝影愛好者的技巧與舖陳，用攝影鏡頭紀錄四季轉變的樣貌，展現屬於五結的生命力及留住瞬間之美。\r\n\r\n\r\n活動資訊\r\n\r\n\r\n活動時間：每年5~10月份期間徵件\r\n活動地點：頒獎暨成果發表活動於12月份於五結鄉公所舉辦(五結路二段343號)",
+          "event_date": "2026-05-01",
+          "end_date": "2026-10-31",
+          "location": "宜蘭縣五結鄉五結路二段343號（五結鄉公所）",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/186/",
+          "source_updated_at": "2026-01-21T14:57:27.2588026",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27064/480x360_articles-image-l3ucgppeqee56v_vjyz8dg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27067/480x360_articles-image-8ed8djr9uuun-o6ndnpjea.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27066/480x360_articles-image-u4542etdu0of7yfh28fqlg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27065/480x360_articles-image-0bo2cfxkweqv7w-loqkoba.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/186/",
+          "reasons": [
+            "日期或場次需確認"
+          ],
+          "expired": true
+        },
+        {
+          "external_id": "362",
+          "title": "蘭陽原創館「鬼混日」",
+          "description": "🎃 警告！10/31，原創館今天沒有正常人！\r\n\r\n如果你這天來蘭陽原創館，先提醒你一件事—這裡可能沒有正常人，有一些平常不太會出現在原創館的「神秘來客」👻\r\n\r\n今年萬聖節，蘭陽原創館準備了一天的「鬼混日」！\r\n不管你是想來搞怪、來拍照、來找朋友一起鬼混，還是只是想看看今天到底會發生什麼事，10/31，通通可以來😈\r\n\r\n📅活動資訊\r\n日期｜10/31（六）\r\n時間｜10:00－18:00\r\n地點｜蘭陽原創館",
+          "event_date": "2026-10-31",
+          "end_date": "2026-10-31",
+          "location": "宜蘭縣宜蘭市蘭陽原創館",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/362/",
+          "source_updated_at": "2026-10-16T12:37:21.4950837",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28162/480x360_articles-image-pxzd27fgee-wixo4azufzq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/362/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "360",
+          "title": "宜蘭傳藝園區｜10月主題劇場《嬉遊梨園》",
+          "description": "來看經典「古」戲－陳三與五娘在元宵節初次邂逅\r\n本演出內容取材自梨園戲《陳三五娘》的〈睇燈〉一折，描寫元宵時節才子佳人們外出賞燈🏮，陳三與五娘於賞花燈時邂逅產生情愫💕\r\n\r\n劇中更加上〈踢球〉與〈跳加官〉橋段，邀請觀眾一起體驗戲曲肢體+球僮踢球的橋段⚽️\r\n若您從沒看過陳三與五娘的愛情故事，輕鬆入門【南管梨園戲】的好表演就在宜蘭傳藝園區✨\r\n\r\n🪧演出資訊\r\n節目名稱：嬉遊梨園\r\n演出日期：2026/10/12~10/31\r\n演出團隊：江之翠劇場\r\n演出地點：廟埕廣場\r\n演出場次：每日13:00，週五至週日及10/26(一) 加演15:30",
+          "event_date": "2026-10-12",
+          "end_date": "2026-10-31",
+          "location": "宜蘭縣五結鄉宜蘭傳藝園區廟埕廣場",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/360/",
+          "source_updated_at": "2026-10-16T12:12:38.3577158",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28159/480x360_articles-image-tcwnzcwet02iu5udq5gmxg.jpeg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/360/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "359",
+          "title": "興創村市集｜搗蛋鬼報到",
+          "description": "叮咚！是誰在門外敲敲門？👻\r\n原來是一群準備來搗蛋的小鬼們，帶著滿滿的萬聖節魔法，偷偷溜進 #中興文創園區啦！\r\n\r\n南瓜燈亮起🎃、糖果裝滿口袋🍭，還有各式各樣的特色選物、創意手作與美味甜點，通通準備好和大家見面！趁著光復節連假，一起來市集探險，尋找藏在各處的小驚喜，讓歡笑與可愛充滿整個園區！\r\n\r\n📅活動資訊\r\n活動日期｜10/24（六）－ 10/26（一）\r\n活動時間｜10:00－18:00\r\n活動地點｜宜蘭中興文創園區（光合屋、南榕廣場）",
+          "event_date": "2026-10-24",
+          "end_date": "2026-10-26",
+          "location": "宜蘭縣五結鄉宜蘭中興文創園區(光合屋、南榕廣場)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/359/",
+          "source_updated_at": "2026-10-16T12:03:38.6586718",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28158/480x360_articles-image-mjhwdnr1rkilxb0qnicb9q.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/359/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "192",
+          "title": "「世紀初戀．楊麗花」歌仔戲特展",
+          "description": "🎎歌仔戲特展：重溫電視黃金年代的動人魅力\r\n本次特展以「世紀初戀」為名，致敬歌仔戲國寶級大師楊麗花。誠摯邀請大眾走進宜蘭傳藝園區，重新找回那段「吃飯配歌仔戲」的電視黃金年代記憶，深度感受歌仔戲跨越世代的文化傳承與藝術張力。\r\n\r\nℹ️活動資訊\r\n\r\n活動日期：2025.12.25（四）－ 2026.10.25（日）\r\n開放時段：每日 09:00－18:00（週一上午休館，中午 12:00 始開放參觀）\r\n活動地點：國立傳統藝術中心・宜蘭園區展示館（宜蘭縣五結鄉五濱路二段201號）\r\n團體導覽：如有團體需求，請至預約連結申請\r\n\r\n\r\n✨ 活動亮點\r\n📺 懷舊記憶重現：帶領觀眾重返電視黃金年代，體驗楊麗花席捲全台的歌仔戲黃金期。\r\n🎨 優質參觀體驗：為維持展覽品質，現場將根據人潮狀況實施流量管控，確保每位觀眾都能享有舒適的觀展空間。\r\n\r\n🔺注意事項：建議出發前搜尋「國立傳統藝術中心」官方資訊，掌握第一手展覽動態與相關配套活動。",
+          "event_date": "2025-12-25",
+          "end_date": "2026-10-25",
+          "location": "宜蘭縣五結鄉五濱路二段201號",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/192/",
+          "source_updated_at": "2026-02-03T16:45:54.9635871",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27087/480x360_articles-image-gizcakwmnk6f8xcexk-ehw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/192/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "353",
+          "title": "2026 亞太傳統藝術節",
+          "description": "「眾水之境」以「水的文化」為主題，集結印度、印尼、日本、韓國與臺灣的頂尖團隊來共襄盛舉✨\r\n\r\n📅活動資訊\r\n活動日期｜2026/10/3(六)-10/11(日)\r\n活動地點｜宜蘭傳藝園區\r\n主辦單位｜國立傳統藝術中心\r\n指導單位｜文化部\r\n協辦單位｜財團法人全聯善美的文化藝術基金會\r\n\r\n⭐亮點時段\r\n10:00-10:30｜文化體驗📍廟埕廣場\r\n10:30-11:30｜異國晨間劇場📍曲藝館、蔣渭水演藝廳\r\n11:00-12:00｜劇場秀上午場📍臨水劇場\r\n13:00-13:30｜文化體驗📍廟埕廣場\r\n14:00-16:00｜劇場秀下午場📍各劇場\r\n\r\n🎊限定亮點\r\n▋異國市集\r\n10/3（六）－10/4（日）｜迷霧森林廣場\r\n\r\n▋限定踩街\r\n10/3（六）－10/11（日）周末限定 16:00-16:30｜文昌街\r\n\r\n▋水燈體驗\r\n10/3（六）、10/10（六） 17:00｜迷霧森林後方河畔\r\n\r\n▋文化 DIY\r\n10:30、13:30共兩場次｜展示館大廳\r\n\r\n\r\n🪧宜蘭傳藝園區 10/3—10/11 入園優惠\r\n\r\n宜蘭縣民：持有效身分證件，享本人免費入園\r\n新住民朋友：持居留證或身分證，享門票買一送一\r\n雙十壽星（10/10限定）：當日壽星享本人免費入園\r\n\r\n\r\n\r\n📝搶票攻略＆劇場須知\r\n\r\n\r\n蔣渭水演藝廳、曲藝館：需先索票才能入場\r\n臨水劇場、廟埕廣場：無須索票，開演前30分鐘自由入場\r\n小提醒：活動索票免費，但進入園區的入園門票需要另外購買！",
+          "event_date": "2026-10-03",
+          "end_date": "2026-10-11",
+          "location": "宜蘭縣五結鄉宜蘭傳藝園區",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/353/",
+          "source_updated_at": "2026-10-06T16:10:46.0418803",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28116/480x360_articles-image-szwpozmede-fewnfaz2afq.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28125/480x360_articles-image-t0ehqtx-nusbdhwicnmhzq.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28124/480x360_articles-image-nnoneewv00g5zlhuyfpbng.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28123/480x360_articles-image-nj0xmt71v06m5jm4xnbxua.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28122/480x360_articles-image-tzfe0ifzaeaikpp4mypbvg.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28121/480x360_articles-image-jdvsdojejecwgzbbrfbzcq.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28120/480x360_articles-image-g2aflh_hiegycs_5dk4ezg.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28119/480x360_articles-image-en67ojs6oeq-eesi4wlhzg.jpeg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/353/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "357",
+          "title": "興創村市集｜豐收投投樂",
+          "description": "秋日收成祭，除了在 中興文化創意園區 逛市集，現場也準備了一個充滿秋日氣息的童趣小遊戲——「豐收投投樂」！\r\n\r\n拿起裝滿稻米象徵豐收的「稻米小包」，把滿溢的熱情用力投入前方的豐收籃裡！\r\n簡單又有趣，歡迎大朋友小朋友一起來參加，看看你能投進幾個吧🌾\r\n這個雙十連假，不妨抽空來興創村市集走走逛逛，感受屬於秋日的豐收樂趣吧🍂\r\n\r\n📅活動資訊\r\n活動日期｜10/9（五）－10/11（日）\r\n活動時間｜10:00－18:00\r\n活動地點｜宜蘭中興文創園區 光合屋、戲棚下\r\n\r\n🎁打卡活動\r\n來到現場體驗「豐收投投樂」，拍照打卡標註「宜蘭中興文化創意園區」，並出示畫面至服務台，即可領取一份神秘小禮物（送完為止）！",
+          "event_date": "2026-10-09",
+          "end_date": "2026-10-11",
+          "location": "宜蘭縣五結鄉宜蘭中興文創園區光合屋、戲棚下",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/357/",
+          "source_updated_at": "2026-10-06T17:13:18.6149963",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28138/480x360_articles-image-tuwnbj-qi0mxfgyup-ucja.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28137/480x360_articles-image-hddjzenvo06153ta5g15qq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/357/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "152",
+          "title": "2026 邁大步 Chill 健走 宜蘭健康好生活",
+          "description": "2026新的一年，宜蘭衛生局規劃了多場次活力健走活動，邀請鄉親朋友們全家大小一起來健走，增加身體活動。健走好處非常多，除了活動活動筋骨、放鬆身心壓力外，也能增加家庭情感的凝聚力，享受歡樂美好的幸福時光。\r\n\r\n【活動主題】\r\n\r\n115年元旦升旗典禮暨全民活力健行活動    \r\n日期：01.01 (四)    \r\n時間：06:30-10:00    \r\n集合地點：宜蘭運動公園 田徑場\r\n\r\n婦幼健康齊步走 幸福安全樂長久\r\n日期：03.28 (六)    \r\n時間：06:30-09:30\r\n集合地點：蘇澳武荖坑風景區 \r\n\r\n走向無菸新生活 遠離菸害迎健康\r\n日期：05.30 (六)    \r\n時間：06:30-10:30        \r\n集合地點：羅東運動公園      \r\n\r\n大步健走 CHILL GO GO 健康樂活趣  \r\n日期：08.22 (六)    \r\n時間：06:30-10:30    \r\n集合地點：宜蘭市鎮安廟廣場(宜蘭市鎮安路21號)\r\n\r\n115年國慶升旗典禮暨全民活力健行活動\r\n10.10 (六)\r\n06:30-10:00\r\n宜蘭運動公園 田徑場",
+          "event_date": "2026-01-01",
+          "end_date": "2026-10-10",
+          "location": "",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/152/",
+          "source_updated_at": "2025-12-23T11:01:24.0449245",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26735/480x360_articles-image-hejmugbi10unrrneflgyza.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/152/",
+          "reasons": [
+            "缺少活動地點"
+          ],
+          "expired": true
+        },
+        {
+          "external_id": "350",
+          "title": "2026 宜蘭星光音樂節",
+          "description": "雙十連假不只看煙火，還要一起聽音樂、逛市集、玩運動！\r\n\r\n📅活動資訊\r\n活動日期｜10/9（五）～10/10（六）\r\n活動時間｜15:00～21:30\r\n活動地點｜宜蘭運動公園體育館前廣場\r\n\r\n\r\n🎶活動內容\r\n◖15:00～21:30｜美食市集・露營休憩區\r\n60攤品牌與特色美食、露營風休憩場域，坐在草地上享受音樂\r\n\r\n◖15:00～18:00｜小舞台演出\r\n伯爵白Earl Blanc、你阿伯NeaR Band、你我U&I、SONNIE桑尼、核果人NUTS、沈默紳士輪番演出！\r\n\r\n◖15:00～18:00｜戶外運動體驗（免預約、現場排隊即可參加）\r\n體能極限氣墊、人體泡泡球\r\n\r\n◖18:30～21:30｜大舞台\r\n\r\n10/9（五）｜星光搖滾晚會⭐\r\n\r\n\r\n芒果醬、董事長樂團、無妄合作社、U:NUS、HUR+、玖壹壹\r\n\r\n\r\n10/10（六）｜經典民歌晚會🎤\r\n\r\n\r\n鄭怡、黃仲崑、于台煙、王海玲、施孝榮、許景淳\r\n\r\n◖10/10（六）晚間｜國慶煙火秀\r\n一起在璀璨煙火中歡慶雙十國慶！🇹🇼 🇹🇼\r\n\r\n\r\n🎁限量好禮\r\n活動當日到 宜蘭市文化發展所FB貼文留言指定文字＋Tag 3位好友，出示留言畫面即可至服務台領取，15:00起發送，每日限量250個防水露營墊，送完為止！",
+          "event_date": "2026-10-09",
+          "end_date": "2026-10-10",
+          "location": "宜蘭縣宜蘭市宜蘭運動公園體育館前廣場",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/350/",
+          "source_updated_at": "2026-10-06T15:37:16.6074212",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28107/480x360_articles-image-b-65scc5q0edv3uvkvzdvq.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28108/480x360_articles-image-m1ytdfo3aeuqhtoaeglw1q.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/350/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "337",
+          "title": "2026蘭陽媽祖文化節",
+          "description": "「2026蘭陽媽祖文化節」訂於 10月2日（五）至10月4日（日） 盛大舉行，虔誠恭請本宮「天上聖母媽祖」聖駕巡境蘭陽，祈願四境平安、百業興旺、萬民安康。\r\n\r\n10月2日｜烏石港起駕 蘭陽女將護女神\r\n首日特別邀集蘭陽在地女神將共同護駕，包括宜蘭東嶽廟「碧霞元君」、礁溪慈母宮「順天聖母」、壯圍番社同安廟「大宮主二宮主」、宜蘭城隍廟「大小姐二小姐」、阿蘭城廣濟宮「吳德秀小姐吳惠玲小姐」、宜蘭靖安堂「門徒白姑娘」及宜蘭市靈惠廟「陳懷玉郡主」，諸方女將共同恭迎媽祖聖駕啟程，展開三天兩夜巡境祈安。\r\n\r\n10月2日｜烏石港起駕 十二婆姐伴聖行\r\n首日特邀臺南六甲恒安宮「十二婆姐陣」跨越南北蒞臨蘭陽。十二婆姐源自臨水夫人陳靖姑信仰，護嬰保產、消災賜福與慈悲護童，是臺灣傳承至今極具特色珍貴民俗藝陣；當日將於烏石港展演賜福收驚，並沿遶境路線先行巡演、恭迎媽祖聖駕，讓蘭陽鄉親難得一睹十二婆姐陣風采，也為本年度蘭陽媽祖巡境，增添別具特色傳統文化。\r\n\r\n10月2日至10月4日｜十七天后 作客蘭陽\r\n適逢本宮寶石珊瑚媽祖安座十七週年紀念，虔誠恭迎花蓮港天宮、屏東東港朝隆宮、下茄萣金鑾宮、安平開台天后宮、六甲恒安宮、笨港口港口宮、新港奉天宮、西螺福興宮、北港朝天宮、鹿港天后宮、彰化南瑤宮、大庄浩天宮、大甲鎮瀾宮、白沙屯拱天宮、山邊媽祖宮、桃園慈護宮、北投關渡宮聖駕作客蘭陽，齊拜「十七天后會珊瑚」眾位天后媽祖。\r\n\r\n10月2日至10月4日｜百年北管 開路迎駕\r\n特別邀請創立於清道光四年（1824）的「宜蘭暨集堂」參與，以傳承逾百年的北管文化為本宮媽祖聖駕開路迎駕，讓媽祖信仰與蘭陽傳統藝陣文化同行。\r\n\r\n10月3日至10月4日｜三后齊聚 福耀蘭陽\r\n本次盛會由本宮擔綱主祀，奉請聖駕巡境，並虔誠恭迎：\r\n\r\n西螺福興宮｜再續聖緣\r\n\r\n聖駕上午於「宜蘭橋旁北津公園」恭迎入隊，與本宮聖駕共同巡境祈安。\r\n\r\n\r\n北港朝天宮｜首贊蘭陽\r\n\r\n聖駕上午於「蘭陽別院」恭迎入隊，三后聖駕齊聚蘭陽、同行賜福，共祈風調雨順、地方安泰、萬民蒙福。\r\n\r\n10月4日｜大甲聖母宮 贊境接駕\r\n台中大甲聖母宮虔誠贊境，恭接南方澳進安宮媽祖聖駕圓滿回鑾，護送聖駕返宮安座。\r\n\r\n\r\n【沿途接駕敬請共同配合】\r\n因應本次文化節由主祀宮廟「南方澳進安宮」廣邀各地友宮共襄盛會，預期沿途參香、隨駕及接駕人潮眾多，尤其三后聖駕同行路段，預估將有許多宮廟、團體及信眾設香案恭迎。\r\n\r\n為兼顧虔誠禮敬、遶境行程及沿線交通順暢，敬請各接駕宮廟、團體及信眾儘量簡化接駕儀式、掌握時間，避免聖駕停留過久而影響後續行程及周邊道路通行。禮敬不在繁複，一炷清香、一份虔心，皆是對媽祖最誠摯的敬意。\r\n\r\n另考量本次隊伍規模及隨行人潮較多，部分沿線如屬 人口較少、路程較長，或不適宜大型隊伍徒步行進路段，採取車巡方式前往下一處抵達點，以維護隊伍、人員及道路交通安全。\r\n\r\n沿途如有宮廟、團體或信眾規劃設置 紅壇、臨時行宮、接駕帳篷、香案等設施，敬請事先評估遶境行經道路寬度、交通動線及設置位置，避免占用道路或影響人車通行；如對聖駕行經路線、接駕位置或相關安排有所疑問，建請事先洽詢主辦(祀)單位確認。\r\n\r\n※遶境實際時間依當日行程為準\r\n※敬請參閱活動GPS定位\r\n\r\n主辦單位｜宜蘭縣政府\r\n主祀單位｜南方澳進安宮\r\n\r\n以媽祖慈航為引、眾神護佑為願，廣邀各地友宮聖駕共襄盛舉，串聯蘭陽城鄉接駕與百年北管文化。敬請沿途宮廟、機關民意團體及信眾鄉親共同配合，祈願三天兩夜巡境順遂、四境平安、盛會圓滿。\r\n\r\n十月相逢在蘭陽，作伙迎駕祈吉祥，我們十月蘭陽見。",
+          "event_date": "2026-10-02",
+          "end_date": "2026-10-04",
+          "location": "",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/337/",
+          "source_updated_at": "2026-09-11T20:07:35.9799158",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28023/480x360_articles-image-pjav0q0xduquib6bymojng.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28025/480x360_articles-image-r1hwdus0buudeoiwtxdlzg.jpeg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28024/480x360_articles-image-ydiici4b10kxradpd_skcq.jpeg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/337/",
+          "reasons": [
+            "缺少活動地點"
+          ],
+          "expired": true
+        },
+        {
+          "external_id": "185",
+          "title": "樂趣五結系列活動-穗花棋盤腳、農家樂、同樂繪、划船趣(預計6~9月份辦理)",
+          "description": "活動時間以主辦單位最新公告為主，內容規劃中，敬請期待。\r\n\r\n五結鄉位於蘭陽溪的出海口，擁有豐饒的平原和遼闊的海岸，地勢平坦、地理景觀豐富，冬山河中、下游精華河段盡在五結鄉境內，孕育出五結鄉豐富的物產與多元的人文、歷史、廟宇文化；還有許多的樂趣等著鄉親旅人們來體驗，故規劃樂趣五結的系列活動，讓更多民眾來到五結進而認識五結。\r\n\r\n\r\n活動資訊\r\n\r\n活動時間：每年 6~9月份期間\r\n活動內容：穗花棋盤腳、農家樂、同樂繪、划船趣\r\n活動地點：\r\n\r\n穗花棋盤腳活動於五結鄉52甲溼地福德廟 (利澤西路18號)\r\n農家樂活動原則上於錦眾村/孝威村舉辦\r\n同樂繪及划船樂活動於五結鄉花樹廊道 (五結國小旁，五結中路二段88號)",
+          "event_date": "2026-06-01",
+          "end_date": "2026-09-30",
+          "location": "",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/185/",
+          "source_updated_at": "2026-01-21T15:00:43.5717963",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27061/480x360_articles-image-e-9yooge9e-s4ao3fshz9w.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27063/480x360_articles-image-jypkhuy7zkacs21ewkzptw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27062/480x360_articles-image-9jeo_zwaiuutkzul8tuu-g.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27060/480x360_articles-image-p9_bvpsww0imc_-mnuuvca.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/185/",
+          "reasons": [
+            "缺少活動地點",
+            "日期或場次需確認"
+          ],
+          "expired": true
+        },
+        {
+          "external_id": "344",
+          "title": "水印大湖開園活動",
+          "description": "坐落於員山鄉的大湖風景特定區，由雪山山脈的地下湧泉匯聚而成\r\n這裡有清澈的湖光、豐富的生態，還有宜蘭專屬的慢活步調\r\n\r\n每一次造訪，山色、水光與天際線的交織，總能讓人看見大湖不同的迷人模樣\r\n在這裡，旅行不再只是走訪景點，而是一場與土地、微風、自然相遇的對話🌿\r\n\r\n為落實觀光永續願景，宜蘭縣政府細心籌備的大湖風景特定區，即將以嶄新面貌與大家重逢！\r\n這不僅是一處秘境的重新解鎖，更是員山旅遊的新起點\r\n期盼將在地的人文溫度，透過湖畔的微風，傳遞給每一位旅人\r\n\r\n放慢腳步，把週末留給大自然吧！\r\n聽風、看水、賞四季，我們在大湖畔，不見不散🌲\r\n\r\n\r\n📝活動資訊\r\n日期🗓️｜9/26 (六) ─ 9/27 (日)\r\n時間⏰｜09:00 - 16:00\r\n地點📍｜員山鄉 大湖風景特定區\r\n內容✨｜漫步絕美湖岸 ✕ 質感地方市集 ✕ 多元藝文展演\r\n\r\n\r\n⭐活動亮點\r\n\r\n湖畔舞台演出💃：伴著微風與波光，欣賞精彩絕倫的藝文展演\r\n大湖起步走🚶：邀請親朋好友沿岸漫步，完成指定步數任務，就能把「迷你多肉植物盆栽」帶回家！\r\n生態瓶手作🌱：藝文與手作的呢喃，親手將大湖的微型綠意打包收藏\r\n湖岸特色市集⛺：匯聚在地青創與小農，讓你邊走邊逛、品嚐在地好滋味🥬\r\n限定水上體驗🏄：SUP立槳、獨木舟、水上自行車與水上瑜珈，讓你以最溫柔的方式親近自然，感受水面上的絕美風光\r\n\r\n\r\n🎁市集集章活動\r\n凡於市集攤位消費（不限金額），每消費1次即可獲得1枚印章：\r\n🔸 集滿1章：兌換「員山鄉農會豆奶」1瓶，品嚐在地純粹\r\n🔸 集滿2章：兌換免費「拍貼機」體驗1次，為這趟大湖之旅定格美好！\r\n🔸溫馨提醒：各項好禮數量有限，換完為止，敬請把握機會",
+          "event_date": "2026-09-26",
+          "end_date": "2026-09-27",
+          "location": "宜蘭縣員山鄉大湖風景特定區",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/344/",
+          "source_updated_at": "2026-09-17T14:33:02.4452517",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28044/480x360_articles-image-ad9fxkq9k0ysrsb6ap4dqa.jpeg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/344/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "347",
+          "title": "115年礁溪鄉中秋民俗遊藝傳承活動",
+          "description": "礁溪鄉「百年傳承歡盪中鞦」活動，延續至今已有136年歷史，盪鞦韆不僅是中秋節的重要民俗，更承載著礁溪珍貴的地方文化記憶，透過「中秋民俗傳承文化」活動，讓傳統文化走進生活，也讓這份屬於礁溪的百年記憶，一代一代傳承下去❤️\r\n\r\n\r\n📅活動資訊\r\n\r\n活動時間：115年9月25日（五）\r\n活動地點：礁溪國小（礁溪鄉大忠村礁溪路四段135號）\r\n鞦韆比賽報名時間：115年9月1日起至9月20日止（額滿提前截止）\r\n鞦韆比賽報名網站：👉點我報名\r\n\r\n\r\n📞報名諮詢\r\n\r\n\r\n礁溪鄉公所民政課－游鎮州先生\r\n電話03-9881311 分機207",
+          "event_date": "2026-09-25",
+          "end_date": "2026-09-25",
+          "location": "宜蘭縣礁溪鄉礁溪國小操場",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/347/",
+          "source_updated_at": "2026-09-17T15:59:11.5827364",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28051/480x360_articles-image-ezqdmwlc0ua3yxmgw2seqq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28050/480x360_articles-image-7tezsznun0kgitkcl1k1gg.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/347/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "302",
+          "title": "宜蘭傳藝暑期活動三部曲｜飛吧！希利克主題劇場、2026 YA傳藝、傳藝大溪日",
+          "description": "▋七月限定\r\n7月主題劇場《飛吧！希利克》一起唱唱跳跳🐦\r\n透過歌舞擊鼓帶給希利克與大小朋友最棒的祝福💫\r\n\r\n【演出資訊】\r\n\r\n節目名稱｜《飛吧！希利克》\r\n演出期間｜2026/07/01—2026/07/24\r\n演出時段｜每日13:00、15:30\r\n演出地點｜文昌街 &rarr; 廟埕廣場 (雨備：廟埕廣場)\r\n演出團隊｜莫比斯圓環創作公社\r\n\r\n\r\n\r\n\r\n▋八月限定\r\n夜間限定《2026 YA傳藝》再度嗨瘋仲夏夜🌟\r\n齊天大聖星光踩街✖️即將成真火舞團✖️夜光裝置✖️台味市集\r\n\r\n✨齊天大聖粉絲不能錯過的星光踩街《大鬧嬉遊》🎪\r\n✨專屬齊天大聖+牛魔王 粉絲見面會加碼復刻龍王回宮🙈🐮🐉\r\n✨夕照與夜光相伴的浪漫台味市集🍔🍕🍻\r\n✨整個園區都是美照景點夜光裝置蒐集美照拍不完📸\r\n✨4組原民音樂團隊在落日舞台輪流開唱🎙️\r\n✨街頭藝人大匯演雜耍特技看不完🤹\r\n✨最終場 即將成真 火舞團熱情演出(8/9場次限定)🔥\r\n\r\n【活動資訊】\r\n\r\n\r\n活動日期｜8/1(六)-8/2(日)、8/8(六)-8/9(日) \r\n活動時間｜09:00-20:30\r\n\r\n16:00-20:30｜台味市集\r\n16:30-17:00｜齊天大聖《粉絲見面會》\r\n17:00-17:30｜一弦多情：跨越文化的音樂對話(8/1限定)\r\n17:00-19:00｜街頭藝人大匯演\r\n18:20-19:00｜落日舞台 原住民音樂演出\r\n19:20-19:55｜星光踩街《大鬧嬉遊》\r\n20:00-20:30｜即將成真火舞團(8/9限定)\r\n\r\n\r\n活動地點｜宜蘭傳藝園區\r\n\r\n\r\n\r\n\r\n▋九月限定－宜蘭傳藝大溪日\r\n\r\n活動亮點🌟\r\n\r\n✨亮點一｜社頭體驗 09.19 ㊅ 15:00-17:00 \r\n平常只能遠遠觀看的神將、神轎與北管樂器，這次可以近距離接觸。從神將步伐到北管樂音，帶你深入認識桃園大溪人的信仰文化。\r\n\r\n✨亮點二｜神氣遶境 09.20 ㊐ 14:00-14:30\r\n由三層新勝社、永福同義社、嘉天宮同義堂及大溪同人社四大社頭聯袂出巡。飛龍、神轎、神將、北管齊聚文昌街區，重現迎六月廿四最經典的節慶風景。\r\n\r\n✨亮點三｜文化劇場《想阮少年時》  09.20 ㊐ 14:30-15:30\r\n透過一段關於家鄉、信仰與歸鄉的故事，帶領觀眾走進大溪人的共同記憶，看見文化傳承最真摯的模樣。\r\n\r\n【活動資訊】\r\n\r\n\r\n活動日期｜09.19－09.20\r\n活動地點｜宜蘭傳藝園區",
+          "event_date": "2026-07-01",
+          "end_date": "2026-09-20",
+          "location": "宜蘭縣五結鄉宜蘭傳藝園區",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/302/",
+          "source_updated_at": "2026-07-14T18:21:11.4878704",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27720/480x360_articles-image-lmltbsvxlecqatm9uagt1q.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27723/480x360_articles-image-2hnfx7zrykywaeyqatxw3q.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27722/480x360_articles-image-on2stwiduem6ypxmzbmu9q.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27721/480x360_articles-image-m42xxttbhuamrmig03wjlw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27719/480x360_articles-image-fupp5hnd3e-jkqvxwog03a.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/302/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "348",
+          "title": "2026 月映員山·光織中秋",
+          "description": "2026「月映員山&middot;光織中秋」將於員山公園熱鬧登場！活動集結超過20攤在地特色市集與親子遊戲，晚間更邀請「向陽特技」震撼開場，搭配林采欣、鄺澤東、郭忠祐、郭婷筠等四大實力派唱將接力獻唱。現場更有限量摸彩活動，將抽出機車、65吋電視等重磅大獎，邀請全家大小共度難忘的中秋佳節！\r\n\r\n\r\n📅活動資訊\r\n日期｜2026年9月19日（六）\r\n時間｜16:00－22:00\r\n地點｜宜蘭縣員山鄉員山公園\r\n內容｜在地團隊展演、中秋晚會、特色美食市集、中秋幸運摸彩\r\n主辦｜員山鄉公所、員山鄉民代表會 \r\n\r\n\r\n🎤晚會卡司介紹\r\n\r\n🔸向陽特技\r\n晚會由向陽特技震撼開場！專業團隊以雜技、肢體技巧與創意道具編排見長，融合馬戲、舞蹈及光影元素，帶來緊張刺激、令人屏息的視覺饗宴。\r\n\r\n🔸林采欣\r\n以〈心牆〉原唱廣為人知，細膩療癒的嗓音與豐富情感總能唱進人心。從〈心牆〉、〈可樂〉到最新台語創作〈三句〉，展現創作歌手溫柔而堅定的音樂力量。\r\n\r\n🔸鄺澤東\r\n來自馬來西亞的實力派歌手，更是《超級紅人榜》首位大馬男冠軍！憑藉渾厚嗓音、穩健唱功與真摯舞台魅力，將帶來國、台語歌曲，讓現場觀眾沉浸在滿滿感動之中。\r\n\r\n🔸郭忠祐\r\n擁有宏亮又溫暖人心的好歌聲，不僅發行多張音樂作品，也活躍於戲劇及綜藝節目。從深情台語歌到耳熟能詳的經典金曲，準備用十足舞台魅力炒熱員山夜晚！\r\n\r\n🔸郭婷筠\r\n曾入圍金曲獎最佳台語女歌手，渾厚嗓音極具穿透力，代表作〈心內有你是幸福〉深受歌迷喜愛。親切活潑的舞台魅力搭配動人歌聲，保證讓現場掌聲與歡呼聲不間斷！\r\n\r\n\r\n⭐活動亮點\r\n\r\n特色市集🛍️｜集結在地小農農產、人氣特色小吃、甜點飲品與親子趣味遊戲（如打彈珠、釣鴨鴨）等超過20個攤位，好玩又好逛。\r\n好禮抽不停🎁｜現場準備 Kymco 新豪邁機車、65吋4K聯網電視、Dyson 吸塵器及實用家電、禮券等超過40份大獎，將分三階段抽出幸運兒。（※摸彩券自 18:00 起於會場前、後方入口發放，限量1,500張，每人限領1張，發完為止。填妥姓名與聯絡電話後，記得在 19:30 前投入摸彩箱！）\r\n\r\n\r\n※實際演出內容、摸彩品項及領獎方式，以主辦單位現場公告為準。",
+          "event_date": "2026-09-19",
+          "end_date": "2026-09-19",
+          "location": "宜蘭縣員山鄉員山公園",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/348/",
+          "source_updated_at": "2026-09-17T16:24:09.7406179",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/28052/480x360_articles-image-ikpmgoadfusn_okkugdnog.jpeg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/348/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "324",
+          "title": "2026蘇澳冷泉觀光系列活動-民歌音樂饗宴",
+          "description": "一首經典老歌，一段青春歲月 💭✨\r\n\r\n那些陪伴我們走過年少時光的旋律，你有多久沒聽到了？\r\n\r\n\r\n今年初秋，『𝟮𝟬𝟮𝟲蘇澳冷泉觀光系列活動』最終壓軸強檔——【民歌音樂饗宴】 即將在蘇澳「蜡藝蜡筆城堡」溫馨登場🥳\r\n\r\n\r\n邀請所有喜愛民歌的朋友們，帶著家人、好友一起來蘇澳吹著微風、哼著熟悉的曲調，沉浸在最純粹的音樂時光中！\r\n\r\n\r\n快安排一趟蘇澳小旅行吧！白天泡冷泉、逛觀光工廠，傍晚一起在蜡筆城堡聽民歌、逛市集～我們𝟬𝟵/𝟭𝟮不見不散❤️\r\n\r\n\r\n🎤 活動資訊\r\n\r\n📅 活動日期｜𝟮𝟬𝟮𝟲/𝟬𝟵/𝟭𝟮 ㊅ \r\n\r\n⏰ 活動時間｜𝟭𝟳:𝟬𝟬\r\n\r\n📍 活動地點｜蜡藝蜡筆城堡停車場（宜蘭縣蘇澳鎮海山西路500號）\r\n\r\n\r\n\r\n🌟活動亮點\r\n\r\n\r\n▋重量級民歌卡司．重溫經典時光\r\n\r\n多位實力派民歌手與樂團輪番登台，帶你穿越時空隧道，重溫那一首首感動人心的校園民歌與經典金曲\r\n\r\n\r\n🎵卡司\r\n\r\n施孝榮、李明德、南方二重唱、于台煙、羅吉鎮、江念庭、陳加洛&澔澔\r\n\r\n\r\n▋吃喝玩樂一次滿足．特色市集熱鬧開逛\r\n\r\n現場集結在地特色美食、文創手作與觀光工廠攤位，聽歌之餘還能大飽口福、買伴手禮！\r\n\r\n\r\n▋好康不容錯過．黃金月月抽大獎！\r\n\r\n在指定合作店家消費集章，就有機會把「黃金一兩」等超值大獎帶回家！快來試試你的手氣吧💰\r\n\r\n快上黃金月月抽網站查看合作店家。",
+          "event_date": "2026-09-12",
+          "end_date": "2026-09-12",
+          "location": "宜蘭縣蘇澳鎮海山西路500號(蜡藝蜡筆城堡停車場)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/324/",
+          "source_updated_at": "2026-08-28T20:28:51.5652183",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27957/480x360_articles-image-l2lsjhs-xu6ov78-fn-bjw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27956/480x360_articles-image-jiwss-rxg0ae9m9qaajzkw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/324/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "323",
+          "title": "2026 宜蘭外澳‧罟浪祭",
+          "description": "2026 宜蘭外澳‧罟浪祭熱力登場\r\n\r\n「2026宜蘭外澳‧罟浪祭」是今年夏末宜蘭最受矚目的海洋觀光盛事，活動自 2026 年 8 月 28 日起至 9 月 6 日於宜蘭頭城烏石港外澳沙灘熱鬧展開。 \r\n\r\n這場盛典以「外澳」為核心舞台，巧妙地將刺激的「海洋運動」、傳統的「漁村牽罟文化」、深度的「觀光旅遊」與「在地產業」完美融合，致力於將外澳打造成臺灣國際級的衝浪觀光新品牌與聖地。活動不僅吸引了近百位來自各國的頂尖衝浪選手前來角逐最高榮耀，更串聯了陸、海、空多樣化的體驗，從水上衝浪到空中飛行傘，讓不同年齡層的旅客都能找到專屬樂趣。\r\n\r\n8/28 - 9/06 體驗活動及小旅行\r\n9/03 - 9/06 衝浪公開賽、國際選手表演賽\r\n9/04 - 9/06 沙灘市集\r\n9/05 - 9/06 罟浪音樂祭、煙火秀\r\n\r\n為了讓民眾能全方位感受外澳的魅力，活動分為「海洋體驗」與「國際賽事及音樂祭」兩大主軸： \r\n\r\n▋海洋與空中體驗週｜8月28日 - 9月2日\r\n系列體驗活動率先起跑！針對不同年齡層與水域熟悉度，現場推出衝浪體驗、趴板衝浪、電動衝浪板體驗，以及能從空中俯瞰壯麗海岸線的飛行傘體驗，帶領遊客暖身感受外澳的自然魅力。\r\n\r\n▋國際衝浪公開賽（初賽與複賽）｜9月3日 - 9月4日\r\n「2026宜蘭外澳‧罟浪祭衝浪公開賽」正式敲響戰鼓。近百名國內外頂尖衝浪好手於烏石港外澳海域集結，展開高水準的激烈賽事，遊客可於沙灘區近距離觀賞選手們馳騁海浪的英姿。\r\n\r\n▋衝浪決賽、特色市集與音樂饗宴｜9月5日 - 9月6日\r\n賽事進入最白熱化的冠軍爭奪戰。週末兩日同步展開結合地方文化的特色市集與「罟浪祭音樂饗宴」，特別邀請到韋禮安與Matzka等重量級歌手熱力開唱。9月6日晚間更將以絢麗的高空煙火秀作為壓軸，為浪迷與樂迷帶來結合陸海空的雙重視聽享受。\r\n\r\n📝 參加規則與注意事項\r\n\r\n為了確保活動安全與環境永續，欲前往共襄盛舉的民眾請留意以下規則：\r\n\r\n觀賽與音樂祭進場：全區沙灘賽事觀賞與音樂饗宴皆為免費開放進場。因逢週末人潮眾多，強烈建議搭乘大眾運輸工具（如台鐵至外澳車站，或轉乘宜蘭勁好行公車）前往，避免塞車與尋找車位的不便。\r\n水上活動體驗報名：衝浪、趴板等水域體驗採「線上預先報名」為主、「現場限量名額」為輔。參與者須穿著合適之泳裝或防磨衣，並全程聽從專業教練與救生人員指示；患有心血管疾病或身體不適者請務必評估自身狀況。\r\n牽罟文化體驗：牽罟（古老的網魚方式）需仰賴團隊合作，參加者需配合在地老漁民的口令共同出力拉網。此活動極度仰賴當日海象與潮汐，是否下網請依現場大會廣播為準。\r\n無塑海洋與環境維護：響應海洋保育理念，強烈鼓勵參與民眾自備環保餐具與水壺於特色市集使用。離場時請落實「垃圾不落地」，共同守護外澳沙灘的潔淨。\r\n\r\n🚌交通資訊",
+          "event_date": "2026-08-28",
+          "end_date": "2026-09-06",
+          "location": "宜蘭縣頭城鎮外澳衝浪區(烏石港北堤、9號咖啡外澳館旁)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/323/",
+          "source_updated_at": "2026-09-11T20:07:56.4409699",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27944/480x360_articles-image-manxopltxu-3t-8garv78a.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27988/480x360_articles-image-3n7fmvzvaky0qelhszd3xq.png",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27947/480x360_articles-image-rltgr1fkb0k7uge2ru7tsg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27955/480x360_articles-image-rlzqvrp9iuo5xl3tvr3i7w.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27954/480x360_articles-image-udogm-zbsecjzwr5ap1vwg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27953/480x360_articles-image-i-rm_ph5hugexvabkj7beg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27952/480x360_articles-image-4icbmiaoleclcmzcs0m8rw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27951/480x360_articles-image--8wzeyadqemowxppe9wmcq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/323/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "232",
+          "title": "2026年冬山鄉三奇美徑系列活動",
+          "description": "2026年冬山鄉三奇美徑系列活動-時程日期預告\r\n\r\n【盛夏冬山，精彩相連】\r\n\r\n5.7 至收割期｜三奇美徑-彩繪稻田\r\n\r\n\r\n在廣闊的稻田畫布上，看見藝術與大地的完美融合。\r\n\r\n\r\n6.6～7 & 6.13～14｜冬山熱氣球嘉年華\r\n\r\n\r\n夢幻熱氣球升空，帶您從高空俯瞰壯麗的蘭陽平原。\r\n\r\n\r\n7.1～8.31｜冬山紅茶季\r\n\r\n\r\n漫步茶鄉，品味在地職人悉心揉捻的芬芳。\r\n\r\n\r\n7.11～12｜冬山風箏嘉年華 (因巴威颱風影響改期至7.18~7.19)\r\n\r\n\r\n讓心情隨風箏起飛，在藍天之下共創溫馨的親子時光。\r\n\r\n趕緊記下時間，跟著冬山一起動起來！\r\n冬山鄉即將迎來充滿色彩與活力的夏季系列活動。誠摯邀請大家來到冬山，體驗在地獨特的自然與人文魅力。詳細活動資訊內容~請持續關注粉絲專頁後續之公告發文!\r\n\r\n★資料來源：冬山鄉公所",
+          "event_date": "2026-05-07",
+          "end_date": "2026-08-31",
+          "location": "宜蘭縣冬山鄉三奇美徑",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/232/",
+          "source_updated_at": "2026-09-11T20:08:05.9760795",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27334/480x360_articles-image-0yjdnzbgjk2yem8xuukvew.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27336/480x360_articles-image-jp70zfzs6ki_yirdfoojfa.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27335/480x360_articles-image-dnobf4aax0omcgzuopw8qa.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/232/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "319",
+          "title": "2026宜蘭情人節",
+          "description": "有些約會，不需要安排得很滿💗\r\n一起散步、逛市集、一起聽音樂、一起挑一份喜歡的禮物，就是最舒服的浪漫！\r\n\r\n今年夏天，宜！蘭人市集攜手宜蘭情人節燈會，在冬山河畔開啟一場屬於夏夜的浪漫連載。\r\n不論你是熱戀中、單身中、或是帶上家人閨蜜，這個七夕，我們準備了「三大限定特別企劃」，帶你從「尋找同頻的人」一路玩到「大聲告白」！\r\n\r\n今年七夕，一起來冬山河逛市集、聽音樂、看燈會，把屬於夏夜的美好回憶帶回家💕\r\n\r\n\r\n\r\n💕𝟮𝟬𝟮𝟲宜！蘭人市集 𝙓 宜蘭情人節活動資訊\r\n\r\n🔸活動地點｜冬山河生態綠舟\r\n🔸市集時間｜8月19日(三)-23日(日)，18:00-22:00\r\n🔸燈會時間｜8月19日(三)-23日(日)，19:00-24:00\r\n🔸活動內容｜煙火秀Ｘ五大主題音樂會Ｘ火舞演出Ｘ星光鵲橋燈飾Ｘ浪漫市集\r\n\r\n📅活動流程\r\n除了燈會的浪漫燈飾與煙火秀陪伴外，還有連續五天精彩的演出，一起共度浪漫夏夜吧！\r\n\r\n🔸8月19日 ❰ 流行音樂會 ❱\r\nLUVSSI、ARKis、JUD 陳泳希、F.F.O、吳霏 FEI\r\n齊聚冬山河生態綠舟，用青春的旋律，唱出屬於夏夜的心動。\r\n🔸8月20日 ❰ 文化音樂會 ❱\r\n許景淳、舞思愛、安地斯樂團\r\n讓歌聲跨越文化與地域，在晚風裡感受音樂最純粹的溫度。\r\n🔸8月21日 ❰ 創作音樂會 ❱\r\n歐比王、神棍樂團、閃閃閃閃、擊沉女孩\r\n讓獨立創作的自由能量，在冬山河畔盡情發聲。\r\n🔸8月22日 ❰ 鄉土音樂會 ❱\r\n沈文程、李子森、袁小迪、喬幼、杜忻恬\r\n熟悉的旋律、滿滿的人情味，陪你一起唱到月亮升起來。\r\n🔸8月23日 ❰ 民歌音樂會 ❱\r\n南方二重唱、殷正洋、羅文裕、李明德、羅吉鎮，\r\n帶你重返最美好的青春年代。\r\n🔸8月23日 ❰ Da火Phan火舞秀❱\r\n\r\n⭐宜！蘭人市集亮點\r\n\r\n🔸30+在地品牌市集🛍\r\n🔸８場七夕限定手作💐\r\n🔸七夕河畔Fun派對🎧\r\n🔸河畔情歌擂台🎤\r\n🔸七夕限定套餐與眾多活動好禮🎁\r\n🔸500朵花（每日限量100朵）送給專情的你，每天都可以來打卡、消費、集章蒐集💐\r\n\r\n\r\n💓三大限定特別企劃\r\n\r\n▋七夕河畔Fun派對｜把節奏交給 DJ，讓心動隨音樂自然發生\r\n\r\n時間｜8月19日（三），20:00-21:00\r\n方式｜入場自由挑選專屬螢光手環，給彼此最舒服的邊界感。跟著DJ Jenny 精心編排的夏夜歌單，在河畔的微風、旋律與歡笑裡，找到與你頻率相同的那個靈魂。\r\n備註｜報到還能領取心動小卡 💗，親手把溫柔的祝福遞給想認識的人\r\n\r\n\r\n▋冬山河情歌點唱機｜有些歌，藏著只有我們懂的夏天\r\n\r\n\r\n日期｜8月20日－浪漫情歌夜、8月21日－療癒時刻\r\n時間｜每日18:30－19:30\r\n方式｜冬山河情歌點唱機 故事徵集與限動歌曲二選一現正熱烈進行中！「在宜！蘭人市集」臉書粉專活動貼文下方留言寫下「你點的歌曲＋背後的故事」，獲選歌曲將由現場歌手在冬山河畔為你專屬獻唱，讓河風把你的故事溫柔唱出來。\r\n\r\n\r\n▋河畔情歌擂台｜這一次，把麥克風交給你，唱出愛的模樣\r\n\r\n\r\n時間｜8月22日（六）18:30-19:30\r\n組數｜網路10組 、現場5組 \r\n說明｜無論想低語對唱，還是勇氣爆棚地當眾告白，這裡都有屬於你的麥克風！除了人人有賞的參加獎，還有「最佳人氣歌王-餘音繞梁獎」、「最佳現場魅力-萬眾矚目獎」、「最佳甜蜜傳情-含情脈脈獎」等多項市集限定好禮等你來拿！\r\n備註｜現場參與投票的聽眾朋友們也有機會抽到獎品唷🎁✨\r\n\r\n\r\n🚆交通資訊\r\n歡迎民眾善用大眾運輸工具，於台鐵冬山站下車，步行約5分鐘即可抵達冬山河生態綠舟園區。活動期間台鐵增停及增開冬山站班次，讓大家賞燈、聽音樂後輕鬆返家。\r\n\r\n🚃搭乘火車\r\n請搭乘火車至宜蘭縣「冬山火車站」出站後即可步行抵達會場。\r\n火車時刻表查詢請點擊此，列車班次及行駛時間請以國營臺灣鐵路股份有限公司（臺鐵）官方最新公告及時刻表為準。\r\n🚇火車加開班次【北上｜冬山&rarr;羅東】\r\n\r\n\r\n🚉445次　21:33\r\n🚉4477次　22:10\r\n🚉4041次　22:25\r\n\r\n🚌搭乘國道客運\r\n請搭乘國道客運至羅東轉運站，再搭乘現場排班計程車抵達會場，或與宜蘭縣境內計程車行聯繫接駁。\r\n電話：(03)9553838、(03)9542800、(03)9542327\r\n\r\n🚗自行開車\r\n導航地址：「宜蘭縣冬山鄉太和村冬山路二段172號」即可抵達會場。\r\n🚘周邊停車場\r\n1️⃣冬山收費停車場\r\n車位數：80位\r\n收費方式：汽車：平日20元/小時，當日最高80元；假日30元/小時，\r\n當日最高150元(隔日另計)、機車：計次20元(隔日另計)、自行車：10元。\r\n\r\n2️⃣冬山河生態綠舟停車場\r\n車位數：7輛大客車、120輛小客車及56輛機車停車位。\r\n收費方式：次計收大客車100元、小客車50元、機車20元，\r\n另領有身心障礙手冊專用停車位識別證者，\r\n其所搭乘之交通工具免收費(營業車輛除外)。\r\n\r\n3️⃣冬山鄉公所停車場\r\n車位數：70位\r\n收費方式：免費停車\r\n※每周六晚上冬山夜市營業無法進出，有移車需求需提早駛離。\r\n\r\n4️⃣冬山鄉第二公有停車場（阿源桶仔雞旁進入）\r\n車位數：15位\r\n收費方式：免費停車。\r\n\r\n5️⃣冬山鄉公有停車場(冬山社區發展協會旁)\r\n車位數：30位\r\n收費方式：10元/30分鐘，平日當日最高收費30元(隔日另計)，\r\n例假日或國定假日當日最高收費50元(隔日另計) 。\r\n\r\n6️⃣冬山天照宮 停車場\r\n收費方式：免費停車。",
+          "event_date": "2026-08-19",
+          "end_date": "2026-08-23",
+          "location": "宜蘭縣冬山鄉冬山河生態綠舟",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/319/",
+          "source_updated_at": "2026-09-11T20:08:01.4585184",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27878/480x360_articles-image-bniqfe2tfucfefyx_fgimq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27919/480x360_articles-image-dsuntwyfruu-065zroe-aw.png",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27918/480x360_articles-image-zayuk_o3pkep8gyd_ckxxa.png",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27917/480x360_articles-image-7-qbfpekkka8snvvsygjoq.png",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27916/480x360_articles-image-7j5vlugj_0idecoorlitkq.png",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27915/480x360_articles-image-vrayzv_heewx8h-obecyqa.png",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27914/480x360_articles-image-gjc4n6hyse2ugod-7zw44w.png",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27880/480x360_articles-image-hqyanholiegoiq-dlzhmyw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/319/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "177",
+          "title": "2026宜蘭潮流文化藝術祭",
+          "description": "「宜蘭潮流文化藝術祭」自2020年首度舉辦以來，持續以多元、開放的策展精神，逐步形塑為全國具指標性的潮流文化品牌，吸引來自全台乃至海外的創作者、表演者與潮流愛好者齊聚宜蘭，共同感受街頭文化所蘊含的創意能量與世代活力。\r\n\r\n\r\n「2026宜蘭潮流文化藝術祭」將延續潮流文化的核心精神，持續聚焦街頭藝術與競技展演，舉辦街舞、滑板、扯鈴等賽事，展現青年世代勇於表達自我、即興創作與挑戰極限的無畏精神；同時透過塗鴉展覽，呈現城市街頭文化高度自由、跨界共融的藝術魅力；備受期待的校際聯合舞展亦將再度登場，提供學生揮灑舞蹈、音樂與造型創意的舞台，展現校園潮流能量。\r\n\r\n\r\n今年度展演活動將帶來一場激盪出跨世代、跨文化的嶄新藝術體驗，打造兼具國際視野與在地特色的潮流活動。活動期間各項競技賽事與演出活動皆採免費入場，誠摯邀請民眾一同走進宜蘭，迎接屬於今夏的潮流文化盛會。\r\n\r\n2026潮流文化藝術祭《街頭造浪》藝術展\r\n展覽日期：115年8月8日（六）至8月23日（日） \r\n開放時間：10:00—18:00\r\n休館資訊：每週三休館\r\n展覽地點：宜蘭中興文化創意園區 54號建物\r\n\r\n\r\n2026潮流文化藝術祭\r\n活動日期：115年8月22日（六）至8月23日（日） \r\n活動時間：9:00—21:00\r\n活動地點：宜蘭中興文化創意園區",
+          "event_date": "2026-08-08",
+          "end_date": "2026-08-23",
+          "location": "宜蘭縣五結鄉中興文化創意園區",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/177/",
+          "source_updated_at": "2026-08-03T14:25:55.506956",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27008/480x360_articles-image-qh1ay5ot3ew21rpz-d753q.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27009/480x360_articles-image-wcxe9cjjpki_orseglmczw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27010/480x360_articles-image-s8ucyql_hkqg0mcsmpguqq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27007/480x360_articles-image-7zq_htmxqe673xak3sgx-q.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27006/480x360_articles-image-rnn8uk8by0slgdkn8z7baq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27005/480x360_articles-image-wouiom8zo0osdtrggrgstq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/177/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "280",
+          "title": "2026 東北角外澳月夜",
+          "description": "遠眺龜山島海景、腳踏外澳細沙，一場專屬東北角的夏日浪漫即將登場！\r\n\r\n由交通部觀光署東北角及宜蘭海岸國家風景區管理處主辦的「2026東北角外澳月夜」，以外澳沙灘與龜山島海景為舞台。今(2026)年共規劃2日音樂會、火舞表演及市集活動，分別為「月曲伴潮音樂會(8月22日)」及「焰舞伴島火舞表演(8月23日)」，並邀請「阿秋派 Art Chill Vibe」藝術團隊於現場帶來藝術互動體驗；活動現場亦有「浪花市集」舉行，攜手國內知名市集品牌「溫度逝光.Market」與大東北角觀光圈業者共同策展，打造結合地景美學與藝術能量的夏日沙灘市集。\r\n\r\n活動期間更結合旅行社推出限定一日遊程「鐵道浪花小旅行」，串聯自行車漫騎、傳統牽罟文化體驗及在地景點導覽，最後回到活動舞台欣賞精采的音樂與火舞表演。歡迎大家一同蒞臨現場，從午後至夜晚，共賞這場屬於東北角的夏日浪漫。\r\n\r\n活動資訊\r\n\r\n8/22(六)月曲伴潮｜樂章伴隨潮汐而生/音樂隨浪而來\r\n\r\n好樂團 /吳汶芳 / 徐暐翔/ 晨悠 / oubamusic 金琳＋林拿巴/楊肅浩\r\n\r\n\r\n8/23(日)焰舞伴島｜島影在烈焰中甦醒/ 火光、島影、藝術共舞的夢幻饗宴\r\n\r\n『金曲歌后』 孫淑媚 、Coming True Fire Group 即將成真火舞團 、凡徒表演藝術團隊，跨界合作演出\r\n\r\n\r\n浪花市集｜溫度逝光.Market &times; 大東北角觀光圈 &times; 阿秋派Art Chill Vibe\r\n\r\n\r\n\r\n\r\n鐵道浪花小旅行｜循著山海軌跡，走進牽罟文化，遇見東北角最浪漫的月夜\r\n\r\n\r\n\r\n\r\n\r\n五漁村集章活動｜以石城、大里、大溪、梗枋及外澳五大漁村為主軸，串聯東北角最具特色的海岸聚落與旅遊據點，完成指定任務，即可兌換限定紀念品(詳情請上東北角之友FB)。",
+          "event_date": "2026-08-22",
+          "end_date": "2026-08-23",
+          "location": "宜蘭縣頭城鎮濱海路二段6號（外澳服務區前沙灘）",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/280/",
+          "source_updated_at": "2026-07-29T15:46:50.0077076",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27602/480x360_articles-image-cbwwt792pkatt4gf3af2hq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27840/480x360_articles-image-1xtl5tn_qe6tzftququn9q.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27839/480x360_articles-image-9p_xn_hup0-m8ekmywmpjw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27604/480x360_articles-image-0exhudbd3eocrgvy_nkuwq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27603/480x360_articles-image-iqj-7vw_v06cmk9ucwxhoa.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27601/480x360_articles-image-o8xhtiovhk67p8hy6up5jq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/280/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "237",
+          "title": "2026宜蘭國際童玩藝術節「森歷其境」",
+          "description": "走過30年的成長與累積，2026童玩節迎來第31年，\r\n今年以「＂森＂歷其境」為主題，把整個園區變成一座充滿生命力的遊戲森林🌿\r\n這不只是一場活動，更像一棵守護童心的大樹🌳\r\n深深扎根在宜蘭的回憶裡，吸收童玩的文化養分，\r\n也透過與世界的交流，慢慢長成一片豐富又多元的森林✨\r\n在這個屬於孩子、也屬於每個曾經是孩子的你我的日子👶👪\r\n邀請大家一起走進森林，化身「玩家」🎮\r\n讓「玩」成為跨世代最溫暖的語言，\r\n在樹蔭下笑著、玩著，找回最純粹的感動💛\r\n🎈童心不分年紀，快樂正在發芽\r\n🌲童玩森林，7/4-8/16一起玩！\r\n\r\n2026童玩節經歷30年成長淬鍊，第31年以「森歷其境」為主題，將園區化作一座生生不息的遊戲森林。\r\n\r\n童玩節已形成宛如一棵守護童心的大樹，它不斷地向下扎根，深植宜蘭節慶記憶，汲取童玩文化的養分，也透過國際交流與世界連結，進而開枝散葉，形成多元茂密森林。\r\n\r\n本年度的童玩節活動融入「演出、展覽、遊戲、交流」四大主題與「創新、服務、品質、安全」四大目標，做為各項活動內容設計之元素，以水、陸、空、展、演方式展現。\r\n\r\n\r\n2026宜蘭國際童玩藝術節活動一覽表\r\n\r\n\r\n項目\r\n活動內容\r\n地點\r\n時間\r\n\r\n\r\n展覽\r\n主題互動體驗館\r\n親子共讀遊戲館\r\n紅龍艇庫(左側)\r\n紅龍艇庫(右側)\r\n10：00～19：00\r\n\r\n\r\n演出\r\n國內外小型民俗團隊\r\n國內外大型兒童民俗音樂舞蹈團隊\r\n國內外專業表演亮點團隊\r\n遊藝踩街團隊\r\n宇宙劇場\r\n宇宙劇場\r\n宇宙劇場\r\n冬山河園區內環步道寰宇廣場\r\n11：30～15：30\r\n16：00～18：00\r\n19：00～20：00\r\n20：00～20：30\r\n\r\n\r\n遊戲\r\n水域遊戲區\r\n星空塔互動體驗區\r\n水上運動-帆船、龍舟、獨木舟\r\n戲水池\r\n冬山河親水公園黃龍岸&rarr;青龍岸與艇庫\r\n冬山河水域\r\n09：00～18：30\r\n09：00～18：30\r\n10：00～17：00\r\n\r\n\r\n交流\r\n國外民俗團隊\r\n國家日\r\n寰宇廣場\r\n寰宇廣場\r\n14：00～15：30，整點演出\r\n11：30～12：30，活動期間週六、日依活動時程排定",
+          "event_date": "2026-07-04",
+          "end_date": "2026-08-16",
+          "location": "宜蘭縣五結鄉親河路二段2號（冬山河親水公園）",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/237/",
+          "source_updated_at": "2026-08-17T17:18:25.2613903",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27366/480x360_articles-image-7bqdokzxseqvfldsyyaadw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/237/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "258",
+          "title": "2026 壯圍沙丘藝術節《浮島流沙》星夜沙丘音樂會",
+          "description": "2026 壯圍沙丘藝術節《浮島流沙》活動是由交通部觀光署東北角及宜蘭海岸國家風景區管理處與宜蘭縣政府及宜蘭縣壯圍鄉公所共同主辦，希望能以壯圍在地特色及地景藝術為媒介，加強壯圍沙丘生態園區與鄰近地區的整合與連結，讓遊客來到這裡除了能體驗園區與周遭地景整體相連繫與呼應之美，另一方面能讓壯圍沙丘生態園區成為宜蘭地區的藝文觀光亮點，同時型塑宜蘭海岸遊憩廊帶。\r\n\r\n今（2026）年藝術節特別邀請3組國內外藝術家，分別是擅長雕琢木頭、石材等天然媒材的日籍藝術家菅野麻依子Maiko Sugano以「不廢」為核心，「跨村」為行動的不廢跨村實驗室（林俊作、楊芳宜）以及專注於雕塑與裝置藝術創作的宜蘭在地藝術家林思瑩，藝術家們以在地文化的根基與生活脈動，透過藝術創作出3件地景藝術作品。\r\n\r\n今（2026）年共規劃4場次音樂會與市集活動，分別為「沙浪如歌、沙海漂浪（7月18-19日）」及「沙岸星河、沙島浮夢 （8月15-16日）」等不同主題，並將邀請到霹靂布袋戲及眾多優秀的表演者獻藝，另外，音樂會現場亦有「星夜沙丘市集」舉行，除了邀請大東北角觀光圈業者、壯圍鄉在地小農以及宜花東創意手作與美食到活動現場展攤外，同日並將於壯圍沙丘遊客中心內辦理DIY體驗活動（部分採限額及收費制），現場也將舉辦拍照打卡抽獎活動歡應大家一起來同樂。\r\n\r\n\r\n【活動場次】\r\n\r\n▋7/18 （六）沙浪如歌\r\n宜蘭縣噶瑪蘭族發展協會、謝英雄、STACO（東漂set）、同根生、精靈幻舞舞團、陳明章\r\n\r\n▋7/19 （日）沙海漂浪\r\n百合花樂團、西卿/黃鳳儀、荒山亮、黃妃、賴富正、蔡佳瑩、千翼、劉昱賢\r\n\r\n▋8/15 （六）沙岸星河\r\n跑跑機器人 Go Go Machine Orchestra、吳汶芳、許富凱、桑布伊\r\n\r\n▋8/16 （六）沙島浮夢\r\n原味醞釀、舞思愛、傻子與白癡、神秘嘉賓\r\n\r\n【活動資訊】\r\n\r\n活動期間｜7/18－8/16\r\n市集時間｜15:00－21:00\r\n音樂會時間｜18:00－21:00\r\n活動地點｜壯圍沙丘生態園區\r\n\r\n\r\n【接駁資訊】\r\n\r\n\r\n路線｜宜蘭後火車站 &harr; 壯圍沙丘藝術節\r\n票價｜＄40（僅能付現、不找零）\r\n發車時間｜宜蘭後火車站：14:30／壯圍沙丘藝術節：15:00，每小時一班",
+          "event_date": "2026-07-18",
+          "end_date": "2026-08-16",
+          "location": "宜蘭縣壯圍鄉復興村壯濱路二段196巷18號（壯圍沙丘生態園區）",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/258/",
+          "source_updated_at": "2026-08-17T17:18:19.9463624",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27518/480x360_articles-image-e-mwlek5ou2knzbrxparfg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27727/480x360_articles-image-6mjqe9ml_02jc_cnt-f-1a.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27726/480x360_articles-image-kdwvz04fgkod0g2evepgww.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27520/480x360_articles-image-thbauazfheuvwq5kzxuh8a.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27519/480x360_articles-image-qk1vxkmeeusabkckk1skwa.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/258/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "298",
+          "title": "2026羅東藝穗節",
+          "description": "宜蘭夏季最受矚目的指標性盛事「2026羅東藝穗節」即將震撼登場！今年夏天，羅東鎮將再度化身為最繽紛的藝術嘉年華，邀請全台民眾作伙來熱鬧！\r\n\r\n我們準備了震撼視覺的創意遊行、熱力四射的踩街，更有匯聚國內外頂尖表演團隊的精彩舞台秀。無論是絢麗的舞蹈、動感的音樂，還是好逛好買的在地特色文創市集，保證讓你目不暇給，日夜都好玩！\r\n\r\n📅活動資訊\r\n\r\n活動期間｜7/13（一）－8/2（日）\r\n活動地點｜羅東中山公園\r\n主辦單位｜羅東鎮公所、羅東鎮民代表會\r\n\r\n\r\n🌟活動亮點\r\n\r\n▋搭觀巴遊羅東🚌\r\n由資深老師帶你深入羅東，體會在地風情，帶給大家最特別的動態小旅行！📸\r\n\r\n▋藝展身手🖍️\r\n羅東在地美術班同學帶領手作體驗，一起發揮創意、動手玩藝術！\r\n\r\n▋童話故事屋📖\r\n跟著《羅東囡仔三十六變》一起展開奇幻冒險！✨\r\n\r\n▋拼圖計時賽🧩\r\n精彩比賽重磅回歸～每日限額開放！\r\n\r\n▋趣味撲克牌_拉密🃏\r\n考驗策略與邏輯，和大家一起動動腦、拚手氣！🏆\r\n\r\n▋愛心99鏢鏢樂🎯\r\n做公益，精美好禮拿不完~\r\n\r\n📌更多活動資訊 請關注羅東鎮觀光發展所臉書粉專\r\n📌主辦單位保有活動最終解釋權，並得視實際情況保留修改、變更、取消活動之權利。",
+          "event_date": "2026-07-13",
+          "end_date": "2026-08-02",
+          "location": "宜蘭縣羅東鎮羅東中山公園",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/298/",
+          "source_updated_at": "2026-07-14T16:59:50.9939864",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27688/480x360_articles-image--illh9ajceum_tz4ymznwg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27690/480x360_articles-image-yx3bxf7t3uwxluf-42crrw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27697/480x360_articles-image-euobm2fngk294heyir5laq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27696/480x360_articles-image-kih-rjklgu6fowsfun7fna.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27695/480x360_articles-image-aphv9i3vk0g75c-lfvzdpw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27694/480x360_articles-image-j8urkwrmk0wiuzp3bgqsww.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27693/480x360_articles-image-vpcuw0vkaewdakudsztflq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27692/480x360_articles-image-r6pmgwhyk0cagxwmh_bofw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/298/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "297",
+          "title": "2026夏戀礁溪、礁心一夏",
+          "description": "今年夏天，讓我們相約在礁溪，共同感受藝術與光影交織的浪漫夜晚💕\r\n\r\n📅活動日期｜2026年7月28日（星期二）晚上7時\r\n📍活動地點｜礁溪國小\r\n🚩主辦單位｜礁溪鄉公所、礁溪鄉民代會\r\n🌃活動內容｜\r\n✨迷你熱氣球光雕秀\r\n✨即將成真火舞團\r\n✨法國奎達姆斯劇團\r\n✨西班牙澤尼特空中芭蕾舞團\r\n👉 更多活動詳情，請持續關注「真愛趣礁溪」Facebook粉絲專頁\r\n\r\n停車位置指引🚗🛵\r\n🚗汽車｜礁溪國小地下停車場，活動期間7/28(二) 17:00-23:00為免費停車\r\n🛵機車｜礁溪國小機車停放區 ，由杏和醫院旁-礁溪路四段與礁溪路四段113巷交叉路口進入",
+          "event_date": "2026-07-28",
+          "end_date": "2026-07-28",
+          "location": "宜蘭縣礁溪鄉礁溪國小",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/297/",
+          "source_updated_at": "2026-07-14T18:30:08.9322669",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27678/480x360_articles-image-rjh9xfuhikut3t0atc9g4w.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27725/480x360_articles-image-gkcpoezss0ihgug3aiioza.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27724/480x360_articles-image-viuejpxbwuu2yoygxhkd4q.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27683/480x360_articles-image-1fvatvmoy0-x31pr4oqkfq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27682/480x360_articles-image-urw6_rbmqkehqgcbmn97ug.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27681/480x360_articles-image-fo46u7vr7uwij4j4t86mlg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27680/480x360_articles-image-xhnyqtuwvkc4o8imj7d6ug.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27679/480x360_articles-image-alvacypxkukhxhsz4qxdoq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/297/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "290",
+          "title": "2026蘇澳冷泉觀光系列活動｜狂歡潑水節、冷泉音樂會",
+          "description": "(因受巴威颱風影響，活動日期延期延期至7/18、7/19)\r\n\r\n一年一度最受期待的夏日清涼盛會——蘇澳「狂歡潑水節」熱力登場! 7月11日下午，蘇澳太平路、中山路一段全面封街，25支踩街隊伍與來自各地的遊客紛紛帶上水槍，換上護目鏡、拖鞋等裝備，齊聚蘇澳火車站前，展開一場盛夏限定的清涼水戰，現場水花漫天飛濺，尖叫聲與歡笑聲此起彼落，快樂指數直破表！\r\n\r\n在清涼消暑的水戰後，7月12日晚間「冷泉音樂會」在蘇西社區活動中心旁接續登場，由知名流行歌手翁立友、楊哲、唐儷、鄔兆邦、吳婕新等實力唱將熱鬧開唱。為歡迎日本石垣市及館山市姊妹市貴賓來訪，特別邀請三線琴演奏家曾健裕老師登台演出，透過悠揚琴聲與歌聲展現日臺文化交融之美。\r\n\r\n\r\n📅活動資訊\r\n𝟬𝟳/𝟭𝟭 ㊅｜狂歡潑水節（蘇澳火車站前） 原定𝟬𝟳/𝟭𝟭 ㊅受天氣影響延期至𝟎𝟕/𝟏𝟗 ㊐ 𝟏𝟓:𝟎𝟎\r\n🔫宜蘭最清涼、最瘋狂的封街水戰！\r\n\r\n𝟬𝟳/𝟭𝟮 ㊐｜冷泉音樂會（蘇西社區活動中心旁） 原定𝟬𝟳/𝟭𝟮 ㊐受天氣影響延期至𝟎𝟕/𝟏𝟖 ㊅ 𝟏𝟖:𝟎𝟎\r\n🎤國台語經典巨星（翁立友、楊哲、唐儷、鄔兆邦、吳婕、曾健裕）輪番上陣\r\n\r\n𝟬𝟴/𝟬𝟭 ㊅｜海洋嘉年華（豆腐岬風景區）\r\n🏄🏻‍♀️白天有熱血的海洋嘉年華運動會！\r\n🎸晚上則融合饒舌與搖滾能量，一起嗨翻豆腐岬！  \r\n\r\n𝟬𝟵/𝟭𝟮 ㊅｜民歌音樂饗宴（蜡藝蜡筆城堡）\r\n🎷帶你一秒穿越到最美好的民歌年代！與知名民歌手一同歡唱。  \r\n\r\n𝟬𝟲/𝟭𝟴-𝟬𝟵/𝟭𝟬蘇澳黃金月月抽\r\n🎁消費滿百元，集滿𝟯個戳章「黃金月月抽」！夢幻獎項，「黃金壹兩」等你帶回家！  \r\n\r\n📌欲知更多活動詳情，請持續鎖定「水水蘇澳」粉絲團，或上蘇澳鎮公所網站查詢！",
+          "event_date": "2026-07-18",
+          "end_date": "2026-07-19",
+          "location": "宜蘭縣蘇澳鎮蘇澳火車站前(蘇澳鎮太平路、中山路一段)、蘇西社區活動中心旁草地",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/290/",
+          "source_updated_at": "2026-07-14T17:32:09.1417691",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27656/480x360_articles-image-ymy2h9syekiimujkbladmq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27707/480x360_articles-image-a-nw4tsqokgill4sdsyzcw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27706/480x360_articles-image-fjohywhvreueook3l3pasq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27657/480x360_articles-image-ofva-q6j0k2lpuddnzmrjw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27643/480x360_articles-image-gsqg3-ooz0mp_t15sbsakg.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/290/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "175",
+          "title": "2026藝術自造祭(預計為5-6月辦理)",
+          "description": "藝術自造祭以「自造」精神為本，鼓勵民眾主動參與、強調跨域協作、實踐藝術共創，邀請參與者在策展過程中共同創造、體驗藝術，進一步深化藝術與觀眾的互動連結。\r\n\r\n中興文化創意園區本身即為紙廠遺構，擁有深厚的紙張產業歷史，此次以「書」為主題，更彰顯園區歷史與策展內容的深刻連結，呼應其獨特的文化底蘊。\r\n\r\n透過策展團隊邀請多元藝術領域的創作者，譬如書藝家、插畫家、版畫藝術家、數位媒體藝術家等，以當代藝術手法，重新詮釋書的多元意涵。深入探討文字的視覺化表現、書寫行為的互動體驗、以及文字與記憶的情感連結，並就創新策展手法，如沉浸式體驗空間或互動裝置藝術等活動結合行銷，營造引人入勝的參與體驗。\r\n\r\n\r\n走進書的世界\r\n高達 3.5 米展開的書法卷軸，結合數位投影構成的蘭陽平原詩景，觀眾可透過混合實境裝置（MR 眼鏡）觸發詩句，營造身處書中、與文字共呼吸的沉浸體驗。\r\n\r\n\r\n宜蘭製字\r\n日本設計師木崎公亮的 Kumiji 數位互動裝置，觀眾可自由組合部首、偏旁與筆畫，創造代表自己的「字我」。",
+          "event_date": "2026-05-01",
+          "end_date": "2026-06-30",
+          "location": "宜蘭縣五結鄉中興文化創意園區",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/175/",
+          "source_updated_at": "2026-01-20T16:57:52.6503191",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27001/480x360_articles-image-xi77qlhvlkcdreiuptnvpa.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27002/480x360_articles-image-qkxyz9dcykss9nkmfx7fhw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/175/",
+          "reasons": [
+            "日期或場次需確認"
+          ],
+          "expired": true
+        },
+        {
+          "external_id": "249",
+          "title": "2026冬山熱氣球嘉年華",
+          "description": "萬眾矚目的冬山熱氣球嘉年華準備登場啦！今年有超多空中萌仔齊聚一堂，快排好行程、攜家帶眷準備衝一波，把療癒的熱氣球美照拍好拍滿！\r\n\r\n活動基本資訊\r\n\r\n活動日期：2026/6/6(六)、6/7(日)、6/13(六)、6/14(日)\r\n活動地點：冬山河舊河道碼頭旁\r\n\r\n\r\n交通與停車指南\r\n\r\n\r\n火車首選：搭到 「冬山站」 下車，出站即抵達，最方便！\r\n客運公車：搭至 「冬山生態綠舟站」 下車，步行約 8 分鐘。\r\n自駕開車：導航至附近停車場再步行前往。\r\n付費停車場：冬山河生態綠舟、冬山車站、Times宜蘭冬山、中正路停車場。\r\n免費停車場：冬山鄉公所、慈愛路單側白線。\r\n貼心提醒：現場無提供接駁車，請勿違規停紅線喔！\r\n\r\n\r\n現場 3 大必玩亮點\r\n\r\n一、熱氣球繫留升空體驗（俯瞰美景超療癒）\r\n\r\n\r\n活動場次：清晨場 05:30-07:30 / 下午場 16:30-18:30\r\n體驗票價：每人 $500 元（體驗時間約 5-7 分鐘）\r\n購票方式：一律當日現場購票（無網路預約）。每人限購 2 張，數量有限售完為止。\r\n搶票撇步：清晨場 05:00、下午場 15:30 開始售票，強烈建議提早去排隊！\r\n注意事項：是否升空由飛行員依當天氣候（風速、熱對流）評估決定。主辦單位也會視現場排隊狀況調整提前售票。\r\n搭乘限制：身高未滿 110cm、孕婦、飲酒、懼高症或身體不適者請勿搭乘。\r\n\r\n\r\n二、浪漫爆棚！熱氣球光雕秀\r\n\r\n\r\n活動時間：活動日傍晚 18:45 - 19:00\r\n活動費用：免費觀賞！\r\n找個好位置，一起沉浸在夜空與光影交織的浪漫氛圍中。\r\n\r\n\r\n三、走進氣球裡！熱氣球地面體驗\r\n\r\n\r\n活動時間：15:30 - 16:00\r\n活動費用：免費！（大人小孩皆可參加，無年齡限制）\r\n如何參加：15:00 起，出示【幸福冬山】粉專按讚畫面即可領取體驗券。名額有限，記得提早排隊。\r\n\r\n\r\n現場周邊市集與好玩活動 \r\n\r\n\r\n鐵路橋下WAWA、新動市集(11:00 - 18:00)： 齊聚特色小吃、清涼飲品、質感手作與在地物產，空檔時間不怕沒地方逛！\r\n舊河道電動小船(08:30-12:00、13:00-17:00)： 搭著小船悠遊冬山河，從河面上欣賞熱氣球，體驗不一樣的 Chill 氛圍。\r\n\r\n\r\n順遊推薦！周邊放電、踩點景點\r\n\r\n\r\n親子放電： 鄉政公園（步行 10 分鐘）、武淵水火同源（車程 8 分鐘）。\r\n秘境探索： 冬山潤泰鐵道（車程 7 分鐘）。\r\n期間限定： 三奇美徑彩繪稻田（車程 10 分鐘），拍完熱氣球順便去看美麗的綠色地毯！\r\n\r\n\r\n這份超強攻略趕快先手刀收藏、分享給準備前來冬山的朋友吧！🙌",
+          "event_date": "2026-06-06",
+          "end_date": "2026-06-14",
+          "location": "宜蘭縣冬山鄉舊河道碼頭乘船處旁",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/249/",
+          "source_updated_at": "2026-05-26T16:28:51.4159425",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27469/480x360_articles-image-0ycufkxilu-e0cfbiovsrq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27474/480x360_articles-image-jgocawyle0kmdain7lnyxg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27473/480x360_articles-image-n72hiw-3deu8vxim_xjvcq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27472/480x360_articles-image-eeprgcgsykclqlroarv02g.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27471/480x360_articles-image-a0icn08sf0o851xnuaog3w.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27470/480x360_articles-image-xb_bkbjmzuy5u8tbjskmqg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27468/480x360_articles-image-z5muok_zf025hr3ywghkow.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/249/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "247",
+          "title": "✨宜❗蘭人市集舊匠開市✨ 5/23－5/24｜蘭陽原創館 ✖︎ 市民之森廣場",
+          "description": "逛完南北館早市別急著走～～快來「宜！蘭人市集」續攤啦！🍻\r\n看表演🎵、玩手作🎨、逛市集🍡\r\n還有舊城實境解謎等你來燒腦解任務🧠\r\n🎁集章抽獎好禮800份\r\n♻️自備環保餐具  還有機會獲得市集限定茄芷袋！\r\n\r\n50+嚴選品牌✨來啦呷啦\r\n\r\n在地美食｜吃出宜蘭的季節與溫度\r\n文創手作｜紅磚巷弄裡的匠心溫度\r\n友善農產｜從田地到你手中的真誠\r\n環境保護｜一起守護咱的山海土地\r\n寵物友善｜毛孩的幸福日常\r\n紓壓療育｜給身心一場溫柔放鬆\r\n\r\n\r\n8+舊城工藝體驗⚒️親子一起玩手作╰(*&deg;▽&deg;*)╯\r\n\r\n\r\n花開一瞬 ✦ 指尖上的春仔花\r\n藤編日常 ✦ 山林的編織手感\r\n土的溫度 ✦ 捏一只自己的器皿\r\n山野藏香 ✦ 茶葉香椎手作\r\n屋脊上的故事 ✦ 剪黏匠師體驗\r\nBonBon祝福 ✦ 做一顆文化的記號\r\n紙上開花 ✦ 蓪草的細緻工藝\r\n紙作時光 ✦ 一塊糕餅的記憶\r\n\r\n\r\n13+團隊🪇雙舞台輪番上演〰給你滿滿的大舞台\r\n⫸主舞台\r\n\r\n\r\n重擊現實打擊樂團\r\n勒巴彥文化藝術團\r\n塘芽.楊/ Tonya Yang ft. 吳凜\r\n湯真 Yahaw ft. 羽茜承霖\r\n壯三新涼樂團\r\n夏至愛樂大提琴室內樂團\r\n瑪嘎巴嗨文化藝術團\r\n\r\n\r\n⫸親子劇場\r\n\r\n\r\n魔法大冒險｜ 魔術師-猴子老師奇幻魔術秀\r\n獨角偶戲｜ 無獨有偶工作室劇團\r\n媽祖婆婆的派對｜Rose姊姊說故事\r\n北管樂的熱鬧時光｜鴨聽雷子弟團\r\n市場有隻狗｜凳子姊姊說故事\r\n夢幻泡泡體驗秀｜宜蘭吹泡泡\r\n\r\n\r\n4+走讀〰2日舊城散策🚶‍♂️🚶帶你從不同視角認識宜蘭\r\n\r\n\r\n宜蘭的民主與公共行動｜李一品\r\n舊城女性生活與記憶 ｜黃麗惠、鄭慧妮\r\n舊城信仰與廟埕生活 ｜蔡明志\r\n跟著幾米遊蘭城｜蠟筆哥哥𝘣𝘳𝘰 𝘙𝘢𝘣𝘣𝘪\r\n\r\n\r\n✄————————————————————————————————————\r\n\r\n💖邀請您一同來舊城慢遊",
+          "event_date": "2026-05-23",
+          "end_date": "2026-05-24",
+          "location": "宜蘭縣宜蘭市蘭陽原創館、市民之森廣場",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/247/",
+          "source_updated_at": "2026-05-19T17:45:21.2059325",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27429/480x360_articles-image-usjnaqdl00ynwmgtkygsga.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27427/480x360_articles-image-y5v8vb2ao0s8y0ix8zwzcg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27423/480x360_articles-image-xwi7ovwrlugnnehod-xbdw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27436/480x360_articles-image-dqeql0mt5e6hduzrkgo92g.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27435/480x360_articles-image-_hyczl7vi0w-mcr3aqp-gq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27434/480x360_articles-image-lap08lmbaeqng__gws3v_w.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27433/480x360_articles-image-bnuterkzee-63g5gfi6v1q.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27432/480x360_articles-image-oy7hfazvrewhbl9zn8u67q.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/247/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "221",
+          "title": "2026宜蘭農特產馬拉松",
+          "description": "「2026宜蘭農特產公益馬拉松」熱情邀請男女老少一起來挑戰自我！帶你從大湖國小出發，沿途飽覽望龍埤、員山伯朗大道、三重坪落羽松至燈篙林道的絕美風光。還有絕世烤雞與各式創意料理招待，絕對讓你活力滿滿、大飽口福！🍗\r\n\r\n【ℹ️活動資訊】\r\n\r\n活動日期📅｜2026/05/23(六)\r\n集合地點📍｜地熱火山爆炸魚餐廳 前廣場\r\n集合時間⏰｜05:10 參加者集合、衣物寄放\r\n\r\n\r\n【🗺️路線組別】\r\n\r\n🏃 42公里組｜05:40起跑 (限時 7.5 小時)\r\n🏃 21公里組｜05:50起跑 \r\n🏃 10公里組｜06:30起跑\r\n🏃 6公里組｜06:50起跑\r\n\r\n【📝報名資訊】\r\n\r\n\r\n報名時間⏰：2025/12/23 至 2026/05/02  (若額滿將提前截止)\r\n活動費用💰：一般組：42K組 1,290元 / 21K組 1,190元 / 10K組 990元 / 5K組 890元(另有早鳥價、宜蘭縣民及影流之友專屬優惠價)\r\n報名連結及活動詳情🔗：2026宜蘭農特產公益馬拉松",
+          "event_date": "2026-05-23",
+          "end_date": "2026-05-23",
+          "location": "宜蘭縣員山鄉大湖國小",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/221/",
+          "source_updated_at": "2026-04-16T17:53:21.3244054",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27223/480x360_articles-image-vytabqxb40ii3pmegbrwug.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/221/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "228",
+          "title": "敬好生活音樂節－紙享爵士 Just Jazz",
+          "description": "將於今年初夏在中興文創園區登場。\r\n\r\n從白晝到入夜，串聯現場音樂演出、餐飲文化與場域漫遊，\r\n音符滲入日常，形成一種自然流動的節奏。\r\n走進這座保有時光溫度的場域，\r\n在紙廠歷史建物中，聽見爵士最純粹的樣子。\r\n\r\n活動邀請多組重量級演出團隊及歌手，\r\n結合音樂、飲食與生活風格，打造多元感官體驗，\r\n敬邀大家一同前來感受爵士音樂的自在與魅力。\r\n\r\n✦✦活動資訊✦✦\r\n\r\n活動時間：2026.05.16（六）－05.17（日）\r\n演出陣容：\r\n\r\n5月16日(日)：川樂團、King Cake New Orleans Jazz、黃瑞豐爵士樂團\r\n5月16日(夜)：楊曉恩爵士樂團、洪筠惠與快樂好夥伴、鮑比達爵士樂團\r\n5月16日(日)：女作之韻、底細爵士樂團、王若琳\r\n\r\n\r\n活動地點：中興文創園區－有料倉庫\r\n\r\n★資料來源：宜蘭縣政府文化局",
+          "event_date": "2026-05-16",
+          "end_date": "2026-05-17",
+          "location": "宜蘭縣五結鄉中正路二段6-8號(中興文創園區－有料倉庫 )",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/228/",
+          "source_updated_at": "2026-05-08T17:32:28.3160407",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27307/480x360_articles-image-no8m69mj4ukx50mdasmdwa.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27310/480x360_articles-image-vtbzdxwlcuw10640sokk0w.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27309/480x360_articles-image-0qgmeq536u6fehisqhby6a.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27308/480x360_articles-image-rshykeikdk-wfwvi8nrvka.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/228/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "209",
+          "title": "▞ 藝起Fun礁溪・春日好玩藝 ▚ 春季活動熱鬧登場！",
+          "description": "宜蘭縣政府文化局將於春季在礁溪跑馬古道公園（北園區）舉辦【藝起Fun礁溪－春日好玩藝】系列活動，邀請民眾走進自然，在春日暖陽中感受藝術與生活交織的美好時光。活動結合專業團隊展演、美感手作及多元互動體驗，透過親子共遊與戶外探索，打造一場充滿創意與活力的春日藝術派對。\r\n\r\n本季「藝起Fun礁溪」以「春日好玩藝」為主題，融合藝術展演與體驗活動，規劃多場精彩演出，邀請表演團隊帶來豐富多元的藝術呈現，包含當代馬戲、肢體劇場、音樂演出等，讓民眾在戶外空間中近距離感受藝術魅力。此外，現場亦安排互動演出及親子同樂內容，營造輕鬆歡樂的春日氛圍。\r\n\r\n「玩」是孩子認識世界的方式\r\n也是大人找回好奇心的鑰匙\r\n\r\n&bull;┈┈┈┈┈┈┈┈┈┈┈┈&bull;\r\n春天最重要的一件事~ 一起好好玩!!\r\n本季活動內容豐富多元\r\n邀請大小朋友透過「玩」這件小事\r\n玩表演、玩創作、玩探索\r\n來趟關於「玩」的春日覺醒旅程~\r\n\r\n&bull;┈┈┈┈┈┈┈┈┈┈┈┈&bull;\r\n\r\n活動日期｜ 2026 / 04 / 11（六）－05 / 10（日）\r\n活動地點｜ 礁溪跑馬古道公園\r\n活動時間｜ 詳見節目表\r\n工作坊報名｜本活動採抽籤制，即日起開放報名至 3月26日（四）下午5時截止（報名方式詳見宜蘭演藝廳FB粉專）.\r\n記得標記行事曆，導航 跑馬古道公園\r\n\r\n&bull;┈┈┈┈┈┈┈┈┈┈┈┈&bull;\r\n\r\n˗ˏˋ 活動亮點公開放送 ˎˊ˗\r\n表演藝術 &times; 手作體驗 &times; 生態探索\r\n\r\n🔹 精彩表演\r\n首週焦點活動精彩登場！\r\n當代馬戲、阿卡貝拉、環境劇場及歌仔戲等\r\n每場節目都帶來高互動的沉浸式體驗\r\n春天最有趣、最好玩的表演，別錯過了！\r\n\r\n🔹 美感手作\r\n本季手作以自然環境為靈感主題\r\n動手創作屬於春天的小小藝術品\r\n在創作裡感受自然靈感\r\n發現生活中的美好片刻\r\n\r\n🔹 戶外體驗・肢體探索\r\n攀樹走繩體驗、親子定向越野挑戰、泡泡互動劇場、親子即興劇場\r\n在自然環境中伸展身體、釋放活力 、盡情玩耍\r\n享受親近自然的春日樂趣",
+          "event_date": "2026-04-11",
+          "end_date": "2026-05-11",
+          "location": "宜蘭縣礁溪鄉跑馬古道公園(北園區)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/209/",
+          "source_updated_at": "2026-03-20T14:29:16.5051838",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27172/480x360_articles-image-k-b6igsoq0-7xppsnskxca.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27174/480x360_articles-image-6tibs61aleir1kout4p-ca.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27173/480x360_articles-image-u53fqcchuesngdh4-njfha.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27176/480x360_articles-image-la3nqdoxde2pmesscmxfxa.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27175/480x360_articles-image-95qnwabqiukgxlhbcdqcpw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/209/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "189",
+          "title": "暢遊宜蘭好禮加倍抽 2.0",
+          "description": "發票登錄全面啟動，邀請大家來宜蘭吃喝玩樂，無論是品嚐在地美食、入住優質旅宿或選購特色好物，只要在「指定商家」消費並登錄發票，就有機會將汽車、電動機車等多項豪華大禮帶回家！\r\n\r\n\r\nℹ️活動資訊\r\n\r\n活動時間📅：\r\n\r\n發票/消費證明有效期間：2026/01/01（四）至 2026/05/10（日）23:59\r\n發票登錄開放期間：2026/01/20（二）08:00 起至 2026/05/11（一）23:59 \r\n\r\n\r\n活動地點📍：宜蘭縣內「指定商家」與「合法旅宿」。\r\n主辦單位📢：宜蘭縣政府、宜蘭縣議會、宜蘭縣觀光協會\r\n\r\n\r\n✨活動亮點\r\n\r\n🚗 豪禮陣容大公開：總獎項價值超過 130 萬元！頭獎包含 Mazda CX-3 汽車一台，還有電動機車、智慧型手機、按摩椅、電動掃地機、電視及吸塵器等豐富獎項。\r\n🛍️ 消費滿額抽：於「指定商家」消費，單筆滿 200 元（含）以上，累計滿 1,000 元即可獲得 1 次抽獎機會，不同發票可合併計算，買越多機會越多。\r\n🏨 旅宿加倍抽：入住宜蘭「合法旅宿」，單筆消費滿 1,000 元即可參加專屬抽獎。消費金額越高序號越多，單筆登錄最高可獲得 20 組抽獎序號。\r\n💡 登錄便利性：全面啟動發票登錄系統，透過官方 LINE 即可輕鬆操作，即時掌握自己的抽獎資格。\r\n\r\n\r\n🔗 報名方式\r\n\r\n指定商家查詢：暢遊宜蘭好禮加倍抽 2.0 指定店家\r\n官方 LINE 登錄：搜尋 ID「@883sqkbm」\r\n客服專線：週一至週五 09:00－17:00\r\n\r\n\r\n🔺注意事項：活動相關說明與調整，請依主辦單位及執行單位公告為準。",
+          "event_date": "2026-01-20",
+          "end_date": "2026-05-11",
+          "location": "",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/189/",
+          "source_updated_at": "2026-02-03T16:29:01.5465936",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27080/480x360_articles-image-diu3ax8_ukgxz7yc8ah7ma.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27079/480x360_articles-image-lhahis2jau2jygcltd9xjq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27078/480x360_articles-image-37avaf_zhuanfcvyzgc0fw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/189/",
+          "reasons": [
+            "缺少活動地點"
+          ],
+          "expired": true
+        },
+        {
+          "external_id": "204",
+          "title": "2026宜蘭綠色博覽會",
+          "description": "今年的綠博自3月28日(六) 開園，至 5月10日(日)閉幕，共舉辦44天。本屆以《格致寶藏》為題，取自《禮記．大學》「格物致知」，寓意研習推究萬物真理，進而獲得珍貴的知識寶藏。在失序的氣候中，連結「自然解方（NbS）」，一起修復大地、守護物種與珍惜海洋，將美好的善意化為行動，共同攜手邁向宜居且繁盛的共融未來。\r\n\r\n\r\n「2026宜蘭綠色博覽會-格致寶藏」\r\n\r\n\r\n舉辦日期：3/28(六) ~ 5/10(日)共計44天。\r\n舉辦地點：蘇澳武荖坑風景區。\r\n活動票價：宜蘭縣民票100元、校外教學票100元、平日全票150元、假日全票250元、平日優待票120元、假日優待票200元，以及多次入園票300元等 ，活動另與國立傳統藝術中心及縣立蘭陽博物館共同販售雙園雙博套票，詳細購票資格與通路，請參閱綠博官網售票資訊。 \r\n新北縣市週優惠：4月20日~4月26日，持身分證件的新北市民即可享有比照宜蘭縣民之百元優惠。\r\n\r\n\r\n更多活動訊息請至臉書搜尋『宜蘭綠色博覽會』官網與粉絲專頁查詢。",
+          "event_date": "2026-03-28",
+          "end_date": "2026-05-10",
+          "location": "宜蘭縣蘇澳鎮武荖坑路75號",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/204/",
+          "source_updated_at": "2026-09-03T09:53:05.4315954",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27148/480x360_articles-image-0pgddaw1ikibxp0yxczhzw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27171/480x360_articles-image-eav5_qwckuykmbsxntryjq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27170/480x360_articles-image-62j0cf9zveqp0ljg9okida.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/204/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "218",
+          "title": "2026 冬山鄉自行車慢活小旅行",
+          "description": "春暖花開，最適合來場悠閒又療癒的單車小旅行！✨\r\n冬山鄉自行車慢活小旅行，帶你穿越三奇美徑、體驗茶園手作，從不同角度感受冬山之美！📸\r\n\r\n【ℹ️活動資訊】\r\n\r\n活動日期📅：4/18(六)、4/19(日)、4/25(六)、4/26(日)、5/2(六)、5/3(日)，共 6 場次\r\n集合地點📍：冬山火車站廣場「2026冬山鄉自行車慢活小旅行服務台」\r\n集合時間⏰：8:00～8:20\r\n\r\n\r\n【🗺️騎行路線】全程約 24.5KM，輕鬆騎乘，愜意慢遊 🚲💨\r\n冬山車站集合(0KM) ➡️ 冬山舊河道(電動小船體驗) (1KM) ➡️ 三奇美徑 (4.5KM) ➡️ 前往中山休閒農業區享用午餐 (10KM) ➡️ 中山亭 (2KM) ➡️ 茶園 DIY 體驗 (1KM) ➡️ 冬山車站賦歸 (6KM)\r\n\r\n【📝報名資訊】\r\n\r\n\r\n報名時間⏰：3/25(三) 上午 10:00起至額滿為止 \r\n活動費用💰：優惠價 599 元 (含自行車及安全帽、午餐、DIY 體驗、電動小船船票、導覽解說、公共意外責任險)\r\n報名方式✅：伊貝特報名網 \r\n報名連結及活動詳情🔗：2026冬山鄉自行車慢活小旅行-伊貝特報名網 \r\n\r\n\r\n💡溫馨提醒： 本活動適合具備基本騎行經驗、穩定騎乘能力的朋友參加，請詳閱報名頁面中的注意事項喔！快標記你的騎行夥伴，一起來報名吧！🙌",
+          "event_date": "2026-04-18",
+          "end_date": "2026-05-03",
+          "location": "宜蘭縣冬山鄉冬山火車站廣場(2026冬山鄉自行車慢活小旅行服務台)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/218/",
+          "source_updated_at": "2026-04-16T17:13:39.7901555",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27219/480x360_articles-image-opcpvjumsuqsjip3bahbsq.png"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/218/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "220",
+          "title": "2026梅花湖永續行動馬拉松 -冬山好運道",
+          "description": "2026 梅花湖永續行動馬拉松 - 冬山好運道，帶你從大埤得安宮出發，奔跑在梅花湖畔、穿梭於山林景緻與季節限定的櫻花林中，感受冬山的慢活步調與自然生態之美！📸\r\n\r\n\r\n【ℹ️活動資訊】\r\n\r\n活動日期📅｜2026/04/25(六)\r\n集合地點📍｜大埤得安宮（宜蘭縣冬山鄉大埤五路170巷3號）\r\n集合時間⏰｜05:30 參加者集合、衣物寄放（各組於 06:20 起陸續鳴槍出發）\r\n\r\n\r\n【🗺️路線組別】\r\n\r\n🏃42公里組｜06:20起跑\r\n🏃21公里組｜06:20起跑\r\n🏃10公里組｜06:40起跑\r\n🏃5公里組｜06:40起跑\r\n\r\n\r\n【📝報名資訊】\r\n\r\n活動費用💰：42K組 990元 / 21K組 890元 / 10K組 790元 / 5K組 690元 (另有早鳥價、宜蘭縣民及影流之友專屬優惠價)\r\n活動詳情🔗：2026梅花湖永續行動馬拉松-冬山好運道\r\n\r\n\r\n💡溫馨提醒：本次賽事融入永續精神，採取簡約、低塑的規劃，僅提供完賽獎牌、賽道補給、敘獎及電子完賽證明（跑衣等紀念品可視需求加購），一起以最自然環保的方式參與路跑！快標記你的跑友夥伴，一起來報名吧！🙌",
+          "event_date": "2026-04-25",
+          "end_date": "2026-04-25",
+          "location": "宜蘭縣冬山鄉大埤得安宮",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/220/",
+          "source_updated_at": "2026-04-16T18:05:03.4444045",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27222/480x360_articles-image-dxvhest0c0si0uqleiyfpw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/220/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "162",
+          "title": "2026 杏輝宜蘭馬拉松",
+          "description": "今年賽事第一次從 秋天改到春天，四月跑宜蘭的氛圍就是：\r\n🌸 花開、💨 微涼、🌿 空氣乾淨、👟 腳步輕盈\r\n\r\n跑在宜蘭，就是一種風景調整❗️\r\n起終點在 宜蘭運動公園，清晨空氣不厚重、呼吸很順。\r\n不一定真的跑進每個行政區，但土地的氛圍與春天的節奏，就在你每一步之中。\r\n\r\n📍 賽事資訊\r\n日期: 2026.04.11\r\n時間: 05:00 — 12:00\r\n地點: 宜蘭運動公園\r\n\r\n🚩 報名截止: 2026.02.11",
+          "event_date": "2026-04-11",
+          "end_date": "2026-04-11",
+          "location": "宜蘭縣宜蘭市宜蘭運動公園",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/162/",
+          "source_updated_at": "2025-12-24T14:43:33.2908731",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26746/480x360_articles-image-rvcjeikaz0qlo0g0-ciefw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/162/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "205",
+          "title": "2026宜蘭市童樂會—奇幻樂園大冒險",
+          "description": "「2026宜蘭市童樂會—奇幻樂園大冒險」將於115年3月28日（六）及3月29日（日）9:00起，在宜蘭運動公園盛大舉行。透過多元遊戲設施、精彩藝文展演與可愛動物互動體驗區等教育體驗活動，打造充滿想像力與歡樂氛圍的「城市奇幻樂園」。\r\n\r\n特色一｜童趣樂園遊戲區\r\n以「動物派對」與「海洋世界」為主題的兩座巨型主題氣墊。\r\n\r\n特色二｜童話故事遊戲區                                               \r\n現場排隊即可遊玩童話小火車、旋轉茶會與旋轉木馬三種設施。\r\n\r\n特色三｜分齡親子遊戲區\r\n0至3歲幼兒專屬室內遊戲空間，設置球池、幼童溜滑梯與積木互動區。\r\n\r\n特色四｜童趣藝文舞台\r\n紙風車劇團帶來經典劇碼《巫頂環遊世界》、東森YOYO哥哥姐姐唱跳演出，以及巨型恐龍玩偶互動出、童話魔術秀與街頭藝術表演。\r\n\r\n特色五｜親子手作體驗區\r\n「海洋小探險生態故事 &times; 創意DIY」、「親子透明扇彩繪樂DIY」、「小小農夫養成記－親子食農教育體驗」等內容，透過故事引導與動手創作。\r\n\r\n特色六｜歡樂市集                                                                                           \r\n集結包含《夜市王》冠軍隊成員等 50攤以上特色美食與親子友善攤位。\r\n\r\n＊備註：目前有開放預約的童趣樂園遊戲區、分齡親子遊戲區、親子手作體驗區三個區域已報名額滿，可至現場候位。",
+          "event_date": "2026-03-28",
+          "end_date": "2026-03-29",
+          "location": "宜蘭縣宜蘭市中山路一段755號(宜蘭運動公園)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/205/",
+          "source_updated_at": "2026-03-18T09:21:17.7579081",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27159/480x360_articles-image-1s1wjfberui6rn4pw1gl1q.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/205/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "203",
+          "title": "雷克斯踢踏舞團《節奏事件》",
+          "description": "節奏是肢體的靈魂，也是音樂最純粹的結構。雷克斯踢踏舞團將於 115年3月28日（週六）晚間7時30分，在宜蘭演藝廳呈現年度跨界力作《節奏事件 Rhythmic Occurrence》。本場演出打破傳統舞臺界線，將踢踏舞的精準敲擊與街舞的爆發力律動無縫結合，為觀眾帶來一場沉浸式的聲響體驗。\r\n\r\n即日起至3月20日搶先購票可享早鳥8折優惠，青年觀眾使用文化幣購買青年席位，不僅享300元指定席位與5折自由席優惠，還可憑票券至現場兌換限量青年來廳禮。歡迎和親朋好友一起走進劇場，在聲音與身體的共鳴之中，共同探索節奏所能開展的無限想像。購票可至OPENTIX兩廳院文化生活或洽雷克斯踢踏舞團0922760768。\r\n【演出及購票資訊】\r\n\r\n演出名稱：雷克斯踢踏舞團《節奏事件》\r\n\r\n演出地點：宜蘭演藝廳 (宜蘭縣宜蘭市中山路2段482號)\r\n\r\n演出時間：3月28日 (六) 晚上7點30分\r\n\r\n演出票價：$400、$600、$800、$1000\r\n\r\n購票請上𝐎𝐏𝐄𝐍𝐓𝐈𝐗系統",
+          "event_date": "2026-03-28",
+          "end_date": "2026-03-28",
+          "location": "宜蘭縣宜蘭市中山路二段482號",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/203/",
+          "source_updated_at": "2026-03-06T15:46:52.7692268",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27146/480x360_articles-image-mqhh-9k3juo1hjhj93jy3g.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27145/480x360_articles-image-ql5kh-pkieuodyrrswtyoq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27147/480x360_articles-image-jzvgzrktb0socc-fuzs75w.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/203/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "155",
+          "title": "2026中山香香馬拉松",
+          "description": "這場賽事以結合「柚花香」與「茶香」為特色，讓跑者徜徉於田園風光中。\r\n\r\n報名期間：2025 年 11 月 11 日至 2026 年 3 月 28 日（額滿為止）\r\n活動日期：\r\n路跑：2026 年 3月 28 日（週六）06:00—14:00\r\n尋寶：3月27日-29日下午14點\r\n活動地點：冬山鄉福林宮及中山社區\r\n主辦單位:  中山社區發展協會\r\n協辦單位:  影流文創\r\n\r\n\r\n更多活動資訊可見活動網站。",
+          "event_date": "2026-03-28",
+          "end_date": "2026-03-28",
+          "location": "宜蘭縣冬山鄉福林宮",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/155/",
+          "source_updated_at": "2025-12-23T11:56:23.1898591",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26737/480x360_articles-image-nisaw4ouuuioaqsnyj_nsa.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/155/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "191",
+          "title": "2026員山頑埤路跑",
+          "description": "＼🏃‍➡️𝟮𝟬𝟮𝟲員山頑埤路跑熱血回歸！／\r\n這是一場結合運動、觀光與在地人情味的賽事。跑者將穿梭於山林與埤塘之間，從輕鬆的親子體驗到挑戰極限的國家級秘境，用雙腳收藏宜蘭最療癒的風景。不論你是專業跑者，還是想帶全家大小出門踏青，都能在這裡找到適合自己的路線，感受員山的好山好水。\r\n\r\nℹ️活動資訊\r\n\r\n活動時間📅：2026/03/21（六）上午 06:30 鳴槍起跑\r\n活動地點📍：員山公園（起跑點）\r\n報名期限🏃‍♀️：即日起至 2月22日 止。\r\n報名連結🔗：伊貝特報名網\r\n主辦單位📢：員山鄉公所、員山鄉民代表大會\r\n\r\n\r\n⭐活動亮點\r\n\r\n▋四大組別，難度任選｜今年賽事全面升級，規劃四種距離滿足不同需求的跑者：\r\n\r\n\r\n福山植物園超馬組 45K：直攻國家級山林秘境，適合想挑戰自我、拚速度與耐力的跑者。\r\n雙連埤超半馬組 24K：穿梭海拔 470 公尺生態秘境，適合進階跑者穩定發揮。\r\n頑埤挑戰組 11K：山光水色一次收集，適合平時有運動習慣的民眾。\r\n頑埤體驗組 6K：距離友善、氣氛輕鬆，適合親子同跑或路跑新手。\r\n\r\n\r\n▋豐富物資與在地補給\r\n\r\n\r\n澎湃補給：賽道設有在地特色美食補給站，讓你跑得有力、吃得滿足。\r\n專屬好禮：以員山吉祥物「💧水滴娃娃」設計的機能排汗衫、毛巾、頭巾及專屬完賽獎牌。\r\n\r\n\r\n▋運動旅遊一次滿足\r\n\r\n結合在地旅宿與特約店家提供專屬優惠，讓跑者安排「跑步＋旅行」的深度遊程，體驗員山風光。\r\n\r\n👉更多資訊：請搜尋 FB 粉絲專頁「員山頑埤路跑」",
+          "event_date": "2026-03-21",
+          "end_date": "2026-03-21",
+          "location": "宜蘭縣員山鄉員山公園",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/191/",
+          "source_updated_at": "2026-02-03T16:26:43.4632324",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27082/480x360_articles-image-pa_qudatzu2wpplficcwla.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27086/480x360_articles-image-9znkzcx650qo9wvntempyq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27085/480x360_articles-image-p_ftedawo0yrw_8bshwvnq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27084/480x360_articles-image-xrj8vkqz3eawr0bvdpvaea.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27083/480x360_articles-image-r05eteufs0-lxmn9-gfsna.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/191/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "202",
+          "title": "「穿天茶香・慢尞冬山」 3/8 相約冬山火車站",
+          "description": "宜蘭縣政府將於115年3月8日在冬山火車站站前廣場及鐵路橋下空間舉辦「115年宜蘭客家天穿日－穿天茶香・慢尞冬山」活動。結合國際婦女節與客家傳統天穿日，以「修補生活」與「客家女力」為主題，規劃舞台表演、文化走讀、手作體驗、好客市集及親子實境解謎遊戲等豐富內容，邀請民眾一同體驗客家文化魅力。\r\n\r\n活動日期：115年3月8日（日）\r\n活動時間：10:00-16:00\r\n活動地點：冬山火車站站前廣場\r\n客家好食發放資訊：10:30客家菜頭糜／14:00九層粄（各時段，限量250份）\r\n貼心提醒｜現場不提供免洗餐具，請自備環保餐具\r\n\r\n更多資訊請至「蘭陽客多讚」Facebook查詢",
+          "event_date": "2026-03-08",
+          "end_date": "2026-03-08",
+          "location": "宜蘭縣冬山鄉中正路1號",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/202/",
+          "source_updated_at": "2026-03-06T15:46:06.1754615",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27143/480x360_articles-image-7zyjhawayuktxjjie-n-xa.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27144/480x360_articles-image-hbfgbduwx0ya9y38_9v-hg.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/202/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "171",
+          "title": "2026冬山舊河港燈節-河光飛夢",
+          "description": "活動期間：1月17日-3月7日\r\n地點：冬山車站廣場至舊河道步道\r\n\r\n1月17日點燈儀式活動 搶先看！✨\r\n\r\n15:00-21:00 WAWA市集\r\n19:00-20:00 蘋果劇團《嬌滴滴與髒兮兮》親子舞台劇\r\n20:00-20:25 長官致詞\r\n20:26-20:29 點燈儀式＋3分鐘煙火秀\r\n\r\n\r\n2月28日活動內容 搶先看！✨\r\n\r\n\r\n18:30-19:00 魔術表演\r\n19:00-20:00 潘芳烈樂團表演\r\n20:26-20:36 10分鐘煙火秀\r\n\r\n************************************\r\n\r\n⚠️重要【煙火管制注意事項🎆】\r\n為了維護施放安全，請大家務必配合以下管制：\r\n管制日期：開幕場115/1/17(六)、元宵場2/28(六)\r\n管制時間：19:00-20:40\r\n施放時間：20:26 (1/17開幕場180秒、2/28元宵場600秒)\r\n\r\n管制範圍：\r\n1. 冬山舊河道步道(雙向)禁止行人進出🚧\r\n煙火施放周邊全面交通管制，禁止人車進入。\r\n\r\n2. 生態綠舟停車場 重要提醒‼️\r\n🚫17:00後停車場不開放停車。\r\n🚫19:00-20:40交通管制期間內，嚴禁任何人員在車內或管制範圍內逗留！\r\n請務必提前離場，謝謝您的配合!\r\n\r\n【交通與停車指南】\r\n🚗開放路邊停車\r\n慈愛路(成興路至香中路間)單側開放停車\r\n請遵從現場指引，秩序停放。\r\n\r\n🚉台鐵服務資訊\r\n活動結束時段北上列車冬山站發車時刻參考：\r\n區    間 4241次：20:44\r\n區間快 4035次：20:49\r\n自    強 241次：21:20  (台鐵配合活動增加停靠)\r\n區    間 4243次：21:43\r\n\r\n🔗 詳情請參考台鐵官網，本資訊僅供參考。\r\n\r\n************************************\r\n\r\n【2026 🐎馬上發財✨搖搖馬提燈】\r\n龍馬精神，好運奔騰！ 馬年DIY小提燈登場！\r\n新的一年，讓我們一起「馬」上擁有好福氣！\r\n1 月 29 日（星期四）起，只要在「冬山舊河港燈節」或周邊的「春節佈置」前拍照打卡， 就能到冬山鄉公所，把充滿朝氣的馬年小提燈帶回家！\r\n提著這盞燈，象徵新的一年龍馬精神、馬到成功， 讓好運跑得比誰都快，一路領先到年尾～\r\n\r\n🐎🏮兌換資訊\r\n時間：1/29（四）起，週一至週五 8:00~17:00（午休 12:00~13:00）\r\n地點：冬山鄉公所二樓觀光所\r\n數量有限，送完為止，每人限領一份喔！\r\n快來和我們一起策馬奔騰，點亮最閃耀的馬年！",
+          "event_date": "2026-01-17",
+          "end_date": "2026-03-07",
+          "location": "宜蘭縣冬山鄉中正路1號(冬山車站前廣場)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/171/",
+          "source_updated_at": "2026-02-03T17:01:23.0610495",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26801/480x360_articles-image-06wg4kwvheo9nmkg5xwkwg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27077/480x360_articles-image-vrtwhhc5cu6bdkdwmfeotw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27076/480x360_articles-image-xfp9fputgeuyrttxidlb9q.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27071/480x360_articles-image-jnajxz9vyu-_igfsa4npwg.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/171/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "125",
+          "title": "2025礁溪溫泉燈花季",
+          "description": "眾所期待的年度盛事回來了！連續三屆榮獲「台灣好湯－金獎」肯定，更一舉奪下美國 MUSE 設計大獎金獎及義大利 Rome Design Awards 銀獎殊榮！🏆今年冬天，我們將再次用璀璨光影點亮礁溪夜空，讓這座溫泉鄉越夜越美麗！\r\n\r\n💡 四大主題展區\r\n從溫泉廣場、迎賓廣場，到地景廣場及水景廣場，炫麗的光雕與裝置藝術，絕對讓你拍到手軟、浪漫滿分！快揪朋友一起來感受「台灣好湯」的魅力！\r\n\r\n📅活動資訊\r\n\r\n活動期間｜2025年11月28日（五）至 2026年3月4日（二）\r\n活動地點｜礁溪溫泉區\r\n參加方式｜全程免費入場，歡迎所有民眾自由參與",
+          "event_date": "2025-11-13",
+          "end_date": "2026-03-04",
+          "location": "宜蘭縣礁溪鄉礁溪溫泉區",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/125/",
+          "source_updated_at": "2025-11-20T14:14:51.6220663",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26513/480x360_articles-image-76a8ihayekekz6ug_8yy9a.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26514/480x360_articles-image-rj9okgbucuoalegtwt6xra.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/125/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "184",
+          "title": "2026五結鄉廟宇嘉年華活動",
+          "description": "五結鄉2026廟宇嘉年華活動\r\n\r\n今年廟宇嘉年華不但保留既有的集章+摸彩活動，還增加了搏杯活動唷 !\r\n\r\n活動希望民眾及遊客在走春集章參拜的同時，也能同時瞭解到15間協力廟宇的文化與深度，在趣味及滿滿年味中參與元宵晚會。活動希望讓大眾感受每一間廟宇都有獨特的文化故事和加持祝福，期待在集章過程中能獲得穩定靜心的能量，並求得新年的順遂平安。歡迎大家春節期間一起來五結鄉走春集章 祈求馬上平安、馬上都圓滿 !\r\n\r\n03月03日元宵節晚會當天邀請金曲台語天后【曾心梅】、原民創作戰將【曾瑋中】、台語小天后【謝金晶】到場獻唱，還有最愛五結鄉的馬力歐主持！五結鄉2026廟宇嘉年華，精彩活動等著你來喔～\r\n\r\n各廟宇紙本集章卡有限，歡迎底下連結自行下載列印集章卡\r\n活動地點：鄉內轄區15間廟宇集章(元宵晚會地點於利澤簡永安宮,利澤路26號)",
+          "event_date": "2026-02-12",
+          "end_date": "2026-03-03",
+          "location": "宜蘭縣五結鄉利澤路26號 (利澤簡永安宮)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/184/",
+          "source_updated_at": "2026-03-06T15:12:07.7108071",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27132/480x360_articles-image-ni16awblekyss77_ql-omg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27127/480x360_articles-image-fdbdhrsgmuwgcgtlbwo73w.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27129/480x360_articles-image-updxts4nikwldrbnc1-bmg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27124/480x360_articles-image-6kq1hdshcksj7-dmdlqxhw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27131/480x360_articles-image-dbpsqb7vte27enhjomuxxw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27130/480x360_articles-image-rdoxdjti4eqwhkto1oy-6g.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27128/480x360_articles-image-vb1jcwrtqeswl5f3_cs7aq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27126/480x360_articles-image-i-zncvnbuuk_5r1mox-qwq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/184/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "158",
+          "title": "2025壯圍生活節《阡陌縱橫沙海間》",
+          "description": "活動以「阡陌縱橫沙海間」為主題，邀請2組藝術家融合地景、人文元素營造環境氛圍，透過藝文展演實踐，逐步勾勒壯圍島、海、沙丘與平原交織的自然地景、農漁勞動風景、藝術人文風情透過一系列沙丘音樂會活動、在地藝文據點串聯體驗活動等等，引領越來越多旅人、觀者來到壯圍沙丘生態園區，領略生活在壯圍的豐盈精彩，此外也凝聚了更多在地生活實踐者的認同。\r\n\r\n各月份活動可參考「2025壯圍生活節」官方活動臉書公告。",
+          "event_date": "2025-07-26",
+          "end_date": "2026-02-28",
+          "location": "宜蘭縣壯圍鄉壯圍沙丘生態園區",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/158/",
+          "source_updated_at": "2025-12-23T11:53:31.8515128",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26741/480x360_articles-image-qeex4s56heyjg_qukzcemq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/158/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "161",
+          "title": "2026五結走尪路跑嘉年華",
+          "description": "五結利澤簡每年逢元宵，都會舉辦特別傳統文化「走尪」，走尪是當地八大村庄重要慶典活動，至今已傳承百年，今年適逢利澤簡永安宮建廟兩百週年，舉辦路跑活動。早期五結居民只要在元宵節，村裡的男丁便會抬著神轎到新婚的家戶沖喜，藉此達到避邪怯災的目的，神轎在遶境中奔跑扶攆驅邪除疫，以過火儀式祈求新年能平安健康。而在「永安宮」的長期推廣傳承下，「走尪」逐漸成了台灣重要的民俗文化資產，近年更透過路跑活動的結合，鼓勵民眾走出戶外，同時又能體驗到獨有的廟宇文化，歡迎有興趣的民眾共同來體驗。\r\n\r\n活動日期：2026 年 2 月 28 日（星期六），星期六，06:00-11:00\r\n活動地點：宜蘭縣五結鄉利澤簡永安宮 (宜蘭縣五結鄉利澤路26號)\r\n賽道路線：從永安宮出發，途經五十二甲濕地與冬山河沿岸\r\n\r\n更多報名資訊可見活動網站。",
+          "event_date": "2026-02-28",
+          "end_date": "2026-02-28",
+          "location": "宜蘭縣五結鄉宜蘭縣五結鄉利澤路26號(利澤簡永安宮)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/161/",
+          "source_updated_at": "2025-12-23T11:52:15.2445519",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26745/480x360_articles-image-i-junc4s9emzjaeenjubxq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26744/480x360_articles-image-ihlqfjdth0sgr41f_uievw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/161/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "178",
+          "title": "2026歡樂宜蘭年",
+          "description": "2026歡樂宜蘭年除夕守歲晚會將於2月16日晚上9點30分在中興文化創意園區熱鬧登場。\r\n\r\n活動現場有象祈福好運的起爐儀式、內容多元的馬吉市集、大小朋友都能參加的台語闖關遊戲，以及一連串精采絕倫的表演，陪伴大家歡喜守歲。\r\n\r\n誠摯邀請您攜家帶眷、呼朋引伴，一同到中興文化創意園區迎接新年，感受溫暖又歡欣的傳統年節氛圍。",
+          "event_date": "2026-02-16",
+          "end_date": "2026-02-16",
+          "location": "宜蘭縣五結鄉中正路二段6之8號(中興文化創意園區)",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/178/",
+          "source_updated_at": "2026-01-08T17:30:58.2403457",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27011/480x360_articles-image-du8xnq6cteggp7ddxzrdla.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/178/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "183",
+          "title": "2026五結鄉春節街景佈置及情人節活動",
+          "description": "駿馬奔騰 五結迎春\r\n\r\n五結鄉物阜民豐及年節喜氣洋洋，五結鄉公所融合傳統與創新，打造各定點場域裝置藝術及各路段街燈佈置，以耳目一新的春節街景佈置，歡迎返鄉遊子、來訪旅客，客製屬於五結鄉的在地特色年節氛圍。\r\n\r\n【五結鄉115年街景佈置點燈記者會】\r\n五結鄉115年街景佈置即將正式點亮，誠摯邀請各位鄉親好友參加五結的幸福時刻！一同來到五結鄉公所廣場參與點燈活動，見證街景亮起、好運啟動的溫暖瞬間。\r\n\r\n活動現場還有限量福袋可以領取～數量有限！手腳要快！\r\n點燈時間 : 115年02月09日 18:00-18:30\r\n點燈地點 : 五結鄉公所\r\n點燈限量好禮 : 點燈活動結束後，將發送限量小福袋 (限量300個 送完為止)\r\n\r\n\r\n\r\n************************************\r\n\r\n來五結 馬上幸福！\r\n\r\n情人節不只甜，還要好玩又好逛！現場除了精彩不間斷的舞台活動，還有滿滿市集攤位等你來挖寶，邊逛邊吃，完全不用擔心餓肚子，趕緊揪情人、揪朋友、揪全家一起來五結 ~\r\n\r\n幸福真的會「馬上」發生\r\n活動地點｜五結排水左岸自行車道（近五育橋，五結國小旁）\r\n活動時間｜115/02/14(六) 16:00-20:00\r\n\r\n以上相關資訊，最新公告請關注亮麗五結粉絲專頁！",
+          "event_date": "2026-02-09",
+          "end_date": "2026-02-14",
+          "location": "",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/183/",
+          "source_updated_at": "2026-03-06T15:19:53.8723821",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27142/480x360_articles-image-eimh80o8xucskc2_msv-zw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27141/480x360_articles-image-uhe_0gidwuykcnzqvbyelg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27140/480x360_articles-image-7b3byaurouaum-rfx1t3ha.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27139/480x360_articles-image-acudhu7s7ksuwnhvyi6_pg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27138/480x360_articles-image-bmmuz0an8eoy2zxcjdhpwq.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27136/480x360_articles-image-eb20dmyeg0yg_3knvjgm4g.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27137/480x360_articles-image-sfbqnvps4ea6y1qcix75tg.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27135/480x360_articles-image-yd6qwngkreiqmrlfy5l-sa.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/183/",
+          "reasons": [
+            "缺少活動地點"
+          ],
+          "expired": true
+        },
+        {
+          "external_id": "190",
+          "title": "蘇澳鎮名家揮毫贈春聯活動",
+          "description": "🏮【 蘇澳迎馬年．名家揮毫贈福氣】🏮\r\n--𝟯場盛會 &times; 𝟭𝟮位名家｜寫春聯、迎新春--\r\n農曆新年腳步近了！\r\n口碑爆棚、好評如潮的蘇澳鎮名家揮毫贈春聯活動\r\n第𝟴年陪伴大家，揮別舊歲，迎新年啦🐎 \r\n\r\n🧧 【 名家揮毫｜𝟭𝟮位華麗陣容共襄盛舉】\r\n卡司陣容華麗，我們邀請到廖大慶、伍高明、李秩丞、楊士霆、陳彩雲等𝟭𝟮位名師及藝術家，客製化現寫春聯、製作版畫，免費贈送\r\n​\r\n🛍️ 【 環保好市｜逛蘇澳公有市場領好市券】 \r\n𝟭/𝟯𝟭(新馬市場)、𝟮/𝟬𝟭(中原市場) 只要持「環保袋」或「環保容器」到我們舉辦名師揮毫的市場之中，確認後，即可獲得𝟱𝟬元 環保好市券乙張！ (𝟮場共𝟱𝟲𝟬張，發完為止喔！) \r\n​\r\n🖌️【 創意𝗗𝗜𝗬｜自己的春聯自己寫】 \r\n𝟮/𝟳(六)第三場次南天宮，特別加開𝗗𝗜𝗬 專區。大人小孩都能親自執筆祈願，滿滿參與感。\r\n​\r\n​\r\n📜 ━━━活動場次資訊．手刀記下來━━━📜\r\n🧨 第一場｜新馬市場｜好市券𝟮𝟴𝟬張\r\n📅 𝟭月𝟯𝟭日(六) 𝟬𝟵:𝟬𝟬~𝟭𝟭:𝟬𝟬\r\n​\r\n🧨第二場｜中原市場｜好市券𝟮𝟴𝟬張\r\n📅 𝟮月𝟭日(日) 𝟬𝟵:𝟬𝟬~𝟭𝟭:𝟬𝟬\r\n​\r\n🧨第三場｜南天宮 ｜𝗗𝗜𝗬寫春聯\r\n📅 𝟮月𝟳日(六) 𝟭𝟬:𝟬𝟬~𝟭𝟮:𝟬𝟬\r\n​\r\n⚠️溫馨提醒：現場名師墨寶數量有限，建議提早到場！\r\n📞洽詢電話：(𝟬𝟯)𝟵𝟵𝟱𝟭-𝟭𝟭𝟴 (蘇澳鎮圖書館)",
+          "event_date": "2026-01-31",
+          "end_date": "2026-02-07",
+          "location": "",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/190/",
+          "source_updated_at": "2026-02-03T15:27:26.4699499",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/27081/480x360_articles-image-b08t_qixhkgdh7iqp2fdyq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/190/",
+          "reasons": [
+            "缺少活動地點"
+          ],
+          "expired": true
+        },
+        {
+          "external_id": "159",
+          "title": "《今夜無法說相聲之大師走了》",
+          "description": "收到宋少卿老師意外過世的新聞\r\n【喜劇團】立即幫他辦理了一場告別式\r\n\r\n各路英雄好漢、喜劇豪傑們紛紛趕來致意\r\n觀禮民眾、親朋好友都到齊了，但禮儀公司還沒來？\r\n喜劇團團長表示「喜劇人要有喜劇人自己的弔唁方式」\r\n各路人馬各自表演一段跟宋老師有關的表演向他致意\r\n\r\n是烏龍新聞？是喜劇追思大會？還是宋老師的幻想？\r\n\r\n《今夜無法說相聲之大師走了》是【喜劇團】第三部作品，由朱德剛、宋少卿、蕭志瑋(八弟)、翁銓偉、呂濟寬、陳妙音、林品澄、劉毓謙擔綱演出，不是單純的傳統相聲表演，是一齣用舞台劇包裝相聲、脫口秀、漫才、素描喜劇的喜劇作品，1月17日下午15:30 歡迎大家來宜蘭演藝廳哈哈大笑！",
+          "event_date": "2026-01-17",
+          "end_date": "2026-01-17",
+          "location": "宜蘭縣宜蘭市宜蘭演藝廳",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/159/",
+          "source_updated_at": "2025-12-23T11:42:26.9330914",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26742/480x360_articles-image-h8ujgsagfkmy0ttpf8oqag.jpeg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/159/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "160",
+          "title": "《牛爺爺的心願》",
+          "description": "《牛爺爺的心願》兒童劇改變自《樹懶爺爺的心願》兒童繪本，由「九歌兒童劇團」演出，幸福社區裡的牛爺爺、馬爺爺和孫女、侯奶奶、龍大叔、楊大嬸，是相知相惜的好鄰居，而且每天早晨都相約在社區公園運動聊天。有一天，牛爺爺在晨間運動時突然昏倒，被送上救護車前往醫院急救。幸福社區好鄰居們紛紛前往探視，病床上的牛爺爺全身插滿管子，兒子和女兒為了是否持續急救爸爸而爭吵。\r\n\r\n醫生嘆息的說，如果牛爺爺身體健康的時候有簽署「預立醫療決定書」，此時此刻就能夠依照自己的想法處理了。馬爺爺聽醫生一席話，心疼看著牛爺爺，開始想著，當生命走到盡頭，我如何做自己身體的主人？\r\n\r\n九歌兒童劇團將原作繪本中的森林世界擬人化動物，化為現代真實生活的日常。幸福是每一個家庭的期待，以「幸福」隱喻自己對自己，以及家人對自己的愛與祝福，讓病人可以依隨自己做主的心意，走完在人生的最後一程。劇團運用「說故事劇場」型式以旁白者建立情境、串連情節發展，並結合「九歌生活故事劇場」特色加入互動，觀眾在看戲的過程中可以自然參與、自然收獲、表達自己的想法。\r\n\r\n本劇為索票節目，歡迎各位大小朋友在1月10日星期六下午至宜蘭演藝廳觀賞。",
+          "event_date": "2026-01-10",
+          "end_date": "2026-01-10",
+          "location": "宜蘭縣宜蘭市宜蘭演藝廳",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/160/",
+          "source_updated_at": "2025-12-23T11:44:27.507431",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26743/480x360_articles-image-yezamep2bku-6oo0pmhgag.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/160/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "97",
+          "title": "2025年宜蘭傳藝園區駐園大戲 《齊天大聖鬧龍宮》",
+          "description": "傳統戲曲x宋江陣法x高空特技\r\n齊天大聖孫悟空率領花果山的猴子大軍，攻打龍宮奪回作亂的龍珠，與龍王展開一場巔峰對決！本劇結合傳統歌仔戲的深厚底蘊與現代電影高空特技，創造出一場親子共享的視覺大饗宴。獨創高空蹦極舞蹈、炫目特技動作場景，讓觀眾目不轉睛，身臨其境感受前所未有的沈浸式互動體驗。超過十隻栩栩如生的猴子穿梭劇場，與大小朋友玩樂互動，歡笑不斷。本劇不僅是傳統與創新的完美融合，更是年度最值得期待的親子定目劇，快來和孫悟空一起熱鬧鬧翻龍宮！\r\n\r\n演出資訊\r\n▪節目名稱：《齊天大聖鬧龍宮》\r\n▪演出日期：2025/01/29-2026/01/07\r\n▪演出時段：10:30、14:00（每天兩場）\r\n▪演出時間：一場約45分鐘\r\n▪演出地點：魯班街&rarr;廟埕廣場&rarr;臨水劇場（晴天踩街演出、雨天或天氣不穩於臨水劇場定點演出）\r\n\r\n觀賞攻略\r\n📍 演出動線：廟埕廣場 &rarr; 臨水劇場\r\n⏰晴天 時間表：\r\n10:20/13:50 ｜ 臨水劇場入場\r\n10:30 /14:00｜ 廟埕廣場踩街\r\n10:45 /14:15｜ 劇場演出開始\r\n\r\n📍 演出動線： 臨水劇場定點演出\r\n⏰雨天時間表\r\n10:20/13:50 ｜ 臨水劇場入場\r\n10:30/14:00 ｜ 劇場演出開始\r\n(以上時間依現場公告為主)",
+          "event_date": "2025-01-29",
+          "end_date": "2026-01-07",
+          "location": "宜蘭縣五結鄉宜蘭傳藝園區",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/97/",
+          "source_updated_at": "2025-11-03T11:23:41.2998188",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26374/480x360_articles-image-gogguwlf-ua1xmy2provqq.jpeg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/97/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "156",
+          "title": "115年羅東鎮元旦升旗典禮暨健走活動",
+          "description": "「115年羅東鎮元旦升旗典禮暨健走活動」將於1月1日上午7時在鎮公所前舉行，升旗典禮將由鎮長吳秋齡率領各界人士向國旗致敬，邀請民眾以嶄新的心情迎接新年曙光，漫步羅東街景、享受清新空氣，開啟健康永續的新年度。\r\n\r\n健走路線自羅東鎮公所報到(發參加序號單)出發 -&gt;地方税務局羅東分局(序號單蓋參加章) -&gt;羅東高中前人行道(以序號單換發摸彩券)-&gt;羅東運動公園(游泳池入口處前人行道--摸彩券上蓋中途點章)-&gt;法鼓山蘭陽分院停車場(摸彩券上蓋章换點心)-&gt;金門餐廳(摸彩券上蓋章換小毛巾)-&gt;公所前(摸彩券上蓋章换宣導品)-&gt;中山公園(集滿四個章參加摸彩)。\r\n\r\n特別在中山公園活動現場與羅東鎮聖母醫院🏥辦協助辦理乳癌、子宮頸癌等宣導攤位及免費篩檢，當天一起來健走護健康。\r\n\r\n誠摯邀請民眾踴躍參與，我愛羅東-活力無限！\r\n在新年的第一天一起共同邁步❤️❤️",
+          "event_date": "2026-01-01",
+          "end_date": "2026-01-01",
+          "location": "宜蘭縣羅東鎮鎮公所",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/156/",
+          "source_updated_at": "2025-12-23T11:15:10.3650027",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26738/480x360_articles-image-ydmxzvj6z0kqyoy1c-vxbw.jpg",
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26739/480x360_articles-image-o3idxefof0ovxrhcykfskq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/156/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "151",
+          "title": "2026璀璨蘭城 幸福宜市",
+          "description": "🎉 2026璀璨蘭城 幸福宜市！宜蘭跨年晚會卡司超豪華！ 🎉\r\n📢 準備好了嗎！《2026璀璨蘭城 幸福宜市》跨年晚會卡司正式公布，保證是今年最有看頭的跨年盛典！\r\n\r\n🎤 12月31日晚間7點起，在宜蘭運動公園熱力開唱！超狂卡司陣容：\r\n&bull; 金曲歌王/呂士軒\r\n&bull; 金曲歌后/彭佳慧\r\n&bull; 國民天后/徐懷鈺\r\n&bull; 嘻哈男神/OSN高爾宣\r\n&bull; 四分衛樂團\r\n&bull; 王ADEN、SOLOMOON紫月光、陳華...等 13組 超人氣藝人輪番登場！\r\n\r\n🌟 跨年亮點搶先看：\r\n&bull; 全能男神 JR(紀言愷)、喜劇甜心 阿喜(林育品) 聯手主持！\r\n&bull; 超人氣 美食市集 讓你不餓肚子！\r\n&bull; 必拍打卡點 「光舞之翼」 大型裝置藝術！\r\n&bull; 限量手指雷射燈 兌換活動，一起點亮夜空！\r\n\r\n🚌 交通便利！ 12/31 18:00起至元旦01:00，提供「宜蘭後火車站」、「宜蘭轉運站」至活動會場「宜蘭運動公園」免費環狀接駁車！\r\n今年跨年，來宜蘭感受熱情、留下最棒的回憶吧！",
+          "event_date": "2025-12-31",
+          "end_date": "2026-01-01",
+          "location": "宜蘭縣宜蘭市宜蘭運動公園",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/151/",
+          "source_updated_at": "2025-12-23T10:49:21.6130385",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26734/480x360_articles-image-6n30w2bda0mdw7ea3wooqw.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/151/",
+          "reasons": [],
+          "expired": true
+        },
+        {
+          "external_id": "153",
+          "title": "115年元旦升旗典禮暨全民活力健行活動",
+          "description": "宜蘭縣政府將於115年1月1日（星期四）上午6點30分至10點30分，在宜蘭運動公園田徑場，舉辦『慶祝中華民國115年元旦升旗典禮暨全民活力健行活動』，歡迎鄉親朋友、舊雨新知、呼朋引伴踴躍前來參加。\r\n\r\n讓我們一起為身心健康而走~走出活力、走出幸福 ~拚出宜蘭健康好生活~",
+          "event_date": "2025-12-23",
+          "end_date": "2026-01-01",
+          "location": "宜蘭縣宜蘭市宜蘭運動公園田徑場",
+          "organizer_name": "",
+          "activity_type": "觀光旅遊",
+          "source_url": "https://travel.yilan.gov.tw/zh-tw/event/153/",
+          "source_updated_at": "2025-12-23T11:04:51.1009044",
+          "schedule_uncertain": false,
+          "images": [
+            "https://travel.yilan.gov.tw/_api/content/images/articles/26736/480x360_articles-image-ing8fqgeokezu7knigcqwq.jpg"
+          ],
+          "image_source_name": "宜蘭勁好玩",
+          "image_source_url": "https://travel.yilan.gov.tw/zh-tw/event/153/",
+          "reasons": [],
+          "expired": true
+        }
+      ]
+    }
+  ]
+}
