@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/activity-import",
+      "schedule": "0 2 * * *",
+      "host": "yilanpass-g2i046m8t-jasonlinns-projects.vercel.app"
+    }
+  ],
+  "undeployed": [],
+  "modified": [],
+  "enabled": true
+}

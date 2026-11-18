@@ -1,0 +1,614 @@
+{
+  "time": "2026-11-05T02:16:39.348Z",
+  "database": [
+    {
+      "id": 63,
+      "title": "世紀初戀－楊麗花歌仔戲特展",
+      "event_date": "2025-12-25",
+      "end_date": "2027-03-01",
+      "location": "宜蘭縣五結鄉五濱路二段201號 國立傳統藝術中心宜蘭園區展示館",
+      "images": [
+        "https://travel.yilan.gov.tw/_api/content/images/articles/27087/480x360_articles-image-gizcakwmnk6f8xcexk-ehw.jpg"
+      ],
+      "status": "approved",
+      "source_name": "國立傳統藝術中心",
+      "source_url": "https://www.ncfta.gov.tw/News_Content3.aspx?n=2802&s=248557"
+    },
+    {
+      "id": 64,
+      "title": "舉人之力：蘭陽首舉百宅第常設展",
+      "event_date": "2026-01-01",
+      "end_date": "2026-12-31",
+      "location": "宜蘭縣五結鄉24鄰五濱路二段201號 國立傳統藝術中心宜蘭園區",
+      "images": [
+        "https://admin.px-sunmake.org.tw/Public/exhibition/955/2.jpeg",
+        "https://admin.px-sunmake.org.tw/Public/exhibition/955/3.jpeg",
+        "https://admin.px-sunmake.org.tw/Public/exhibition/955/4.jpeg",
+        "https://admin.px-sunmake.org.tw/Public/exhibition/955/5.jpeg",
+        "https://admin.px-sunmake.org.tw/Public/exhibition/955/6.jpeg",
+        "https://admin.px-sunmake.org.tw/Public/exhibition/955/7.jpeg"
+      ],
+      "status": "approved",
+      "source_name": "文化部（展覽）",
+      "source_url": "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?category=6&method=doFindTypeJ"
+    },
+    {
+      "id": 65,
+      "title": "二結王公文化祭｜二結王公廟240週年系列活動",
+      "event_date": "2026-09-19",
+      "end_date": "2026-12-23",
+      "location": "宜蘭縣五結鄉宜蘭境內",
+      "images": [
+        "https://travel.yilan.gov.tw/_api/content/images/articles/28047/480x360_articles-image-7qr2sbjmska0cfrf3kv35a.jpg",
+        "https://travel.yilan.gov.tw/_api/content/images/articles/28049/480x360_articles-image-bnfubv0oc0epagw-ultozw.jpg",
+        "https://travel.yilan.gov.tw/_api/content/images/articles/28048/480x360_articles-image-whi_hz-pf0afts-ibkvslw.jpg"
+      ],
+      "status": "approved",
+      "source_name": "宜蘭勁好玩",
+      "source_url": "https://travel.yilan.gov.tw/zh-tw/event/346/"
+    },
+    {
+      "id": 66,
+      "title": "2026 冬山河馬拉松",
+      "event_date": "2026-11-14",
+      "end_date": "2026-11-14",
+      "location": "宜蘭縣冬山鄉冬山車站站前廣場",
+      "images": [
+        "https://travel.yilan.gov.tw/_api/content/images/articles/27221/480x360_articles-image-sgcdyfaymuwczu1snicl2w.jpg"
+      ],
+      "status": "approved",
+      "source_name": "宜蘭勁好玩",
+      "source_url": "https://travel.yilan.gov.tw/zh-tw/event/219/"
+    },
+    {
+      "id": 71,
+      "title": "雙子二重奏《初心》",
+      "event_date": "2027-01-16",
+      "end_date": "2027-01-16",
+      "location": "宜蘭縣宜蘭市中山路二段482號 宜蘭演藝廳",
+      "images": [
+        "https://s3.resource.opentix.life/upload/program/1787635311420dZrEdMJ2jZ.jpeg"
+      ],
+      "status": "approved",
+      "source_name": "文化部（音樂）",
+      "source_url": "https://www.opentix.life/program/2089266667219144705"
+    },
+    {
+      "id": 72,
+      "title": "蘭燈之星 2026 新逸交響樂團年度公演",
+      "event_date": "2026-12-18",
+      "end_date": "2026-12-18",
+      "location": "宜蘭縣宜蘭市中山路二段482號 宜蘭演藝廳",
+      "images": [
+        "https://s3.resource.opentix.life/upload/program/1791872794148RLnmTwSZay.png"
+      ],
+      "status": "approved",
+      "source_name": "文化部（音樂）",
+      "source_url": "https://www.opentix.life/program/2104863939604979713"
+    },
+    {
+      "id": 76,
+      "title": "2026 宜蘭冬山河超級馬拉松",
+      "event_date": "2026-11-20",
+      "end_date": "2026-11-21",
+      "location": "宜蘭縣五結鄉冬山河親水公園",
+      "images": [
+        "https://travel.yilan.gov.tw/_api/content/images/articles/27577/480x360_articles-image-lnb1jhvuyuundslbr2jt1q.jpg"
+      ],
+      "status": "approved",
+      "source_name": "宜蘭勁好玩（官方新聞／人工核對）",
+      "source_url": "https://travel.yilan.gov.tw/zh-tw/news/272/"
+    },
+    {
+      "id": 77,
+      "title": "2026礁溪溫泉馬拉松",
+      "event_date": "2026-12-12",
+      "end_date": "2026-12-12",
+      "location": "宜蘭縣礁溪鄉礁溪國小",
+      "images": [
+        "https://travel.yilan.gov.tw/_api/content/images/articles/27783/480x360_articles-image-yrmar5tm5uoqeik85cunng.jpg"
+      ],
+      "status": "approved",
+      "source_name": "宜蘭勁好玩（官方新聞）",
+      "source_url": "https://travel.yilan.gov.tw/zh-tw/news/307/"
+    },
+    {
+      "id": 78,
+      "title": "正港宜蘭－烏石港正口兩百年特展",
+      "event_date": "2026-04-13",
+      "end_date": "2027-05-18",
+      "location": "宜蘭縣頭城鎮青雲路三段750號 蘭陽博物館一樓特展室",
+      "images": [
+        "https://www.lym.gov.tw/export/sites/lym/images/exhibition/Special-Exhibition/2-2-SE-20260413-port-02.jpg"
+      ],
+      "status": "approved",
+      "source_name": "蘭陽博物館",
+      "source_url": "https://www.lym.gov.tw/ch/exhibition/special-exhibition/TSLymSpecialExhibition-000044/"
+    },
+    {
+      "id": 79,
+      "title": "宜蘭傳藝園區｜11月主題演出《哪吒海底歷險記－海洋之心》",
+      "event_date": "2026-11-01",
+      "end_date": "2026-11-30",
+      "location": "宜蘭縣五結鄉五濱路二段201號 宜蘭傳藝園區廟埕廣場／臨水劇場（日期與場地異動詳見活動說明）",
+      "images": [
+        "https://admin.px-sunmake.org.tw/Public/show/1045/%E5%AE%98%E7%B6%B2960-660%E8%87%A8%E6%B0%B4%E5%8A%87%E5%A0%B4.png"
+      ],
+      "status": "approved",
+      "source_name": "宜蘭傳藝園區",
+      "source_url": "https://www.px-sunmake.org.tw/news/107"
+    },
+    {
+      "id": 80,
+      "title": "感恩十載 傳藝謝平安",
+      "event_date": "2026-11-21",
+      "end_date": "2026-11-21",
+      "location": "宜蘭縣五結鄉五濱路二段201號 宜蘭傳藝園區廟埕廣場、逗陣廣場",
+      "images": [
+        "https://admin.px-sunmake.org.tw/Public/post/0/960X660.png"
+      ],
+      "status": "approved",
+      "source_name": "宜蘭傳藝園區",
+      "source_url": "https://www.px-sunmake.org.tw/news/107"
+    },
+    {
+      "id": 81,
+      "title": "2026草嶺古道芒花季",
+      "event_date": "2026-11-14",
+      "end_date": "2026-12-13",
+      "location": "宜蘭縣頭城鎮大里遊客中心、草嶺古道（跨宜蘭與新北）",
+      "images": [
+        "https://events.necoast-nsa.gov.tw/flower26/common/images/fbimg.jpg"
+      ],
+      "status": "approved",
+      "source_name": "東北角及宜蘭海岸國家風景區管理處",
+      "source_url": "https://events.necoast-nsa.gov.tw/flower26/page-2.html"
+    },
+    {
+      "id": 82,
+      "title": "2026 冬戀蘭陽溫泉季系列活動",
+      "event_date": "2026-10-15",
+      "end_date": "2027-02-28",
+      "location": "宜蘭縣礁溪鄉礁溪溫泉區（各子活動場地依主辦公告）",
+      "images": [],
+      "status": "approved",
+      "source_name": "交通部觀光署台灣好湯",
+      "source_url": "https://taiwanhotspring.net/News-Content.aspx?a=4307&l=1"
+    }
+  ],
+  "mapping": [
+    {
+      "source_id": "culture-6",
+      "external_id": "697678ed26b32454e437c439:693524ccf9c5c735",
+      "state": "duplicate",
+      "activity_id": 63,
+      "last_seen_at": "2026-10-24T22:00:27.060Z"
+    },
+    {
+      "source_id": "ncfta",
+      "external_id": "248557",
+      "state": "published",
+      "activity_id": 63,
+      "last_seen_at": "2026-11-05T02:00:38.171Z"
+    },
+    {
+      "source_id": "yilan-site",
+      "external_id": "192",
+      "state": "duplicate",
+      "activity_id": 63,
+      "last_seen_at": "2026-11-05T02:00:38.171Z"
+    },
+    {
+      "source_id": "yilan-news",
+      "external_id": "307",
+      "state": "published",
+      "activity_id": 77,
+      "last_seen_at": "2026-11-05T02:00:38.171Z"
+    },
+    {
+      "source_id": "lanyang-museum",
+      "external_id": "TSLymSpecialExhibition-000044",
+      "state": "published",
+      "activity_id": 78,
+      "last_seen_at": "2026-11-05T02:00:38.171Z"
+    },
+    {
+      "source_id": "sunmake",
+      "external_id": "107-november",
+      "state": "published",
+      "activity_id": 79,
+      "last_seen_at": "2026-11-05T02:00:38.171Z"
+    },
+    {
+      "source_id": "sunmake",
+      "external_id": "107-peace",
+      "state": "published",
+      "activity_id": 80,
+      "last_seen_at": "2026-11-05T02:00:38.171Z"
+    },
+    {
+      "source_id": "necoast",
+      "external_id": "flower26",
+      "state": "published",
+      "activity_id": 81,
+      "last_seen_at": "2026-11-05T02:00:38.171Z"
+    },
+    {
+      "source_id": "taiwan-hotspring",
+      "external_id": "4307",
+      "state": "published",
+      "activity_id": 82,
+      "last_seen_at": "2026-11-05T02:00:38.171Z"
+    }
+  ],
+  "publicStatus": 200,
+  "publicCount": 13,
+  "publicIds": [
+    63,
+    64,
+    65,
+    66,
+    71,
+    72,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82
+  ],
+  "databaseIds": [
+    63,
+    64,
+    65,
+    66,
+    71,
+    72,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82
+  ],
+  "pageStatus": 200,
+  "details": [
+    {
+      "id": 63,
+      "status": 200,
+      "title": "世紀初戀－楊麗花歌仔戲特展",
+      "start": "2025-12-25",
+      "end": "2027-03-01",
+      "images": [
+        "https://travel.yilan.gov.tw/_api/content/images/articles/27087/480x360_articles-image-gizcakwmnk6f8xcexk-ehw.jpg"
+      ],
+      "source": "https://www.ncfta.gov.tw/News_Content3.aspx?n=2802&s=248557",
+      "matchesDatabase": true
+    },
+    {
+      "id": 77,
+      "status": 200,
+      "title": "2026礁溪溫泉馬拉松",
+      "start": "2026-12-12",
+      "end": "2026-12-12",
+      "images": [
+        "https://travel.yilan.gov.tw/_api/content/images/articles/27783/480x360_articles-image-yrmar5tm5uoqeik85cunng.jpg"
+      ],
+      "source": "https://travel.yilan.gov.tw/zh-tw/news/307/",
+      "matchesDatabase": true
+    },
+    {
+      "id": 78,
+      "status": 200,
+      "title": "正港宜蘭－烏石港正口兩百年特展",
+      "start": "2026-04-13",
+      "end": "2027-05-18",
+      "images": [
+        "https://www.lym.gov.tw/export/sites/lym/images/exhibition/Special-Exhibition/2-2-SE-20260413-port-02.jpg"
+      ],
+      "source": "https://www.lym.gov.tw/ch/exhibition/special-exhibition/TSLymSpecialExhibition-000044/",
+      "matchesDatabase": true
+    },
+    {
+      "id": 79,
+      "status": 200,
+      "title": "宜蘭傳藝園區｜11月主題演出《哪吒海底歷險記－海洋之心》",
+      "start": "2026-11-01",
+      "end": "2026-11-30",
+      "images": [
+        "https://admin.px-sunmake.org.tw/Public/show/1045/%E5%AE%98%E7%B6%B2960-660%E8%87%A8%E6%B0%B4%E5%8A%87%E5%A0%B4.png"
+      ],
+      "source": "https://www.px-sunmake.org.tw/news/107",
+      "matchesDatabase": true
+    },
+    {
+      "id": 80,
+      "status": 200,
+      "title": "感恩十載 傳藝謝平安",
+      "start": "2026-11-21",
+      "end": "2026-11-21",
+      "images": [
+        "https://admin.px-sunmake.org.tw/Public/post/0/960X660.png"
+      ],
+      "source": "https://www.px-sunmake.org.tw/news/107",
+      "matchesDatabase": true
+    },
+    {
+      "id": 81,
+      "status": 200,
+      "title": "2026草嶺古道芒花季",
+      "start": "2026-11-14",
+      "end": "2026-12-13",
+      "images": [
+        "https://events.necoast-nsa.gov.tw/flower26/common/images/fbimg.jpg"
+      ],
+      "source": "https://events.necoast-nsa.gov.tw/flower26/page-2.html",
+      "matchesDatabase": true
+    },
+    {
+      "id": 82,
+      "status": 200,
+      "title": "2026 冬戀蘭陽溫泉季系列活動",
+      "start": "2026-10-15",
+      "end": "2027-02-28",
+      "images": [],
+      "source": "https://taiwanhotspring.net/News-Content.aspx?a=4307&l=1",
+      "matchesDatabase": true
+    }
+  ],
+  "officialMatches": [
+    {
+      "id": 63,
+      "exists": true,
+      "datesMatch": true,
+      "imagesMatch": null
+    },
+    {
+      "id": 77,
+      "exists": true,
+      "datesMatch": true,
+      "imagesMatch": true
+    },
+    {
+      "id": 78,
+      "exists": true,
+      "datesMatch": true,
+      "imagesMatch": true
+    },
+    {
+      "id": 79,
+      "exists": true,
+      "datesMatch": true,
+      "imagesMatch": true
+    },
+    {
+      "id": 80,
+      "exists": true,
+      "datesMatch": true,
+      "imagesMatch": true
+    },
+    {
+      "id": 81,
+      "exists": true,
+      "datesMatch": true,
+      "imagesMatch": true
+    },
+    {
+      "id": 82,
+      "exists": true,
+      "datesMatch": true,
+      "imagesMatch": true
+    }
+  ],
+  "images": [
+    {
+      "id": 77,
+      "url": "https://travel.yilan.gov.tw/_api/content/images/articles/27783/480x360_articles-image-yrmar5tm5uoqeik85cunng.jpg",
+      "status": 200,
+      "contentType": "image/jpeg",
+      "bytes": 32644
+    },
+    {
+      "id": 78,
+      "url": "https://www.lym.gov.tw/export/sites/lym/images/exhibition/Special-Exhibition/2-2-SE-20260413-port-02.jpg",
+      "status": 200,
+      "contentType": "image/jpeg",
+      "bytes": 207608
+    },
+    {
+      "id": 79,
+      "url": "https://admin.px-sunmake.org.tw/Public/show/1045/%E5%AE%98%E7%B6%B2960-660%E8%87%A8%E6%B0%B4%E5%8A%87%E5%A0%B4.png",
+      "status": 200,
+      "contentType": "image/png",
+      "bytes": 1831905
+    },
+    {
+      "id": 80,
+      "url": "https://admin.px-sunmake.org.tw/Public/post/0/960X660.png",
+      "status": 200,
+      "contentType": "image/png",
+      "bytes": 1789139
+    },
+    {
+      "id": 81,
+      "url": "https://events.necoast-nsa.gov.tw/flower26/common/images/fbimg.jpg",
+      "status": 200,
+      "contentType": "image/jpeg",
+      "bytes": 443980
+    }
+  ],
+  "duplicates": [],
+  "liveSummary": [
+    {
+      "source": "culture-1",
+      "name": "文化部（音樂）",
+      "ok": true,
+      "rawCount": 468,
+      "contentHash": "43db625da65a0e04426dd95e71ca030efdafb156e8221bb8245ade912b5e766d",
+      "feedUrl": "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?category=1&method=doFindTypeJ",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 2
+    },
+    {
+      "source": "culture-6",
+      "name": "文化部（展覽）",
+      "ok": true,
+      "rawCount": 278,
+      "contentHash": "8765c8f18a69d9be014d6dfaaac7bb845aa83cf7cfdabf58e05fff5cf14e0706",
+      "feedUrl": "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?category=6&method=doFindTypeJ",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 1
+    },
+    {
+      "source": "culture-7",
+      "name": "文化部（講座）",
+      "ok": true,
+      "rawCount": 100,
+      "contentHash": "f4494c6ef051e07f0ab2c3d0ec0f862df67d5ab6675e34482b812285164f091a",
+      "feedUrl": "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?category=7&method=doFindTypeJ",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 0
+    },
+    {
+      "source": "yilan-site",
+      "name": "宜蘭勁好玩",
+      "ok": true,
+      "rawCount": 60,
+      "contentHash": "744ca2ecc44d0d196a4ff156073d6a5313bf5af25a24bb5cccd9df5615ff645d",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 60
+    },
+    {
+      "source": "culture-other",
+      "name": "文化部（其他藝文類別）",
+      "ok": true,
+      "rawCount": 1328,
+      "contentHash": "f5eb2a7fb7ca519e0f72772a3c335e4077bc5496efce9000f3cecd81f7180615",
+      "feedUrl": "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?category=all&method=doFindTypeJ",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 2
+    },
+    {
+      "source": "yilan-news",
+      "name": "宜蘭勁好玩（官方新聞）",
+      "ok": true,
+      "rawCount": 1,
+      "contentHash": "285f585988abeb8fee60397dde470d89a9eabe9bafd80924b34fa3399da3cd9d",
+      "feedUrl": "https://travel.yilan.gov.tw/zh-tw/news/307/",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 1
+    },
+    {
+      "source": "ncfta",
+      "name": "國立傳統藝術中心",
+      "ok": true,
+      "rawCount": 1,
+      "contentHash": "ea9dbcd6836707951554c98c4dafe51de05b2c9fd76b89dd0ee0caea9a1c6859",
+      "feedUrl": "https://www.ncfta.gov.tw/News_Content3.aspx?n=2802&s=248557",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 1
+    },
+    {
+      "source": "lanyang-museum",
+      "name": "蘭陽博物館",
+      "ok": true,
+      "rawCount": 1,
+      "contentHash": "18c6ecf8766a6bf9464e3b60ef552f88d3d8bd640d9854944a632b907674dc46",
+      "feedUrl": "https://www.lym.gov.tw/ch/exhibition/special-exhibition/TSLymSpecialExhibition-000044/",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 1
+    },
+    {
+      "source": "sunmake",
+      "name": "宜蘭傳藝園區",
+      "ok": true,
+      "rawCount": 2,
+      "contentHash": "db32a0a5adca0c53e78925405757c822574a827d3ea81b35185943ed8dfae73c",
+      "feedUrl": "https://www.px-sunmake.org.tw/news/107",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 2
+    },
+    {
+      "source": "necoast",
+      "name": "東北角及宜蘭海岸國家風景區管理處",
+      "ok": true,
+      "rawCount": 1,
+      "contentHash": "4aa5b36f3fd92a93d7e38a5c6e8576037993f02e2107b2dc6f72e12709899e7c",
+      "feedUrl": "https://events.necoast-nsa.gov.tw/flower26/page-2.html",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "items": 1
+    },
+    {
+      "source": "taiwan-hotspring",
+      "name": "交通部觀光署台灣好湯",
+      "ok": true,
+      "rawCount": 1,
+      "contentHash": "a4d23f90d7c1622ab33f0719831aaf4264efcafa58ec04df0c3cbd1406368022",
+      "feedUrl": "https://taiwanhotspring.net/News-Content.aspx?a=4307&l=1",
+      "fetchedAt": "2026-11-05T02:16:33.154Z",
+      "warnings": [
+        "尚無可核對的官方圖片：2026 冬戀蘭陽溫泉季系列活動"
+      ],
+      "items": 1
+    }
+  ],
+  "production": {
+    "deploymentId": "dpl_2gmwSMZBEDbqJ5c7zdFENXf51AKj",
+    "state": "READY",
+    "sha": "1785c8cb7892df5fecfca1e47c73f9798ac40e12",
+    "url": "https://yilanpass.com"
+  },
+  "detailPages": [
+    {
+      "id": 63,
+      "url": "https://yilanpass.com/yilan-activities/63",
+      "status": 200,
+      "titlePresent": true,
+      "bytes": 53430
+    },
+    {
+      "id": 77,
+      "url": "https://yilanpass.com/yilan-activities/77",
+      "status": 200,
+      "titlePresent": true,
+      "bytes": 57052
+    },
+    {
+      "id": 78,
+      "url": "https://yilanpass.com/yilan-activities/78",
+      "status": 200,
+      "titlePresent": true,
+      "bytes": 53637
+    },
+    {
+      "id": 79,
+      "url": "https://yilanpass.com/yilan-activities/79",
+      "status": 200,
+      "titlePresent": true,
+      "bytes": 54453
+    },
+    {
+      "id": 80,
+      "url": "https://yilanpass.com/yilan-activities/80",
+      "status": 200,
+      "titlePresent": true,
+      "bytes": 53819
+    },
+    {
+      "id": 81,
+      "url": "https://yilanpass.com/yilan-activities/81",
+      "status": 200,
+      "titlePresent": true,
+      "bytes": 53505
+    },
+    {
+      "id": 82,
+      "url": "https://yilanpass.com/yilan-activities/82",
+      "status": 200,
+      "titlePresent": true,
+      "bytes": 52451
+    }
+  ]
+}
