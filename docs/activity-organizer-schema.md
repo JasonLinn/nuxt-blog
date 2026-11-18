@@ -35,4 +35,10 @@
 
 本次 11 個已核對單位涵蓋 13 頁；32 頁的歷史單位網址未核實，將只保留畫面原名稱；13 頁原本未提供單位，不新增虛構資料。
 
-正式站驗收紀錄待部署後補入。Search Console 必須等 Google 重新擷取與驗證；網站輸出驗收不等於 Google 報表已更新。
+正式版本 `6c91c6ad55af4d5eaa1f890f6aa81450adf40ce2`，Vercel deployment `dpl_J9pBZa3Mr5fMoErjG1PAoRom1uPY` 已 READY 並綁定 `yilanpass.com` 與 `www.yilanpass.com`。
+
+2026-11-10 18:57（台北時間），`node scripts/verify-activity-organizer.mjs` 對 sitemap 的 58 頁逐一驗證成功：HTTP 200、每頁恰有一個 Event、活動名稱及 canonical 對應的 Event URL 正確、13 頁的 organizer 名稱／網址與畫面連結一致、32 頁未核實單位仍顯示原名稱但省略 organizer、13 頁維持無主辦單位。缺少 `organizer.url` 的已輸出節點由 45 降至 0。
+
+正式驗收原件：`docs/evidence/activity-organizer-20261110/production.json`。本次只驗證上述項目，未宣稱所有 Google 活動建議欄位皆完整。
+
+未操作 Search Console 驗證按鈕，也未取得 Google 複合式搜尋結果測試的通過結果。Search Console 必須等 Google 重新擷取與驗證；網站輸出驗收不等於 Google 報表已更新。可在問題詳情按「驗證修正後的項目」，[Google 官方流程](https://support.google.com/webmasters/answer/13300208?hl=zh-Hant)。
