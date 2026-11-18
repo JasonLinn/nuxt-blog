@@ -162,17 +162,20 @@ export default defineEventHandler(async (event) => {
       'view_count': 'h.view_count'
     };
 
+    // 從協會官網匯入、尚未在本站註冊的民宿（id 以 ythma_ 開頭）一律排在最後
+    const associationLast = `starts_with(h.id, 'ythma_') ASC`;
+
     let orderClause;
     const orderParams = [];
     if (filters.sort_by === 'random') {
       // 以種子雜湊排序；沒帶種子時以當天日期為種子
       const seed = filters.seed || new Date().toISOString().slice(0, 10);
-      orderClause = `md5(h.id::text || $${paramIndex + 2}), h.id ASC`;
+      orderClause = `${associationLast}, md5(h.id::text || $${paramIndex + 2}), h.id ASC`;
       orderParams.push(seed);
     } else {
       const orderBy = orderMap[filters.sort_by] || 'h.rating';
       const orderDirection = filters.order === 'asc' ? 'ASC' : 'DESC';
-      orderClause = `${orderBy} ${orderDirection} NULLS LAST, h.id ASC`;
+      orderClause = `${associationLast}, ${orderBy} ${orderDirection} NULLS LAST, h.id ASC`;
     }
 
     // 主查詢
