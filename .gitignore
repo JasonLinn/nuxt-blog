@@ -25,5 +25,9 @@ logs
 
 # Uploaded files
 public/uploads/
-.claude/settings.local.json
+.claude/
 .vercel/
+
+# Local work outputs (screenshots, raw audit data). Tracked evidence stays tracked;
+# add new evidence to docs/evidence/ or force-add with `git add -f`.
+output/
