@@ -43,7 +43,18 @@ async function collectVerified(client) {
 export async function writeActivity(client, item, sourceName, activityId = null, managed = true) {
   const fields = ['title', 'description', 'event_date', 'end_date', 'location', 'organizer_name', 'activity_type']
   const values = fields.map(key => key === 'organizer_name' ? (item[key] || '') : (item[key] || null))
-  const images = (item.images || []).map(safeActivityImage).filter(Boolean)
+  let images = (item.images || []).map(safeActivityImage).filter(Boolean)
+  const yilanThumbnail = /^https:\/\/travel\.yilan\.gov\.tw\/_api\/content\/images\/articles\/\d+\/480x360_/
+  if (activityId && images.some(url => yilanThumbnail.test(url))) {
+    const current = await client.query('SELECT images FROM yilan_activities WHERE id = $1 FOR UPDATE', [activityId])
+    const published = new Set(current.rows[0]?.images || [])
+    // Reuse only an already published variant of the exact same asset. Keep feed order and removals.
+    images = images.map(url => {
+      if (!yilanThumbnail.test(url)) return url
+      const larger = url.replace('/480x360_', '/1024x768_')
+      return published.has(larger) ? larger : url
+    })
+  }
   // A temporary missing image feed must not erase an existing published gallery.
   if (images.length || !activityId) {
     fields.push('images', 'image_source_name', 'image_source_url')

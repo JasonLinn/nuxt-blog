@@ -1,6 +1,12 @@
 // Reviewed official pages. Dates are parsed on every run, never advanced by guessing
 // next year's schedule. A changed structure is a source failure, not an empty feed.
 const policy = { official: true, organizerOptional: true, descriptionOptional: true, format: 'official-page' }
+// The festival publishes this as the sharing image for its 2026 opening parade.
+export const hotSpringParade2026 = {
+  image: 'https://www.yilanhotspring.com.tw/Uploads/ClinicService/bce5fe80-2e2c-4e9e-b5c2-927cd3ed23f7.jpg',
+  name: '宜蘭縣政府・2026 冬戀蘭陽溫泉季官網（開幕踩街嘉年華宣傳圖）',
+  url: 'https://www.yilanhotspring.com.tw/h/servicedetail?key=hhb9w&cont=328069'
+}
 export const officialPageSources = [
   { id: 'yilan-news', name: '宜蘭勁好玩（官方新聞）', feed: 'https://travel.yilan.gov.tw/zh-tw/news/307/' },
   { id: 'ncfta', name: '國立傳統藝術中心', feed: 'https://www.ncfta.gov.tw/News_Content3.aspx?n=2802&s=248557' },
@@ -138,8 +144,14 @@ export function parseOfficialPage(html, source) {
         return u.hostname === 'taiwanhotspring.net' && /^\/UserFiles\/image\/[^?#]+\.(png|jpe?g|webp)$/i.test(u.pathname) ? [u.href] : []
       } catch { return [] }
     })
+    const media = { images: [...new Set(images)].slice(0, 6) }
+    if (!images.length && details.includes('踩街嘉年華')) {
+      media.images = [hotSpringParade2026.image]
+      media.image_source_name = hotSpringParade2026.name
+      media.image_source_url = hotSpringParade2026.url
+    }
     return [item('4307', '2026 冬戀蘭陽溫泉季系列活動', range(details), '宜蘭縣礁溪鄉礁溪溫泉區（各子活動場地依主辦公告）',
-      `本頁為系列活動期間，不代表每天均有現場節目。子活動的確切地點、場次與內容以主辦單位後續公告為準。\n${details}`, { activity_type: '節慶慶典', images: [...new Set(images)].slice(0, 6) })]
+      `本頁為系列活動期間，不代表每天均有現場節目。子活動的確切地點、場次與內容以主辦單位後續公告為準。\n${details}`, { activity_type: '節慶慶典', ...media })]
   }
   throw new Error('未核可的官方頁面')
 }

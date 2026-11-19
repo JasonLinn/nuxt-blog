@@ -87,6 +87,13 @@ try {
   const kept = (await client.query("SELECT images, image_source_name FROM yilan_activities WHERE title = '活動 photo'")).rows[0]
   assert.deepEqual(kept.images, [photo])
   assert.equal(kept.image_source_name, '宜蘭勁好玩')
+  const asset = 'https://travel.yilan.gov.tw/_api/content/images/articles/1/'
+  const large = asset + '1024x768_poster.jpg'
+  const thumbnail = asset + '480x360_poster.jpg'
+  const newPhoto = asset + '480x360_new.jpg'
+  await applyCollection(client, collection([item('photo', { images: [large, photo] })]))
+  await applyCollection(client, collection([item('photo', { images: [newPhoto, thumbnail] })]))
+  assert.deepEqual((await client.query("SELECT images FROM yilan_activities WHERE title = '活動 photo'")).rows[0].images, [newPhoto, large])
   summary = await applyCollection(client, collection([item('photo-mirror', { duplicate_of: {source:'test-official',external_id:'photo'} })], 'yilan-site'))
   assert.equal(summary[0].duplicate, 1)
   assert.equal(summary[0].published, 0)

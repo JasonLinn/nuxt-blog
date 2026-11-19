@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { dateOnly, taipeiToday } from '../../utils/activity-dates.js'
-import { officialPageSources, parseOfficialPage, parseSunmakeCover } from './activity-official-pages.js'
+import { officialPageSources, parseOfficialPage, parseSunmakeCover, hotSpringParade2026 } from './activity-official-pages.js'
 
 const cultureUrl = category => `https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?category=${category}&method=doFindTypeJ`
 export const activitySources = [
@@ -23,6 +23,7 @@ const cleanTitle = value => plainText(value).normalize('NFKC').toLowerCase().rep
 export function safeActivityImage(value) {
   const safe = safeSourceUrl(value)
   if (!safe) return null
+  if (safe === hotSpringParade2026.image) return safe
   const { hostname, pathname } = new URL(safe)
   if (hostname === 'travel.yilan.gov.tw' && pathname.startsWith('/_api/content/images/')) return safe
   if (hostname === 'admin.px-sunmake.org.tw' && /^\/Public\/(exhibition|post)\/\d+\//.test(pathname)) return safe

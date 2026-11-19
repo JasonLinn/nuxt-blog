@@ -1,0 +1,227 @@
+{
+  "checkedAt": "2026-11-19T19:38:20+08:00",
+  "activityPages": 62,
+  "missingEventImages": 0,
+  "otherGalleriesCompared": 51,
+  "verifiedPages": [
+    {
+      "id": 63,
+      "title": "世紀初戀－楊麗花歌仔戲特展",
+      "page": "https://yilanpass.com/yilan-activities/63",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/event/192/",
+      "sourceLabel": "宜蘭勁好玩",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/27087/1024x768_articles-image-gizcakwmnk6f8xcexk-ehw.jpg",
+          "width": 1024,
+          "height": 1280
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "title": "二結王公文化祭｜二結王公廟240週年系列活動",
+      "page": "https://yilanpass.com/yilan-activities/65",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/event/346/",
+      "sourceLabel": "宜蘭勁好玩",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28047/1024x768_articles-image-7qr2sbjmska0cfrf3kv35a.jpg",
+          "width": 1024,
+          "height": 1448
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28049/1024x768_articles-image-bnfubv0oc0epagw-ultozw.jpg",
+          "width": 1024,
+          "height": 1267
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28048/1024x768_articles-image-whi_hz-pf0afts-ibkvslw.jpg",
+          "width": 1024,
+          "height": 1448
+        }
+      ]
+    },
+    {
+      "id": 76,
+      "title": "2026 宜蘭冬山河超級馬拉松",
+      "page": "https://yilanpass.com/yilan-activities/76",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/news/272/",
+      "sourceLabel": "宜蘭勁好玩",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/27577/1024x768_articles-image-lnb1jhvuyuundslbr2jt1q.jpg",
+          "width": 1900,
+          "height": 768
+        }
+      ]
+    },
+    {
+      "id": 77,
+      "title": "2026礁溪溫泉馬拉松",
+      "page": "https://yilanpass.com/yilan-activities/77",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/news/307/",
+      "sourceLabel": "宜蘭勁好玩（官方新聞）",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/27783/1024x768_articles-image-yrmar5tm5uoqeik85cunng.jpg",
+          "width": 1024,
+          "height": 1449
+        }
+      ]
+    },
+    {
+      "id": 82,
+      "title": "2026 冬戀蘭陽溫泉季系列活動",
+      "page": "https://yilanpass.com/yilan-activities/82",
+      "imageSource": "https://www.yilanhotspring.com.tw/h/servicedetail?key=hhb9w&cont=328069",
+      "sourceLabel": "宜蘭縣政府・2026 冬戀蘭陽溫泉季官網（開幕踩街嘉年華宣傳圖）",
+      "images": [
+        {
+          "url": "https://www.yilanhotspring.com.tw/Uploads/ClinicService/bce5fe80-2e2c-4e9e-b5c2-927cd3ed23f7.jpg",
+          "width": 800,
+          "height": 500
+        }
+      ]
+    },
+    {
+      "id": 83,
+      "title": "2026 礁溪溫泉燈花季",
+      "page": "https://yilanpass.com/yilan-activities/83",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/event/375/",
+      "sourceLabel": "宜蘭勁好玩",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28194/1024x768_articles-image-i5kycn-dxuw46_5maqhh_a.png",
+          "width": 2018,
+          "height": 768
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28197/1024x768_articles-image-xdzbg33dyeq5ig6ya4jyug.jpg",
+          "width": 1024,
+          "height": 1448
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28196/1024x768_articles-image-nx8lzwczw0adk0mp1-zdvq.jpg",
+          "width": 1365,
+          "height": 768
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28195/1024x768_articles-image-twuzr1g-dkoij-tgkdlwtq.jpg",
+          "width": 959,
+          "height": 768
+        }
+      ]
+    },
+    {
+      "id": 84,
+      "title": "謝平安・龜遊傳藝｜跟著柑仔龜尋五福",
+      "page": "https://yilanpass.com/yilan-activities/84",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/event/363/",
+      "sourceLabel": "宜蘭勁好玩",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28165/1024x768_articles-image-enisd3ccduaxumvmgqfm1g.jpg",
+          "width": 1024,
+          "height": 1024
+        }
+      ]
+    },
+    {
+      "id": 85,
+      "title": "感恩十載謝平安系列活動｜文化展示Ｘ平安遶境Ｘ民俗體驗",
+      "page": "https://yilanpass.com/yilan-activities/85",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/event/365/",
+      "sourceLabel": "宜蘭勁好玩",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28167/1024x768_articles-image-qx28yjvkjuqditr3z3jaqg.jpg",
+          "width": 1920,
+          "height": 768
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28168/1024x768_articles-image-a0n_m4gsre-vbnmfvaiiya.jpg",
+          "width": 1024,
+          "height": 1024
+        }
+      ]
+    },
+    {
+      "id": 87,
+      "title": "2027 杏輝宜蘭馬拉松",
+      "page": "https://yilanpass.com/yilan-activities/87",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/event/371/",
+      "sourceLabel": "宜蘭勁好玩",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28181/1024x768_articles-image-bcvmqyorp0ofnx9n7xxsmw.jpg",
+          "width": 1364,
+          "height": 768
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28182/1024x768_articles-image-leerwcuquuu0atc43jixoa.jpg",
+          "width": 1024,
+          "height": 1024
+        }
+      ]
+    },
+    {
+      "id": 88,
+      "title": "2026 紙廠電影院－中興57影展",
+      "page": "https://yilanpass.com/yilan-activities/88",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/event/376/",
+      "sourceLabel": "宜蘭勁好玩",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28200/1024x768_articles-image-_bvfgwfut0crlsebe9icxa.jpg",
+          "width": 1365,
+          "height": 768
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28198/1024x768_articles-image-ekyd_qvihusyekerodpeag.png",
+          "width": 1078,
+          "height": 768
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28199/1024x768_articles-image-3uixcs-u0eciw07e0iggsq.png",
+          "width": 1088,
+          "height": 768
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28204/1024x768_articles-image-6acmdya-me66urldvs3ang.jpg",
+          "width": 1024,
+          "height": 1280
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28203/1024x768_articles-image-kkmyvqv_jkackdv3zmulea.jpg",
+          "width": 1024,
+          "height": 1280
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28202/1024x768_articles-image-oue1mz8kak-v0ytp_uk-hw.jpg",
+          "width": 1024,
+          "height": 1280
+        },
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28201/1024x768_articles-image-rv4amlv2oemrj0itad3g1a.jpg",
+          "width": 1024,
+          "height": 1280
+        }
+      ]
+    },
+    {
+      "id": 89,
+      "title": "興創村市集｜復古派對",
+      "page": "https://yilanpass.com/yilan-activities/89",
+      "imageSource": "https://travel.yilan.gov.tw/zh-tw/event/377/",
+      "sourceLabel": "宜蘭勁好玩",
+      "images": [
+        {
+          "url": "https://travel.yilan.gov.tw/_api/content/images/articles/28205/1024x768_articles-image-5iclzjazfu2ldk7xn0plag.jpg",
+          "width": 1024,
+          "height": 1448
+        }
+      ]
+    }
+  ]
+}

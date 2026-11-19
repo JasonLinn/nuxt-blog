@@ -36,7 +36,13 @@ test('hot spring pages only import article photos, never site branding or relate
   const source = officialPageSources.find(s => s.id === 'taiwan-hotspring')
   const html = `<meta property="og:image" content="https://taiwanhotspring.net/images/ogimg.jpg"><img src="/UserFiles/image/logo.png"><div class="container-article"><img src="images/loader.gif" data-src="/UserFiles/image/event.jpg"></div><div class="container-aside"><img src="/UserFiles/image/unrelated.jpg"></div>`
   assert.deepEqual(parseOfficialPage(fixtures['taiwan-hotspring'] + html, source)[0].images, ['https://taiwanhotspring.net/UserFiles/image/event.jpg'])
-  assert.deepEqual(parseOfficialPage(fixtures['taiwan-hotspring'], source)[0].images, [])
+  const fallback = parseOfficialPage(fixtures['taiwan-hotspring'], source)[0]
+  assert.deepEqual(fallback.images, ['https://www.yilanhotspring.com.tw/Uploads/ClinicService/bce5fe80-2e2c-4e9e-b5c2-927cd3ed23f7.jpg'])
+  assert.equal(safeActivityImage(fallback.images[0]), fallback.images[0])
+  assert.equal(safeActivityImage(fallback.images[0].replace('bce5fe80', '00000000')), null)
+  assert.match(fallback.image_source_name, /開幕踩街嘉年華/)
+  assert.equal(fallback.image_source_url, 'https://www.yilanhotspring.com.tw/h/servicedetail?key=hhb9w&cont=328069')
+  assert.deepEqual(parseOfficialPage(fixtures['taiwan-hotspring'].replaceAll('踩街嘉年華', ''), source)[0].images, [])
 })
 
 test('official media fetch failures preserve existing images and missing covers are visible warnings', async () => {
